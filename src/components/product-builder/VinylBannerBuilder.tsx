@@ -200,10 +200,23 @@ export default function VinylBannerBuilder() {
         method: "POST",
         body: formData,
       });
-      const data = await response.json();
+      const contentType = response.headers.get("content-type") ?? "";
+      let data: { fileUrl?: string; originalName?: string; error?: string } = {};
+
+      if (contentType.includes("application/json")) {
+        data = await response.json();
+      } else {
+        const raw = await response.text();
+        data = {
+          error:
+            response.status === 413
+              ? "Upload rejected by server size limit. Ask support to increase Nginx client_max_body_size."
+              : `Upload failed with status ${response.status}. ${raw.slice(0, 180)}`,
+        };
+      }
 
       if (!response.ok || !data.fileUrl) {
-        setUploadError(data.error ?? "Artwork upload failed. Please try again.");
+        setUploadError(data.error ?? `Artwork upload failed (status ${response.status}).`);
         return;
       }
 
