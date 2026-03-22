@@ -30,6 +30,7 @@ export interface BannerOrderMeta {
 interface WooHeaders {
   "Content-Type": string;
   Authorization: string;
+  [key: string]: string;
 }
 
 function getAuthHeaders(): WooHeaders {
