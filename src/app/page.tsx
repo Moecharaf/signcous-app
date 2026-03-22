@@ -6,7 +6,7 @@ const categories = [
   { name: "Aluminum Signs", href: "/shop/aluminum-signs", desc: "Durable metal signage for long-term exterior use." },
   { name: "Stickers & Decals", href: "/shop/stickers-decals", desc: "Indoor and outdoor adhesive vinyl in any shape." },
   { name: "Business Cards", href: "/shop/business-cards", desc: "Premium full-color cards that make an impression." },
-  { name: "Mesh Banners", href: "/shop/mesh-banners", desc: "Wind-resistant mesh for outdoor installations." },
+  { name: "Mesh Banners", href: "/banners/mesh-banner", desc: "Wind-resistant mesh for outdoor installations." },
 ];
 
 const featuredProducts = [

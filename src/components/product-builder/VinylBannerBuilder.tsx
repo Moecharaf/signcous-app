@@ -59,6 +59,11 @@ const DEFAULTS: FormState = {
   rush: false,
 };
 
+interface VinylBannerBuilderProps {
+  initialMaterial?: Material;
+  productName?: string;
+}
+
 const MIN_IN = 6;
 const MAX_IN = 240;
 const BASE_PX_PER_IN = 2.4;
@@ -76,9 +81,12 @@ function fromInches(value: number, unit: Unit): string {
   return value.toFixed(1);
 }
 
-export default function VinylBannerBuilder() {
+export default function VinylBannerBuilder({
+  initialMaterial = "13oz Vinyl",
+  productName = "Vinyl Banner",
+}: VinylBannerBuilderProps) {
   const cart = useCart();
-  const [form, setForm] = useState<FormState>(DEFAULTS);
+  const [form, setForm] = useState<FormState>({ ...DEFAULTS, material: initialMaterial });
   const [errors, setErrors] = useState<FormErrors>({});
   const [addedToCart, setAddedToCart] = useState(false);
   const [zoom, setZoom] = useState(1);
@@ -169,7 +177,7 @@ export default function VinylBannerBuilder() {
 
     cart.addItem({
       productId: 12,
-      productName: "Vinyl Banner",
+      productName,
       width: widthNum,
       height: heightNum,
       unit: form.unit,
@@ -343,7 +351,7 @@ export default function VinylBannerBuilder() {
                 <span className="rounded bg-zinc-900 px-1.5 py-0.5 text-[10px] tracking-normal text-orange-400">SC</span>
                 Signcous Studio
               </div>
-              <h2 className="mt-1 text-3xl font-semibold tracking-tight text-zinc-900">Vinyl Banner Configurator</h2>
+              <h2 className="mt-1 text-3xl font-semibold tracking-tight text-zinc-900">{productName} Configurator</h2>
               <p className="mt-1 text-sm text-zinc-600">
                 Drag to reposition artwork. Use the corner handle to resize and auto-update dimensions.
               </p>
