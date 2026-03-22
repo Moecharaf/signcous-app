@@ -6,7 +6,7 @@ import { useCart } from "@/context/CartContext";
 
 const navLinks = [
   { href: "/shop", label: "Shop" },
-  { href: "/banners/vinyl-banner", label: "Banners" },
+  { href: "/shop/banners", label: "Banners" },
   { href: "/banners/vinyl-banner", label: "Studio" },
   { href: "/quote", label: "Custom Quote" },
   { href: "/about", label: "About" },

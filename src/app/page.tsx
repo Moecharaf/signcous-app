@@ -1,19 +1,19 @@
 import Link from "next/link";
 
 const categories = [
-  { name: "Vinyl Banners", href: "/banners/vinyl-banner", desc: "Custom size, full-color banners for any event." },
-  { name: "Yard Signs", href: "/shop/yard-signs", desc: "Coroplast signs for campaigns, retail, and real estate." },
+  { name: "Vinyl Banners", href: "/shop/vinyl-banners", desc: "Custom size, full-color banners for any event." },
+  { name: "Yard Signs", href: "/shop/yard-signs-coroplast", desc: "Coroplast signs for campaigns, retail, and real estate." },
   { name: "Aluminum Signs", href: "/shop/aluminum-signs", desc: "Durable metal signage for long-term exterior use." },
-  { name: "Stickers & Decals", href: "/shop/stickers", desc: "Indoor and outdoor adhesive vinyl in any shape." },
+  { name: "Stickers & Decals", href: "/shop/stickers-decals", desc: "Indoor and outdoor adhesive vinyl in any shape." },
   { name: "Business Cards", href: "/shop/business-cards", desc: "Premium full-color cards that make an impression." },
   { name: "Mesh Banners", href: "/shop/mesh-banners", desc: "Wind-resistant mesh for outdoor installations." },
 ];
 
 const featuredProducts = [
-  { name: "Vinyl Banners", href: "/banners/vinyl-banner", price: "From $12.00", specs: "Any size · 13-oz material · Full color" },
-  { name: "Yard Signs", href: "/shop/yard-signs", price: "From $2.45/ea", specs: "18×24 · Coroplast · Double-sided" },
+  { name: "Vinyl Banners", href: "/shop/vinyl-banners", price: "From $12.00", specs: "Any size · 13-oz material · Full color" },
+  { name: "Yard Signs", href: "/shop/yard-signs-coroplast", price: "From $2.45/ea", specs: "18×24 · Coroplast · Double-sided" },
   { name: "Aluminum Signs", href: "/shop/aluminum-signs", price: "From $8.00", specs: "24×36 · .040 Aluminum · UV print" },
-  { name: "Custom Stickers", href: "/shop/stickers", price: "From $0.30/ea", specs: "Die-cut · Waterproof · Any shape" },
+  { name: "Custom Stickers", href: "/shop/stickers-decals", price: "From $0.30/ea", specs: "Die-cut · Waterproof · Any shape" },
   { name: "Business Cards", href: "/shop/business-cards", price: "From $19.00/500", specs: "3.5×2 · 16pt · Full color" },
 ];
 

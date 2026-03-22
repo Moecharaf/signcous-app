@@ -5,6 +5,33 @@ const WOO_BASE_URL = process.env.NEXT_PUBLIC_WOO_BASE_URL ?? "";
 const WOO_KEY = process.env.WOO_CONSUMER_KEY ?? "";
 const WOO_SECRET = process.env.WOO_CONSUMER_SECRET ?? "";
 
+export interface WooCategory {
+  id: number;
+  name: string;
+  slug: string;
+  parent: number;
+  count: number;
+}
+
+export interface WooProductImage {
+  id: number;
+  src: string;
+  alt: string;
+}
+
+export interface WooProduct {
+  id: number;
+  name: string;
+  slug: string;
+  permalink: string;
+  price: string;
+  regular_price: string;
+  short_description: string;
+  description: string;
+  images: WooProductImage[];
+  categories: Array<Pick<WooCategory, "id" | "name" | "slug">>;
+}
+
 /**
  * Metadata attached to each WooCommerce cart/order line item
  * for custom-configured products.
@@ -100,6 +127,97 @@ export async function getProduct(productId: number): Promise<unknown | null> {
   } catch {
     return null;
   }
+}
+
+/**
+ * Fetches all product categories from WooCommerce.
+ */
+export async function getProductCategories(): Promise<WooCategory[]> {
+  if (!WOO_BASE_URL || !WOO_KEY || !WOO_SECRET) return [];
+
+  const allCategories: WooCategory[] = [];
+  let page = 1;
+
+  try {
+    while (true) {
+      const url = `${WOO_BASE_URL}/wp-json/wc/v3/products/categories?per_page=100&page=${page}&orderby=menu_order&order=asc`;
+      const res = await fetch(url, {
+        headers: getAuthHeaders(),
+        next: { revalidate: 300 },
+      });
+
+      if (!res.ok) break;
+
+      const data = (await res.json()) as WooCategory[];
+      if (!Array.isArray(data) || data.length === 0) break;
+
+      allCategories.push(...data);
+
+      if (data.length < 100) break;
+      page += 1;
+    }
+  } catch {
+    return [];
+  }
+
+  return allCategories;
+}
+
+/**
+ * Fetches products, optionally filtered by category ID.
+ */
+export async function getProducts(options?: {
+  categoryId?: number;
+  perPage?: number;
+  page?: number;
+}): Promise<WooProduct[]> {
+  if (!WOO_BASE_URL || !WOO_KEY || !WOO_SECRET) return [];
+
+  const params = new URLSearchParams({
+    per_page: String(options?.perPage ?? 24),
+    page: String(options?.page ?? 1),
+    status: "publish",
+    orderby: "date",
+    order: "desc",
+  });
+
+  if (options?.categoryId) {
+    params.set("category", String(options.categoryId));
+  }
+
+  const url = `${WOO_BASE_URL}/wp-json/wc/v3/products?${params.toString()}`;
+
+  try {
+    const res = await fetch(url, {
+      headers: getAuthHeaders(),
+      next: { revalidate: 300 },
+    });
+
+    if (!res.ok) return [];
+
+    const data = (await res.json()) as WooProduct[];
+    return Array.isArray(data) ? data : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Fetches a category by slug and all products within it.
+ */
+export async function getProductsByCategorySlug(slug: string): Promise<{
+  category: WooCategory | null;
+  products: WooProduct[];
+}> {
+  const categories = await getProductCategories();
+  const category = categories.find((c) => c.slug === slug) ?? null;
+
+  if (!category) {
+    return { category: null, products: [] };
+  }
+
+  const products = await getProducts({ categoryId: category.id, perPage: 60 });
+  return { category, products };
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
