@@ -1,0 +1,11 @@
+services:
+  signcous-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: signcous-app
+    restart: unless-stopped
+    env_file:
+      - .env.local
+    ports:
+      - "3000:3000"
