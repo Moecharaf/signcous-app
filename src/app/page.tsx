@@ -1,13 +1,7 @@
 import Link from "next/link";
+import { SIGNCOUS_COLLECTIONS } from "@/lib/catalog";
 
-const categories = [
-  { name: "Vinyl Banners", href: "/shop/vinyl-banners", desc: "Custom size, full-color banners for any event." },
-  { name: "Yard Signs", href: "/shop/yard-signs-coroplast", desc: "Coroplast signs for campaigns, retail, and real estate." },
-  { name: "Aluminum Signs", href: "/shop/aluminum-signs", desc: "Durable metal signage for long-term exterior use." },
-  { name: "Stickers & Decals", href: "/shop/stickers-decals", desc: "Indoor and outdoor adhesive vinyl in any shape." },
-  { name: "Business Cards", href: "/shop/business-cards", desc: "Premium full-color cards that make an impression." },
-  { name: "Mesh Banners", href: "/banners/mesh-banner", desc: "Wind-resistant mesh for outdoor installations." },
-];
+const categories = SIGNCOUS_COLLECTIONS;
 
 const featuredProducts = [
   { name: "Vinyl Banners", href: "/shop/vinyl-banners", price: "From $12.00", specs: "Any size · 13-oz material · Full color" },
@@ -97,21 +91,27 @@ export default function HomePage() {
       {/* ── Categories ── */}
       <section id="categories" className="mx-auto max-w-7xl px-6 py-20">
         <div className="mb-10">
-          <div className="text-sm font-semibold uppercase tracking-[0.25em] text-orange-400">Product categories</div>
-          <h2 className="mt-3 text-4xl font-black tracking-tight">What do you need to print?</h2>
+          <div className="text-sm font-semibold uppercase tracking-[0.25em] text-orange-400">Supplier-backed collections</div>
+          <h2 className="mt-3 text-4xl font-black tracking-tight">Shop the Signcous catalog structure</h2>
+          <p className="mt-3 max-w-3xl text-zinc-400">
+            We keep the Signcous brand and buying experience, but the storefront is organized around approved supplier-supported product families.
+          </p>
         </div>
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {categories.map((cat) => (
             <Link
-              key={cat.name}
+              key={cat.slug}
               href={cat.href}
               className="group rounded-3xl border border-white/10 bg-zinc-950 p-6 transition hover:-translate-y-1 hover:border-orange-500/30 hover:bg-zinc-900"
             >
               <div className="mb-6 flex h-36 items-center justify-center rounded-2xl bg-gradient-to-br from-zinc-800 to-zinc-950 ring-1 ring-white/10">
-                <div className="h-20 w-32 rounded-2xl border border-white/10 bg-white/5 shadow-xl" />
+                <div className="rounded-full border border-orange-500/20 bg-orange-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-orange-300">
+                  {cat.supplierFamily}
+                </div>
               </div>
               <div className="text-xl font-bold">{cat.name}</div>
-              <p className="mt-2 text-sm leading-6 text-zinc-400">{cat.desc}</p>
+              <p className="mt-2 text-sm leading-6 text-zinc-400">{cat.description}</p>
+              <div className="mt-3 text-xs uppercase tracking-[0.18em] text-zinc-500">{cat.highlight}</div>
               <span className="mt-4 inline-block text-sm font-semibold text-orange-400 group-hover:underline">
                 Shop now →
               </span>
