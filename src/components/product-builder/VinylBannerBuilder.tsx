@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Button from "@/components/ui/Button";
 import {
   calculateBannerPrice,
+  type EdgeFinish,
   formatPrice,
   type GrommetMode,
   type Material,
@@ -24,6 +25,7 @@ interface FormState {
   doubleSided: boolean;
   grommets: boolean;
   grommetMode: GrommetMode;
+  edgeFinish: EdgeFinish;
   polePockets: boolean;
   windSlits: boolean;
   hemming: boolean;
@@ -50,6 +52,7 @@ const DEFAULTS: FormState = {
   doubleSided: false,
   grommets: true,
   grommetMode: "every-2ft",
+  edgeFinish: "none",
   polePockets: false,
   windSlits: false,
   hemming: false,
@@ -94,6 +97,7 @@ export default function VinylBannerBuilder() {
 
   const widthIn = toInches(widthNum, form.unit);
   const heightIn = toInches(heightNum, form.unit);
+  const isMeshMaterial = form.material === "Mesh Banner";
 
   const pxPerIn = BASE_PX_PER_IN * zoom;
   const artWidth = clamp(widthIn * pxPerIn, 90, 760);
@@ -109,6 +113,7 @@ export default function VinylBannerBuilder() {
         doubleSided: form.doubleSided,
         grommets: form.grommets,
         grommetMode: form.grommetMode,
+        edgeFinish: form.edgeFinish,
         polePockets: form.polePockets,
         windSlits: form.windSlits,
         hemming: form.hemming,
@@ -122,6 +127,7 @@ export default function VinylBannerBuilder() {
       form.doubleSided,
       form.grommets,
       form.grommetMode,
+      form.edgeFinish,
       form.polePockets,
       form.windSlits,
       form.hemming,
@@ -171,6 +177,7 @@ export default function VinylBannerBuilder() {
       material: form.material,
       doubleSided: form.doubleSided,
       grommets: form.grommets,
+      edgeFinish: form.edgeFinish,
       polePockets: form.polePockets,
       windSlits: form.windSlits,
       hemming: form.hemming,
@@ -308,6 +315,23 @@ export default function VinylBannerBuilder() {
       if (uploadedImage) URL.revokeObjectURL(uploadedImage);
     };
   }, [uploadedImage]);
+
+  useEffect(() => {
+    if (!isMeshMaterial) return;
+
+    setForm((prev) => {
+      if (!prev.doubleSided && !prev.windSlits && !prev.hemming) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        doubleSided: false,
+        windSlits: false,
+        hemming: false,
+      };
+    });
+  }, [isMeshMaterial]);
 
   return (
     <div className="min-h-[calc(100vh-96px)] bg-[linear-gradient(145deg,#f4f4f5_0%,#ececef_55%,#e4e4e7_100%)] text-zinc-800">
@@ -452,8 +476,12 @@ export default function VinylBannerBuilder() {
                     leftLabel="Single"
                     rightLabel="Double"
                     isRightActive={form.doubleSided}
-                    onToggle={() => set("doubleSided", !form.doubleSided)}
+                    onToggle={() => {
+                      if (isMeshMaterial) return;
+                      set("doubleSided", !form.doubleSided);
+                    }}
                   />
+                  {isMeshMaterial && <div className="mt-1 text-[10px] text-zinc-500">Mesh uses single-sided pricing.</div>}
                 </ControlBox>
 
                 <ControlBox title="Grommets">
@@ -484,23 +512,40 @@ export default function VinylBannerBuilder() {
                   />
                 </ControlBox>
 
-                <ControlBox title="Wind Slits">
-                  <TogglePair
-                    leftLabel="No"
-                    rightLabel="Yes"
-                    isRightActive={form.windSlits}
-                    onToggle={() => set("windSlits", !form.windSlits)}
-                  />
-                </ControlBox>
+                {isMeshMaterial ? (
+                  <ControlBox title="Edge Finish">
+                    <select
+                      value={form.edgeFinish}
+                      onChange={(e) => set("edgeFinish", e.target.value as EdgeFinish)}
+                      className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"
+                    >
+                      <option value="none">None</option>
+                      <option value="welding">Welding</option>
+                      <option value="webbing">Webbing</option>
+                      <option value="rope">Rope</option>
+                    </select>
+                  </ControlBox>
+                ) : (
+                  <>
+                    <ControlBox title="Wind Slits">
+                      <TogglePair
+                        leftLabel="No"
+                        rightLabel="Yes"
+                        isRightActive={form.windSlits}
+                        onToggle={() => set("windSlits", !form.windSlits)}
+                      />
+                    </ControlBox>
 
-                <ControlBox title="Hemming">
-                  <TogglePair
-                    leftLabel="No"
-                    rightLabel="Yes"
-                    isRightActive={form.hemming}
-                    onToggle={() => set("hemming", !form.hemming)}
-                  />
-                </ControlBox>
+                    <ControlBox title="Hemming">
+                      <TogglePair
+                        leftLabel="No"
+                        rightLabel="Yes"
+                        isRightActive={form.hemming}
+                        onToggle={() => set("hemming", !form.hemming)}
+                      />
+                    </ControlBox>
+                  </>
+                )}
 
                 <ControlBox title="Qty / Add" error={errors.quantity}>
                   <div className="grid grid-cols-[70px_1fr] gap-1">
@@ -529,6 +574,7 @@ export default function VinylBannerBuilder() {
               <div className="mt-3 space-y-2 text-sm">
                 <Row label="Base (per unit)" value={formatPrice(pricing.basePricePerUnit)} />
                 <Row label="Grommets" value={formatPrice(pricing.grommetCostPerUnit)} />
+                <Row label="Edge Finish" value={formatPrice(pricing.edgeFinishCostPerUnit)} />
                 <Row label="Pole Pockets" value={formatPrice(pricing.polePocketCostPerUnit)} />
                 <Row label="Wind Slits" value={formatPrice(pricing.windSlitsCostPerUnit)} />
                 <Row label="Hemming" value={formatPrice(pricing.hemmingCostPerUnit)} />

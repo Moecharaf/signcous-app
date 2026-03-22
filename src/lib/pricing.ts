@@ -4,6 +4,7 @@ export type MaterialName = "13oz Vinyl" | "15oz Vinyl" | "Mesh Banner" | "Fabric
 export type LegacyMaterialName = "standard" | "premium" | "mesh" | "fabric";
 export type Material = MaterialName | LegacyMaterialName;
 export type GrommetMode = "per-corner" | "every-2ft";
+export type EdgeFinish = "none" | "welding" | "webbing" | "rope";
 
 export interface PricingConfig {
   // Square foot rate (USD) per material
@@ -54,6 +55,7 @@ export interface BannerPricingInput {
   doubleSided: boolean;
   grommets: boolean;
   grommetMode: GrommetMode;
+  edgeFinish: EdgeFinish;
   polePockets: boolean;
   windSlits: boolean;
   hemming: boolean;
@@ -64,6 +66,7 @@ export interface BannerPricingResult {
   sqFt: number;
   basePricePerUnit: number;
   grommetCostPerUnit: number;
+  edgeFinishCostPerUnit: number;
   polePocketCostPerUnit: number;
   windSlitsCostPerUnit: number;
   hemmingCostPerUnit: number;
@@ -78,7 +81,7 @@ export interface BannerPricingResult {
  */
 export function calculateBannerPrice(input: BannerPricingInput): BannerPricingResult {
   const { widthIn, heightIn, quantity, material, doubleSided,
-          grommets, grommetMode, polePockets, windSlits, hemming, rush } = input;
+          grommets, grommetMode, edgeFinish, polePockets, windSlits, hemming, rush } = input;
 
   const config = PRICING_CONFIG;
   const resolvedMaterial = resolveMaterial(material);
@@ -91,6 +94,64 @@ export function calculateBannerPrice(input: BannerPricingInput): BannerPricingRe
   const widthFt = safeWidthIn / 12;
   const heightFt = safeHeightIn / 12;
   const sqFt = widthFt * heightFt;
+  const perimeterFt = 2 * (widthFt + heightFt);
+
+  // Mesh has its own pricing model and add-on rates.
+  if (resolvedMaterial === "Mesh Banner") {
+    const meshSqFtRate = 4.75;
+    const meshGrommetRate = 0.75;
+    const meshPolePocketPerLinearFt = 5.5;
+    const meshEdgeFinishRates: Record<Exclude<EdgeFinish, "none">, number> = {
+      welding: 1.1,
+      webbing: 1.4,
+      rope: 1.9,
+    };
+    const meshRushMultiplier = 1.5;
+
+    let basePricePerUnit = sqFt * meshSqFtRate;
+
+    let grommetCostPerUnit = 0;
+    if (grommets) {
+      const totalPlacements = grommetMode === "per-corner"
+        ? 4
+        : Math.max(4, Math.ceil(perimeterFt / 2));
+      grommetCostPerUnit = totalPlacements * meshGrommetRate;
+    }
+
+    let edgeFinishCostPerUnit = 0;
+    if (edgeFinish !== "none") {
+      edgeFinishCostPerUnit = perimeterFt * meshEdgeFinishRates[edgeFinish];
+    }
+
+    let polePocketCostPerUnit = 0;
+    if (polePockets) {
+      const polePocketLinearFt = widthFt * 2;
+      polePocketCostPerUnit = polePocketLinearFt * meshPolePocketPerLinearFt;
+    }
+
+    const windSlitsCostPerUnit = 0;
+    const hemmingCostPerUnit = 0;
+    const addOnCostPerUnit = grommetCostPerUnit + edgeFinishCostPerUnit + polePocketCostPerUnit;
+    const priceBeforeRush = basePricePerUnit + addOnCostPerUnit;
+    const rushSurchargePerUnit = rush ? priceBeforeRush * (meshRushMultiplier - 1) : 0;
+    let unitPrice = priceBeforeRush + rushSurchargePerUnit;
+    unitPrice = Math.max(unitPrice, config.minimumPrice);
+    const totalPrice = unitPrice * safeQuantity;
+
+    return {
+      sqFt: Math.round(sqFt * 100) / 100,
+      basePricePerUnit: Math.round(basePricePerUnit * 100) / 100,
+      grommetCostPerUnit: Math.round(grommetCostPerUnit * 100) / 100,
+      edgeFinishCostPerUnit: Math.round(edgeFinishCostPerUnit * 100) / 100,
+      polePocketCostPerUnit: Math.round(polePocketCostPerUnit * 100) / 100,
+      windSlitsCostPerUnit: 0,
+      hemmingCostPerUnit: 0,
+      addOnCostPerUnit: Math.round(addOnCostPerUnit * 100) / 100,
+      rushSurchargePerUnit: Math.round(rushSurchargePerUnit * 100) / 100,
+      unitPrice: Math.round(unitPrice * 100) / 100,
+      totalPrice: Math.round(totalPrice * 100) / 100,
+    };
+  }
 
   // Base price per unit
   let basePricePerUnit = sqFt * config.materialRates[resolvedMaterial];
@@ -99,7 +160,6 @@ export function calculateBannerPrice(input: BannerPricingInput): BannerPricingRe
   }
 
   // Add-on costs
-  const perimeterFt = 2 * (widthFt + heightFt);
 
   let grommetCostPerUnit = 0;
   if (grommets) {
@@ -127,6 +187,7 @@ export function calculateBannerPrice(input: BannerPricingInput): BannerPricingRe
 
   let addOnCostPerUnit = 0;
   addOnCostPerUnit += grommetCostPerUnit;
+  const edgeFinishCostPerUnit = 0;
   addOnCostPerUnit += polePocketCostPerUnit;
   addOnCostPerUnit += windSlitsCostPerUnit;
   addOnCostPerUnit += hemmingCostPerUnit;
@@ -148,6 +209,7 @@ export function calculateBannerPrice(input: BannerPricingInput): BannerPricingRe
     sqFt: Math.round(sqFt * 100) / 100,
     basePricePerUnit: Math.round(basePricePerUnit * 100) / 100,
     grommetCostPerUnit: Math.round(grommetCostPerUnit * 100) / 100,
+    edgeFinishCostPerUnit,
     polePocketCostPerUnit: Math.round(polePocketCostPerUnit * 100) / 100,
     windSlitsCostPerUnit: Math.round(windSlitsCostPerUnit * 100) / 100,
     hemmingCostPerUnit: Math.round(hemmingCostPerUnit * 100) / 100,

@@ -44,6 +44,7 @@ export interface BannerOrderMeta {
   material: string;
   doubleSided: boolean;
   grommets: boolean;
+  edgeFinish?: "none" | "welding" | "webbing" | "rope";
   polePockets: boolean;
   windSlits: boolean;
   hemming: boolean;
@@ -230,6 +231,7 @@ function buildLineItemMeta(meta: BannerOrderMeta): Record<string, string> {
     custom_material: meta.material,
     custom_double_sided: meta.doubleSided ? "yes" : "no",
     custom_grommets: meta.grommets ? "yes" : "no",
+    custom_edge_finish: meta.edgeFinish ?? "none",
     custom_pole_pockets: meta.polePockets ? "yes" : "no",
     custom_wind_slits: meta.windSlits ? "yes" : "no",
     custom_hemming: meta.hemming ? "yes" : "no",

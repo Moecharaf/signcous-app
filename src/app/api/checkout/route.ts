@@ -51,6 +51,7 @@ export async function POST(req: NextRequest) {
         { key: "custom_material", value: item.material },
         { key: "custom_double_sided", value: item.doubleSided ? "yes" : "no" },
         { key: "custom_grommets", value: item.grommets ? "yes" : "no" },
+        { key: "custom_edge_finish", value: item.edgeFinish ?? "none" },
         { key: "custom_pole_pockets", value: item.polePockets ? "yes" : "no" },
         { key: "custom_wind_slits", value: item.windSlits ? "yes" : "no" },
         { key: "custom_hemming", value: item.hemming ? "yes" : "no" },

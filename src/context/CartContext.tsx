@@ -19,6 +19,7 @@ export interface CartItem {
   material: string;
   doubleSided: boolean;
   grommets: boolean;
+  edgeFinish?: "none" | "welding" | "webbing" | "rope";
   polePockets: boolean;
   windSlits: boolean;
   hemming: boolean;

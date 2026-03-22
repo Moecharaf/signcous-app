@@ -23,6 +23,7 @@ function LineItemCard({ item }: { item: CartItem }) {
           <div className="mt-1 flex flex-wrap gap-x-3 text-xs text-zinc-500">
             {item.doubleSided && <span>Double-sided</span>}
             {item.grommets && <span>Grommets</span>}
+            {item.edgeFinish && item.edgeFinish !== "none" && <span>Edge: {item.edgeFinish}</span>}
             {item.polePockets && <span>Pole pockets</span>}
             {item.windSlits && <span>Wind slits</span>}
             {item.hemming && <span>Hemming</span>}
