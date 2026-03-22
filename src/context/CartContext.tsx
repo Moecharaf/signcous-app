@@ -24,6 +24,7 @@ export interface CartItem {
   hemming: boolean;
   rush: boolean;
   uploadedFileUrl: string | null;
+  uploadedFileName?: string | null;
   unitPrice: number;
   totalPrice: number;
   addedAt: number;

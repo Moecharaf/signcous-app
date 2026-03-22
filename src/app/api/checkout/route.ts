@@ -56,6 +56,7 @@ export async function POST(req: NextRequest) {
         { key: "custom_hemming", value: item.hemming ? "yes" : "no" },
         { key: "custom_rush", value: item.rush ? "yes" : "no" },
         { key: "custom_file_url", value: item.uploadedFileUrl ?? "" },
+        { key: "custom_file_name", value: item.uploadedFileName ?? "" },
         { key: "custom_unit_price", value: item.unitPrice.toFixed(2) },
         { key: "custom_total_price", value: item.totalPrice.toFixed(2) },
       ],

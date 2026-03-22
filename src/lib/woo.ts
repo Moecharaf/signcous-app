@@ -22,6 +22,7 @@ export interface BannerOrderMeta {
   hemming: boolean;
   rush: boolean;
   uploadedFileUrl: string | null;
+  uploadedFileName?: string | null;
   customerNotes: string;
   calculatedUnitPrice: number;
   calculatedTotalPrice: number;
@@ -116,6 +117,7 @@ function buildLineItemMeta(meta: BannerOrderMeta): Record<string, string> {
     custom_hemming: meta.hemming ? "yes" : "no",
     custom_rush: meta.rush ? "yes" : "no",
     custom_file_url: meta.uploadedFileUrl ?? "",
+    custom_file_name: meta.uploadedFileName ?? "",
     custom_notes: meta.customerNotes,
     custom_unit_price: meta.calculatedUnitPrice.toFixed(2),
     custom_total_price: meta.calculatedTotalPrice.toFixed(2),

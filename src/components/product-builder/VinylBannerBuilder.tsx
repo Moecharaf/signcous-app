@@ -82,6 +82,10 @@ export default function VinylBannerBuilder() {
   const [artPos, setArtPos] = useState({ x: 0, y: 0 });
   const [drag, setDrag] = useState<DragState>({ mode: "none" });
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null);
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  const [uploadingArtwork, setUploadingArtwork] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const workspaceRef = useRef<HTMLDivElement | null>(null);
 
   const widthNum = parseFloat(form.width) || 0;
@@ -152,6 +156,11 @@ export default function VinylBannerBuilder() {
   function handleAddToCart() {
     if (!validate()) return;
 
+    if (uploadingArtwork) {
+      setUploadError("Please wait for your artwork to finish uploading.");
+      return;
+    }
+
     cart.addItem({
       productId: 12,
       productName: "Vinyl Banner",
@@ -166,7 +175,8 @@ export default function VinylBannerBuilder() {
       windSlits: form.windSlits,
       hemming: form.hemming,
       rush: form.rush,
-      uploadedFileUrl: uploadedImage ?? null,
+      uploadedFileUrl,
+      uploadedFileName,
       unitPrice: pricing.unitPrice,
       totalPrice: pricing.totalPrice,
     });
@@ -175,14 +185,49 @@ export default function VinylBannerBuilder() {
     setTimeout(() => setAddedToCart(false), 2500);
   }
 
-  function onUploadArtwork(event: React.ChangeEvent<HTMLInputElement>) {
+  async function onUploadArtwork(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) return;
-    const blobUrl = URL.createObjectURL(file);
-    setUploadedImage((prev) => {
-      if (prev) URL.revokeObjectURL(prev);
-      return blobUrl;
-    });
+
+    setUploadingArtwork(true);
+    setUploadError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/upload-artwork", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await response.json();
+
+      if (!response.ok || !data.fileUrl) {
+        setUploadError(data.error ?? "Artwork upload failed. Please try again.");
+        return;
+      }
+
+      setUploadedFileUrl(data.fileUrl);
+      setUploadedFileName(data.originalName ?? file.name);
+
+      if (file.type.startsWith("image/")) {
+        const blobUrl = URL.createObjectURL(file);
+        setUploadedImage((prev) => {
+          if (prev) URL.revokeObjectURL(prev);
+          return blobUrl;
+        });
+      } else {
+        setUploadedImage((prev) => {
+          if (prev) URL.revokeObjectURL(prev);
+          return null;
+        });
+      }
+    } catch {
+      setUploadError("Artwork upload failed. Please try again.");
+    } finally {
+      setUploadingArtwork(false);
+      event.target.value = "";
+    }
   }
 
   function startMove(event: React.PointerEvent<HTMLDivElement>) {
@@ -485,15 +530,26 @@ export default function VinylBannerBuilder() {
             <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
               <div className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">Artwork</div>
               <label className="mt-3 block cursor-pointer rounded-xl border border-dashed border-zinc-300 bg-zinc-50 px-3 py-6 text-center text-sm text-zinc-600 hover:border-orange-400 hover:bg-orange-50">
-                Upload Artwork
+                {uploadingArtwork ? "Uploading..." : "Upload Artwork"}
                 <input
                   type="file"
                   accept=".pdf,.ai,.eps,.png,.jpg,.jpeg,.tif,.tiff"
                   onChange={onUploadArtwork}
+                  disabled={uploadingArtwork}
                   className="hidden"
                 />
               </label>
-              <div className="mt-2 text-xs text-zinc-500">Accepted: PDF, AI, EPS, PNG, JPG, TIFF</div>
+              <div className="mt-2 text-xs text-zinc-500">Accepted: PDF, AI, EPS, PNG, JPG, TIFF, PSD (up to 100MB)</div>
+              {uploadedFileName && (
+                <div className="mt-2 rounded border border-emerald-200 bg-emerald-50 px-2.5 py-2 text-xs text-emerald-700">
+                  Uploaded: {uploadedFileName}
+                </div>
+              )}
+              {uploadError && (
+                <div className="mt-2 rounded border border-rose-200 bg-rose-50 px-2.5 py-2 text-xs text-rose-700">
+                  {uploadError}
+                </div>
+              )}
             </div>
 
             <div className="rounded-2xl border border-zinc-200 bg-white p-4 text-xs text-zinc-600 shadow-sm">

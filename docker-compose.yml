@@ -9,3 +9,5 @@ services:
       - .env.local
     ports:
       - "3000:3000"
+    volumes:
+      - ./data/uploads:/app/public/uploads
