@@ -24,6 +24,27 @@ function getSafeExtension(fileName: string): string | null {
   return ext;
 }
 
+function getPublicBaseUrl(request: NextRequest): string {
+  const configuredBaseUrl =
+    process.env.PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? "";
+  if (configuredBaseUrl) {
+    return configuredBaseUrl.replace(/\/$/, "");
+  }
+
+  const forwardedProto = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim();
+  const forwardedHost = request.headers.get("x-forwarded-host")?.split(",")[0]?.trim();
+  const host = request.headers.get("host")?.split(",")[0]?.trim();
+
+  const proto = forwardedProto || "https";
+  const resolvedHost = forwardedHost || host;
+
+  if (!resolvedHost) {
+    return new URL(request.url).origin;
+  }
+
+  return `${proto}://${resolvedHost}`;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
@@ -62,7 +83,8 @@ export async function POST(request: NextRequest) {
 
     await writeFile(targetPath, fileBuffer);
 
-    const fileUrl = new URL(`/uploads/${storedName}`, request.url).toString();
+    const baseUrl = getPublicBaseUrl(request);
+    const fileUrl = `${baseUrl}/uploads/${storedName}`;
 
     return NextResponse.json({
       success: true,
