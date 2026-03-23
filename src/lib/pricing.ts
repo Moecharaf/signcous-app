@@ -76,6 +76,12 @@ export interface BannerPricingResult {
   totalPrice: number;
 }
 
+export interface SimpleSqFtPricingResult {
+  sqFt: number;
+  unitPrice: number;
+  totalPrice: number;
+}
+
 /**
  * Calculates the total price for a vinyl banner order.
  */
@@ -108,7 +114,7 @@ export function calculateBannerPrice(input: BannerPricingInput): BannerPricingRe
     };
     const meshRushMultiplier = 1.5;
 
-    let basePricePerUnit = sqFt * meshSqFtRate;
+    const basePricePerUnit = sqFt * meshSqFtRate;
 
     let grommetCostPerUnit = 0;
     if (grommets) {
@@ -144,8 +150,8 @@ export function calculateBannerPrice(input: BannerPricingInput): BannerPricingRe
       grommetCostPerUnit: Math.round(grommetCostPerUnit * 100) / 100,
       edgeFinishCostPerUnit: Math.round(edgeFinishCostPerUnit * 100) / 100,
       polePocketCostPerUnit: Math.round(polePocketCostPerUnit * 100) / 100,
-      windSlitsCostPerUnit: 0,
-      hemmingCostPerUnit: 0,
+      windSlitsCostPerUnit: Math.round(windSlitsCostPerUnit * 100) / 100,
+      hemmingCostPerUnit: Math.round(hemmingCostPerUnit * 100) / 100,
       addOnCostPerUnit: Math.round(addOnCostPerUnit * 100) / 100,
       rushSurchargePerUnit: Math.round(rushSurchargePerUnit * 100) / 100,
       unitPrice: Math.round(unitPrice * 100) / 100,
@@ -215,6 +221,26 @@ export function calculateBannerPrice(input: BannerPricingInput): BannerPricingRe
     hemmingCostPerUnit: Math.round(hemmingCostPerUnit * 100) / 100,
     addOnCostPerUnit: Math.round(addOnCostPerUnit * 100) / 100,
     rushSurchargePerUnit: Math.round(rushSurchargePerUnit * 100) / 100,
+    unitPrice: Math.round(unitPrice * 100) / 100,
+    totalPrice: Math.round(totalPrice * 100) / 100,
+  };
+}
+
+export function calculateHdpePrice(
+  widthIn: number,
+  heightIn: number,
+  quantity: number = 1
+): SimpleSqFtPricingResult {
+  const safeWidthIn = Number.isFinite(widthIn) ? Math.max(0, widthIn) : 0;
+  const safeHeightIn = Number.isFinite(heightIn) ? Math.max(0, heightIn) : 0;
+  const safeQuantity = Number.isFinite(quantity) ? Math.max(1, quantity) : 1;
+
+  const sqFt = (safeWidthIn / 12) * (safeHeightIn / 12);
+  const unitPrice = sqFt * 3.5;
+  const totalPrice = unitPrice * safeQuantity;
+
+  return {
+    sqFt: Math.round(sqFt * 100) / 100,
     unitPrice: Math.round(unitPrice * 100) / 100,
     totalPrice: Math.round(totalPrice * 100) / 100,
   };

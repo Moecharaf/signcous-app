@@ -2,6 +2,7 @@ import Link from "next/link";
 
 const shopLinks = [
   { href: "/banners/vinyl-banner", label: "Vinyl Banners" },
+  { href: "/banners/hdpe", label: "HDPE Signs" },
   { href: "/shop/yard-signs", label: "Yard Signs" },
   { href: "/shop/aluminum-signs", label: "Aluminum Signs" },
   { href: "/shop/stickers", label: "Stickers & Decals" },

@@ -8,6 +8,7 @@ const navLinks = [
   { href: "/shop", label: "Shop" },
   { href: "/shop/banners", label: "Banners" },
   { href: "/banners/vinyl-banner", label: "Studio" },
+  { href: "/banners/hdpe", label: "HDPE" },
   { href: "/quote", label: "Custom Quote" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
@@ -55,7 +56,7 @@ export default function Header() {
               key={`${link.href}-${link.label}`}
               href={link.href}
               className={`transition-colors hover:text-white ${
-                link.label === "Studio"
+                link.label === "Studio" || link.label === "HDPE"
                   ? "rounded-full border border-orange-500/35 bg-orange-500/10 px-3 py-1 text-orange-300"
                   : ""
               }`}
