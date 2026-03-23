@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Button from "@/components/ui/Button";
 import { useCart } from "@/context/CartContext";
-import { calculateHdpePrice, formatPrice } from "@/lib/pricing";
+import { calculateHdpePrice, formatPrice, getHdpeSqFtRate } from "@/lib/pricing";
 
 const unitOptions = ["inches", "feet"] as const;
 type Unit = (typeof unitOptions)[number];
@@ -61,6 +61,7 @@ export default function HdpeBuilder() {
     () => calculateHdpePrice(widthIn, heightIn, qtyNum),
     [widthIn, heightIn, qtyNum]
   );
+  const hdpeRate = useMemo(() => getHdpeSqFtRate(qtyNum), [qtyNum]);
 
   const set = useCallback((field: "width" | "height", val: string) => {
     if (field === "width") setWidth(val);
@@ -348,11 +349,12 @@ export default function HdpeBuilder() {
             <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
               <div className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">Pricing Breakdown</div>
               <div className="mt-3 space-y-2 text-sm">
-                <Row label="Rate" value="$3.50 / sqft" />
+                <Row label="Rate" value={`$${hdpeRate.toFixed(2)} / sqft`} />
                 <Row label="Square Feet" value={String(pricing.sqFt)} />
                 <div className="my-2 border-t border-zinc-200" />
                 <Row label="Unit Price" value={formatPrice(pricing.unitPrice)} strong />
                 <Row label={`Order Total (${qtyNum})`} value={formatPrice(pricing.totalPrice)} strong className="text-orange-600" />
+                <Row label="Minimum Order" value="$20.00" />
               </div>
             </div>
 

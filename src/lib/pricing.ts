@@ -82,6 +82,15 @@ export interface SimpleSqFtPricingResult {
   totalPrice: number;
 }
 
+export function getHdpeSqFtRate(quantity: number): number {
+  const safeQuantity = Number.isFinite(quantity) ? Math.max(1, quantity) : 1;
+  if (safeQuantity < 10) return 4.5;
+  if (safeQuantity < 50) return 4.0;
+  if (safeQuantity < 100) return 3.6;
+  if (safeQuantity < 500) return 3.2;
+  return 2.9;
+}
+
 /**
  * Calculates the total price for a vinyl banner order.
  */
@@ -229,15 +238,27 @@ export function calculateBannerPrice(input: BannerPricingInput): BannerPricingRe
 export function calculateHdpePrice(
   widthIn: number,
   heightIn: number,
-  quantity: number = 1
+  quantity: number = 1,
+  rush: boolean = false
 ): SimpleSqFtPricingResult {
   const safeWidthIn = Number.isFinite(widthIn) ? Math.max(0, widthIn) : 0;
   const safeHeightIn = Number.isFinite(heightIn) ? Math.max(0, heightIn) : 0;
   const safeQuantity = Number.isFinite(quantity) ? Math.max(1, quantity) : 1;
 
   const sqFt = (safeWidthIn / 12) * (safeHeightIn / 12);
-  const unitPrice = sqFt * 3.5;
-  const totalPrice = unitPrice * safeQuantity;
+  const pricePerSqFt = getHdpeSqFtRate(safeQuantity);
+
+  let base = sqFt * pricePerSqFt;
+  if (rush) {
+    base *= 1.4;
+  }
+
+  let totalPrice = base * safeQuantity;
+  if (totalPrice < 20) {
+    totalPrice = 20;
+  }
+
+  const unitPrice = totalPrice / safeQuantity;
 
   return {
     sqFt: Math.round(sqFt * 100) / 100,
