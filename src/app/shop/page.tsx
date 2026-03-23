@@ -1,10 +1,9 @@
 import Link from "next/link";
 import {
-  APPROVED_CATEGORY_SLUGS,
-  SIGNCOUS_COLLECTIONS,
-  getCollectionBySlug,
+  getCollectionForCategory,
+  isAllowedPrimaryCategory,
 } from "@/lib/catalog";
-import { getProductCategories, getProducts } from "@/lib/woo";
+import { getAllProducts, getProductCategories } from "@/lib/woo";
 
 function stripHtml(input: string): string {
   return input.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
@@ -16,43 +15,56 @@ export const metadata = {
 };
 
 export default async function ShopPage() {
-  const [categories, products] = await Promise.all([
-    getProductCategories(),
-    getProducts({ perPage: 18 }),
-  ]);
-
-  const topLevel = SIGNCOUS_COLLECTIONS
-    .map((collection) => categories.find((c) => c.slug === collection.slug) ?? null)
-    .filter((category): category is NonNullable<typeof category> => category !== null);
+  const categories = await getProductCategories();
+  const topLevel = categories.filter(
+    (category) => category.parent === 0 && isAllowedPrimaryCategory(category)
+  );
   const childrenByParent = new Map<number, typeof categories>();
 
   for (const category of categories) {
     if (category.parent === 0) continue;
-    if (!APPROVED_CATEGORY_SLUGS.has(category.slug)) continue;
+
+    const parent = categories.find((candidate) => candidate.id === category.parent);
+    if (!parent || !isAllowedPrimaryCategory(parent)) continue;
+
     const list = childrenByParent.get(category.parent) ?? [];
     list.push(category);
     childrenByParent.set(category.parent, list);
   }
 
-  const approvedProducts = products.filter((product) =>
-    product.categories.some((category) => APPROVED_CATEGORY_SLUGS.has(category.slug))
+  const allowedCategoryIds = new Set<number>([
+    ...topLevel.map((category) => category.id),
+    ...Array.from(childrenByParent.values()).flat().map((category) => category.id),
+  ]);
+
+  const productLists = await Promise.all(
+    Array.from(allowedCategoryIds).map((categoryId) => getAllProducts({ categoryId }))
   );
+  const approvedProductsById = new Map<number, (typeof productLists)[number][number]>();
+
+  for (const list of productLists) {
+    for (const product of list) {
+      approvedProductsById.set(product.id, product);
+    }
+  }
+
+  const approvedProducts = Array.from(approvedProductsById.values());
 
   return (
     <div className="min-h-screen bg-black text-white">
       <section className="mx-auto max-w-7xl px-6 py-16">
         <div className="mb-10">
           <div className="text-xs font-semibold uppercase tracking-[0.2em] text-orange-400">Catalog</div>
-          <h1 className="mt-3 text-4xl font-black tracking-tight md:text-5xl">Approved Signcous collections</h1>
+          <h1 className="mt-3 text-4xl font-black tracking-tight md:text-5xl">Core Signcous collections</h1>
           <p className="mt-3 max-w-2xl text-zinc-400">
-            The public storefront only surfaces supplier-backed collections that fit the Signcous brand and fulfillment workflow.
+            The storefront is limited to Banner, Rigid, Adhesive, and Magnet collections.
           </p>
         </div>
 
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {topLevel.map((parent) => {
             const children = childrenByParent.get(parent.id) ?? [];
-            const collection = getCollectionBySlug(parent.slug);
+            const collection = getCollectionForCategory(parent);
 
             return (
               <div key={parent.id} className="rounded-3xl border border-white/10 bg-zinc-950 p-6">
@@ -62,7 +74,7 @@ export default async function ShopPage() {
                 <p className="mt-2 text-sm text-zinc-400">{collection?.description ?? `${parent.count} products`}</p>
                 {collection && (
                   <div className="mt-3 text-xs uppercase tracking-[0.18em] text-zinc-500">
-                    Supplier family: {collection.supplierFamily}
+                    Family: {collection.supplierFamily}
                   </div>
                 )}
 

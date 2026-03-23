@@ -1,92 +1,85 @@
 export interface CatalogCollection {
+  key: "banner" | "rigid" | "adhesive" | "magnet";
   slug: string;
   name: string;
   supplierFamily: string;
   description: string;
   href: string;
   highlight: string;
+  matchTerms: string[];
 }
 
 export const SIGNCOUS_COLLECTIONS: CatalogCollection[] = [
   {
-    slug: "banners",
-    name: "Banners",
+    key: "banner",
+    slug: "banner",
+    name: "Banner",
     supplierFamily: "Banner",
-    description: "Supplier-backed banner products with live Signcous pricing, artwork upload, and fast turnaround.",
-    href: "/shop/banners",
-    highlight: "Vinyl, mesh, fabric, retractable, and event displays",
+    description: "Premium vinyl scrim, HDPE, mesh, and banner materials for indoor and outdoor use.",
+    href: "/#banner",
+    highlight: "Includes HD Banner and HDPE",
+    matchTerms: ["banner", "banners"],
   },
   {
-    slug: "signs",
-    name: "Signs",
+    key: "rigid",
+    slug: "rigid",
+    name: "Rigid",
     supplierFamily: "Rigid",
-    description: "Rigid sign products sourced through the supplier catalog and presented with Signcous branding.",
-    href: "/shop/signs",
-    highlight: "Coroplast, aluminum, PVC, acrylic, and foam board",
+    description: "Rigid substrates for photo-quality and durable signage applications.",
+    href: "/#rigid",
+    highlight: "Coroplast, acrylic, foamcore, PVC and more",
+    matchTerms: ["rigid", "signs", "sign"],
   },
   {
-    slug: "stickers-decals",
-    name: "Stickers & Decals",
+    key: "adhesive",
+    slug: "adhesive",
+    name: "Adhesive",
     supplierFamily: "Adhesive",
-    description: "Adhesive graphics and decals aligned to supplier-supported materials and production methods.",
-    href: "/shop/stickers-decals",
-    highlight: "Window, wall, floor, die-cut, and kiss-cut",
+    description: "Window, wall, and vehicle adhesive films with short-term and durable options.",
+    href: "/#adhesive",
+    highlight: "Vehicle wrap, window cling, one-way and cast films",
+    matchTerms: ["adhesive", "stickers", "decals", "sticker"],
   },
   {
-    slug: "marketing-materials",
-    name: "Marketing Materials",
-    supplierFamily: "Handheld",
-    description: "Portable print collateral and business handouts, curated under the Signcous storefront experience.",
-    href: "/shop/marketing-materials",
-    highlight: "Business cards, flyers, brochures, postcards, and booklets",
-  },
-  {
-    slug: "large-format-events",
-    name: "Large Format & Events",
-    supplierFamily: "Display",
-    description: "Large event graphics and show hardware organized around supplier-supported display products.",
-    href: "/shop/large-format-events",
-    highlight: "Backdrops, table covers, step and repeat, and trade show displays",
+    key: "magnet",
+    slug: "magnet",
+    name: "Magnet",
+    supplierFamily: "Magnet",
+    description: "Vehicle-ready magnetic products for mobile promotion and custom cut sizes.",
+    href: "/#magnet",
+    highlight: "Vehicle magnet and custom magnet products",
+    matchTerms: ["magnet", "magnets"],
   },
 ];
 
-export const APPROVED_CATEGORY_SLUGS = new Set([
-  "banners",
-  "vinyl-banners",
-  "mesh-banners",
-  "fabric-banners",
-  "retractable-banners",
-  "pole-banners",
-  "double-sided-banners",
-  "signs",
-  "yard-signs-coroplast",
-  "aluminum-signs",
-  "pvc-signs",
-  "acrylic-signs",
-  "foam-board-signs",
-  "stickers-decals",
-  "die-cut-stickers",
-  "kiss-cut-stickers",
-  "sticker-sheets",
-  "window-decals",
-  "wall-decals",
-  "floor-decals",
-  "marketing-materials",
-  "business-cards",
-  "flyers",
-  "brochures",
-  "postcards",
-  "door-hangers",
-  "booklets",
-  "large-format-events",
-  "step-and-repeat-banners",
-  "backdrops",
-  "table-covers",
-  "tension-fabric-displays",
-  "trade-show-displays",
-  "posters",
-]);
+export interface CategoryMatcherInput {
+  slug: string;
+  name: string;
+}
+
+function normalize(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
 
 export function getCollectionBySlug(slug: string): CatalogCollection | undefined {
-  return SIGNCOUS_COLLECTIONS.find((collection) => collection.slug === slug);
+  const normalizedSlug = normalize(slug);
+  return SIGNCOUS_COLLECTIONS.find((collection) =>
+    [collection.slug, ...collection.matchTerms].some((term) => normalize(term) === normalizedSlug)
+  );
+}
+
+export function getCollectionForCategory(category: CategoryMatcherInput): CatalogCollection | undefined {
+  const normalizedName = normalize(category.name);
+  const normalizedSlug = normalize(category.slug);
+
+  return SIGNCOUS_COLLECTIONS.find((collection) =>
+    [collection.slug, ...collection.matchTerms].some((term) => {
+      const normalizedTerm = normalize(term);
+      return normalizedSlug.includes(normalizedTerm) || normalizedName.includes(normalizedTerm);
+    })
+  );
+}
+
+export function isAllowedPrimaryCategory(category: CategoryMatcherInput): boolean {
+  return Boolean(getCollectionForCategory(category));
 }

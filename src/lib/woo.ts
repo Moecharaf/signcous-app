@@ -204,6 +204,36 @@ export async function getProducts(options?: {
 }
 
 /**
+ * Fetches all published products, optionally filtered by category ID.
+ */
+export async function getAllProducts(options?: { categoryId?: number }): Promise<WooProduct[]> {
+  if (!WOO_BASE_URL || !WOO_KEY || !WOO_SECRET) return [];
+
+  const allProducts: WooProduct[] = [];
+  let page = 1;
+
+  try {
+    while (true) {
+      const pageItems = await getProducts({
+        categoryId: options?.categoryId,
+        perPage: 100,
+        page,
+      });
+
+      if (pageItems.length === 0) break;
+      allProducts.push(...pageItems);
+
+      if (pageItems.length < 100) break;
+      page += 1;
+    }
+  } catch {
+    return [];
+  }
+
+  return allProducts;
+}
+
+/**
  * Fetches a category by slug and all products within it.
  */
 export async function getProductsByCategorySlug(slug: string): Promise<{
@@ -217,11 +247,38 @@ export async function getProductsByCategorySlug(slug: string): Promise<{
     return { category: null, products: [] };
   }
 
-  const products = await getProducts({ categoryId: category.id, perPage: 60 });
-  return { category, products };
+  const descendantIds = collectDescendantCategoryIds(category.id, categories);
+  const productPages = await Promise.all(descendantIds.map((categoryId) => getAllProducts({ categoryId })));
+  const byId = new Map<number, WooProduct>();
+
+  for (const list of productPages) {
+    for (const product of list) {
+      byId.set(product.id, product);
+    }
+  }
+
+  return { category, products: Array.from(byId.values()) };
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
+
+function collectDescendantCategoryIds(rootId: number, categories: WooCategory[]): number[] {
+  const found = new Set<number>([rootId]);
+  const queue = [rootId];
+
+  while (queue.length > 0) {
+    const current = queue.shift();
+    if (current === undefined) continue;
+
+    for (const category of categories) {
+      if (category.parent !== current || found.has(category.id)) continue;
+      found.add(category.id);
+      queue.push(category.id);
+    }
+  }
+
+  return Array.from(found);
+}
 
 function buildLineItemMeta(meta: BannerOrderMeta): Record<string, string> {
   return {

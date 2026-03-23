@@ -1,12 +1,12 @@
 import Link from "next/link";
 
 const shopLinks = [
-  { href: "/banners/vinyl-banner", label: "Vinyl Banners" },
-  { href: "/banners/hdpe", label: "HDPE Signs" },
-  { href: "/shop/yard-signs", label: "Yard Signs" },
-  { href: "/shop/aluminum-signs", label: "Aluminum Signs" },
-  { href: "/shop/stickers", label: "Stickers & Decals" },
-  { href: "/shop/business-cards", label: "Business Cards" },
+  { href: "/#banner", label: "Banner" },
+  { href: "/banners/vinyl-banner", label: "HD Banner" },
+  { href: "/banners/hdpe", label: "HDPE" },
+  { href: "/#rigid", label: "Rigid" },
+  { href: "/#adhesive", label: "Adhesive" },
+  { href: "/#magnet", label: "Magnet" },
 ];
 
 const companyLinks = [
@@ -24,42 +24,42 @@ const supportLinks = [
 
 export default function Footer() {
   return (
-    <footer className="border-t border-zinc-800 bg-zinc-950">
-      <div className="border-b border-zinc-800 bg-zinc-900/80 px-6 py-2">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-6 text-[11px] font-medium uppercase tracking-[0.14em] text-zinc-400 sm:justify-between">
+    <footer className="border-t border-[#d4d4d4] bg-[#f1f1f1] text-[#4b4b4b]">
+      <div className="border-b border-[#dadada] bg-[#ececec] px-6 py-2">
+        <div className="mx-auto flex max-w-[1500px] flex-wrap items-center justify-center gap-6 text-[11px] font-medium uppercase tracking-[0.14em] text-[#666] sm:justify-between">
           <span>Trade Pricing</span>
           <span>Fast Reorder Workflow</span>
           <span>Proof Approval Ready</span>
-          <span className="text-orange-400">Studio-Powered Ordering</span>
+          <span className="font-semibold text-[#c87500]">Studio-Powered Ordering</span>
         </div>
       </div>
 
-      <div className="mx-auto grid max-w-7xl gap-10 px-6 py-12 md:grid-cols-4">
+      <div className="mx-auto grid max-w-[1500px] gap-10 px-6 py-12 md:grid-cols-4">
         {/* Brand */}
         <div>
           <div className="inline-flex items-center gap-2">
-            <span className="rounded bg-orange-500/15 px-2 py-1 text-xs font-black tracking-widest text-orange-400 ring-1 ring-orange-500/35">
+            <span className="rounded bg-[#ffd100] px-2 py-1 text-xs font-black tracking-widest text-[#262626] ring-1 ring-[#c3ab31]">
               SC
             </span>
-            <div className="text-xl font-black text-zinc-100">
-              SIGNCO<span className="text-orange-500">US</span>
+            <div className="text-xl font-black text-[#2c2c2c]">
+              SIGNCO<span className="text-[#c87500]">US</span>
             </div>
           </div>
-          <p className="mt-3 text-sm leading-7 text-zinc-400">
+          <p className="mt-3 text-sm leading-7 text-[#5f5f5f]">
             Custom print ordering for businesses, events, and individuals. Fast turnaround, premium quality, nationwide delivery.
           </p>
-          <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-orange-500/30 bg-orange-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-orange-300">
+          <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-[#d8b72d] bg-[#fff4bf] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#7a5100]">
             Web-to-Print Platform
           </div>
         </div>
 
         {/* Shop */}
         <div>
-          <div className="text-sm font-semibold uppercase tracking-[0.25em] text-zinc-500">Shop</div>
-          <ul className="mt-4 space-y-3 text-sm text-zinc-300">
+          <div className="text-sm font-semibold uppercase tracking-[0.25em] text-[#666]">Shop</div>
+          <ul className="mt-4 space-y-3 text-sm text-[#555]">
             {shopLinks.map((link) => (
               <li key={link.href}>
-                <Link href={link.href} className="hover:text-white transition-colors">
+                <Link href={link.href} className="transition-colors hover:text-[#1f1f1f]">
                   {link.label}
                 </Link>
               </li>
@@ -69,11 +69,11 @@ export default function Footer() {
 
         {/* Company */}
         <div>
-          <div className="text-sm font-semibold uppercase tracking-[0.25em] text-zinc-500">Company</div>
-          <ul className="mt-4 space-y-3 text-sm text-zinc-300">
+          <div className="text-sm font-semibold uppercase tracking-[0.25em] text-[#666]">Company</div>
+          <ul className="mt-4 space-y-3 text-sm text-[#555]">
             {companyLinks.map((link) => (
               <li key={link.href}>
-                <Link href={link.href} className="hover:text-white transition-colors">
+                <Link href={link.href} className="transition-colors hover:text-[#1f1f1f]">
                   {link.label}
                 </Link>
               </li>
@@ -83,11 +83,11 @@ export default function Footer() {
 
         {/* Support */}
         <div>
-          <div className="text-sm font-semibold uppercase tracking-[0.25em] text-zinc-500">Support</div>
-          <ul className="mt-4 space-y-3 text-sm text-zinc-300">
+          <div className="text-sm font-semibold uppercase tracking-[0.25em] text-[#666]">Support</div>
+          <ul className="mt-4 space-y-3 text-sm text-[#555]">
             {supportLinks.map((link) => (
               <li key={link.href}>
-                <Link href={link.href} className="hover:text-white transition-colors">
+                <Link href={link.href} className="transition-colors hover:text-[#1f1f1f]">
                   {link.label}
                 </Link>
               </li>
@@ -96,13 +96,13 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="border-t border-zinc-800 px-6 py-5">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 text-xs text-zinc-500 sm:flex-row">
+      <div className="border-t border-[#d8d8d8] px-6 py-5">
+        <div className="mx-auto flex max-w-[1500px] flex-col items-center justify-between gap-3 text-xs text-[#777] sm:flex-row">
           <span>© {new Date().getFullYear()} Signcous. All rights reserved.</span>
           <div className="flex gap-6">
-            <Link href="/terms" className="hover:text-zinc-300 transition-colors">Terms</Link>
-            <Link href="/privacy" className="hover:text-zinc-300 transition-colors">Privacy</Link>
-            <Link href="/refund-policy" className="hover:text-zinc-300 transition-colors">Refund Policy</Link>
+            <Link href="/terms" className="transition-colors hover:text-[#333]">Terms</Link>
+            <Link href="/privacy" className="transition-colors hover:text-[#333]">Privacy</Link>
+            <Link href="/refund-policy" className="transition-colors hover:text-[#333]">Refund Policy</Link>
           </div>
         </div>
       </div>
