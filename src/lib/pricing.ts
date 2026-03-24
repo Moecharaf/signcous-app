@@ -174,7 +174,9 @@ export function calculateMeshPrice(
   unit: "inches" | "feet",
   quantity: number,
   grommets: boolean,
-  edgeFinish: EdgeFinish,
+  welding: boolean,
+  webbing: boolean,
+  rope: boolean,
   polePockets: boolean,
   rush: boolean
 ): MeshPricingResult {
@@ -196,11 +198,14 @@ export function calculateMeshPrice(
   // Pole pockets: $1.00/linear ft (top + bottom = 2×width) plus $10.00 setup
   const polePocketCostPerUnit = polePockets ? (widthFt * 2 * 1.00) + 10.00 : 0;
 
-  // Edge finish: welding = free, rope/webbing = $1.00/linear ft of perimeter
-  let edgeFinishCostPerUnit = 0;
-  if (edgeFinish === "rope" || edgeFinish === "webbing") {
-    edgeFinishCostPerUnit = perimeterFt * 1.00;
-  }
+  // Signs365 style mesh add-ons:
+  // - Welding: no additional cost
+  // - Webbing: $1.00 per linear foot of perimeter
+  // - Rope:    $1.00 per linear foot of perimeter
+  const weldingCostPerUnit = welding ? 0 : 0;
+  const webbingCostPerUnit = webbing ? perimeterFt * 1.00 : 0;
+  const ropeCostPerUnit = rope ? perimeterFt * 1.00 : 0;
+  const edgeFinishCostPerUnit = weldingCostPerUnit + webbingCostPerUnit + ropeCostPerUnit;
 
   const priceBeforeRush      = basePricePerUnit + polePocketCostPerUnit + edgeFinishCostPerUnit;
   const rushSurchargePerUnit = rush ? priceBeforeRush * 1.00 : 0; // 100% additional

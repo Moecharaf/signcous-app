@@ -34,6 +34,9 @@ interface FormState {
   windSlits: boolean;
   hemming: boolean;
   rush: boolean;
+  meshWelding: boolean;
+  meshWebbing: boolean;
+  meshRope: boolean;
 }
 
 interface FormErrors {
@@ -61,6 +64,9 @@ const DEFAULTS: FormState = {
   windSlits: false,
   hemming: false,
   rush: false,
+  meshWelding: true,
+  meshWebbing: false,
+  meshRope: false,
 };
 
 interface VinylBannerBuilderProps {
@@ -86,6 +92,42 @@ function toInches(value: number, unit: Unit): number {
 function fromInches(value: number, unit: Unit): string {
   if (unit === "feet") return (value / 12).toFixed(2);
   return value.toFixed(1);
+}
+
+function getGrommetPoints(
+  widthIn: number,
+  heightIn: number,
+  enabled: boolean,
+  mode: GrommetMode
+): Array<{ xPct: number; yPct: number }> {
+  if (!enabled || widthIn <= 0 || heightIn <= 0) return [];
+
+  if (mode === "per-corner") {
+    return [
+      { xPct: 0, yPct: 0 },
+      { xPct: 100, yPct: 0 },
+      { xPct: 100, yPct: 100 },
+      { xPct: 0, yPct: 100 },
+    ];
+  }
+
+  const points: Array<{ xPct: number; yPct: number }> = [];
+  const xSegments = Math.max(1, Math.ceil(widthIn / 24));
+  const ySegments = Math.max(1, Math.ceil(heightIn / 24));
+
+  for (let i = 0; i <= xSegments; i += 1) {
+    const xPct = (i / xSegments) * 100;
+    points.push({ xPct, yPct: 0 });
+    points.push({ xPct, yPct: 100 });
+  }
+
+  for (let i = 1; i < ySegments; i += 1) {
+    const yPct = (i / ySegments) * 100;
+    points.push({ xPct: 0, yPct });
+    points.push({ xPct: 100, yPct });
+  }
+
+  return points;
 }
 
 export default function VinylBannerBuilder({
@@ -118,6 +160,9 @@ export default function VinylBannerBuilder({
   const isCanvasProduct = pricingMode === "canvas";
   const isMeshProduct   = pricingMode === "mesh";
   const isMeshMaterial  = isMeshProduct || form.material === "Mesh Banner";
+  const perimeterFt = 2 * ((widthIn / 12) + (heightIn / 12));
+  const meshWebbingCost = form.meshWebbing ? perimeterFt : 0;
+  const meshRopeCost = form.meshRope ? perimeterFt : 0;
 
   const pxPerIn = BASE_PX_PER_IN * zoom;
   const artWidth = clamp(widthIn * pxPerIn, 90, 760);
@@ -125,13 +170,22 @@ export default function VinylBannerBuilder({
 
   const canvasRate = useMemo(() => getCanvasSqFtRate(qtyNum), [qtyNum]);
   const meshRate   = useMemo(() => getMeshSqFtRate(qtyNum),   [qtyNum]);
+  const meshGrommetPoints = useMemo(
+    () => getGrommetPoints(widthIn, heightIn, isMeshProduct && form.grommets, form.grommetMode),
+    [widthIn, heightIn, isMeshProduct, form.grommets, form.grommetMode]
+  );
 
   const pricing = useMemo(
     () => {
       if (isMeshProduct) {
         const m = calculateMeshPrice(
           widthNum, heightNum, form.unit, qtyNum,
-          form.grommets, form.edgeFinish, form.polePockets, form.rush
+          form.grommets,
+          form.meshWelding,
+          form.meshWebbing,
+          form.meshRope,
+          form.polePockets,
+          form.rush
         );
         return {
           sqFt:                 m.sqFt,
@@ -199,6 +253,9 @@ export default function VinylBannerBuilder({
       form.windSlits,
       form.hemming,
       form.rush,
+      form.meshWelding,
+      form.meshWebbing,
+      form.meshRope,
     ]
   );
 
@@ -234,6 +291,14 @@ export default function VinylBannerBuilder({
       return;
     }
 
+    const meshEdgeFinish: EdgeFinish = form.meshRope
+      ? "rope"
+      : form.meshWebbing
+        ? "webbing"
+        : form.meshWelding
+          ? "welding"
+          : "none";
+
     cart.addItem({
       productId,
       productName,
@@ -244,7 +309,7 @@ export default function VinylBannerBuilder({
       material: isCanvasProduct ? "Canvas" : isMeshProduct ? "Mesh Banner" : form.material,
       doubleSided: (isCanvasProduct || isMeshProduct) ? false : form.doubleSided,
       grommets: isCanvasProduct ? false : form.grommets,
-      edgeFinish: isCanvasProduct ? "none" : form.edgeFinish,
+      edgeFinish: isCanvasProduct ? "none" : isMeshProduct ? meshEdgeFinish : form.edgeFinish,
       polePockets: isCanvasProduct ? false : form.polePockets,
       windSlits: (isCanvasProduct || isMeshProduct) ? false : form.windSlits,
       hemming: (isCanvasProduct || isMeshProduct) ? false : form.hemming,
@@ -400,6 +465,21 @@ export default function VinylBannerBuilder({
     });
   }, [isMeshMaterial]);
 
+  useEffect(() => {
+    if (!isMeshProduct) return;
+
+    setForm((prev) => {
+      if (prev.meshWelding || prev.meshWebbing || prev.meshRope) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        meshWelding: true,
+      };
+    });
+  }, [isMeshProduct]);
+
   return (
     <div className="min-h-[calc(100vh-96px)] bg-[linear-gradient(145deg,#f4f4f5_0%,#ececef_55%,#e4e4e7_100%)] text-zinc-800">
       <div className="mx-auto max-w-[1400px] px-4 py-5">
@@ -451,11 +531,11 @@ export default function VinylBannerBuilder({
 
             <div
               ref={workspaceRef}
-              className="relative h-[56vh] min-h-[380px] overflow-hidden rounded-b-2xl bg-[#fafaf9]"
+              className={`relative h-[56vh] min-h-[380px] overflow-hidden rounded-b-2xl ${isMeshProduct ? "bg-[#f4f4f2]" : "bg-[#fafaf9]"}`}
               style={{
                 backgroundImage:
                   "linear-gradient(to right, rgba(63,63,70,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(63,63,70,0.08) 1px, transparent 1px)",
-                backgroundSize: "26px 26px",
+                backgroundSize: isMeshProduct ? "18px 18px" : "26px 26px",
               }}
             >
               <div className="absolute left-5 top-5 rounded-md border border-zinc-200 bg-white px-3 py-1 text-xs font-medium text-zinc-600 shadow-sm">
@@ -463,7 +543,11 @@ export default function VinylBannerBuilder({
               </div>
 
               <div
-                className="absolute left-1/2 top-1/2 cursor-move select-none rounded-md border-2 border-dashed border-orange-500 bg-orange-50/55 shadow-lg"
+                className={`absolute left-1/2 top-1/2 cursor-move select-none rounded-md shadow-lg ${
+                  isMeshProduct
+                    ? "border border-zinc-500 bg-white"
+                    : "border-2 border-dashed border-orange-500 bg-orange-50/55"
+                }`}
                 onPointerDown={startMove}
                 style={{
                   width: artWidth,
@@ -471,6 +555,20 @@ export default function VinylBannerBuilder({
                   transform: `translate(calc(-50% + ${artPos.x}px), calc(-50% + ${artPos.y}px))`,
                 }}
               >
+                {isMeshProduct && (
+                  <>
+                    <div className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-600">
+                      Top Of Image
+                    </div>
+                    <div className="pointer-events-none absolute -top-4 left-1/2 -translate-x-1/2 text-[11px] text-zinc-500">
+                      {widthNum.toFixed(2)} {form.unit === "feet" ? "ft" : "in"}
+                    </div>
+                    <div className="pointer-events-none absolute -right-7 top-1/2 -translate-y-1/2 rotate-90 text-[11px] text-zinc-500">
+                      {heightNum.toFixed(2)} {form.unit === "feet" ? "ft" : "in"}
+                    </div>
+                  </>
+                )}
+
                 {uploadedImage ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -487,6 +585,19 @@ export default function VinylBannerBuilder({
                     </div>
                   </div>
                 )}
+
+                {isMeshProduct && meshGrommetPoints.map((point, index) => (
+                  <span
+                    key={`grommet-${index}`}
+                    className="pointer-events-none absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-zinc-500 bg-zinc-100 shadow"
+                    style={{
+                      left: `${point.xPct}%`,
+                      top: `${point.yPct}%`,
+                    }}
+                  >
+                    <span className="absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-zinc-400" />
+                  </span>
+                ))}
 
                 <button
                   type="button"
@@ -553,18 +664,20 @@ export default function VinylBannerBuilder({
 
                 {!isCanvasProduct && (
                   <>
-                    <ControlBox title="Print">
-                      <TogglePair
-                        leftLabel="Single"
-                        rightLabel="Double"
-                        isRightActive={form.doubleSided}
-                        onToggle={() => {
-                          if (isMeshMaterial) return;
-                          set("doubleSided", !form.doubleSided);
-                        }}
-                      />
-                      {isMeshMaterial && <div className="mt-1 text-[10px] text-zinc-500">Mesh uses single-sided pricing.</div>}
-                    </ControlBox>
+                    {!isMeshProduct && (
+                      <ControlBox title="Print">
+                        <TogglePair
+                          leftLabel="Single"
+                          rightLabel="Double"
+                          isRightActive={form.doubleSided}
+                          onToggle={() => {
+                            if (isMeshMaterial) return;
+                            set("doubleSided", !form.doubleSided);
+                          }}
+                        />
+                        {isMeshMaterial && <div className="mt-1 text-[10px] text-zinc-500">Mesh uses single-sided pricing.</div>}
+                      </ControlBox>
+                    )}
 
                     <ControlBox title="Grommets">
                       <TogglePair
@@ -579,7 +692,7 @@ export default function VinylBannerBuilder({
                           onChange={(e) => set("grommetMode", e.target.value as GrommetMode)}
                           className="mt-1 h-8 w-full rounded border border-zinc-300 bg-white px-2 text-xs"
                         >
-                          <option value="every-2ft">Every 2 ft</option>
+                          <option value="every-2ft">Every 2-3 ft</option>
                           <option value="per-corner">Per corner</option>
                         </select>
                       )}
@@ -594,7 +707,36 @@ export default function VinylBannerBuilder({
                       />
                     </ControlBox>
 
-                    {isMeshMaterial ? (
+                    {isMeshProduct ? (
+                      <>
+                        <ControlBox title="Welding">
+                          <TogglePair
+                            leftLabel="No"
+                            rightLabel="Yes"
+                            isRightActive={form.meshWelding}
+                            onToggle={() => set("meshWelding", !form.meshWelding)}
+                          />
+                        </ControlBox>
+
+                        <ControlBox title="Webbing">
+                          <TogglePair
+                            leftLabel="No"
+                            rightLabel="Yes"
+                            isRightActive={form.meshWebbing}
+                            onToggle={() => set("meshWebbing", !form.meshWebbing)}
+                          />
+                        </ControlBox>
+
+                        <ControlBox title="Rope">
+                          <TogglePair
+                            leftLabel="No"
+                            rightLabel="Yes"
+                            isRightActive={form.meshRope}
+                            onToggle={() => set("meshRope", !form.meshRope)}
+                          />
+                        </ControlBox>
+                      </>
+                    ) : isMeshMaterial ? (
                       <ControlBox title="Edge Finish">
                         <select
                           value={form.edgeFinish}
@@ -680,8 +822,11 @@ export default function VinylBannerBuilder({
                   <>
                     <Row label="Mesh Rate" value={`${formatPrice(meshRate)} / sqft`} />
                     <Row label="Grommets" value="Free" />
+                    <Row label="Welding" value={form.meshWelding ? "Included" : "No"} />
+                    <Row label="Webbing" value={formatPrice(meshWebbingCost)} />
+                    <Row label="Rope" value={formatPrice(meshRopeCost)} />
                     <Row label="Pole Pockets" value={formatPrice(pricing.polePocketCostPerUnit)} />
-                    <Row label="Edge Finish" value={formatPrice(pricing.edgeFinishCostPerUnit)} />
+                    <Row label="Edge Add-ons" value={formatPrice(pricing.edgeFinishCostPerUnit)} />
                     <Row label="Rush Surcharge" value={formatPrice(pricing.rushSurchargePerUnit)} />
                   </>
                 ) : (
