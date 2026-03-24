@@ -4,12 +4,11 @@ import Link from "next/link";
 import { useState } from "react";
 import { useCart } from "@/context/CartContext";
 
-const navLinks = [
-  { href: "/#banner", label: "Banner", icon: "▦" },
-  { href: "/#rigid", label: "Rigid", icon: "▣" },
-  { href: "/#adhesive", label: "Adhesive", icon: "◫" },
-  { href: "/#magnet", label: "Magnet", icon: "∪" },
-  { href: "/quote", label: "Custom Quote" },
+const categoryNavLinks = [
+  { hash: "banner", label: "Banner", icon: "▦" },
+  { hash: "rigid", label: "Rigid", icon: "▣" },
+  { hash: "adhesive", label: "Adhesive", icon: "◫" },
+  { hash: "magnet", label: "Magnet", icon: "∪" },
 ];
 
 export default function Header() {
@@ -49,20 +48,24 @@ export default function Header() {
 
         {/* Desktop nav */}
         <nav className="hidden items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#4a4a4a] lg:flex">
-          {navLinks.map((link) => (
-            <Link
-              key={`${link.href}-${link.label}`}
-              href={link.href}
+          {categoryNavLinks.map((link) => (
+            <a
+              key={`${link.hash}-${link.label}`}
+              href={`/#${link.hash}`}
               className="group inline-flex min-w-[94px] flex-col items-center rounded-sm border border-[#d2d2d2] bg-white px-3 py-2.5 transition hover:border-[#d8b72d] hover:bg-[#fff8d7]"
             >
-              {"icon" in link && (
-                <span className="text-base leading-none text-[#808080] transition group-hover:text-[#3b3b3b]">
-                  {link.icon}
-                </span>
-              )}
+              <span className="text-base leading-none text-[#808080] transition group-hover:text-[#3b3b3b]">
+                {link.icon}
+              </span>
               {link.label}
-            </Link>
+            </a>
           ))}
+          <Link
+            href="/quote"
+            className="group inline-flex min-w-[94px] flex-col items-center rounded-sm border border-[#d2d2d2] bg-white px-3 py-2.5 transition hover:border-[#d8b72d] hover:bg-[#fff8d7]"
+          >
+            Custom Quote
+          </Link>
         </nav>
 
         {/* Desktop actions */}
@@ -108,16 +111,23 @@ export default function Header() {
       {menuOpen && (
         <div className="border-t border-[#d6d6d6] bg-[#f5f5f5] px-4 pb-5 md:hidden">
           <nav className="flex flex-col gap-3 pt-4 text-sm text-[#4c4c4c]">
-            {navLinks.map((link) => (
-              <Link
-                key={`${link.href}-${link.label}`}
-                href={link.href}
+            {categoryNavLinks.map((link) => (
+              <a
+                key={`${link.hash}-${link.label}`}
+                href={`/#${link.hash}`}
                 className="rounded-sm border border-[#d3d3d3] bg-white px-3 py-2 hover:bg-[#fff8d7]"
                 onClick={() => setMenuOpen(false)}
               >
                 {link.label}
-              </Link>
+              </a>
             ))}
+            <Link
+              href="/quote"
+              className="rounded-sm border border-[#d3d3d3] bg-white px-3 py-2 hover:bg-[#fff8d7]"
+              onClick={() => setMenuOpen(false)}
+            >
+              Custom Quote
+            </Link>
             <Link href="/cart" className="flex items-center gap-2 rounded-sm border border-[#d3d3d3] bg-white px-3 py-2 hover:bg-[#f4f4f4]" onClick={() => setMenuOpen(false)}>
               Cart
               {itemCount > 0 && (
