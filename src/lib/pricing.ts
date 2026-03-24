@@ -88,6 +88,18 @@ export interface CanvasPricingResult extends SimpleSqFtPricingResult {
   minimumApplied: boolean;
 }
 
+export interface MeshPricingResult {
+  sqFt: number;
+  ratePerSqFt: number;
+  basePricePerUnit: number;
+  grommetCostPerUnit: number;
+  polePocketCostPerUnit: number;
+  edgeFinishCostPerUnit: number;
+  rushSurchargePerUnit: number;
+  unitPrice: number;
+  totalPrice: number;
+}
+
 export function getHdpeSqFtRate(quantity: number): number {
   const safeQuantity = Number.isFinite(quantity) ? Math.max(1, quantity) : 1;
   if (safeQuantity < 10) return 4.5;
@@ -133,6 +145,78 @@ export function calculateCanvasPrice(
     unitPrice: Math.round(unitPrice * 100) / 100,
     totalPrice: Math.round(totalPrice * 100) / 100,
     minimumApplied: totalPrice > baseTotalPrice,
+  };
+}
+
+/**
+ * Returns per-sqft rate for mesh banners based on quantity tiers.
+ * Tiers (placeholder — update with your pricing strategy):
+ *   1–999: $2.44 | 1000–2499: $1.49 | 2500–4999: $1.09 | 5000+: $0.99
+ */
+export function getMeshSqFtRate(quantity: number): number {
+  const safeQuantity = Number.isFinite(quantity) ? Math.max(1, quantity) : 1;
+  if (safeQuantity <= 999) return 2.44;
+  if (safeQuantity <= 2499) return 1.49;
+  if (safeQuantity <= 4999) return 1.09;
+  return 0.99;
+}
+
+/**
+ * Calculates the total price for a mesh banner order.
+ * Add-ons: grommets = free, welding = free,
+ *          rope/webbing = $1.00/linear ft (perimeter),
+ *          polePockets = $1.00/linear ft (2×width) + $10 setup,
+ *          rush = 100% surcharge.
+ */
+export function calculateMeshPrice(
+  width: number,
+  height: number,
+  unit: "inches" | "feet",
+  quantity: number,
+  grommets: boolean,
+  edgeFinish: EdgeFinish,
+  polePockets: boolean,
+  rush: boolean
+): MeshPricingResult {
+  const safeWidth    = Number.isFinite(width)    ? Math.max(0, width)    : 0;
+  const safeHeight   = Number.isFinite(height)   ? Math.max(0, height)   : 0;
+  const safeQuantity = Number.isFinite(quantity) ? Math.max(1, quantity) : 1;
+
+  const widthFt    = unit === "feet" ? safeWidth  : safeWidth  / 12;
+  const heightFt   = unit === "feet" ? safeHeight : safeHeight / 12;
+  const sqFt       = widthFt * heightFt;
+  const perimeterFt = 2 * (widthFt + heightFt);
+
+  const ratePerSqFt      = getMeshSqFtRate(safeQuantity);
+  const basePricePerUnit = sqFt * ratePerSqFt;
+
+  // Grommets: always free for mesh
+  const grommetCostPerUnit = grommets ? 0 : 0;
+
+  // Pole pockets: $1.00/linear ft (top + bottom = 2×width) plus $10.00 setup
+  const polePocketCostPerUnit = polePockets ? (widthFt * 2 * 1.00) + 10.00 : 0;
+
+  // Edge finish: welding = free, rope/webbing = $1.00/linear ft of perimeter
+  let edgeFinishCostPerUnit = 0;
+  if (edgeFinish === "rope" || edgeFinish === "webbing") {
+    edgeFinishCostPerUnit = perimeterFt * 1.00;
+  }
+
+  const priceBeforeRush      = basePricePerUnit + polePocketCostPerUnit + edgeFinishCostPerUnit;
+  const rushSurchargePerUnit = rush ? priceBeforeRush * 1.00 : 0; // 100% additional
+  const unitPrice            = priceBeforeRush + rushSurchargePerUnit;
+  const totalPrice           = unitPrice * safeQuantity;
+
+  return {
+    sqFt:                  Math.round(sqFt                  * 100) / 100,
+    ratePerSqFt,
+    basePricePerUnit:      Math.round(basePricePerUnit      * 100) / 100,
+    grommetCostPerUnit:    0,
+    polePocketCostPerUnit: Math.round(polePocketCostPerUnit * 100) / 100,
+    edgeFinishCostPerUnit: Math.round(edgeFinishCostPerUnit * 100) / 100,
+    rushSurchargePerUnit:  Math.round(rushSurchargePerUnit  * 100) / 100,
+    unitPrice:             Math.round(unitPrice             * 100) / 100,
+    totalPrice:            Math.round(totalPrice            * 100) / 100,
   };
 }
 

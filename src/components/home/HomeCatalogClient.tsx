@@ -193,7 +193,7 @@ export default function HomeCatalogClient({ sections, manualBannerProducts }: Ho
 
       <section className="mx-auto max-w-[1500px] px-4 py-8 md:px-8 md:py-10">
         {activeSection.key === "banner" && (
-          <div className="mb-6 grid gap-4 md:grid-cols-3">
+          <div className="mb-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {manualBannerProducts.map((manualProduct) => (
               <Link
                 key={manualProduct.id}

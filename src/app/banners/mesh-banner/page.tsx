@@ -8,5 +8,13 @@ export const metadata: Metadata = {
 };
 
 export default function MeshBannerPage() {
-  return <VinylBannerBuilder initialMaterial="Mesh Banner" productName="Mesh Banner" />;
+  return (
+    <VinylBannerBuilder
+      initialMaterial="Mesh Banner"
+      productName="Mesh Banner"
+      productDescription="Durable 8oz Coated Polyester Mesh Banner with 37% Air-Flow Perforation"
+      pricingMode="mesh"
+      productId={27}
+    />
+  );
 }

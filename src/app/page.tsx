@@ -36,6 +36,13 @@ const MANUAL_BANNER_PRODUCTS: ManualBannerProductCard[] = [
     description: "Canvas builder with quantity-tier pricing and a $20 minimum order.",
     label: "Builder",
   },
+  {
+    id: "manual-mesh",
+    name: "Mesh Banner",
+    href: "/banners/mesh-banner",
+    description: "Durable 8oz coated polyester mesh with 37% air-flow perforation.",
+    label: "Builder",
+  },
 ];
 
 function stripHtml(input: string): string {

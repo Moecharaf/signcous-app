@@ -5,9 +5,11 @@ import Button from "@/components/ui/Button";
 import {
   calculateBannerPrice,
   calculateCanvasPrice,
+  calculateMeshPrice,
   type EdgeFinish,
   formatPrice,
   getCanvasSqFtRate,
+  getMeshSqFtRate,
   type GrommetMode,
   type Material,
 } from "@/lib/pricing";
@@ -64,8 +66,9 @@ const DEFAULTS: FormState = {
 interface VinylBannerBuilderProps {
   initialMaterial?: Material;
   productName?: string;
+  productDescription?: string;
   productId?: number;
-  pricingMode?: "banner" | "canvas";
+  pricingMode?: "banner" | "canvas" | "mesh";
 }
 
 const MIN_IN = 6;
@@ -88,6 +91,7 @@ function fromInches(value: number, unit: Unit): string {
 export default function VinylBannerBuilder({
   initialMaterial = "13oz Vinyl",
   productName = "Vinyl Banner",
+  productDescription,
   productId = 12,
   pricingMode = "banner",
 }: VinylBannerBuilderProps) {
@@ -112,16 +116,38 @@ export default function VinylBannerBuilder({
   const widthIn = toInches(widthNum, form.unit);
   const heightIn = toInches(heightNum, form.unit);
   const isCanvasProduct = pricingMode === "canvas";
-  const isMeshMaterial = form.material === "Mesh Banner";
+  const isMeshProduct   = pricingMode === "mesh";
+  const isMeshMaterial  = isMeshProduct || form.material === "Mesh Banner";
 
   const pxPerIn = BASE_PX_PER_IN * zoom;
   const artWidth = clamp(widthIn * pxPerIn, 90, 760);
   const artHeight = clamp(heightIn * pxPerIn, 70, 460);
 
   const canvasRate = useMemo(() => getCanvasSqFtRate(qtyNum), [qtyNum]);
+  const meshRate   = useMemo(() => getMeshSqFtRate(qtyNum),   [qtyNum]);
 
   const pricing = useMemo(
     () => {
+      if (isMeshProduct) {
+        const m = calculateMeshPrice(
+          widthNum, heightNum, form.unit, qtyNum,
+          form.grommets, form.edgeFinish, form.polePockets, form.rush
+        );
+        return {
+          sqFt:                 m.sqFt,
+          basePricePerUnit:     m.basePricePerUnit,
+          grommetCostPerUnit:   m.grommetCostPerUnit,
+          edgeFinishCostPerUnit: m.edgeFinishCostPerUnit,
+          polePocketCostPerUnit: m.polePocketCostPerUnit,
+          windSlitsCostPerUnit: 0,
+          hemmingCostPerUnit:   0,
+          addOnCostPerUnit:     m.polePocketCostPerUnit + m.edgeFinishCostPerUnit,
+          rushSurchargePerUnit: m.rushSurchargePerUnit,
+          unitPrice:            m.unitPrice,
+          totalPrice:           m.totalPrice,
+        };
+      }
+
       if (isCanvasProduct) {
         const canvasPricing = calculateCanvasPrice(widthNum, heightNum, form.unit, qtyNum);
 
@@ -156,6 +182,7 @@ export default function VinylBannerBuilder({
       });
     },
     [
+      isMeshProduct,
       isCanvasProduct,
       widthNum,
       heightNum,
@@ -214,13 +241,13 @@ export default function VinylBannerBuilder({
       height: heightNum,
       unit: form.unit,
       quantity: qtyNum,
-      material: isCanvasProduct ? "Canvas" : form.material,
-      doubleSided: isCanvasProduct ? false : form.doubleSided,
+      material: isCanvasProduct ? "Canvas" : isMeshProduct ? "Mesh Banner" : form.material,
+      doubleSided: (isCanvasProduct || isMeshProduct) ? false : form.doubleSided,
       grommets: isCanvasProduct ? false : form.grommets,
       edgeFinish: isCanvasProduct ? "none" : form.edgeFinish,
       polePockets: isCanvasProduct ? false : form.polePockets,
-      windSlits: isCanvasProduct ? false : form.windSlits,
-      hemming: isCanvasProduct ? false : form.hemming,
+      windSlits: (isCanvasProduct || isMeshProduct) ? false : form.windSlits,
+      hemming: (isCanvasProduct || isMeshProduct) ? false : form.hemming,
       rush: isCanvasProduct ? false : form.rush,
       uploadedFileUrl,
       uploadedFileName,
@@ -384,6 +411,9 @@ export default function VinylBannerBuilder({
                 Signcous Studio
               </div>
               <h2 className="mt-1 text-3xl font-semibold tracking-tight text-zinc-900">{productName} Configurator</h2>
+              {productDescription && (
+                <p className="mt-0.5 text-xs font-medium text-zinc-500">{productDescription}</p>
+              )}
               <p className="mt-1 text-sm text-zinc-600">
                 Drag to reposition artwork. Use the corner handle to resize and auto-update dimensions.
               </p>
@@ -504,6 +534,10 @@ export default function VinylBannerBuilder({
                     <div className="flex h-9 items-center rounded border border-zinc-300 bg-zinc-100 px-2 text-sm font-medium text-zinc-700">
                       Canvas
                     </div>
+                  ) : isMeshProduct ? (
+                    <div className="flex h-9 items-center rounded border border-zinc-300 bg-zinc-100 px-2 text-sm font-medium text-zinc-700">
+                      Mesh Banner
+                    </div>
                   ) : (
                     <select
                       value={form.material}
@@ -594,6 +628,20 @@ export default function VinylBannerBuilder({
                         </ControlBox>
                       </>
                     )}
+
+                    {isMeshProduct && (
+                      <ControlBox title="Rush">
+                        <TogglePair
+                          leftLabel="No"
+                          rightLabel="Yes"
+                          isRightActive={form.rush}
+                          onToggle={() => set("rush", !form.rush)}
+                        />
+                        {form.rush && (
+                          <div className="mt-1 text-[10px] text-zinc-500">+100% surcharge</div>
+                        )}
+                      </ControlBox>
+                    )}
                   </>
                 )}
 
@@ -627,6 +675,14 @@ export default function VinylBannerBuilder({
                   <>
                     <Row label="Canvas Rate" value={`${formatPrice(canvasRate)} / sqft`} />
                     <Row label="Formula" value="max((W x H / unit) x rate x qty, $20)" />
+                  </>
+                ) : isMeshProduct ? (
+                  <>
+                    <Row label="Mesh Rate" value={`${formatPrice(meshRate)} / sqft`} />
+                    <Row label="Grommets" value="Free" />
+                    <Row label="Pole Pockets" value={formatPrice(pricing.polePocketCostPerUnit)} />
+                    <Row label="Edge Finish" value={formatPrice(pricing.edgeFinishCostPerUnit)} />
+                    <Row label="Rush Surcharge" value={formatPrice(pricing.rushSurchargePerUnit)} />
                   </>
                 ) : (
                   <>
