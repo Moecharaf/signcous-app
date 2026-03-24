@@ -12,7 +12,7 @@ export default function CanvasPage() {
     <VinylBannerBuilder
       productName="Canvas"
       pricingMode="canvas"
-      productId={19}
+      productId={60}
     />
   );
 }
