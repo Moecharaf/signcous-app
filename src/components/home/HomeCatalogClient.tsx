@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 export interface ManualBannerProductCard {
   id: string;
@@ -65,9 +65,32 @@ const CATEGORY_THEME: Record<HomeCatalogSection["key"], { hero: string; chip: st
   },
 };
 
+const CATEGORY_KEYS: HomeCatalogSection["key"][] = ["banner", "rigid", "adhesive", "magnet"];
+
+function subscribeToHashChange(callback: () => void): () => void {
+  window.addEventListener("hashchange", callback);
+  return () => window.removeEventListener("hashchange", callback);
+}
+
+function getHashSnapshot(): string {
+  return window.location.hash.toLowerCase();
+}
+
+function getServerSnapshot(): string {
+  return "";
+}
+
+function getCategoryFromHash(hash: string): HomeCatalogSection["key"] | null {
+  const clean = hash.replace("#", "").trim().toLowerCase();
+  return CATEGORY_KEYS.includes(clean as HomeCatalogSection["key"])
+    ? (clean as HomeCatalogSection["key"])
+    : null;
+}
+
 export default function HomeCatalogClient({ sections, manualBannerProducts }: HomeCatalogClientProps) {
-  const initialKey = sections[0]?.key ?? "banner";
-  const [activeKey, setActiveKey] = useState<HomeCatalogSection["key"]>(initialKey);
+  const currentHash = useSyncExternalStore(subscribeToHashChange, getHashSnapshot, getServerSnapshot);
+  const activeKeyFromHash = getCategoryFromHash(currentHash);
+  const activeKey = activeKeyFromHash ?? sections[0]?.key ?? "banner";
   const [heroFrame, setHeroFrame] = useState(0);
 
   const activeSection = useMemo(() => {
@@ -100,33 +123,6 @@ export default function HomeCatalogClient({ sections, manualBannerProducts }: Ho
 
   return (
     <div className="min-h-screen bg-[#e6e6e6] text-[#2f2f2f]">
-      <section className="border-b border-[#d5d5d5] bg-[#f7f7f7]">
-        <div className="mx-auto flex max-w-[1500px] flex-wrap items-center gap-2 px-4 py-4 md:px-8">
-          {sections.map((section) => {
-            const active = section.key === activeKey;
-
-            return (
-              <button
-                key={section.key}
-                type="button"
-                onClick={() => {
-                  setActiveKey(section.key);
-                  setHeroFrame(0);
-                }}
-                className={`inline-flex min-w-[130px] items-center justify-center gap-2 border px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] transition ${
-                  active
-                    ? "border-[#d6b22a] bg-[#ffd100] text-[#232323]"
-                    : "border-[#d0d0d0] bg-white text-[#3d3d3d] hover:border-[#d7b72d] hover:bg-[#fff7d4]"
-                }`}
-              >
-                <span className="text-sm leading-none">{CATEGORY_ICON[section.key]}</span>
-                <span>{section.name}</span>
-              </button>
-            );
-          })}
-        </div>
-      </section>
-
       <section className="border-b border-[#d5d5d5] bg-[#eeeeee]">
         <div className="mx-auto max-w-[1500px] px-4 py-7 md:px-8 md:py-8">
           <div
@@ -141,6 +137,7 @@ export default function HomeCatalogClient({ sections, manualBannerProducts }: Ho
             )}
             <div className="relative max-w-3xl">
               <div className="text-xs font-semibold uppercase tracking-[0.2em] text-black/70">
+                <span className="mr-2 text-sm leading-none">{CATEGORY_ICON[activeSection.key]}</span>
                 Signcous {activeSection.supplierFamily} Collection
               </div>
               <h1 className="mt-2 text-3xl font-black uppercase tracking-[0.04em] text-[#242424] md:text-4xl">
