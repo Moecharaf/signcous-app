@@ -29,6 +29,13 @@ const MANUAL_BANNER_PRODUCTS: ManualBannerProductCard[] = [
     description: "Water and tear resistant HDPE sign builder with size-based pricing.",
     label: "Builder",
   },
+  {
+    id: "manual-canvas",
+    name: "Canvas",
+    href: "/banners/canvas",
+    description: "Canvas builder with quantity-tier pricing and a $20 minimum order.",
+    label: "Builder",
+  },
 ];
 
 function stripHtml(input: string): string {

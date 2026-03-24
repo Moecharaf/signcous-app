@@ -82,6 +82,12 @@ export interface SimpleSqFtPricingResult {
   totalPrice: number;
 }
 
+export interface CanvasPricingResult extends SimpleSqFtPricingResult {
+  ratePerSqFt: number;
+  baseTotalPrice: number;
+  minimumApplied: boolean;
+}
+
 export function getHdpeSqFtRate(quantity: number): number {
   const safeQuantity = Number.isFinite(quantity) ? Math.max(1, quantity) : 1;
   if (safeQuantity < 10) return 4.5;
@@ -89,6 +95,45 @@ export function getHdpeSqFtRate(quantity: number): number {
   if (safeQuantity < 100) return 3.6;
   if (safeQuantity < 500) return 3.2;
   return 2.9;
+}
+
+export function getCanvasSqFtRate(quantity: number): number {
+  const safeQuantity = Number.isFinite(quantity) ? Math.max(1, quantity) : 1;
+
+  if (safeQuantity <= 5) return 6.99;
+  if (safeQuantity <= 10) return 6.49;
+  if (safeQuantity <= 25) return 5.99;
+  if (safeQuantity <= 50) return 5.49;
+  return 4.99;
+}
+
+export function calculateCanvasPrice(
+  width: number,
+  height: number,
+  unit: "inches" | "feet",
+  quantity: number = 1
+): CanvasPricingResult {
+  const safeWidth = Number.isFinite(width) ? Math.max(0, width) : 0;
+  const safeHeight = Number.isFinite(height) ? Math.max(0, height) : 0;
+  const safeQuantity = Number.isFinite(quantity) ? Math.max(1, quantity) : 1;
+  const ratePerSqFt = getCanvasSqFtRate(safeQuantity);
+
+  const sqFt = unit === "feet"
+    ? safeWidth * safeHeight
+    : (safeWidth * safeHeight) / 144;
+
+  const baseTotalPrice = sqFt * ratePerSqFt * safeQuantity;
+  const totalPrice = Math.max(baseTotalPrice, 20);
+  const unitPrice = totalPrice / safeQuantity;
+
+  return {
+    sqFt: Math.round(sqFt * 100) / 100,
+    ratePerSqFt: Math.round(ratePerSqFt * 100) / 100,
+    baseTotalPrice: Math.round(baseTotalPrice * 100) / 100,
+    unitPrice: Math.round(unitPrice * 100) / 100,
+    totalPrice: Math.round(totalPrice * 100) / 100,
+    minimumApplied: totalPrice > baseTotalPrice,
+  };
 }
 
 /**

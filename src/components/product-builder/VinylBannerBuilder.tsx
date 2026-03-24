@@ -4,8 +4,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Button from "@/components/ui/Button";
 import {
   calculateBannerPrice,
+  calculateCanvasPrice,
   type EdgeFinish,
   formatPrice,
+  getCanvasSqFtRate,
   type GrommetMode,
   type Material,
 } from "@/lib/pricing";
@@ -62,6 +64,8 @@ const DEFAULTS: FormState = {
 interface VinylBannerBuilderProps {
   initialMaterial?: Material;
   productName?: string;
+  productId?: number;
+  pricingMode?: "banner" | "canvas";
 }
 
 const MIN_IN = 6;
@@ -84,6 +88,8 @@ function fromInches(value: number, unit: Unit): string {
 export default function VinylBannerBuilder({
   initialMaterial = "13oz Vinyl",
   productName = "Vinyl Banner",
+  productId = 12,
+  pricingMode = "banner",
 }: VinylBannerBuilderProps) {
   const cart = useCart();
   const [form, setForm] = useState<FormState>({ ...DEFAULTS, material: initialMaterial });
@@ -105,15 +111,36 @@ export default function VinylBannerBuilder({
 
   const widthIn = toInches(widthNum, form.unit);
   const heightIn = toInches(heightNum, form.unit);
+  const isCanvasProduct = pricingMode === "canvas";
   const isMeshMaterial = form.material === "Mesh Banner";
 
   const pxPerIn = BASE_PX_PER_IN * zoom;
   const artWidth = clamp(widthIn * pxPerIn, 90, 760);
   const artHeight = clamp(heightIn * pxPerIn, 70, 460);
 
+  const canvasRate = useMemo(() => getCanvasSqFtRate(qtyNum), [qtyNum]);
+
   const pricing = useMemo(
-    () =>
-      calculateBannerPrice({
+    () => {
+      if (isCanvasProduct) {
+        const canvasPricing = calculateCanvasPrice(widthNum, heightNum, form.unit, qtyNum);
+
+        return {
+          sqFt: canvasPricing.sqFt,
+          basePricePerUnit: canvasPricing.baseTotalPrice / qtyNum,
+          grommetCostPerUnit: 0,
+          edgeFinishCostPerUnit: 0,
+          polePocketCostPerUnit: 0,
+          windSlitsCostPerUnit: 0,
+          hemmingCostPerUnit: 0,
+          addOnCostPerUnit: 0,
+          rushSurchargePerUnit: 0,
+          unitPrice: canvasPricing.unitPrice,
+          totalPrice: canvasPricing.totalPrice,
+        };
+      }
+
+      return calculateBannerPrice({
         widthIn,
         heightIn,
         quantity: qtyNum,
@@ -126,8 +153,13 @@ export default function VinylBannerBuilder({
         windSlits: form.windSlits,
         hemming: form.hemming,
         rush: form.rush,
-      }),
+      });
+    },
     [
+      isCanvasProduct,
+      widthNum,
+      heightNum,
+      form.unit,
       widthIn,
       heightIn,
       qtyNum,
@@ -176,20 +208,20 @@ export default function VinylBannerBuilder({
     }
 
     cart.addItem({
-      productId: 12,
+      productId,
       productName,
       width: widthNum,
       height: heightNum,
       unit: form.unit,
       quantity: qtyNum,
-      material: form.material,
-      doubleSided: form.doubleSided,
-      grommets: form.grommets,
-      edgeFinish: form.edgeFinish,
-      polePockets: form.polePockets,
-      windSlits: form.windSlits,
-      hemming: form.hemming,
-      rush: form.rush,
+      material: isCanvasProduct ? "Canvas" : form.material,
+      doubleSided: isCanvasProduct ? false : form.doubleSided,
+      grommets: isCanvasProduct ? false : form.grommets,
+      edgeFinish: isCanvasProduct ? "none" : form.edgeFinish,
+      polePockets: isCanvasProduct ? false : form.polePockets,
+      windSlits: isCanvasProduct ? false : form.windSlits,
+      hemming: isCanvasProduct ? false : form.hemming,
+      rush: isCanvasProduct ? false : form.rush,
       uploadedFileUrl,
       uploadedFileName,
       unitPrice: pricing.unitPrice,
@@ -468,90 +500,100 @@ export default function VinylBannerBuilder({
                 </ControlBox>
 
                 <ControlBox title="Material">
-                  <select
-                    value={form.material}
-                    onChange={(e) => set("material", e.target.value as Material)}
-                    className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"
-                  >
-                    {materialOptions.map((material) => (
-                      <option key={material} value={material}>{material}</option>
-                    ))}
-                  </select>
-                </ControlBox>
-
-                <ControlBox title="Print">
-                  <TogglePair
-                    leftLabel="Single"
-                    rightLabel="Double"
-                    isRightActive={form.doubleSided}
-                    onToggle={() => {
-                      if (isMeshMaterial) return;
-                      set("doubleSided", !form.doubleSided);
-                    }}
-                  />
-                  {isMeshMaterial && <div className="mt-1 text-[10px] text-zinc-500">Mesh uses single-sided pricing.</div>}
-                </ControlBox>
-
-                <ControlBox title="Grommets">
-                  <TogglePair
-                    leftLabel="No"
-                    rightLabel="Yes"
-                    isRightActive={form.grommets}
-                    onToggle={() => set("grommets", !form.grommets)}
-                  />
-                  {form.grommets && (
+                  {isCanvasProduct ? (
+                    <div className="flex h-9 items-center rounded border border-zinc-300 bg-zinc-100 px-2 text-sm font-medium text-zinc-700">
+                      Canvas
+                    </div>
+                  ) : (
                     <select
-                      value={form.grommetMode}
-                      onChange={(e) => set("grommetMode", e.target.value as GrommetMode)}
-                      className="mt-1 h-8 w-full rounded border border-zinc-300 bg-white px-2 text-xs"
+                      value={form.material}
+                      onChange={(e) => set("material", e.target.value as Material)}
+                      className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"
                     >
-                      <option value="every-2ft">Every 2 ft</option>
-                      <option value="per-corner">Per corner</option>
+                      {materialOptions.map((material) => (
+                        <option key={material} value={material}>{material}</option>
+                      ))}
                     </select>
                   )}
                 </ControlBox>
 
-                <ControlBox title="Pole Pockets">
-                  <TogglePair
-                    leftLabel="No"
-                    rightLabel="Yes"
-                    isRightActive={form.polePockets}
-                    onToggle={() => set("polePockets", !form.polePockets)}
-                  />
-                </ControlBox>
-
-                {isMeshMaterial ? (
-                  <ControlBox title="Edge Finish">
-                    <select
-                      value={form.edgeFinish}
-                      onChange={(e) => set("edgeFinish", e.target.value as EdgeFinish)}
-                      className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"
-                    >
-                      <option value="none">None</option>
-                      <option value="welding">Welding</option>
-                      <option value="webbing">Webbing</option>
-                      <option value="rope">Rope</option>
-                    </select>
-                  </ControlBox>
-                ) : (
+                {!isCanvasProduct && (
                   <>
-                    <ControlBox title="Wind Slits">
+                    <ControlBox title="Print">
+                      <TogglePair
+                        leftLabel="Single"
+                        rightLabel="Double"
+                        isRightActive={form.doubleSided}
+                        onToggle={() => {
+                          if (isMeshMaterial) return;
+                          set("doubleSided", !form.doubleSided);
+                        }}
+                      />
+                      {isMeshMaterial && <div className="mt-1 text-[10px] text-zinc-500">Mesh uses single-sided pricing.</div>}
+                    </ControlBox>
+
+                    <ControlBox title="Grommets">
                       <TogglePair
                         leftLabel="No"
                         rightLabel="Yes"
-                        isRightActive={form.windSlits}
-                        onToggle={() => set("windSlits", !form.windSlits)}
+                        isRightActive={form.grommets}
+                        onToggle={() => set("grommets", !form.grommets)}
+                      />
+                      {form.grommets && (
+                        <select
+                          value={form.grommetMode}
+                          onChange={(e) => set("grommetMode", e.target.value as GrommetMode)}
+                          className="mt-1 h-8 w-full rounded border border-zinc-300 bg-white px-2 text-xs"
+                        >
+                          <option value="every-2ft">Every 2 ft</option>
+                          <option value="per-corner">Per corner</option>
+                        </select>
+                      )}
+                    </ControlBox>
+
+                    <ControlBox title="Pole Pockets">
+                      <TogglePair
+                        leftLabel="No"
+                        rightLabel="Yes"
+                        isRightActive={form.polePockets}
+                        onToggle={() => set("polePockets", !form.polePockets)}
                       />
                     </ControlBox>
 
-                    <ControlBox title="Hemming">
-                      <TogglePair
-                        leftLabel="No"
-                        rightLabel="Yes"
-                        isRightActive={form.hemming}
-                        onToggle={() => set("hemming", !form.hemming)}
-                      />
-                    </ControlBox>
+                    {isMeshMaterial ? (
+                      <ControlBox title="Edge Finish">
+                        <select
+                          value={form.edgeFinish}
+                          onChange={(e) => set("edgeFinish", e.target.value as EdgeFinish)}
+                          className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"
+                        >
+                          <option value="none">None</option>
+                          <option value="welding">Welding</option>
+                          <option value="webbing">Webbing</option>
+                          <option value="rope">Rope</option>
+                        </select>
+                      </ControlBox>
+                    ) : (
+                      <>
+                        <ControlBox title="Wind Slits">
+                          <TogglePair
+                            leftLabel="No"
+                            rightLabel="Yes"
+                            isRightActive={form.windSlits}
+                            onToggle={() => set("windSlits", !form.windSlits)}
+                          />
+                        </ControlBox>
+
+                        <ControlBox title="Hemming">
+                          <TogglePair
+                            leftLabel="No"
+                            rightLabel="Yes"
+                            isRightActive={form.hemming}
+                            onToggle={() => set("hemming", !form.hemming)}
+                          />
+                        </ControlBox>
+                      </>
+                    )}
                   </>
                 )}
 
@@ -581,13 +623,22 @@ export default function VinylBannerBuilder({
               <div className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">Pricing Breakdown</div>
               <div className="mt-3 space-y-2 text-sm">
                 <Row label="Base (per unit)" value={formatPrice(pricing.basePricePerUnit)} />
-                <Row label="Grommets" value={formatPrice(pricing.grommetCostPerUnit)} />
-                <Row label="Edge Finish" value={formatPrice(pricing.edgeFinishCostPerUnit)} />
-                <Row label="Pole Pockets" value={formatPrice(pricing.polePocketCostPerUnit)} />
-                <Row label="Wind Slits" value={formatPrice(pricing.windSlitsCostPerUnit)} />
-                <Row label="Hemming" value={formatPrice(pricing.hemmingCostPerUnit)} />
-                <Row label="Add-ons Total" value={formatPrice(pricing.addOnCostPerUnit)} />
-                <Row label="Rush" value={formatPrice(pricing.rushSurchargePerUnit)} />
+                {isCanvasProduct ? (
+                  <>
+                    <Row label="Canvas Rate" value={`${formatPrice(canvasRate)} / sqft`} />
+                    <Row label="Formula" value="max((W x H / unit) x rate x qty, $20)" />
+                  </>
+                ) : (
+                  <>
+                    <Row label="Grommets" value={formatPrice(pricing.grommetCostPerUnit)} />
+                    <Row label="Edge Finish" value={formatPrice(pricing.edgeFinishCostPerUnit)} />
+                    <Row label="Pole Pockets" value={formatPrice(pricing.polePocketCostPerUnit)} />
+                    <Row label="Wind Slits" value={formatPrice(pricing.windSlitsCostPerUnit)} />
+                    <Row label="Hemming" value={formatPrice(pricing.hemmingCostPerUnit)} />
+                    <Row label="Add-ons Total" value={formatPrice(pricing.addOnCostPerUnit)} />
+                    <Row label="Rush" value={formatPrice(pricing.rushSurchargePerUnit)} />
+                  </>
+                )}
                 <div className="my-2 border-t border-zinc-200" />
                 <Row label="Unit Price" value={formatPrice(pricing.unitPrice)} strong />
                 <Row label={`Order Total (${qtyNum})`} value={formatPrice(pricing.totalPrice)} strong className="text-orange-600" />
