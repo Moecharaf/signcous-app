@@ -186,8 +186,8 @@ export default function VinylBannerBuilder({
   const posterRate = useMemo(() => getPosterSqFtRate(posterBillableSqFt), [posterBillableSqFt]);
   const meshRate   = useMemo(() => getMeshSqFtRate(meshBillableSqFt), [meshBillableSqFt]);
   const meshGrommetPoints = useMemo(
-    () => getGrommetPoints(widthIn, heightIn, !isCanvasProduct && !isHdpeProduct && !isPosterProduct && form.grommets, form.grommetMode),
-    [widthIn, heightIn, isCanvasProduct, isHdpeProduct, isPosterProduct, form.grommets, form.grommetMode]
+    () => getGrommetPoints(widthIn, heightIn, !isCanvasProduct && !isHdpeProduct && !isPosterProduct && !isNoCurlProduct && form.grommets, form.grommetMode),
+    [widthIn, heightIn, isCanvasProduct, isHdpeProduct, isPosterProduct, isNoCurlProduct, form.grommets, form.grommetMode]
   );
 
   const pricing = useMemo(
