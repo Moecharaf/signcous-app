@@ -52,7 +52,7 @@ const MANUAL_BANNER_PRODUCTS: ManualBannerProductCard[] = [
     href: "/banners/mesh-banner",
     description: "Durable 8oz coated polyester mesh with 37% air-flow perforation.",
     label: "Builder",
-    image: null,
+    image: "/card-images/Mesh Banner.png",
     imageAlt: "Mesh Banner",
   },
   {
@@ -213,8 +213,8 @@ export default async function HomePage() {
 
     return {
       ...product,
-      image: visual?.image ?? product.image,
-      imageAlt: visual?.imageAlt ?? product.imageAlt,
+      image: product.image ?? visual?.image ?? null,
+      imageAlt: product.imageAlt || visual?.imageAlt || product.name,
     };
   });
 
