@@ -39,6 +39,39 @@ interface HomeCatalogClientProps {
   manualBannerProducts: ManualBannerProductCard[];
 }
 
+const MANUAL_CARD_THEME: Record<string, { texture: string; ghost: string; eyebrow: string }> = {
+  "manual-hd-banner": {
+    texture: "from-[#ffffff]/95 via-[#f3f3f3]/78 to-[#ececec]/88",
+    ghost: "VINYL",
+    eyebrow: "Flexible Print",
+  },
+  "manual-hdpe": {
+    texture: "from-[#ffffff]/95 via-[#edf3f8]/78 to-[#e4edf5]/88",
+    ghost: "HDPE",
+    eyebrow: "Rigid Sheet",
+  },
+  "manual-canvas": {
+    texture: "from-[#ffffff]/95 via-[#f7f0e9]/78 to-[#efe5dc]/88",
+    ghost: "CANVAS",
+    eyebrow: "Fine Art",
+  },
+  "manual-mesh": {
+    texture: "from-[#ffffff]/95 via-[#f1f1f1]/78 to-[#e7e7e7]/88",
+    ghost: "MESH",
+    eyebrow: "Outdoor Airflow",
+  },
+  "manual-no-curl": {
+    texture: "from-[#ffffff]/95 via-[#f6f2eb]/78 to-[#ece3d8]/88",
+    ghost: "NO CURL",
+    eyebrow: "Premium Flat",
+  },
+  "manual-poster": {
+    texture: "from-[#ffffff]/95 via-[#f0f5fb]/78 to-[#e7eef7]/88",
+    ghost: "POSTER",
+    eyebrow: "Retail Prints",
+  },
+};
+
 const CATEGORY_ICON: Record<HomeCatalogSection["key"], string> = {
   banner: "▦",
   rigid: "▣",
@@ -195,20 +228,45 @@ export default function HomeCatalogClient({ sections, manualBannerProducts }: Ho
         {activeSection.key === "banner" && (
           <div className="mb-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {manualBannerProducts.map((manualProduct) => (
-              <Link
-                key={manualProduct.id}
-                href={manualProduct.href}
-                className="group rounded-lg border border-[#cfcfcf] bg-[#fff7cc] p-4 transition hover:border-[#f2c100]"
-              >
-                <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#8b7a00]">
-                  {manualProduct.label}
-                </div>
-                <h2 className="mt-1 text-xl font-bold uppercase text-[#1f1f1f]">{manualProduct.name}</h2>
-                <p className="mt-2 text-sm leading-6 text-[#454545]">{manualProduct.description}</p>
-                <span className="mt-3 inline-block text-xs font-semibold uppercase tracking-[0.14em] text-[#222] group-hover:text-black">
-                  Configure now
-                </span>
-              </Link>
+              (() => {
+                const visual = MANUAL_CARD_THEME[manualProduct.id] ?? {
+                  texture: "from-[#ffffff]/95 via-[#f3f3f3]/78 to-[#ececec]/88",
+                  ghost: "PRINT",
+                  eyebrow: "Builder",
+                };
+
+                return (
+                  <Link
+                    key={manualProduct.id}
+                    href={manualProduct.href}
+                    className="group relative isolate overflow-hidden rounded-lg border border-white/70 bg-white/62 p-4 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.38)] backdrop-blur-sm transition duration-300 hover:border-[#d8b72d] hover:bg-white/90"
+                  >
+                    <span
+                      className={`pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br ${visual.texture} opacity-62 transition duration-300 group-hover:opacity-96`}
+                      aria-hidden="true"
+                    />
+                    <span
+                      className="pointer-events-none absolute -right-2 top-1 text-[44px] font-black uppercase tracking-[0.08em] text-[#6e6e6e]/14 transition duration-300 group-hover:text-[#4f4f4f]/26"
+                      aria-hidden="true"
+                    >
+                      {visual.ghost}
+                    </span>
+
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7e7e7e]">
+                      {manualProduct.label} · {visual.eyebrow}
+                    </div>
+                    <h2 className="mt-1 text-3xl font-black uppercase leading-none tracking-[0.01em] text-[#1f1f1f]">
+                      {manualProduct.name}
+                    </h2>
+                    <p className="mt-2 max-h-0 overflow-hidden text-sm leading-6 text-[#4d4d4d] opacity-0 transition-all duration-300 group-hover:max-h-24 group-hover:opacity-100">
+                      {manualProduct.description}
+                    </p>
+                    <span className="mt-3 inline-block text-xs font-semibold uppercase tracking-[0.14em] text-[#2a2a2a] group-hover:text-black">
+                      Configure now
+                    </span>
+                  </Link>
+                );
+              })()
             ))}
           </div>
         )}
