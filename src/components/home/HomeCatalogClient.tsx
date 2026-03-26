@@ -230,7 +230,7 @@ export default function HomeCatalogClient({ sections, manualBannerProducts }: Ho
 
       <section className="w-full bg-[#f7f7f7] px-4 py-8 md:px-6 md:py-10">
         {activeSection.key === "banner" && (
-          <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mb-6 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
             {manualBannerProducts.map((manualProduct) => {
               const visual = MANUAL_CARD_THEME[manualProduct.id] ?? {
                 texture: "from-[#ffffff]/95 via-[#f3f3f3]/78 to-[#ececec]/88",
@@ -241,7 +241,7 @@ export default function HomeCatalogClient({ sections, manualBannerProducts }: Ho
               return (
                 <div
                   key={manualProduct.id}
-                  className="group relative aspect-[16/7] overflow-hidden rounded-lg border border-[#e6e6e6] bg-[#fdfdfd] shadow-[0_1px_0_rgba(0,0,0,0.04)]"
+                  className="group relative aspect-[16/7] overflow-hidden rounded-md border border-[#e8e8e8] bg-[#fdfdfd] shadow-[0_1px_0_rgba(0,0,0,0.04)]"
                 >
                   {/* Faded background image — default state only */}
                   {manualProduct.image && (
