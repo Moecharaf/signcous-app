@@ -7,11 +7,13 @@ import {
   calculateCanvasPrice,
   calculateHdpePrice,
   calculateMeshPrice,
+  calculatePosterPrice,
   type EdgeFinish,
   formatPrice,
   getCanvasSqFtRate,
   getHdpeSqFtRate,
   getMeshSqFtRate,
+  getPosterSqFtRate,
   type GrommetMode,
   type Material,
 } from "@/lib/pricing";
@@ -76,7 +78,7 @@ interface VinylBannerBuilderProps {
   productName?: string;
   productDescription?: string;
   productId?: number;
-  pricingMode?: "banner" | "canvas" | "mesh" | "hdpe";
+  pricingMode?: "banner" | "canvas" | "mesh" | "hdpe" | "poster";
 }
 
 const MIN_IN = 6;
@@ -162,7 +164,10 @@ export default function VinylBannerBuilder({
   const isCanvasProduct = pricingMode === "canvas";
   const isMeshProduct   = pricingMode === "mesh";
   const isHdpeProduct   = pricingMode === "hdpe";
+  const isPosterProduct = pricingMode === "poster";
+  const effectiveQtyNum = isPosterProduct ? 1 : qtyNum;
   const isMeshMaterial  = isMeshProduct || form.material === "Mesh Banner";
+  const posterBillableSqFt = Math.max(1, Math.ceil((widthIn / 12) * (heightIn / 12)));
   const meshBillableSqFt = Math.max(1, Math.ceil((widthIn / 12) * (heightIn / 12)));
   const perimeterFt = 2 * ((widthIn / 12) + (heightIn / 12));
   const meshWebbingCost = form.meshWebbing ? perimeterFt * 1.75 : 0;
@@ -174,17 +179,18 @@ export default function VinylBannerBuilder({
 
   const canvasRate = useMemo(() => getCanvasSqFtRate(qtyNum), [qtyNum]);
   const hdpeRate = useMemo(() => getHdpeSqFtRate(qtyNum), [qtyNum]);
+  const posterRate = useMemo(() => getPosterSqFtRate(posterBillableSqFt), [posterBillableSqFt]);
   const meshRate   = useMemo(() => getMeshSqFtRate(meshBillableSqFt), [meshBillableSqFt]);
   const meshGrommetPoints = useMemo(
-    () => getGrommetPoints(widthIn, heightIn, !isCanvasProduct && !isHdpeProduct && form.grommets, form.grommetMode),
-    [widthIn, heightIn, isCanvasProduct, isHdpeProduct, form.grommets, form.grommetMode]
+    () => getGrommetPoints(widthIn, heightIn, !isCanvasProduct && !isHdpeProduct && !isPosterProduct && form.grommets, form.grommetMode),
+    [widthIn, heightIn, isCanvasProduct, isHdpeProduct, isPosterProduct, form.grommets, form.grommetMode]
   );
 
   const pricing = useMemo(
     () => {
       if (isMeshProduct) {
         const m = calculateMeshPrice(
-          widthNum, heightNum, form.unit, qtyNum,
+          widthNum, heightNum, form.unit, effectiveQtyNum,
           form.grommets,
           form.meshWelding,
           form.meshWebbing,
@@ -208,11 +214,11 @@ export default function VinylBannerBuilder({
       }
 
       if (isCanvasProduct) {
-        const canvasPricing = calculateCanvasPrice(widthNum, heightNum, form.unit, qtyNum);
+        const canvasPricing = calculateCanvasPrice(widthNum, heightNum, form.unit, effectiveQtyNum);
 
         return {
           sqFt: canvasPricing.sqFt,
-          basePricePerUnit: canvasPricing.baseTotalPrice / qtyNum,
+          basePricePerUnit: canvasPricing.baseTotalPrice / effectiveQtyNum,
           grommetCostPerUnit: 0,
           edgeFinishCostPerUnit: 0,
           polePocketCostPerUnit: 0,
@@ -226,7 +232,7 @@ export default function VinylBannerBuilder({
       }
 
       if (isHdpeProduct) {
-        const hdpePricing = calculateHdpePrice(widthIn, heightIn, qtyNum);
+        const hdpePricing = calculateHdpePrice(widthIn, heightIn, effectiveQtyNum);
 
         return {
           sqFt: hdpePricing.sqFt,
@@ -243,10 +249,28 @@ export default function VinylBannerBuilder({
         };
       }
 
+      if (isPosterProduct) {
+        const posterPricing = calculatePosterPrice(widthNum, heightNum, form.unit, effectiveQtyNum, false);
+
+        return {
+          sqFt: posterPricing.sqFt,
+          basePricePerUnit: posterPricing.basePricePerUnit,
+          grommetCostPerUnit: 0,
+          edgeFinishCostPerUnit: 0,
+          polePocketCostPerUnit: 0,
+          windSlitsCostPerUnit: 0,
+          hemmingCostPerUnit: 0,
+          addOnCostPerUnit: 0,
+          rushSurchargePerUnit: posterPricing.rushSurchargePerUnit,
+          unitPrice: posterPricing.unitPrice,
+          totalPrice: posterPricing.totalPrice,
+        };
+      }
+
       return calculateBannerPrice({
         widthIn,
         heightIn,
-        quantity: qtyNum,
+        quantity: effectiveQtyNum,
         material: form.material,
         doubleSided: form.doubleSided,
         grommets: form.grommets,
@@ -262,6 +286,7 @@ export default function VinylBannerBuilder({
       isMeshProduct,
       isCanvasProduct,
       isHdpeProduct,
+      isPosterProduct,
       widthNum,
       heightNum,
       form.unit,
@@ -330,14 +355,15 @@ export default function VinylBannerBuilder({
       height: heightNum,
       unit: form.unit,
       quantity: qtyNum,
-      material: isHdpeProduct ? "HDPE" : isCanvasProduct ? "Canvas" : isMeshProduct ? "Mesh Banner" : form.material,
-      doubleSided: (isCanvasProduct || isMeshProduct || isHdpeProduct) ? false : form.doubleSided,
-      grommets: (isCanvasProduct || isHdpeProduct) ? false : form.grommets,
-      edgeFinish: (isCanvasProduct || isHdpeProduct) ? "none" : isMeshProduct ? meshEdgeFinish : form.edgeFinish,
-      polePockets: (isCanvasProduct || isHdpeProduct) ? false : form.polePockets,
-      windSlits: (isCanvasProduct || isMeshProduct || isHdpeProduct) ? false : form.windSlits,
-      hemming: (isCanvasProduct || isMeshProduct || isHdpeProduct) ? false : form.hemming,
-      rush: (isCanvasProduct || isHdpeProduct) ? false : form.rush,
+      quantity: effectiveQtyNum,
+      material: isPosterProduct ? "Poster" : isHdpeProduct ? "HDPE" : isCanvasProduct ? "Canvas" : isMeshProduct ? "Mesh Banner" : form.material,
+      doubleSided: (isCanvasProduct || isMeshProduct || isHdpeProduct || isPosterProduct) ? false : form.doubleSided,
+      grommets: (isCanvasProduct || isHdpeProduct || isPosterProduct) ? false : form.grommets,
+      edgeFinish: (isCanvasProduct || isHdpeProduct || isPosterProduct) ? "none" : isMeshProduct ? meshEdgeFinish : form.edgeFinish,
+      polePockets: (isCanvasProduct || isHdpeProduct || isPosterProduct) ? false : form.polePockets,
+      windSlits: (isCanvasProduct || isMeshProduct || isHdpeProduct || isPosterProduct) ? false : form.windSlits,
+      hemming: (isCanvasProduct || isMeshProduct || isHdpeProduct || isPosterProduct) ? false : form.hemming,
+      rush: (isCanvasProduct || isHdpeProduct || isPosterProduct) ? false : form.rush,
       uploadedFileUrl,
       uploadedFileName,
       unitPrice: pricing.unitPrice,
@@ -525,7 +551,7 @@ export default function VinylBannerBuilder({
             <div className="rounded-xl border border-orange-200 bg-gradient-to-r from-orange-50 to-amber-50 px-4 py-2 text-right">
               <div className="text-xs uppercase tracking-[0.14em] text-orange-700">Live Total</div>
               <div className="text-3xl font-semibold text-zinc-900">{formatPrice(pricing.totalPrice)}</div>
-              <div className="text-xs text-orange-700/80">{pricing.sqFt} sqft · {qtyNum} unit{qtyNum !== 1 ? "s" : ""}</div>
+              <div className="text-xs text-orange-700/80">{pricing.sqFt} sqft · {effectiveQtyNum} unit{effectiveQtyNum !== 1 ? "s" : ""}</div>
             </div>
           </div>
         </div>
@@ -664,6 +690,7 @@ export default function VinylBannerBuilder({
                   </div>
                 </ControlBox>
 
+                {!isPosterProduct && (
                 <ControlBox title="Material">
                   {isCanvasProduct ? (
                     <div className="flex h-9 items-center rounded border border-zinc-300 bg-zinc-100 px-2 text-sm font-medium text-zinc-700">
@@ -689,8 +716,9 @@ export default function VinylBannerBuilder({
                     </select>
                   )}
                 </ControlBox>
+                )}
 
-                {!(isCanvasProduct || isHdpeProduct) && (
+                {!(isCanvasProduct || isHdpeProduct || isPosterProduct) && (
                   <>
                     {!isMeshProduct && (
                       <ControlBox title="Print">
@@ -815,6 +843,16 @@ export default function VinylBannerBuilder({
                   </>
                 )}
 
+                {isPosterProduct ? (
+                  <ControlBox title="Add">
+                    <Button
+                      className="h-9 w-full rounded bg-orange-500 text-xs font-semibold text-white hover:bg-orange-400"
+                      onClick={handleAddToCart}
+                    >
+                      {addedToCart ? "Added" : "Add"}
+                    </Button>
+                  </ControlBox>
+                ) : (
                 <ControlBox title="Qty / Add" error={errors.quantity}>
                   <div className="grid grid-cols-[70px_1fr] gap-1">
                     <input
@@ -832,6 +870,7 @@ export default function VinylBannerBuilder({
                     </Button>
                   </div>
                 </ControlBox>
+                )}
               </div>
             </div>
           </div>
@@ -851,6 +890,12 @@ export default function VinylBannerBuilder({
                     <Row label="Rate" value={`${formatPrice(hdpeRate)} / sqft`} />
                     <Row label="Square Feet" value={String(pricing.sqFt)} />
                     <Row label="Minimum Order" value="$20.00" />
+                  </>
+                ) : isPosterProduct ? (
+                  <>
+                    <Row label="Poster Rate" value={`${formatPrice(posterRate)} / sqft`} />
+                    <Row label="Billable Area" value={`${pricing.sqFt} sqft`} />
+                    <Row label="Minimum Unit Price" value="$12.00" />
                   </>
                 ) : isMeshProduct ? (
                   <>
@@ -878,7 +923,7 @@ export default function VinylBannerBuilder({
                 )}
                 <div className="my-2 border-t border-zinc-200" />
                 <Row label="Unit Price" value={formatPrice(pricing.unitPrice)} strong />
-                <Row label={`Order Total (${qtyNum})`} value={formatPrice(pricing.totalPrice)} strong className="text-orange-600" />
+                <Row label={`Order Total (${effectiveQtyNum})`} value={formatPrice(pricing.totalPrice)} strong className="text-orange-600" />
               </div>
             </div>
 

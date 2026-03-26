@@ -43,6 +43,13 @@ const MANUAL_BANNER_PRODUCTS: ManualBannerProductCard[] = [
     description: "Durable 8oz coated polyester mesh with 37% air-flow perforation.",
     label: "Builder",
   },
+  {
+    id: "manual-poster",
+    name: "Poster",
+    href: "/banners/poster",
+    description: "Poster builder with upload and rounded-up area pricing.",
+    label: "Builder",
+  },
 ];
 
 function stripHtml(input: string): string {
