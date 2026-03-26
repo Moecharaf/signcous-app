@@ -228,9 +228,9 @@ export default function HomeCatalogClient({ sections, manualBannerProducts }: Ho
         </div>
       </section>
 
-      <section className="w-full bg-[#f3f3f3] px-4 pb-4 pt-2 md:px-6 md:pb-5 md:pt-2">
+      <section className="w-full bg-[#f3f3f3] px-4 pb-4 pt-1 md:px-6 md:pb-5 md:pt-1">
         {activeSection.key === "banner" && (
-          <h2 className="mb-2 text-[25px] font-normal leading-none tracking-[-0.01em] text-[#3b3b3b] [font-family:'Roboto_Condensed','Arial_Narrow',Arial,sans-serif] md:text-[29px]">
+          <h2 className="mb-4 text-[25px] font-normal leading-none tracking-[-0.01em] text-[#3b3b3b] [font-family:'Roboto_Condensed','Arial_Narrow',Arial,sans-serif] md:mb-5 md:text-[29px]">
             Banner Products
           </h2>
         )}
