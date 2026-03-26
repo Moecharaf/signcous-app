@@ -229,7 +229,7 @@ export default function HomeCatalogClient({ sections, manualBannerProducts }: Ho
 
       <section className="mx-auto max-w-[1500px] px-4 py-8 md:px-8 md:py-10">
         {activeSection.key === "banner" && (
-          <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
+          <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {manualBannerProducts.map((manualProduct) => {
               const visual = MANUAL_CARD_THEME[manualProduct.id] ?? {
                 texture: "from-[#ffffff]/95 via-[#f3f3f3]/78 to-[#ececec]/88",
@@ -238,61 +238,81 @@ export default function HomeCatalogClient({ sections, manualBannerProducts }: Ho
               };
 
               return (
-                <Link
+                <div
                   key={manualProduct.id}
-                  href={manualProduct.href}
-                  className="group relative isolate aspect-[3/4] overflow-hidden rounded-sm bg-[#111]"
+                  className="group relative aspect-[16/7] overflow-hidden rounded-lg border border-[#e0e0e0] bg-white shadow-sm"
                 >
-                  {/* Full-bleed product image */}
-                  {manualProduct.image ? (
+                  {/* Faded background image — default state only */}
+                  {manualProduct.image && (
                     <Image
                       src={manualProduct.image}
-                      alt={manualProduct.imageAlt}
+                      alt=""
                       fill
-                      quality={70}
+                      quality={60}
                       loading="lazy"
-                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 17vw"
-                      className="object-cover transition duration-500 group-hover:scale-[1.07]"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      className="object-cover opacity-20 grayscale transition duration-500 group-hover:opacity-0"
+                      aria-hidden="true"
                     />
-                  ) : (
-                    <div className="absolute inset-0 bg-gradient-to-br from-[#2a2a2a] to-[#111]" />
                   )}
 
-                  {/* Permanent dark footer gradient — always visible */}
-                  <div
-                    className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"
-                    aria-hidden="true"
-                  />
-
-                  {/* Hover overlay */}
-                  <div
-                    className="absolute inset-0 bg-black/55 opacity-0 transition duration-300 group-hover:opacity-100"
-                    aria-hidden="true"
-                  />
-
-                  {/* Default: name at bottom-left */}
-                  <div className="absolute bottom-0 left-0 right-0 p-3 transition duration-300 group-hover:opacity-0">
-                    <div className="text-[8px] font-semibold uppercase tracking-[0.22em] text-white/50">
-                      {visual.eyebrow}
-                    </div>
-                    <h2 className="mt-0.5 text-xs font-black uppercase leading-tight tracking-[0.03em] text-white">
+                  {/* DEFAULT STATE: large product name + subtitle */}
+                  <div className="absolute inset-0 flex flex-col justify-end p-5 transition duration-300 group-hover:opacity-0">
+                    <h2 className="text-3xl font-black uppercase leading-none tracking-[0.02em] text-[#1a1a1a] md:text-4xl">
                       {manualProduct.name}
                     </h2>
-                  </div>
-
-                  {/* Hover: centered CTA panel */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 px-3 opacity-0 transition duration-300 group-hover:opacity-100">
-                    <h2 className="text-center text-sm font-black uppercase leading-tight tracking-[0.03em] text-white">
-                      {manualProduct.name}
-                    </h2>
-                    <p className="text-center text-[9px] leading-4 text-white/80">
+                    <p className="mt-1.5 text-xs font-medium text-[#666]">
                       {manualProduct.description}
                     </p>
-                    <span className="mt-1 border border-white px-3 py-1 text-[9px] font-bold uppercase tracking-[0.18em] text-white">
-                      Configure Now
-                    </span>
                   </div>
-                </Link>
+
+                  {/* HOVER STATE: split — left info + right image */}
+                  <div className="absolute inset-0 flex opacity-0 transition duration-300 group-hover:opacity-100">
+                    {/* Left panel: info + CTAs */}
+                    <div className="flex w-[55%] flex-col justify-center gap-2 p-5">
+                      <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#888]">
+                        {visual.eyebrow}
+                      </div>
+                      <h2 className="text-xl font-black uppercase leading-tight tracking-[0.01em] text-[#1a1a1a]">
+                        {manualProduct.name}
+                      </h2>
+                      <p className="text-[11px] leading-5 text-[#555]">
+                        {manualProduct.description}
+                      </p>
+                      <div className="mt-1 flex flex-col gap-1.5">
+                        <Link
+                          href={manualProduct.href}
+                          className="border border-[#bbb] px-3 py-1.5 text-center text-[10px] font-bold uppercase tracking-[0.16em] text-[#333] transition hover:border-[#333] hover:bg-[#f5f5f5]"
+                        >
+                          More Info
+                        </Link>
+                        <Link
+                          href={manualProduct.href}
+                          className="bg-[#f5c800] px-3 py-1.5 text-center text-[10px] font-bold uppercase tracking-[0.16em] text-[#1a1a1a] transition hover:bg-[#e6b800]"
+                        >
+                          Order
+                        </Link>
+                      </div>
+                    </div>
+
+                    {/* Right panel: product photo */}
+                    <div className="relative w-[45%]">
+                      {manualProduct.image ? (
+                        <Image
+                          src={manualProduct.image}
+                          alt={manualProduct.imageAlt}
+                          fill
+                          quality={75}
+                          loading="lazy"
+                          sizes="(max-width: 640px) 45vw, (max-width: 1024px) 22vw, 15vw"
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="h-full bg-[#f0f0f0]" />
+                      )}
+                    </div>
+                  </div>
+                </div>
               );
             })}
           </div>
