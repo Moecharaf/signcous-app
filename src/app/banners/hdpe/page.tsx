@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import HdpeBuilder from "@/components/product-builder/HdpeBuilder";
+import VinylBannerBuilder from "@/components/product-builder/VinylBannerBuilder";
 
 export const metadata: Metadata = {
   title: "HDPE Signs — Signcous",
@@ -8,5 +8,12 @@ export const metadata: Metadata = {
 };
 
 export default function HdpePage() {
-  return <HdpeBuilder />;
+  return (
+    <VinylBannerBuilder
+      productName="HDPE Sign"
+      productDescription="Water and tear resistant HDPE sign builder with size-based pricing."
+      pricingMode="hdpe"
+      productId={56}
+    />
+  );
 }

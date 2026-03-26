@@ -5,10 +5,12 @@ import Button from "@/components/ui/Button";
 import {
   calculateBannerPrice,
   calculateCanvasPrice,
+  calculateHdpePrice,
   calculateMeshPrice,
   type EdgeFinish,
   formatPrice,
   getCanvasSqFtRate,
+  getHdpeSqFtRate,
   getMeshSqFtRate,
   type GrommetMode,
   type Material,
@@ -74,7 +76,7 @@ interface VinylBannerBuilderProps {
   productName?: string;
   productDescription?: string;
   productId?: number;
-  pricingMode?: "banner" | "canvas" | "mesh";
+  pricingMode?: "banner" | "canvas" | "mesh" | "hdpe";
 }
 
 const MIN_IN = 6;
@@ -159,20 +161,23 @@ export default function VinylBannerBuilder({
   const heightIn = toInches(heightNum, form.unit);
   const isCanvasProduct = pricingMode === "canvas";
   const isMeshProduct   = pricingMode === "mesh";
+  const isHdpeProduct   = pricingMode === "hdpe";
   const isMeshMaterial  = isMeshProduct || form.material === "Mesh Banner";
+  const meshBillableSqFt = Math.max(1, Math.ceil((widthIn / 12) * (heightIn / 12)));
   const perimeterFt = 2 * ((widthIn / 12) + (heightIn / 12));
-  const meshWebbingCost = form.meshWebbing ? perimeterFt : 0;
-  const meshRopeCost = form.meshRope ? perimeterFt : 0;
+  const meshWebbingCost = form.meshWebbing ? perimeterFt * 1.75 : 0;
+  const meshRopeCost = form.meshRope ? perimeterFt * 1.75 : 0;
 
   const pxPerIn = BASE_PX_PER_IN * zoom;
   const artWidth = clamp(widthIn * pxPerIn, 90, 760);
   const artHeight = clamp(heightIn * pxPerIn, 70, 460);
 
   const canvasRate = useMemo(() => getCanvasSqFtRate(qtyNum), [qtyNum]);
-  const meshRate   = useMemo(() => getMeshSqFtRate(qtyNum),   [qtyNum]);
+  const hdpeRate = useMemo(() => getHdpeSqFtRate(qtyNum), [qtyNum]);
+  const meshRate   = useMemo(() => getMeshSqFtRate(meshBillableSqFt), [meshBillableSqFt]);
   const meshGrommetPoints = useMemo(
-    () => getGrommetPoints(widthIn, heightIn, isMeshProduct && form.grommets, form.grommetMode),
-    [widthIn, heightIn, isMeshProduct, form.grommets, form.grommetMode]
+    () => getGrommetPoints(widthIn, heightIn, !isCanvasProduct && !isHdpeProduct && form.grommets, form.grommetMode),
+    [widthIn, heightIn, isCanvasProduct, isHdpeProduct, form.grommets, form.grommetMode]
   );
 
   const pricing = useMemo(
@@ -220,6 +225,24 @@ export default function VinylBannerBuilder({
         };
       }
 
+      if (isHdpeProduct) {
+        const hdpePricing = calculateHdpePrice(widthIn, heightIn, qtyNum);
+
+        return {
+          sqFt: hdpePricing.sqFt,
+          basePricePerUnit: hdpePricing.unitPrice,
+          grommetCostPerUnit: 0,
+          edgeFinishCostPerUnit: 0,
+          polePocketCostPerUnit: 0,
+          windSlitsCostPerUnit: 0,
+          hemmingCostPerUnit: 0,
+          addOnCostPerUnit: 0,
+          rushSurchargePerUnit: 0,
+          unitPrice: hdpePricing.unitPrice,
+          totalPrice: hdpePricing.totalPrice,
+        };
+      }
+
       return calculateBannerPrice({
         widthIn,
         heightIn,
@@ -238,6 +261,7 @@ export default function VinylBannerBuilder({
     [
       isMeshProduct,
       isCanvasProduct,
+      isHdpeProduct,
       widthNum,
       heightNum,
       form.unit,
@@ -306,14 +330,14 @@ export default function VinylBannerBuilder({
       height: heightNum,
       unit: form.unit,
       quantity: qtyNum,
-      material: isCanvasProduct ? "Canvas" : isMeshProduct ? "Mesh Banner" : form.material,
-      doubleSided: (isCanvasProduct || isMeshProduct) ? false : form.doubleSided,
-      grommets: isCanvasProduct ? false : form.grommets,
-      edgeFinish: isCanvasProduct ? "none" : isMeshProduct ? meshEdgeFinish : form.edgeFinish,
-      polePockets: isCanvasProduct ? false : form.polePockets,
-      windSlits: (isCanvasProduct || isMeshProduct) ? false : form.windSlits,
-      hemming: (isCanvasProduct || isMeshProduct) ? false : form.hemming,
-      rush: isCanvasProduct ? false : form.rush,
+      material: isHdpeProduct ? "HDPE" : isCanvasProduct ? "Canvas" : isMeshProduct ? "Mesh Banner" : form.material,
+      doubleSided: (isCanvasProduct || isMeshProduct || isHdpeProduct) ? false : form.doubleSided,
+      grommets: (isCanvasProduct || isHdpeProduct) ? false : form.grommets,
+      edgeFinish: (isCanvasProduct || isHdpeProduct) ? "none" : isMeshProduct ? meshEdgeFinish : form.edgeFinish,
+      polePockets: (isCanvasProduct || isHdpeProduct) ? false : form.polePockets,
+      windSlits: (isCanvasProduct || isMeshProduct || isHdpeProduct) ? false : form.windSlits,
+      hemming: (isCanvasProduct || isMeshProduct || isHdpeProduct) ? false : form.hemming,
+      rush: (isCanvasProduct || isHdpeProduct) ? false : form.rush,
       uploadedFileUrl,
       uploadedFileName,
       unitPrice: pricing.unitPrice,
@@ -539,7 +563,7 @@ export default function VinylBannerBuilder({
               }}
             >
               <div className="absolute left-5 top-5 rounded-md border border-zinc-200 bg-white px-3 py-1 text-xs font-medium text-zinc-600 shadow-sm">
-                Click and drag banner to move
+                Click and drag {isHdpeProduct ? "sign" : "banner"} to move
               </div>
 
               <div
@@ -586,7 +610,7 @@ export default function VinylBannerBuilder({
                   </div>
                 )}
 
-                {isMeshProduct && meshGrommetPoints.map((point, index) => (
+                {meshGrommetPoints.map((point, index) => (
                   <span
                     key={`grommet-${index}`}
                     className="pointer-events-none absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-zinc-500 bg-zinc-100 shadow"
@@ -649,6 +673,10 @@ export default function VinylBannerBuilder({
                     <div className="flex h-9 items-center rounded border border-zinc-300 bg-zinc-100 px-2 text-sm font-medium text-zinc-700">
                       Mesh Banner
                     </div>
+                  ) : isHdpeProduct ? (
+                    <div className="flex h-9 items-center rounded border border-zinc-300 bg-zinc-100 px-2 text-sm font-medium text-zinc-700">
+                      HDPE
+                    </div>
                   ) : (
                     <select
                       value={form.material}
@@ -662,7 +690,7 @@ export default function VinylBannerBuilder({
                   )}
                 </ControlBox>
 
-                {!isCanvasProduct && (
+                {!(isCanvasProduct || isHdpeProduct) && (
                   <>
                     {!isMeshProduct && (
                       <ControlBox title="Print">
@@ -818,9 +846,16 @@ export default function VinylBannerBuilder({
                     <Row label="Canvas Rate" value={`${formatPrice(canvasRate)} / sqft`} />
                     <Row label="Formula" value="max((W x H / unit) x rate x qty, $20)" />
                   </>
+                ) : isHdpeProduct ? (
+                  <>
+                    <Row label="Rate" value={`${formatPrice(hdpeRate)} / sqft`} />
+                    <Row label="Square Feet" value={String(pricing.sqFt)} />
+                    <Row label="Minimum Order" value="$20.00" />
+                  </>
                 ) : isMeshProduct ? (
                   <>
                     <Row label="Mesh Rate" value={`${formatPrice(meshRate)} / sqft`} />
+                    <Row label="Billable Area" value={`${pricing.sqFt} sqft`} />
                     <Row label="Grommets" value="Free" />
                     <Row label="Welding" value={form.meshWelding ? "Included" : "No"} />
                     <Row label="Webbing" value={formatPrice(meshWebbingCost)} />
@@ -828,6 +863,7 @@ export default function VinylBannerBuilder({
                     <Row label="Pole Pockets" value={formatPrice(pricing.polePocketCostPerUnit)} />
                     <Row label="Edge Add-ons" value={formatPrice(pricing.edgeFinishCostPerUnit)} />
                     <Row label="Rush Surcharge" value={formatPrice(pricing.rushSurchargePerUnit)} />
+                    <Row label="Minimum Unit Price" value={formatPrice(30)} />
                   </>
                 ) : (
                   <>

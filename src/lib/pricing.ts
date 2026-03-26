@@ -153,20 +153,23 @@ export function calculateCanvasPrice(
  * Tiers (placeholder — update with your pricing strategy):
  *   1–999: $2.44 | 1000–2499: $1.49 | 2500–4999: $1.09 | 5000+: $0.99
  */
-export function getMeshSqFtRate(quantity: number): number {
-  const safeQuantity = Number.isFinite(quantity) ? Math.max(1, quantity) : 1;
-  if (safeQuantity <= 999) return 2.44;
-  if (safeQuantity <= 2499) return 1.49;
-  if (safeQuantity <= 4999) return 1.09;
-  return 0.99;
+export function getMeshSqFtRate(areaSqFt: number): number {
+  const safeAreaSqFt = Number.isFinite(areaSqFt) ? Math.max(1, areaSqFt) : 1;
+  if (safeAreaSqFt <= 20) return 3.75;
+  if (safeAreaSqFt <= 50) return 3.4;
+  if (safeAreaSqFt <= 100) return 3.1;
+  if (safeAreaSqFt <= 300) return 2.85;
+  return 2.6;
 }
 
 /**
  * Calculates the total price for a mesh banner order.
+ * Billable area is rounded up to the next whole square foot.
  * Add-ons: grommets = free, welding = free,
- *          rope/webbing = $1.00/linear ft (perimeter),
+ *          rope/webbing = $1.75/linear ft (perimeter),
  *          polePockets = $1.00/linear ft (2×width) + $10 setup,
- *          rush = 100% surcharge.
+ *          rush = 100% surcharge,
+ *          minimum unit price = $30.
  */
 export function calculateMeshPrice(
   width: number,
@@ -186,10 +189,11 @@ export function calculateMeshPrice(
 
   const widthFt    = unit === "feet" ? safeWidth  : safeWidth  / 12;
   const heightFt   = unit === "feet" ? safeHeight : safeHeight / 12;
-  const sqFt       = widthFt * heightFt;
+  const rawSqFt    = widthFt * heightFt;
+  const sqFt       = Math.ceil(rawSqFt);
   const perimeterFt = 2 * (widthFt + heightFt);
 
-  const ratePerSqFt      = getMeshSqFtRate(safeQuantity);
+  const ratePerSqFt      = getMeshSqFtRate(sqFt);
   const basePricePerUnit = sqFt * ratePerSqFt;
 
   // Grommets: always free for mesh
@@ -198,22 +202,22 @@ export function calculateMeshPrice(
   // Pole pockets: $1.00/linear ft (top + bottom = 2×width) plus $10.00 setup
   const polePocketCostPerUnit = polePockets ? (widthFt * 2 * 1.00) + 10.00 : 0;
 
-  // Signs365 style mesh add-ons:
+  // Retail mesh add-ons:
   // - Welding: no additional cost
-  // - Webbing: $1.00 per linear foot of perimeter
-  // - Rope:    $1.00 per linear foot of perimeter
+  // - Webbing: $1.75 per linear foot of perimeter
+  // - Rope:    $1.75 per linear foot of perimeter
   const weldingCostPerUnit = welding ? 0 : 0;
-  const webbingCostPerUnit = webbing ? perimeterFt * 1.00 : 0;
-  const ropeCostPerUnit = rope ? perimeterFt * 1.00 : 0;
+  const webbingCostPerUnit = webbing ? perimeterFt * 1.75 : 0;
+  const ropeCostPerUnit = rope ? perimeterFt * 1.75 : 0;
   const edgeFinishCostPerUnit = weldingCostPerUnit + webbingCostPerUnit + ropeCostPerUnit;
 
   const priceBeforeRush      = basePricePerUnit + polePocketCostPerUnit + edgeFinishCostPerUnit;
   const rushSurchargePerUnit = rush ? priceBeforeRush * 1.00 : 0; // 100% additional
-  const unitPrice            = priceBeforeRush + rushSurchargePerUnit;
+  const unitPrice            = Math.max(priceBeforeRush + rushSurchargePerUnit, 30);
   const totalPrice           = unitPrice * safeQuantity;
 
   return {
-    sqFt:                  Math.round(sqFt                  * 100) / 100,
+    sqFt,
     ratePerSqFt,
     basePricePerUnit:      Math.round(basePricePerUnit      * 100) / 100,
     grommetCostPerUnit:    0,
@@ -247,48 +251,32 @@ export function calculateBannerPrice(input: BannerPricingInput): BannerPricingRe
 
   // Mesh has its own pricing model and add-on rates.
   if (resolvedMaterial === "Mesh Banner") {
-    const meshSqFtRate = 4.75;
-    const meshGrommetRate = 0.75;
-    const meshPolePocketPerLinearFt = 5.5;
-    const meshEdgeFinishRates: Record<Exclude<EdgeFinish, "none">, number> = {
-      welding: 1.1,
-      webbing: 1.4,
-      rope: 1.9,
-    };
-    const meshRushMultiplier = 1.5;
+    const billableSqFt = Math.ceil(sqFt);
+    const meshSqFtRate = getMeshSqFtRate(billableSqFt);
+    const basePricePerUnit = billableSqFt * meshSqFtRate;
 
-    const basePricePerUnit = sqFt * meshSqFtRate;
-
-    let grommetCostPerUnit = 0;
-    if (grommets) {
-      const totalPlacements = grommetMode === "per-corner"
-        ? 4
-        : Math.max(4, Math.ceil(perimeterFt / 2));
-      grommetCostPerUnit = totalPlacements * meshGrommetRate;
-    }
+    const grommetCostPerUnit = 0;
 
     let edgeFinishCostPerUnit = 0;
-    if (edgeFinish !== "none") {
-      edgeFinishCostPerUnit = perimeterFt * meshEdgeFinishRates[edgeFinish];
+    if (edgeFinish === "webbing" || edgeFinish === "rope") {
+      edgeFinishCostPerUnit = perimeterFt * 1.75;
     }
 
     let polePocketCostPerUnit = 0;
     if (polePockets) {
-      const polePocketLinearFt = widthFt * 2;
-      polePocketCostPerUnit = polePocketLinearFt * meshPolePocketPerLinearFt;
+      polePocketCostPerUnit = (widthFt * 2 * 1.0) + 10;
     }
 
     const windSlitsCostPerUnit = 0;
     const hemmingCostPerUnit = 0;
     const addOnCostPerUnit = grommetCostPerUnit + edgeFinishCostPerUnit + polePocketCostPerUnit;
     const priceBeforeRush = basePricePerUnit + addOnCostPerUnit;
-    const rushSurchargePerUnit = rush ? priceBeforeRush * (meshRushMultiplier - 1) : 0;
-    let unitPrice = priceBeforeRush + rushSurchargePerUnit;
-    unitPrice = Math.max(unitPrice, config.minimumPrice);
+    const rushSurchargePerUnit = rush ? priceBeforeRush * 1.0 : 0;
+    const unitPrice = Math.max(priceBeforeRush + rushSurchargePerUnit, 30);
     const totalPrice = unitPrice * safeQuantity;
 
     return {
-      sqFt: Math.round(sqFt * 100) / 100,
+      sqFt: billableSqFt,
       basePricePerUnit: Math.round(basePricePerUnit * 100) / 100,
       grommetCostPerUnit: Math.round(grommetCostPerUnit * 100) / 100,
       edgeFinishCostPerUnit: Math.round(edgeFinishCostPerUnit * 100) / 100,
