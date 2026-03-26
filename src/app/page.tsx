@@ -22,7 +22,7 @@ const MANUAL_BANNER_PRODUCTS: ManualBannerProductCard[] = [
     href: "/banners/vinyl-banner",
     description: "Premium vinyl scrim banner with live configuration and upload.",
     label: "Builder",
-    image: null,
+    image: "/card-images/HD-Banner.png",
     imageAlt: "HD Banner",
   },
   {
