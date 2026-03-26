@@ -229,24 +229,19 @@ export default function HomeCatalogClient({ sections, manualBannerProducts }: Ho
 
       <section className="mx-auto max-w-[1500px] px-4 py-8 md:px-8 md:py-10">
         {activeSection.key === "banner" && (
-          <div className="mb-6 grid grid-cols-2 gap-[3px] lg:grid-cols-4">
-            {manualBannerProducts.map((manualProduct, index) => {
+          <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
+            {manualBannerProducts.map((manualProduct) => {
               const visual = MANUAL_CARD_THEME[manualProduct.id] ?? {
                 texture: "from-[#ffffff]/95 via-[#f3f3f3]/78 to-[#ececec]/88",
                 ghost: "PRINT",
                 eyebrow: "Builder",
               };
 
-              // Signs365-style mosaic: first card is hero (spans 2 cols + 2 rows), rest are standard
-              const isHero = index === 0;
-              const colSpan = isHero ? "lg:col-span-2 lg:row-span-2" : "";
-              const aspect = isHero ? "aspect-[4/3] lg:aspect-auto lg:h-full" : "aspect-[5/4]";
-
               return (
                 <Link
                   key={manualProduct.id}
                   href={manualProduct.href}
-                  className={`group relative isolate overflow-hidden bg-[#111] ${colSpan} ${aspect}`}
+                  className="group relative isolate aspect-[3/4] overflow-hidden rounded-sm bg-[#111]"
                 >
                   {/* Full-bleed product image */}
                   {manualProduct.image ? (
@@ -254,50 +249,46 @@ export default function HomeCatalogClient({ sections, manualBannerProducts }: Ho
                       src={manualProduct.image}
                       alt={manualProduct.imageAlt}
                       fill
-                      quality={isHero ? 80 : 70}
-                      loading={isHero ? "eager" : "lazy"}
-                      sizes={isHero
-                        ? "(max-width: 1024px) 100vw, 50vw"
-                        : "(max-width: 640px) 50vw, (max-width: 1280px) 25vw, 25vw"}
-                      className="object-cover transition duration-500 group-hover:scale-[1.05]"
+                      quality={70}
+                      loading="lazy"
+                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 17vw"
+                      className="object-cover transition duration-500 group-hover:scale-[1.07]"
                     />
                   ) : (
                     <div className="absolute inset-0 bg-gradient-to-br from-[#2a2a2a] to-[#111]" />
                   )}
 
-                  {/* Permanent dark footer gradient */}
+                  {/* Permanent dark footer gradient — always visible */}
                   <div
-                    className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/5 to-transparent"
+                    className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"
                     aria-hidden="true"
                   />
 
-                  {/* Hover dark overlay for contrast */}
+                  {/* Hover overlay */}
                   <div
-                    className="absolute inset-0 bg-black/40 opacity-0 transition duration-300 group-hover:opacity-100"
+                    className="absolute inset-0 bg-black/55 opacity-0 transition duration-300 group-hover:opacity-100"
                     aria-hidden="true"
                   />
 
-                  {/* Default: product name pinned to bottom */}
-                  <div className={`absolute bottom-0 left-0 right-0 p-4 transition-all duration-300 group-hover:translate-y-1 group-hover:opacity-0 ${isHero ? "p-5" : "p-3"}`}>
-                    <div className="text-[9px] font-semibold uppercase tracking-[0.22em] text-white/55">
+                  {/* Default: name at bottom-left */}
+                  <div className="absolute bottom-0 left-0 right-0 p-3 transition duration-300 group-hover:opacity-0">
+                    <div className="text-[8px] font-semibold uppercase tracking-[0.22em] text-white/50">
                       {visual.eyebrow}
                     </div>
-                    <h2 className={`mt-0.5 font-black uppercase leading-tight tracking-[0.03em] text-white ${isHero ? "text-2xl" : "text-base"}`}>
+                    <h2 className="mt-0.5 text-xs font-black uppercase leading-tight tracking-[0.03em] text-white">
                       {manualProduct.name}
                     </h2>
                   </div>
 
-                  {/* Hover: centered name + description + CTA */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 px-5 opacity-0 transition-all duration-300 group-hover:opacity-100">
-                    <h2 className={`text-center font-black uppercase leading-tight tracking-[0.03em] text-white drop-shadow ${isHero ? "text-2xl" : "text-sm"}`}>
+                  {/* Hover: centered CTA panel */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 px-3 opacity-0 transition duration-300 group-hover:opacity-100">
+                    <h2 className="text-center text-sm font-black uppercase leading-tight tracking-[0.03em] text-white">
                       {manualProduct.name}
                     </h2>
-                    {isHero && (
-                      <p className="max-w-[260px] text-center text-xs leading-5 text-white/85">
-                        {manualProduct.description}
-                      </p>
-                    )}
-                    <span className="mt-1 border border-white/90 px-5 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-white transition duration-200 hover:bg-white hover:text-black">
+                    <p className="text-center text-[9px] leading-4 text-white/80">
+                      {manualProduct.description}
+                    </p>
+                    <span className="mt-1 border border-white px-3 py-1 text-[9px] font-bold uppercase tracking-[0.18em] text-white">
                       Configure Now
                     </span>
                   </div>
