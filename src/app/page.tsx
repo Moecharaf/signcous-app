@@ -20,6 +20,8 @@ const MANUAL_BANNER_PRODUCTS: ManualBannerProductCard[] = [
     productId: 12,
     name: "HD Banner",
     displayName: "HDBANNER",
+    titleImage: "/card-images/HD-Banner-title.png",
+    titleImageAlt: "HD Banner Premium Vinyl Scrim Banner",
     href: "/banners/vinyl-banner",
     description: "Premium Vinyl Scrim Banner",
     label: "Builder",

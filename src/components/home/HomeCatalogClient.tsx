@@ -9,6 +9,8 @@ export interface ManualBannerProductCard {
   productId: number;
   name: string;
   displayName?: string;
+  titleImage?: string;
+  titleImageAlt?: string;
   href: string;
   description: string;
   label: string;
@@ -271,12 +273,25 @@ export default function HomeCatalogClient({ sections, manualBannerProducts }: Ho
 
                   {/* DEFAULT STATE: large product name centered */}
                   <div className="absolute inset-0 flex flex-col items-center justify-center p-5 transition duration-300 group-hover:opacity-0">
-                    <h2 className="text-center text-3xl font-black uppercase leading-none tracking-[0.02em] text-[#1a1a1a] md:text-4xl">
-                      {manualProduct.displayName ?? manualProduct.name}
-                    </h2>
-                    <p className="mt-2 text-center text-xs font-medium text-[#666]">
-                      {manualProduct.description}
-                    </p>
+                    {manualProduct.titleImage ? (
+                      <Image
+                        src={manualProduct.titleImage}
+                        alt={manualProduct.titleImageAlt ?? `${manualProduct.name} title`}
+                        width={900}
+                        height={260}
+                        className="w-[82%] max-w-[420px] object-contain"
+                        sizes="(max-width: 640px) 70vw, (max-width: 1024px) 36vw, 20vw"
+                      />
+                    ) : (
+                      <>
+                        <h2 className="text-center text-3xl font-black uppercase leading-none tracking-[0.02em] text-[#1a1a1a] md:text-4xl">
+                          {manualProduct.displayName ?? manualProduct.name}
+                        </h2>
+                        <p className="mt-2 text-center text-xs font-medium text-[#666]">
+                          {manualProduct.description}
+                        </p>
+                      </>
+                    )}
                   </div>
 
                   {/* HOVER STATE: split — left info slides in from left, right photo slides in from right */}
