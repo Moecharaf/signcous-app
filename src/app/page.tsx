@@ -32,7 +32,7 @@ const MANUAL_BANNER_PRODUCTS: ManualBannerProductCard[] = [
     href: "/banners/hdpe",
     description: "Water and tear resistant HDPE sign builder with size-based pricing.",
     label: "Builder",
-    image: null,
+    image: "/card-images/HDPE.png",
     imageAlt: "HDPE",
   },
   {
@@ -42,7 +42,7 @@ const MANUAL_BANNER_PRODUCTS: ManualBannerProductCard[] = [
     href: "/banners/canvas",
     description: "Canvas builder with quantity-tier pricing and a $20 minimum order.",
     label: "Builder",
-    image: null,
+    image: "/card-images/canva.png",
     imageAlt: "Canvas",
   },
   {
@@ -62,7 +62,7 @@ const MANUAL_BANNER_PRODUCTS: ManualBannerProductCard[] = [
     href: "/banners/no-curl-banner",
     description: "Premium 8mil no-curl banner material for flat, high-end displays.",
     label: "Builder",
-    image: null,
+    image: "/card-images/No Curl.png",
     imageAlt: "No-Curl Banner",
   },
   {
@@ -72,7 +72,7 @@ const MANUAL_BANNER_PRODUCTS: ManualBannerProductCard[] = [
     href: "/banners/poster",
     description: "Poster builder with upload and rounded-up area pricing.",
     label: "Builder",
-    image: null,
+    image: "/card-images/Poster.png",
     imageAlt: "Poster",
   },
 ];
