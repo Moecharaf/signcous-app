@@ -229,71 +229,81 @@ export default function HomeCatalogClient({ sections, manualBannerProducts }: Ho
 
       <section className="mx-auto max-w-[1500px] px-4 py-8 md:px-8 md:py-10">
         {activeSection.key === "banner" && (
-          <div className="mb-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {manualBannerProducts.map((manualProduct) => (
-              (() => {
-                const visual = MANUAL_CARD_THEME[manualProduct.id] ?? {
-                  texture: "from-[#ffffff]/95 via-[#f3f3f3]/78 to-[#ececec]/88",
-                  ghost: "PRINT",
-                  eyebrow: "Builder",
-                };
+          <div className="mb-6 grid grid-cols-2 gap-[3px] lg:grid-cols-4">
+            {manualBannerProducts.map((manualProduct, index) => {
+              const visual = MANUAL_CARD_THEME[manualProduct.id] ?? {
+                texture: "from-[#ffffff]/95 via-[#f3f3f3]/78 to-[#ececec]/88",
+                ghost: "PRINT",
+                eyebrow: "Builder",
+              };
 
-                return (
-                  <Link
-                    key={manualProduct.id}
-                    href={manualProduct.href}
-                    className="group relative isolate min-h-[132px] overflow-hidden rounded-lg border border-white/70 bg-white/62 p-4 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.38)] backdrop-blur-sm transition duration-300 hover:border-[#d8b72d] hover:bg-white/90"
-                  >
-                    {manualProduct.image && (
-                      <div className="pointer-events-none absolute inset-0 -z-20 overflow-hidden">
-                        <Image
-                          src={manualProduct.image}
-                          alt={manualProduct.imageAlt}
-                          fill
-                          unoptimized
-                          sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 25vw"
-                          className="object-cover opacity-[0.2] grayscale-[0.5] transition duration-300 group-hover:scale-[1.03] group-hover:opacity-[0.92] group-hover:grayscale-0"
-                        />
-                      </div>
-                    )}
-                    <span
-                      className={`pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br ${visual.texture} opacity-68 transition duration-300 group-hover:opacity-28`}
-                      aria-hidden="true"
+              // Signs365-style mosaic: first card is hero (spans 2 cols + 2 rows), rest are standard
+              const isHero = index === 0;
+              const colSpan = isHero ? "lg:col-span-2 lg:row-span-2" : "";
+              const aspect = isHero ? "aspect-[4/3] lg:aspect-auto lg:h-full" : "aspect-[5/4]";
+
+              return (
+                <Link
+                  key={manualProduct.id}
+                  href={manualProduct.href}
+                  className={`group relative isolate overflow-hidden bg-[#111] ${colSpan} ${aspect}`}
+                >
+                  {/* Full-bleed product image */}
+                  {manualProduct.image ? (
+                    <Image
+                      src={manualProduct.image}
+                      alt={manualProduct.imageAlt}
+                      fill
+                      quality={isHero ? 80 : 70}
+                      loading={isHero ? "eager" : "lazy"}
+                      sizes={isHero
+                        ? "(max-width: 1024px) 100vw, 50vw"
+                        : "(max-width: 640px) 50vw, (max-width: 1280px) 25vw, 25vw"}
+                      className="object-cover transition duration-500 group-hover:scale-[1.05]"
                     />
-                    <span
-                      className="pointer-events-none absolute -right-2 top-1 text-[44px] font-black uppercase tracking-[0.08em] text-[#6e6e6e]/14 transition duration-300 group-hover:text-[#4f4f4f]/40"
-                      aria-hidden="true"
-                    >
-                      {visual.ghost}
-                    </span>
+                  ) : (
+                    <div className="absolute inset-0 bg-gradient-to-br from-[#2a2a2a] to-[#111]" />
+                  )}
 
-                    <div className="pointer-events-none absolute inset-0 flex flex-col items-start justify-center transition duration-300 group-hover:opacity-0">
-                      <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7e7e7e]">
-                        {manualProduct.label} · {visual.eyebrow}
-                      </div>
-                      <h2 className="mt-1 text-5xl font-black uppercase leading-none tracking-[0.01em] text-[#1f1f1f]">
-                        {manualProduct.name}
-                      </h2>
+                  {/* Permanent dark footer gradient */}
+                  <div
+                    className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/5 to-transparent"
+                    aria-hidden="true"
+                  />
+
+                  {/* Hover dark overlay for contrast */}
+                  <div
+                    className="absolute inset-0 bg-black/40 opacity-0 transition duration-300 group-hover:opacity-100"
+                    aria-hidden="true"
+                  />
+
+                  {/* Default: product name pinned to bottom */}
+                  <div className={`absolute bottom-0 left-0 right-0 p-4 transition-all duration-300 group-hover:translate-y-1 group-hover:opacity-0 ${isHero ? "p-5" : "p-3"}`}>
+                    <div className="text-[9px] font-semibold uppercase tracking-[0.22em] text-white/55">
+                      {visual.eyebrow}
                     </div>
+                    <h2 className={`mt-0.5 font-black uppercase leading-tight tracking-[0.03em] text-white ${isHero ? "text-2xl" : "text-base"}`}>
+                      {manualProduct.name}
+                    </h2>
+                  </div>
 
-                    <div className="relative z-10 w-[62%] rounded-md border border-white/60 bg-white/78 px-3 py-2 shadow-sm backdrop-blur-sm opacity-0 transition duration-300 group-hover:opacity-100">
-                      <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-[#7a7a7a]">
-                        {manualProduct.label}
-                      </div>
-                      <h2 className="mt-1 text-3xl font-black uppercase leading-none tracking-[0.01em] text-[#1f1f1f]">
-                        {manualProduct.name}
-                      </h2>
-                      <p className="mt-1 text-xs leading-5 text-[#444]">
+                  {/* Hover: centered name + description + CTA */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 px-5 opacity-0 transition-all duration-300 group-hover:opacity-100">
+                    <h2 className={`text-center font-black uppercase leading-tight tracking-[0.03em] text-white drop-shadow ${isHero ? "text-2xl" : "text-sm"}`}>
+                      {manualProduct.name}
+                    </h2>
+                    {isHero && (
+                      <p className="max-w-[260px] text-center text-xs leading-5 text-white/85">
                         {manualProduct.description}
                       </p>
-                      <span className="mt-2 inline-block text-[10px] font-semibold uppercase tracking-[0.14em] text-[#1f1f1f]">
-                        Configure now
-                      </span>
-                    </div>
-                  </Link>
-                );
-              })()
-            ))}
+                    )}
+                    <span className="mt-1 border border-white/90 px-5 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-white transition duration-200 hover:bg-white hover:text-black">
+                      Configure Now
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         )}
 
@@ -315,7 +325,8 @@ export default function HomeCatalogClient({ sections, manualBannerProducts }: Ho
                         src={product.image}
                         alt={product.imageAlt}
                         fill
-                        unoptimized
+                        quality={65}
+                        loading="lazy"
                         sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 25vw"
                         className="object-cover"
                       />
