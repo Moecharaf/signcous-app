@@ -266,10 +266,10 @@ export default function HomeCatalogClient({ sections, manualBannerProducts }: Ho
                     </p>
                   </div>
 
-                  {/* HOVER STATE: split — left info + right image */}
-                  <div className="absolute inset-0 flex opacity-0 transition duration-300 group-hover:opacity-100">
-                    {/* Left panel: info + CTAs */}
-                    <div className="flex w-[55%] flex-col justify-center gap-2 p-5">
+                  {/* HOVER STATE: split — left info slides in from left, right photo slides in from right */}
+                  <div className="absolute inset-0 flex overflow-hidden">
+                    {/* Left panel */}
+                    <div className="flex w-[55%] -translate-x-full flex-col justify-center gap-2 bg-white p-5 transition duration-500 ease-out group-hover:translate-x-0">
                       <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#888]">
                         {visual.eyebrow}
                       </div>
@@ -295,8 +295,8 @@ export default function HomeCatalogClient({ sections, manualBannerProducts }: Ho
                       </div>
                     </div>
 
-                    {/* Right panel: product photo */}
-                    <div className="relative w-[45%]">
+                    {/* Right panel: slides in from right */}
+                    <div className="relative w-[45%] translate-x-full transition duration-500 ease-out group-hover:translate-x-0">
                       {manualProduct.image ? (
                         <Image
                           src={manualProduct.image}
