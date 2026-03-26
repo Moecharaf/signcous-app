@@ -5,10 +5,38 @@ import { useState } from "react";
 import { useCart } from "@/context/CartContext";
 
 const categoryNavLinks = [
-  { hash: "banner", label: "Banner", icon: "▦" },
-  { hash: "rigid", label: "Rigid", icon: "▣" },
-  { hash: "adhesive", label: "Adhesive", icon: "◫" },
-  { hash: "magnet", label: "Magnet", icon: "∪" },
+  {
+    hash: "banner",
+    label: "Banner",
+    icon: "▦",
+    eyebrow: "Flexible Media",
+    detail: "Vinyl, mesh, no-curl and poster options",
+    texture: "from-[#ffffff]/90 via-[#f4f4f4]/70 to-[#ececec]/80",
+  },
+  {
+    hash: "rigid",
+    label: "Rigid",
+    icon: "▣",
+    eyebrow: "Panel Products",
+    detail: "PVC, foamboard, acrylic and aluminum",
+    texture: "from-[#ffffff]/90 via-[#eef3f7]/70 to-[#e7edf2]/80",
+  },
+  {
+    hash: "adhesive",
+    label: "Adhesive",
+    icon: "◫",
+    eyebrow: "Sticky Graphics",
+    detail: "Wall, window and floor applications",
+    texture: "from-[#ffffff]/90 via-[#f8f3eb]/70 to-[#f1e9dd]/80",
+  },
+  {
+    hash: "magnet",
+    label: "Magnet",
+    icon: "∪",
+    eyebrow: "Magnetic Prints",
+    detail: "Vehicle and retail-ready magnetic sheets",
+    texture: "from-[#ffffff]/90 via-[#f1f1f1]/70 to-[#e8e8e8]/80",
+  },
 ];
 
 export default function Header() {
@@ -52,19 +80,42 @@ export default function Header() {
             <a
               key={`${link.hash}-${link.label}`}
               href={`/#${link.hash}`}
-              className="group inline-flex min-w-[94px] flex-col items-center rounded-sm border border-[#d2d2d2] bg-white px-3 py-2.5 transition hover:border-[#d8b72d] hover:bg-[#fff8d7]"
+              className="group relative isolate inline-flex min-w-[132px] flex-col items-start overflow-hidden rounded-sm border border-white/70 bg-white/65 px-3 py-2.5 text-left shadow-[inset_0_0_0_1px_rgba(255,255,255,0.35)] backdrop-blur-sm transition duration-300 hover:border-[#d8b72d] hover:bg-white/88"
             >
-              <span className="text-base leading-none text-[#808080] transition group-hover:text-[#3b3b3b]">
+              <span
+                className={`pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br ${link.texture} opacity-60 transition duration-300 group-hover:opacity-95`}
+                aria-hidden="true"
+              />
+              <span
+                className="pointer-events-none absolute -right-2 -top-3 text-[44px] leading-none text-[#8f8f8f]/28 transition duration-300 group-hover:text-[#686868]/42"
+                aria-hidden="true"
+              >
                 {link.icon}
               </span>
-              {link.label}
+              <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-[#808080]">
+                {link.eyebrow}
+              </span>
+              <span className="mt-0.5 text-xs font-bold uppercase tracking-[0.12em] text-[#3f3f3f]">
+                {link.label}
+              </span>
+              <span className="mt-1 max-h-0 overflow-hidden text-[10px] normal-case tracking-normal text-[#5f5f5f] opacity-0 transition-all duration-300 group-hover:max-h-10 group-hover:opacity-100">
+                {link.detail}
+              </span>
             </a>
           ))}
           <Link
             href="/quote"
-            className="group inline-flex min-w-[94px] flex-col items-center rounded-sm border border-[#d2d2d2] bg-white px-3 py-2.5 transition hover:border-[#d8b72d] hover:bg-[#fff8d7]"
+            className="group relative isolate inline-flex min-w-[132px] flex-col items-start overflow-hidden rounded-sm border border-white/70 bg-white/65 px-3 py-2.5 text-left shadow-[inset_0_0_0_1px_rgba(255,255,255,0.35)] backdrop-blur-sm transition duration-300 hover:border-[#d8b72d] hover:bg-white/88"
           >
-            Custom Quote
+            <span
+              className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-[#ffffff]/90 via-[#f7f7f7]/70 to-[#eeeeee]/80 opacity-65 transition duration-300 group-hover:opacity-95"
+              aria-hidden="true"
+            />
+            <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-[#808080]">Service</span>
+            <span className="mt-0.5 text-xs font-bold uppercase tracking-[0.12em] text-[#3f3f3f]">Custom Quote</span>
+            <span className="mt-1 max-h-0 overflow-hidden text-[10px] normal-case tracking-normal text-[#5f5f5f] opacity-0 transition-all duration-300 group-hover:max-h-10 group-hover:opacity-100">
+              Upload specs and get a tailored print estimate
+            </span>
           </Link>
         </nav>
 
