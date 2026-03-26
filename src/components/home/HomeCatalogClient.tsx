@@ -242,7 +242,7 @@ export default function HomeCatalogClient({ sections, manualBannerProducts }: Ho
                   <Link
                     key={manualProduct.id}
                     href={manualProduct.href}
-                    className="group relative isolate overflow-hidden rounded-lg border border-white/70 bg-white/62 p-4 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.38)] backdrop-blur-sm transition duration-300 hover:border-[#d8b72d] hover:bg-white/90"
+                    className="group relative isolate min-h-[132px] overflow-hidden rounded-lg border border-white/70 bg-white/62 p-4 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.38)] backdrop-blur-sm transition duration-300 hover:border-[#d8b72d] hover:bg-white/90"
                   >
                     {manualProduct.image && (
                       <div className="pointer-events-none absolute inset-0 -z-20 overflow-hidden">
@@ -252,33 +252,44 @@ export default function HomeCatalogClient({ sections, manualBannerProducts }: Ho
                           fill
                           unoptimized
                           sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 25vw"
-                          className="object-cover opacity-[0.18] grayscale-[0.55] transition duration-300 group-hover:scale-[1.03] group-hover:opacity-[0.62] group-hover:grayscale-0"
+                          className="object-cover opacity-[0.2] grayscale-[0.5] transition duration-300 group-hover:scale-[1.03] group-hover:opacity-[0.92] group-hover:grayscale-0"
                         />
                       </div>
                     )}
                     <span
-                      className={`pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br ${visual.texture} opacity-62 transition duration-300 group-hover:opacity-96`}
+                      className={`pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br ${visual.texture} opacity-68 transition duration-300 group-hover:opacity-28`}
                       aria-hidden="true"
                     />
                     <span
-                      className="pointer-events-none absolute -right-2 top-1 text-[44px] font-black uppercase tracking-[0.08em] text-[#6e6e6e]/14 transition duration-300 group-hover:text-[#4f4f4f]/26"
+                      className="pointer-events-none absolute -right-2 top-1 text-[44px] font-black uppercase tracking-[0.08em] text-[#6e6e6e]/14 transition duration-300 group-hover:text-[#4f4f4f]/40"
                       aria-hidden="true"
                     >
                       {visual.ghost}
                     </span>
 
-                    <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7e7e7e]">
-                      {manualProduct.label} · {visual.eyebrow}
+                    <div className="pointer-events-none absolute inset-0 flex flex-col items-start justify-center transition duration-300 group-hover:opacity-0">
+                      <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7e7e7e]">
+                        {manualProduct.label} · {visual.eyebrow}
+                      </div>
+                      <h2 className="mt-1 text-5xl font-black uppercase leading-none tracking-[0.01em] text-[#1f1f1f]">
+                        {manualProduct.name}
+                      </h2>
                     </div>
-                    <h2 className="mt-1 text-3xl font-black uppercase leading-none tracking-[0.01em] text-[#1f1f1f]">
-                      {manualProduct.name}
-                    </h2>
-                    <p className="mt-2 max-h-0 overflow-hidden text-sm leading-6 text-[#4d4d4d] opacity-0 transition-all duration-300 group-hover:max-h-24 group-hover:opacity-100">
-                      {manualProduct.description}
-                    </p>
-                    <span className="mt-3 inline-block text-xs font-semibold uppercase tracking-[0.14em] text-[#2a2a2a] group-hover:text-black">
-                      Configure now
-                    </span>
+
+                    <div className="relative z-10 w-[62%] rounded-md border border-white/60 bg-white/78 px-3 py-2 shadow-sm backdrop-blur-sm opacity-0 transition duration-300 group-hover:opacity-100">
+                      <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-[#7a7a7a]">
+                        {manualProduct.label}
+                      </div>
+                      <h2 className="mt-1 text-3xl font-black uppercase leading-none tracking-[0.01em] text-[#1f1f1f]">
+                        {manualProduct.name}
+                      </h2>
+                      <p className="mt-1 text-xs leading-5 text-[#444]">
+                        {manualProduct.description}
+                      </p>
+                      <span className="mt-2 inline-block text-[10px] font-semibold uppercase tracking-[0.14em] text-[#1f1f1f]">
+                        Configure now
+                      </span>
+                    </div>
                   </Link>
                 );
               })()
