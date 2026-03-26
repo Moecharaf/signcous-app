@@ -354,7 +354,6 @@ export default function VinylBannerBuilder({
       width: widthNum,
       height: heightNum,
       unit: form.unit,
-      quantity: qtyNum,
       quantity: effectiveQtyNum,
       material: isPosterProduct ? "Poster" : isHdpeProduct ? "HDPE" : isCanvasProduct ? "Canvas" : isMeshProduct ? "Mesh Banner" : form.material,
       doubleSided: (isCanvasProduct || isMeshProduct || isHdpeProduct || isPosterProduct) ? false : form.doubleSided,
