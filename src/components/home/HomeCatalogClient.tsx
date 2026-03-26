@@ -258,10 +258,16 @@ export default function HomeCatalogClient({ sections, manualBannerProducts }: Ho
                       quality={60}
                       loading="lazy"
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      className="object-cover opacity-16 grayscale transition duration-500 group-hover:opacity-0"
+                      className="object-cover opacity-65 saturate-110 transition duration-500 group-hover:opacity-0"
                       aria-hidden="true"
                     />
                   )}
+
+                  {/* Glassy white veil over the image in default state */}
+                  <div
+                    className="pointer-events-none absolute inset-0 bg-white/68 backdrop-blur-[1px] transition duration-300 group-hover:opacity-0"
+                    aria-hidden="true"
+                  />
 
                   {/* DEFAULT STATE: large product name centered */}
                   <div className="absolute inset-0 flex flex-col items-center justify-center p-5 transition duration-300 group-hover:opacity-0">
