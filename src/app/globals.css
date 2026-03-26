@@ -21,3 +21,38 @@ body {
 * {
   box-sizing: border-box;
 }
+
+.sc-label-fx {
+  position: relative;
+  display: inline-block;
+  isolation: isolate;
+}
+
+.sc-label-fx::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.2rem;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, #f97316 50%, transparent 100%);
+  background-size: 220% 100%;
+  opacity: 0.75;
+  animation: sc-label-shimmer 2.8s linear infinite;
+}
+
+@keyframes sc-label-shimmer {
+  0% {
+    background-position: 200% 50%;
+  }
+
+  100% {
+    background-position: -200% 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sc-label-fx::after {
+    animation: none;
+  }
+}

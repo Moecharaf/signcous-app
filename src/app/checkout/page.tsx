@@ -60,7 +60,7 @@ function Field({
 }) {
   return (
     <div>
-      <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-zinc-400">
+      <label className="sc-label-fx mb-1.5 block text-xs font-medium uppercase tracking-wider text-zinc-400">
         {label}
         {required && <span className="ml-0.5 text-orange-400">*</span>}
       </label>
@@ -333,7 +333,7 @@ export default function CheckoutPage() {
                     />
                   </div>
                   <div>
-                    <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-zinc-400">
+                    <label className="sc-label-fx mb-1.5 block text-xs font-medium uppercase tracking-wider text-zinc-400">
                       Country
                     </label>
                     <select
