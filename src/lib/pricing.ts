@@ -109,6 +109,15 @@ export interface PosterPricingResult {
   totalPrice: number;
 }
 
+export interface NoCurlPricingResult {
+  sqFt: number;
+  ratePerSqFt: number;
+  basePricePerUnit: number;
+  rushSurchargePerUnit: number;
+  unitPrice: number;
+  totalPrice: number;
+}
+
 export function getHdpeSqFtRate(quantity: number): number {
   const safeQuantity = Number.isFinite(quantity) ? Math.max(1, quantity) : 1;
   if (safeQuantity < 10) return 4.5;
@@ -138,6 +147,16 @@ export function getPosterSqFtRate(areaSqFt: number): number {
   return 2.6;
 }
 
+export function getNoCurlSqFtRate(areaSqFt: number): number {
+  const safeAreaSqFt = Number.isFinite(areaSqFt) ? Math.max(1, areaSqFt) : 1;
+
+  if (safeAreaSqFt <= 5) return 6.5;
+  if (safeAreaSqFt <= 15) return 6.0;
+  if (safeAreaSqFt <= 30) return 5.5;
+  if (safeAreaSqFt <= 100) return 5.0;
+  return 4.2;
+}
+
 export function calculatePosterPrice(
   width: number,
   height: number,
@@ -157,6 +176,37 @@ export function calculatePosterPrice(
   const basePricePerUnit = sqFt * ratePerSqFt;
   const rushSurchargePerUnit = rush ? basePricePerUnit * 1.0 : 0;
   const unitPrice = Math.max(basePricePerUnit + rushSurchargePerUnit, 12);
+  const totalPrice = unitPrice * safeQuantity;
+
+  return {
+    sqFt,
+    ratePerSqFt,
+    basePricePerUnit: Math.round(basePricePerUnit * 100) / 100,
+    rushSurchargePerUnit: Math.round(rushSurchargePerUnit * 100) / 100,
+    unitPrice: Math.round(unitPrice * 100) / 100,
+    totalPrice: Math.round(totalPrice * 100) / 100,
+  };
+}
+
+export function calculateNoCurlPrice(
+  width: number,
+  height: number,
+  unit: "inches" | "feet",
+  quantity: number = 1,
+  rush: boolean = false
+): NoCurlPricingResult {
+  const safeWidth = Number.isFinite(width) ? Math.max(0, width) : 0;
+  const safeHeight = Number.isFinite(height) ? Math.max(0, height) : 0;
+  const safeQuantity = Number.isFinite(quantity) ? Math.max(1, quantity) : 1;
+
+  const widthFt = unit === "feet" ? safeWidth : safeWidth / 12;
+  const heightFt = unit === "feet" ? safeHeight : safeHeight / 12;
+  const sqFt = Math.max(1, Math.ceil(widthFt * heightFt));
+  const ratePerSqFt = getNoCurlSqFtRate(sqFt);
+
+  const basePricePerUnit = sqFt * ratePerSqFt;
+  const rushSurchargePerUnit = rush ? basePricePerUnit * 1.0 : 0;
+  const unitPrice = Math.max(basePricePerUnit + rushSurchargePerUnit, 20);
   const totalPrice = unitPrice * safeQuantity;
 
   return {

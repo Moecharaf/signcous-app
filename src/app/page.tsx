@@ -44,6 +44,13 @@ const MANUAL_BANNER_PRODUCTS: ManualBannerProductCard[] = [
     label: "Builder",
   },
   {
+    id: "manual-no-curl",
+    name: "No-Curl Banner",
+    href: "/banners/no-curl-banner",
+    description: "Premium 8mil no-curl banner material for flat, high-end displays.",
+    label: "Builder",
+  },
+  {
     id: "manual-poster",
     name: "Poster",
     href: "/banners/poster",

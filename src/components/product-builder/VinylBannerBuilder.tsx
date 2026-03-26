@@ -7,12 +7,14 @@ import {
   calculateCanvasPrice,
   calculateHdpePrice,
   calculateMeshPrice,
+  calculateNoCurlPrice,
   calculatePosterPrice,
   type EdgeFinish,
   formatPrice,
   getCanvasSqFtRate,
   getHdpeSqFtRate,
   getMeshSqFtRate,
+  getNoCurlSqFtRate,
   getPosterSqFtRate,
   type GrommetMode,
   type Material,
@@ -78,7 +80,7 @@ interface VinylBannerBuilderProps {
   productName?: string;
   productDescription?: string;
   productId?: number;
-  pricingMode?: "banner" | "canvas" | "mesh" | "hdpe" | "poster";
+  pricingMode?: "banner" | "canvas" | "mesh" | "hdpe" | "poster" | "nocurl";
 }
 
 const MIN_IN = 6;
@@ -165,6 +167,7 @@ export default function VinylBannerBuilder({
   const isMeshProduct   = pricingMode === "mesh";
   const isHdpeProduct   = pricingMode === "hdpe";
   const isPosterProduct = pricingMode === "poster";
+  const isNoCurlProduct = pricingMode === "nocurl";
   const effectiveQtyNum = isPosterProduct ? 1 : qtyNum;
   const isMeshMaterial  = isMeshProduct || form.material === "Mesh Banner";
   const posterBillableSqFt = Math.max(1, Math.ceil((widthIn / 12) * (heightIn / 12)));
@@ -179,6 +182,7 @@ export default function VinylBannerBuilder({
 
   const canvasRate = useMemo(() => getCanvasSqFtRate(qtyNum), [qtyNum]);
   const hdpeRate = useMemo(() => getHdpeSqFtRate(qtyNum), [qtyNum]);
+  const noCurlRate = useMemo(() => getNoCurlSqFtRate(Math.max(1, Math.ceil((widthIn / 12) * (heightIn / 12)))), [widthIn, heightIn]);
   const posterRate = useMemo(() => getPosterSqFtRate(posterBillableSqFt), [posterBillableSqFt]);
   const meshRate   = useMemo(() => getMeshSqFtRate(meshBillableSqFt), [meshBillableSqFt]);
   const meshGrommetPoints = useMemo(
@@ -267,6 +271,24 @@ export default function VinylBannerBuilder({
         };
       }
 
+      if (isNoCurlProduct) {
+        const noCurlPricing = calculateNoCurlPrice(widthNum, heightNum, form.unit, effectiveQtyNum, form.rush);
+
+        return {
+          sqFt: noCurlPricing.sqFt,
+          basePricePerUnit: noCurlPricing.basePricePerUnit,
+          grommetCostPerUnit: 0,
+          edgeFinishCostPerUnit: 0,
+          polePocketCostPerUnit: 0,
+          windSlitsCostPerUnit: 0,
+          hemmingCostPerUnit: 0,
+          addOnCostPerUnit: 0,
+          rushSurchargePerUnit: noCurlPricing.rushSurchargePerUnit,
+          unitPrice: noCurlPricing.unitPrice,
+          totalPrice: noCurlPricing.totalPrice,
+        };
+      }
+
       return calculateBannerPrice({
         widthIn,
         heightIn,
@@ -287,6 +309,7 @@ export default function VinylBannerBuilder({
       isCanvasProduct,
       isHdpeProduct,
       isPosterProduct,
+      isNoCurlProduct,
       widthNum,
       heightNum,
       form.unit,
@@ -355,13 +378,13 @@ export default function VinylBannerBuilder({
       height: heightNum,
       unit: form.unit,
       quantity: effectiveQtyNum,
-      material: isPosterProduct ? "Poster" : isHdpeProduct ? "HDPE" : isCanvasProduct ? "Canvas" : isMeshProduct ? "Mesh Banner" : form.material,
-      doubleSided: (isCanvasProduct || isMeshProduct || isHdpeProduct || isPosterProduct) ? false : form.doubleSided,
-      grommets: (isCanvasProduct || isHdpeProduct || isPosterProduct) ? false : form.grommets,
-      edgeFinish: (isCanvasProduct || isHdpeProduct || isPosterProduct) ? "none" : isMeshProduct ? meshEdgeFinish : form.edgeFinish,
-      polePockets: (isCanvasProduct || isHdpeProduct || isPosterProduct) ? false : form.polePockets,
-      windSlits: (isCanvasProduct || isMeshProduct || isHdpeProduct || isPosterProduct) ? false : form.windSlits,
-      hemming: (isCanvasProduct || isMeshProduct || isHdpeProduct || isPosterProduct) ? false : form.hemming,
+      material: isNoCurlProduct ? "No-Curl Banner" : isPosterProduct ? "Poster" : isHdpeProduct ? "HDPE" : isCanvasProduct ? "Canvas" : isMeshProduct ? "Mesh Banner" : form.material,
+      doubleSided: (isCanvasProduct || isMeshProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct) ? false : form.doubleSided,
+      grommets: isNoCurlProduct ? true : (isCanvasProduct || isHdpeProduct || isPosterProduct) ? false : form.grommets,
+      edgeFinish: (isCanvasProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct) ? "none" : isMeshProduct ? meshEdgeFinish : form.edgeFinish,
+      polePockets: (isCanvasProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct) ? false : form.polePockets,
+      windSlits: (isCanvasProduct || isMeshProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct) ? false : form.windSlits,
+      hemming: (isCanvasProduct || isMeshProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct) ? false : form.hemming,
       rush: (isCanvasProduct || isHdpeProduct || isPosterProduct) ? false : form.rush,
       uploadedFileUrl,
       uploadedFileName,
@@ -695,6 +718,10 @@ export default function VinylBannerBuilder({
                     <div className="flex h-9 items-center rounded border border-zinc-300 bg-zinc-100 px-2 text-sm font-medium text-zinc-700">
                       Canvas
                     </div>
+                  ) : isNoCurlProduct ? (
+                    <div className="flex h-9 items-center rounded border border-zinc-300 bg-zinc-100 px-2 text-sm font-medium text-zinc-700">
+                      No-Curl Banner
+                    </div>
                   ) : isMeshProduct ? (
                     <div className="flex h-9 items-center rounded border border-zinc-300 bg-zinc-100 px-2 text-sm font-medium text-zinc-700">
                       Mesh Banner
@@ -717,7 +744,7 @@ export default function VinylBannerBuilder({
                 </ControlBox>
                 )}
 
-                {!(isCanvasProduct || isHdpeProduct || isPosterProduct) && (
+                {!(isCanvasProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct) && (
                   <>
                     {!isMeshProduct && (
                       <ControlBox title="Print">
@@ -842,6 +869,20 @@ export default function VinylBannerBuilder({
                   </>
                 )}
 
+                {isNoCurlProduct && (
+                  <ControlBox title="Rush">
+                    <TogglePair
+                      leftLabel="No"
+                      rightLabel="Yes"
+                      isRightActive={form.rush}
+                      onToggle={() => set("rush", !form.rush)}
+                    />
+                    {form.rush && (
+                      <div className="mt-1 text-[10px] text-zinc-500">+100% surcharge</div>
+                    )}
+                  </ControlBox>
+                )}
+
                 {isPosterProduct ? (
                   <ControlBox title="Add">
                     <Button
@@ -889,6 +930,14 @@ export default function VinylBannerBuilder({
                     <Row label="Rate" value={`${formatPrice(hdpeRate)} / sqft`} />
                     <Row label="Square Feet" value={String(pricing.sqFt)} />
                     <Row label="Minimum Order" value="$20.00" />
+                  </>
+                ) : isNoCurlProduct ? (
+                  <>
+                    <Row label="No-Curl Rate" value={`${formatPrice(noCurlRate)} / sqft`} />
+                    <Row label="Billable Area" value={`${pricing.sqFt} sqft`} />
+                    <Row label="Grommets" value="Included" />
+                    <Row label="Rush Surcharge" value={formatPrice(pricing.rushSurchargePerUnit)} />
+                    <Row label="Minimum Unit Price" value="$20.00" />
                   </>
                 ) : isPosterProduct ? (
                   <>
