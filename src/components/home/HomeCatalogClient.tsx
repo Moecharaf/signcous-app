@@ -241,7 +241,7 @@ export default function HomeCatalogClient({ sections, manualBannerProducts }: Ho
               return (
                 <div
                   key={manualProduct.id}
-                  className="group relative aspect-[16/7] overflow-hidden rounded-md border border-[#e8e8e8] bg-[#fdfdfd] shadow-[0_1px_0_rgba(0,0,0,0.04)]"
+                  className="group relative aspect-[16/9] overflow-hidden rounded-md border border-[#e8e8e8] bg-[#fdfdfd] shadow-[0_1px_0_rgba(0,0,0,0.04)]"
                 >
                   {/* Faded background image — default state only */}
                   {manualProduct.image && (
