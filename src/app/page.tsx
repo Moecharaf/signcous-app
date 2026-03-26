@@ -17,45 +17,63 @@ import {
 const MANUAL_BANNER_PRODUCTS: ManualBannerProductCard[] = [
   {
     id: "manual-hd-banner",
+    productId: 12,
     name: "HD Banner",
     href: "/banners/vinyl-banner",
     description: "Premium vinyl scrim banner with live configuration and upload.",
     label: "Builder",
+    image: null,
+    imageAlt: "HD Banner",
   },
   {
     id: "manual-hdpe",
+    productId: 56,
     name: "HDPE",
     href: "/banners/hdpe",
     description: "Water and tear resistant HDPE sign builder with size-based pricing.",
     label: "Builder",
+    image: null,
+    imageAlt: "HDPE",
   },
   {
     id: "manual-canvas",
+    productId: 60,
     name: "Canvas",
     href: "/banners/canvas",
     description: "Canvas builder with quantity-tier pricing and a $20 minimum order.",
     label: "Builder",
+    image: null,
+    imageAlt: "Canvas",
   },
   {
     id: "manual-mesh",
+    productId: 27,
     name: "Mesh Banner",
     href: "/banners/mesh-banner",
     description: "Durable 8oz coated polyester mesh with 37% air-flow perforation.",
     label: "Builder",
+    image: null,
+    imageAlt: "Mesh Banner",
   },
   {
     id: "manual-no-curl",
+    productId: 67,
     name: "No-Curl Banner",
     href: "/banners/no-curl-banner",
     description: "Premium 8mil no-curl banner material for flat, high-end displays.",
     label: "Builder",
+    image: null,
+    imageAlt: "No-Curl Banner",
   },
   {
     id: "manual-poster",
+    productId: 54,
     name: "Poster",
     href: "/banners/poster",
     description: "Poster builder with upload and rounded-up area pricing.",
     label: "Builder",
+    image: null,
+    imageAlt: "Poster",
   },
 ];
 
@@ -177,11 +195,33 @@ async function loadSections(): Promise<HomeCatalogSection[]> {
 
 export default async function HomePage() {
   const sections = await loadSections();
+  const imageByProductId = new Map<number, { image: string | null; imageAlt: string }>();
+
+  for (const section of sections) {
+    for (const product of section.products) {
+      if (!imageByProductId.has(product.id)) {
+        imageByProductId.set(product.id, {
+          image: product.image,
+          imageAlt: product.imageAlt,
+        });
+      }
+    }
+  }
+
+  const manualBannerProducts = MANUAL_BANNER_PRODUCTS.map((product) => {
+    const visual = imageByProductId.get(product.productId);
+
+    return {
+      ...product,
+      image: visual?.image ?? product.image,
+      imageAlt: visual?.imageAlt ?? product.imageAlt,
+    };
+  });
 
   return (
     <HomeCatalogClient
       sections={sections}
-      manualBannerProducts={MANUAL_BANNER_PRODUCTS}
+      manualBannerProducts={manualBannerProducts}
     />
   );
 }

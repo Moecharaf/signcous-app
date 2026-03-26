@@ -6,10 +6,13 @@ import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 export interface ManualBannerProductCard {
   id: string;
+  productId: number;
   name: string;
   href: string;
   description: string;
   label: string;
+  image: string | null;
+  imageAlt: string;
 }
 
 export interface HomeCatalogProductCard {
@@ -241,6 +244,18 @@ export default function HomeCatalogClient({ sections, manualBannerProducts }: Ho
                     href={manualProduct.href}
                     className="group relative isolate overflow-hidden rounded-lg border border-white/70 bg-white/62 p-4 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.38)] backdrop-blur-sm transition duration-300 hover:border-[#d8b72d] hover:bg-white/90"
                   >
+                    {manualProduct.image && (
+                      <div className="pointer-events-none absolute inset-0 -z-20 overflow-hidden">
+                        <Image
+                          src={manualProduct.image}
+                          alt={manualProduct.imageAlt}
+                          fill
+                          unoptimized
+                          sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 25vw"
+                          className="object-cover opacity-[0.18] grayscale-[0.55] transition duration-300 group-hover:scale-[1.03] group-hover:opacity-[0.62] group-hover:grayscale-0"
+                        />
+                      </div>
+                    )}
                     <span
                       className={`pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br ${visual.texture} opacity-62 transition duration-300 group-hover:opacity-96`}
                       aria-hidden="true"
