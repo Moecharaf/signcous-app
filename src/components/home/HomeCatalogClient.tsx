@@ -146,7 +146,7 @@ export default function HomeCatalogClient({ sections, manualBannerProducts }: Ho
 
   if (!activeSection) {
     return (
-      <div className="min-h-screen bg-[#e6e6e6] px-4 py-10 text-[#3a3a3a] md:px-8">
+      <div className="min-h-screen bg-[#f3f3f3] px-4 py-10 text-[#3a3a3a] md:px-8">
         <div className="mx-auto max-w-[1500px] rounded-lg border border-[#d2d2d2] bg-white p-8 text-sm">
           No category data is available right now.
         </div>
@@ -159,9 +159,9 @@ export default function HomeCatalogClient({ sections, manualBannerProducts }: Ho
     activeSection.heroImages[heroFrame % Math.max(activeSection.heroImages.length, 1)] ?? null;
 
   return (
-    <div className="min-h-screen bg-[#e6e6e6] text-[#2f2f2f]">
-      <section className="border-b border-[#d5d5d5] bg-[#eeeeee]">
-        <div className="mx-auto max-w-[1500px] px-4 py-7 md:px-8 md:py-8">
+    <div className="min-h-screen bg-[#f3f3f3] text-[#2f2f2f]">
+      <section className="border-b border-[#dedede] bg-[#f6f6f6]">
+        <div className="px-4 py-7 md:px-6 md:py-8">
           <div
             className={`relative overflow-hidden rounded-lg border border-[#cfcfcf] bg-gradient-to-r ${theme.hero} p-5 md:p-7`}
           >
@@ -228,9 +228,9 @@ export default function HomeCatalogClient({ sections, manualBannerProducts }: Ho
         </div>
       </section>
 
-      <section className="mx-auto max-w-[1500px] px-4 py-8 md:px-8 md:py-10">
+      <section className="w-full bg-[#f7f7f7] px-4 py-8 md:px-6 md:py-10">
         {activeSection.key === "banner" && (
-          <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {manualBannerProducts.map((manualProduct) => {
               const visual = MANUAL_CARD_THEME[manualProduct.id] ?? {
                 texture: "from-[#ffffff]/95 via-[#f3f3f3]/78 to-[#ececec]/88",
@@ -241,7 +241,7 @@ export default function HomeCatalogClient({ sections, manualBannerProducts }: Ho
               return (
                 <div
                   key={manualProduct.id}
-                  className="group relative aspect-[16/7] overflow-hidden rounded-lg border border-[#e0e0e0] bg-white shadow-sm"
+                  className="group relative aspect-[16/7] overflow-hidden rounded-lg border border-[#e6e6e6] bg-[#fdfdfd] shadow-[0_1px_0_rgba(0,0,0,0.04)]"
                 >
                   {/* Faded background image — default state only */}
                   {manualProduct.image && (
@@ -252,7 +252,7 @@ export default function HomeCatalogClient({ sections, manualBannerProducts }: Ho
                       quality={60}
                       loading="lazy"
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      className="object-cover opacity-20 grayscale transition duration-500 group-hover:opacity-0"
+                      className="object-cover opacity-16 grayscale transition duration-500 group-hover:opacity-0"
                       aria-hidden="true"
                     />
                   )}
