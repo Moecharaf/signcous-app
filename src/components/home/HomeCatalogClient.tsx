@@ -160,7 +160,7 @@ export default function HomeCatalogClient({ sections, manualBannerProducts }: Ho
 
   return (
     <div className="min-h-screen bg-[#f3f3f3] text-[#2f2f2f]">
-      <section className="border-b border-[#dedede] bg-[#f6f6f6]">
+      <section className="bg-[#f3f3f3]">
         <div className="px-4 py-7 md:px-6 md:py-8">
           <div
             className={`relative overflow-hidden rounded-lg border border-[#cfcfcf] bg-gradient-to-r ${theme.hero} p-5 md:p-7`}
@@ -228,7 +228,13 @@ export default function HomeCatalogClient({ sections, manualBannerProducts }: Ho
         </div>
       </section>
 
-      <section className="w-full bg-[#f7f7f7] px-4 py-8 md:px-6 md:py-10">
+      <section className="w-full bg-[#f3f3f3] px-4 py-4 md:px-6 md:py-5">
+        {activeSection.key === "banner" && (
+          <h2 className="mb-3 text-[34px] font-normal leading-none text-[#3a3a3a] [font-family:var(--font-oswald)] md:text-[38px]">
+            Banner Products
+          </h2>
+        )}
+
         {activeSection.key === "banner" && (
           <div className="mb-6 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
             {manualBannerProducts.map((manualProduct) => {
