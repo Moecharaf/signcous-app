@@ -131,6 +131,8 @@ export default function HomeCatalogClient({ sections, manualBannerProducts }: Ho
   const activeKeyFromHash = getCategoryFromHash(currentHash);
   const activeKey = activeKeyFromHash ?? sections[0]?.key ?? "banner";
   const [heroFrame, setHeroFrame] = useState(0);
+  const [isCoarsePointer, setIsCoarsePointer] = useState(false);
+  const [expandedMobileCardId, setExpandedMobileCardId] = useState<string | null>(null);
 
   const activeSection = useMemo(() => {
     return sections.find((section) => section.key === activeKey) ?? sections[0] ?? null;
@@ -145,6 +147,22 @@ export default function HomeCatalogClient({ sections, manualBannerProducts }: Ho
 
     return () => window.clearInterval(interval);
   }, [activeSection]);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(hover: none), (pointer: coarse)");
+    const updatePointerMode = () => setIsCoarsePointer(mediaQuery.matches);
+
+    updatePointerMode();
+
+    mediaQuery.addEventListener("change", updatePointerMode);
+    return () => mediaQuery.removeEventListener("change", updatePointerMode);
+  }, []);
+
+  useEffect(() => {
+    if (!isCoarsePointer && expandedMobileCardId) {
+      setExpandedMobileCardId(null);
+    }
+  }, [expandedMobileCardId, isCoarsePointer]);
 
   if (!activeSection) {
     return (
@@ -245,11 +263,24 @@ export default function HomeCatalogClient({ sections, manualBannerProducts }: Ho
                 ghost: "PRINT",
                 eyebrow: "Builder",
               };
+              const isMobileExpanded = isCoarsePointer && expandedMobileCardId === manualProduct.id;
 
               return (
                 <div
                   key={manualProduct.id}
-                  className="group relative aspect-[1.82/1] overflow-hidden rounded-2xl border border-[#e8e8e8] bg-[#fdfdfd] shadow-[0_1px_0_rgba(0,0,0,0.04)]"
+                  className="group relative aspect-[1.82/1] overflow-hidden rounded-2xl border border-[#e8e8e8] bg-[#fdfdfd] shadow-[0_1px_0_rgba(0,0,0,0.04)] focus:outline-none"
+                  tabIndex={0}
+                  onClick={(event) => {
+                    if (!isCoarsePointer) return;
+                    if ((event.target as HTMLElement).closest("a, button")) return;
+
+                    if (expandedMobileCardId === manualProduct.id) {
+                      window.location.href = manualProduct.href;
+                      return;
+                    }
+
+                    setExpandedMobileCardId(manualProduct.id);
+                  }}
                 >
                   {/* Faded background image — default state only */}
                   {manualProduct.image && (
@@ -260,19 +291,21 @@ export default function HomeCatalogClient({ sections, manualBannerProducts }: Ho
                       quality={60}
                       loading="lazy"
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      className="object-cover opacity-65 saturate-110 transition duration-500 group-hover:opacity-0"
+                      className={`object-cover opacity-65 saturate-110 transition duration-500 group-hover:opacity-0 group-focus:opacity-0 group-focus-within:opacity-0 ${isMobileExpanded ? "opacity-0" : ""}`}
                       aria-hidden="true"
                     />
                   )}
 
                   {/* Glassy white veil over the image in default state */}
                   <div
-                    className="pointer-events-none absolute inset-0 bg-white/68 backdrop-blur-[1px] transition duration-300 group-hover:opacity-0"
+                    className={`pointer-events-none absolute inset-0 bg-white/68 backdrop-blur-[1px] transition duration-300 group-hover:opacity-0 group-focus:opacity-0 group-focus-within:opacity-0 ${isMobileExpanded ? "opacity-0" : ""}`}
                     aria-hidden="true"
                   />
 
                   {/* DEFAULT STATE: large product name centered */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center p-5 transition duration-300 group-hover:opacity-0">
+                  <div
+                    className={`absolute inset-0 flex flex-col items-center justify-center p-5 transition duration-300 group-hover:opacity-0 group-focus:opacity-0 group-focus-within:opacity-0 ${isMobileExpanded ? "opacity-0" : ""}`}
+                  >
                     {manualProduct.titleImage ? (
                       <Image
                         src={manualProduct.titleImage}
@@ -297,7 +330,9 @@ export default function HomeCatalogClient({ sections, manualBannerProducts }: Ho
                   {/* HOVER STATE: split — left info slides in from left, right photo slides in from right */}
                   <div className="absolute inset-0 flex overflow-hidden">
                     {/* Left panel */}
-                    <div className="flex w-[55%] -translate-x-full flex-col justify-center gap-2 bg-white p-5 transition duration-500 ease-out group-hover:translate-x-0">
+                    <div
+                      className={`flex w-[55%] -translate-x-full flex-col justify-center gap-2 bg-white p-5 transition duration-500 ease-out group-hover:translate-x-0 group-focus:translate-x-0 group-focus-within:translate-x-0 ${isMobileExpanded ? "translate-x-0" : ""}`}
+                    >
                       <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#888]">
                         {visual.eyebrow}
                       </div>
@@ -324,7 +359,9 @@ export default function HomeCatalogClient({ sections, manualBannerProducts }: Ho
                     </div>
 
                     {/* Right panel: slides in from right */}
-                    <div className="relative w-[45%] translate-x-full transition duration-500 ease-out group-hover:translate-x-0">
+                    <div
+                      className={`relative w-[45%] translate-x-full transition duration-500 ease-out group-hover:translate-x-0 group-focus:translate-x-0 group-focus-within:translate-x-0 ${isMobileExpanded ? "translate-x-0" : ""}`}
+                    >
                       {manualProduct.image ? (
                         <Image
                           src={manualProduct.image}
