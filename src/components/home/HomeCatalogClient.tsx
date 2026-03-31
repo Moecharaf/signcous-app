@@ -46,6 +46,11 @@ interface HomeCatalogClientProps {
 }
 
 const MANUAL_CARD_THEME: Record<string, { texture: string; ghost: string; eyebrow: string }> = {
+  "manual-economical-stand": {
+    texture: "from-[#ffffff]/95 via-[#f3f3f3]/78 to-[#ececec]/88",
+    ghost: "STAND",
+    eyebrow: "Display System",
+  },
   "manual-hd-banner": {
     texture: "from-[#ffffff]/95 via-[#f3f3f3]/78 to-[#ececec]/88",
     ghost: "VINYL",

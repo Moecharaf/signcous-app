@@ -16,6 +16,19 @@ import {
 
 const MANUAL_BANNER_PRODUCTS: ManualBannerProductCard[] = [
   {
+    id: "manual-economical-stand",
+    productId: 124,
+    name: "Economical Banner Stand",
+    displayName: "ECONO STAND",
+    titleImage: "/card-images/ECONOSTAND.png",
+    titleImageAlt: "Economical Banner Stand Solution",
+    href: "/banners/economical-banner-stand",
+    description: "Standard 33.5 x 80 single-sided banner stand at a fixed $130 per banner.",
+    label: "Builder",
+    image: "/card-images/ECONOSTAND.png",
+    imageAlt: "Economical Banner Stand",
+  },
+  {
     id: "manual-hd-banner",
     productId: 12,
     name: "HD Banner",

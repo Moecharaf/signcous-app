@@ -80,12 +80,15 @@ interface VinylBannerBuilderProps {
   productName?: string;
   productDescription?: string;
   productId?: number;
-  pricingMode?: "banner" | "canvas" | "mesh" | "hdpe" | "poster" | "nocurl";
+  pricingMode?: "banner" | "canvas" | "mesh" | "hdpe" | "poster" | "nocurl" | "economical-stand";
 }
 
 const MIN_IN = 6;
 const MAX_IN = 240;
 const BASE_PX_PER_IN = 2.4;
+const ECONOMICAL_STAND_WIDTH_IN = 33.5;
+const ECONOMICAL_STAND_HEIGHT_IN = 80;
+const ECONOMICAL_STAND_UNIT_PRICE = 130;
 
 function clamp(n: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, n));
@@ -168,6 +171,7 @@ export default function VinylBannerBuilder({
   const isHdpeProduct   = pricingMode === "hdpe";
   const isPosterProduct = pricingMode === "poster";
   const isNoCurlProduct = pricingMode === "nocurl";
+  const isEconomicalStandProduct = pricingMode === "economical-stand";
   const effectiveQtyNum = isPosterProduct ? 1 : qtyNum;
   const isMeshMaterial  = isMeshProduct || form.material === "Mesh Banner";
   const posterBillableSqFt = Math.max(1, Math.ceil((widthIn / 12) * (heightIn / 12)));
@@ -289,6 +293,22 @@ export default function VinylBannerBuilder({
         };
       }
 
+      if (isEconomicalStandProduct) {
+        return {
+          sqFt: Number(((ECONOMICAL_STAND_WIDTH_IN / 12) * (ECONOMICAL_STAND_HEIGHT_IN / 12)).toFixed(2)),
+          basePricePerUnit: ECONOMICAL_STAND_UNIT_PRICE,
+          grommetCostPerUnit: 0,
+          edgeFinishCostPerUnit: 0,
+          polePocketCostPerUnit: 0,
+          windSlitsCostPerUnit: 0,
+          hemmingCostPerUnit: 0,
+          addOnCostPerUnit: 0,
+          rushSurchargePerUnit: 0,
+          unitPrice: ECONOMICAL_STAND_UNIT_PRICE,
+          totalPrice: ECONOMICAL_STAND_UNIT_PRICE * effectiveQtyNum,
+        };
+      }
+
       return calculateBannerPrice({
         widthIn,
         heightIn,
@@ -310,6 +330,7 @@ export default function VinylBannerBuilder({
       isHdpeProduct,
       isPosterProduct,
       isNoCurlProduct,
+      isEconomicalStandProduct,
       widthNum,
       heightNum,
       form.unit,
@@ -552,6 +573,27 @@ export default function VinylBannerBuilder({
     });
   }, [isMeshProduct]);
 
+  useEffect(() => {
+    if (!isEconomicalStandProduct) return;
+
+    setForm((prev) => {
+      if (
+        prev.width === ECONOMICAL_STAND_WIDTH_IN.toString() &&
+        prev.height === ECONOMICAL_STAND_HEIGHT_IN.toString() &&
+        prev.unit === "inches"
+      ) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        width: ECONOMICAL_STAND_WIDTH_IN.toString(),
+        height: ECONOMICAL_STAND_HEIGHT_IN.toString(),
+        unit: "inches",
+      };
+    });
+  }, [isEconomicalStandProduct]);
+
   return (
     <div className="min-h-[calc(100vh-96px)] bg-[linear-gradient(145deg,#f4f4f5_0%,#ececef_55%,#e4e4e7_100%)] text-zinc-800">
       <div className="mx-auto max-w-[1400px] px-4 py-5">
@@ -567,7 +609,7 @@ export default function VinylBannerBuilder({
                 <p className="mt-0.5 text-xs font-medium text-zinc-500">{productDescription}</p>
               )}
               <p className="mt-1 text-sm text-zinc-600">
-                Drag to reposition artwork. Use the corner handle to resize and auto-update dimensions.
+                Drag to reposition artwork{isEconomicalStandProduct ? " in the standard 33.5\" x 80\" area." : ". Use the corner handle to resize and auto-update dimensions."}
               </p>
             </div>
             <div className="rounded-xl border border-orange-200 bg-gradient-to-r from-orange-50 to-amber-50 px-4 py-2 text-right">
@@ -585,6 +627,7 @@ export default function VinylBannerBuilder({
                 <div className="text-sm font-medium text-zinc-700">
                   Artboard Size: {(widthIn / 12).toFixed(2)} ft x {(heightIn / 12).toFixed(2)} ft
                 </div>
+                {!isEconomicalStandProduct && (
                 <div className="flex items-center gap-2">
                   <label className="sc-label-fx text-xs font-semibold uppercase tracking-[0.14em] text-zinc-500">Zoom</label>
                   <input
@@ -598,6 +641,7 @@ export default function VinylBannerBuilder({
                   />
                   <span className="w-10 text-right text-xs font-semibold text-zinc-600">{Math.round(zoom * 100)}%</span>
                 </div>
+                )}
               </div>
             </div>
 
@@ -616,7 +660,7 @@ export default function VinylBannerBuilder({
 
               <div
                 className={`absolute left-1/2 top-1/2 cursor-move select-none rounded-md shadow-lg ${
-                  isMeshProduct
+                  isMeshProduct || isEconomicalStandProduct
                     ? "border border-zinc-500 bg-white"
                     : "border-2 border-dashed border-orange-500 bg-orange-50/55"
                 }`}
@@ -627,7 +671,7 @@ export default function VinylBannerBuilder({
                   transform: `translate(calc(-50% + ${artPos.x}px), calc(-50% + ${artPos.y}px))`,
                 }}
               >
-                {isMeshProduct && (
+                {(isMeshProduct || isEconomicalStandProduct) && (
                   <>
                     <div className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-600">
                       Top Of Image
@@ -671,45 +715,53 @@ export default function VinylBannerBuilder({
                   </span>
                 ))}
 
-                <button
-                  type="button"
-                  data-role="resize-handle"
-                  onPointerDown={startResize}
-                  className="absolute -bottom-3 -right-3 h-6 w-6 rounded-full border-2 border-white bg-orange-500 shadow"
-                  aria-label="Resize banner"
-                  title="Drag to resize"
-                />
+                {!isEconomicalStandProduct && (
+                  <button
+                    type="button"
+                    data-role="resize-handle"
+                    onPointerDown={startResize}
+                    className="absolute -bottom-3 -right-3 h-6 w-6 rounded-full border-2 border-white bg-orange-500 shadow"
+                    aria-label="Resize banner"
+                    title="Drag to resize"
+                  />
+                )}
               </div>
             </div>
 
             <div className="border-t border-zinc-200 bg-zinc-50 p-3">
               <div className="grid gap-2 md:grid-cols-3 xl:grid-cols-8">
-                <ControlBox title="Size" error={errors.width || errors.height} className="md:col-span-2 xl:col-span-2">
-                  <div className="grid grid-cols-[1fr_1fr_70px] gap-1">
-                    <input
-                      type="number"
-                      value={form.width}
-                      onChange={(e) => set("width", e.target.value)}
-                      className="h-9 min-w-0 appearance-none rounded border border-zinc-300 px-2 text-sm text-zinc-800"
-                      placeholder="W"
-                    />
-                    <input
-                      type="number"
-                      value={form.height}
-                      onChange={(e) => set("height", e.target.value)}
-                      className="h-9 min-w-0 appearance-none rounded border border-zinc-300 px-2 text-sm text-zinc-800"
-                      placeholder="H"
-                    />
-                    <select
-                      value={form.unit}
-                      onChange={(e) => set("unit", e.target.value as Unit)}
-                      className="h-9 rounded border border-zinc-300 bg-white px-1 text-sm"
-                    >
-                      {unitOptions.map((unit) => (
-                        <option key={unit} value={unit}>{unit === "inches" ? "in" : "ft"}</option>
-                      ))}
-                    </select>
-                  </div>
+                <ControlBox title="Size" error={isEconomicalStandProduct ? undefined : errors.width || errors.height} className="md:col-span-2 xl:col-span-2">
+                  {isEconomicalStandProduct ? (
+                    <div className="flex h-9 items-center rounded border border-zinc-300 bg-zinc-100 px-2 text-sm font-medium text-zinc-700">
+                      33.5 in x 80 in (Standard)
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-[1fr_1fr_70px] gap-1">
+                      <input
+                        type="number"
+                        value={form.width}
+                        onChange={(e) => set("width", e.target.value)}
+                        className="h-9 min-w-0 appearance-none rounded border border-zinc-300 px-2 text-sm text-zinc-800"
+                        placeholder="W"
+                      />
+                      <input
+                        type="number"
+                        value={form.height}
+                        onChange={(e) => set("height", e.target.value)}
+                        className="h-9 min-w-0 appearance-none rounded border border-zinc-300 px-2 text-sm text-zinc-800"
+                        placeholder="H"
+                      />
+                      <select
+                        value={form.unit}
+                        onChange={(e) => set("unit", e.target.value as Unit)}
+                        className="h-9 rounded border border-zinc-300 bg-white px-1 text-sm"
+                      >
+                        {unitOptions.map((unit) => (
+                          <option key={unit} value={unit}>{unit === "inches" ? "in" : "ft"}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                 </ControlBox>
 
                 {!isPosterProduct && (
@@ -744,7 +796,7 @@ export default function VinylBannerBuilder({
                 </ControlBox>
                 )}
 
-                {!(isCanvasProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct) && (
+                {!(isCanvasProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct || isEconomicalStandProduct) && (
                   <>
                     {!isMeshProduct && (
                       <ControlBox title="Print">
@@ -883,6 +935,14 @@ export default function VinylBannerBuilder({
                   </ControlBox>
                 )}
 
+                {isEconomicalStandProduct && (
+                  <ControlBox title="Format">
+                    <div className="flex h-9 items-center rounded border border-zinc-300 bg-zinc-100 px-2 text-sm font-medium text-zinc-700">
+                      Single-Sided
+                    </div>
+                  </ControlBox>
+                )}
+
                 {isPosterProduct ? (
                   <ControlBox title="Add">
                     <Button
@@ -938,6 +998,12 @@ export default function VinylBannerBuilder({
                     <Row label="Grommets" value="Included" />
                     <Row label="Rush Surcharge" value={formatPrice(pricing.rushSurchargePerUnit)} />
                     <Row label="Minimum Unit Price" value="$20.00" />
+                  </>
+                ) : isEconomicalStandProduct ? (
+                  <>
+                    <Row label="Standard Size" value='33.5" x 80"' />
+                    <Row label="Format" value="Single-Sided" />
+                    <Row label="Fixed Unit Price" value={formatPrice(ECONOMICAL_STAND_UNIT_PRICE)} />
                   </>
                 ) : isPosterProduct ? (
                   <>
