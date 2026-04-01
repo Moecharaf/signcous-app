@@ -25,9 +25,8 @@ const MANUAL_BANNER_PRODUCTS: ManualBannerProductCard[] = [
     href: "/banners/economical-banner-stand",
     description: "Standard 33.5 x 80 single-sided banner stand at a fixed $130 per banner.",
     label: "Builder",
-    image: "/card-images/ECONOSTAND-BG.png",
-    imageAlt: "Economical Banner Stand",
-    theme: "manual-economical-stand",
+    image: "/card-images/Ecostand.png",
+    imageAlt: "Economical Banner Stand display",
   },
   {
     id: "manual-hdpe",
