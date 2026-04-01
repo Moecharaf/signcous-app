@@ -59,6 +59,14 @@ export const CORO_SHEET = {
 
 export const CORO_MARKUP = 1.6;
 
+// Signs365 uses fixed sheet counts for some sizes instead of pure max packing.
+const SIGNS365_SIGNS_PER_SHEET_OVERRIDES: Record<string, number> = {
+  "11x11": 32,
+  "12x16": 24,
+  "12x18": 20,
+  "24x36": 5,
+};
+
 export const CORO_SIZE_OPTIONS: CoroSizeOption[] = [
   { id: "10.5x29", width: 10.5, height: 29 },
   { id: "11x11", width: 11, height: 11 },
@@ -174,6 +182,10 @@ function chooseBetterLayout(current: CoroSheetLayout, candidate: CoroSheetLayout
   return candidate.count > current.count ? candidate : current;
 }
 
+function getSizeKey(width: number, height: number): string {
+  return `${Number(width)}x${Number(height)}`;
+}
+
 function centerPlacementsInSheet(placements: CoroSheetPlacement[]): CoroSheetPlacement[] {
   if (placements.length === 0) return placements;
 
@@ -215,10 +227,13 @@ export function getBestSheetLayout(width: number, height: number): CoroSheetLayo
     true
   );
 
+  const candidates: CoroSheetLayout[] = [
+    { count: normalPlacements.length, placements: normalPlacements },
+    { count: rotatedPlacements.length, placements: rotatedPlacements },
+  ];
+
   let best: CoroSheetLayout =
-    normalPlacements.length >= rotatedPlacements.length
-      ? { count: normalPlacements.length, placements: normalPlacements }
-      : { count: rotatedPlacements.length, placements: rotatedPlacements };
+    candidates[0].count >= candidates[1].count ? candidates[0] : candidates[1];
 
   const splitXCandidates = new Set<number>([0, CORO_SHEET.width]);
   const splitYCandidates = new Set<number>([0, CORO_SHEET.height]);
@@ -243,6 +258,10 @@ export function getBestSheetLayout(width: number, height: number): CoroSheetLayo
       count: leftNormal.length + rightRotated.length,
       placements: [...leftNormal, ...rightRotated],
     });
+    candidates.push({
+      count: leftNormal.length + rightRotated.length,
+      placements: [...leftNormal, ...rightRotated],
+    });
 
     const leftRotated = buildGridPlacements(0, 0, splitX, CORO_SHEET.height, height, width, true);
     const rightNormal = buildGridPlacements(
@@ -255,6 +274,10 @@ export function getBestSheetLayout(width: number, height: number): CoroSheetLayo
       false
     );
     best = chooseBetterLayout(best, {
+      count: leftRotated.length + rightNormal.length,
+      placements: [...leftRotated, ...rightNormal],
+    });
+    candidates.push({
       count: leftRotated.length + rightNormal.length,
       placements: [...leftRotated, ...rightNormal],
     });
@@ -275,6 +298,10 @@ export function getBestSheetLayout(width: number, height: number): CoroSheetLayo
       count: topNormal.length + bottomRotated.length,
       placements: [...topNormal, ...bottomRotated],
     });
+    candidates.push({
+      count: topNormal.length + bottomRotated.length,
+      placements: [...topNormal, ...bottomRotated],
+    });
 
     const topRotated = buildGridPlacements(0, 0, CORO_SHEET.width, splitY, height, width, true);
     const bottomNormal = buildGridPlacements(
@@ -290,6 +317,27 @@ export function getBestSheetLayout(width: number, height: number): CoroSheetLayo
       count: topRotated.length + bottomNormal.length,
       placements: [...topRotated, ...bottomNormal],
     });
+    candidates.push({
+      count: topRotated.length + bottomNormal.length,
+      placements: [...topRotated, ...bottomNormal],
+    });
+  }
+
+  const overrideCount = SIGNS365_SIGNS_PER_SHEET_OVERRIDES[getSizeKey(width, height)];
+  if (overrideCount) {
+    const exact = candidates.filter((candidate) => candidate.count === overrideCount);
+    if (exact.length > 0) {
+      // Prefer layout with fewer rotated signs when multiple exact matches exist.
+      exact.sort((a, b) => {
+        const aRotated = a.placements.filter((placement) => placement.rotated).length;
+        const bRotated = b.placements.filter((placement) => placement.rotated).length;
+        return aRotated - bRotated;
+      });
+      return {
+        count: overrideCount,
+        placements: centerPlacementsInSheet(exact[0].placements),
+      };
+    }
   }
 
   return {
