@@ -108,6 +108,10 @@ const CATEGORY_ICON: Record<HomeCatalogSection["key"], string> = {
   magnet: "∪",
 };
 
+const HERO_IMAGE_OVERRIDE: Partial<Record<HomeCatalogSection["key"], string>> = {
+  banner: "/card-images/HDbanner-Banner.png",
+};
+
 const CATEGORY_THEME: Record<HomeCatalogSection["key"], { hero: string; chip: string }> = {
   banner: {
     hero: "from-[#d97706] via-[#f2bd1f] to-[#ffe69e]",
@@ -198,7 +202,8 @@ export default function HomeCatalogClient({ sections, manualBannerProducts }: Ho
   }
 
   const theme = CATEGORY_THEME[activeSection.key];
-  const activeHeroImage =
+  const heroOverride = HERO_IMAGE_OVERRIDE[activeSection.key] ?? null;
+  const activeHeroImage = heroOverride ??
     activeSection.heroImages[heroFrame % Math.max(activeSection.heroImages.length, 1)] ?? null;
 
   return (
