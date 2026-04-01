@@ -62,6 +62,7 @@ export const CORO_MARKUP = 1.6;
 // Signs365 uses fixed sheet counts for some sizes instead of pure max packing.
 const SIGNS365_SIGNS_PER_SHEET_OVERRIDES: Record<string, number> = {
   "11x11": 32,
+  "14x10": 27,
   "12x16": 24,
   "12x18": 20,
   "12x34": 10,
