@@ -89,6 +89,7 @@ const BASE_PX_PER_IN = 2.4;
 const ECONOMICAL_STAND_WIDTH_IN = 33.5;
 const ECONOMICAL_STAND_HEIGHT_IN = 80;
 const ECONOMICAL_STAND_UNIT_PRICE = 130;
+const ECONOMICAL_STAND_PREVIEW_HEIGHT = 520;
 
 function clamp(n: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, n));
@@ -101,6 +102,12 @@ function toInches(value: number, unit: Unit): number {
 function fromInches(value: number, unit: Unit): string {
   if (unit === "feet") return (value / 12).toFixed(2);
   return value.toFixed(1);
+}
+
+function formatInchLabel(value: number): string {
+  const rounded = parseFloat(value.toFixed(2));
+  const text = Number.isInteger(rounded) ? rounded.toFixed(0) : rounded.toString();
+  return `${text.replace(/\.0+$/, "")}\"`;
 }
 
 function getGrommetPoints(
@@ -180,9 +187,13 @@ export default function VinylBannerBuilder({
   const meshWebbingCost = form.meshWebbing ? perimeterFt * 1.75 : 0;
   const meshRopeCost = form.meshRope ? perimeterFt * 1.75 : 0;
 
-  const pxPerIn = BASE_PX_PER_IN * zoom;
-  const artWidth = clamp(widthIn * pxPerIn, 90, 760);
-  const artHeight = clamp(heightIn * pxPerIn, 70, 460);
+  const pxPerIn = isEconomicalStandProduct
+    ? ECONOMICAL_STAND_PREVIEW_HEIGHT / ECONOMICAL_STAND_HEIGHT_IN
+    : BASE_PX_PER_IN * zoom;
+  const artWidth = isEconomicalStandProduct ? widthIn * pxPerIn : clamp(widthIn * pxPerIn, 90, 760);
+  const artHeight = isEconomicalStandProduct ? heightIn * pxPerIn : clamp(heightIn * pxPerIn, 70, 460);
+  const widthLabelInches = formatInchLabel(widthIn);
+  const heightLabelInches = formatInchLabel(heightIn);
 
   const canvasRate = useMemo(() => getCanvasSqFtRate(qtyNum), [qtyNum]);
   const hdpeRate = useMemo(() => getHdpeSqFtRate(qtyNum), [qtyNum]);
@@ -700,7 +711,7 @@ export default function VinylBannerBuilder({
                   transform: `translate(calc(-50% + ${artPos.x}px), calc(-50% + ${artPos.y}px))`,
                 }}
               >
-                {(isMeshProduct || isEconomicalStandProduct) && (
+                {isMeshProduct && (
                   <>
                     <div className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-600">
                       Top Of Image
@@ -710,6 +721,27 @@ export default function VinylBannerBuilder({
                     </div>
                     <div className="pointer-events-none absolute -right-7 top-1/2 -translate-y-1/2 rotate-90 text-[11px] text-zinc-500">
                       {heightNum.toFixed(2)} {form.unit === "feet" ? "ft" : "in"}
+                    </div>
+                  </>
+                )}
+
+                {isEconomicalStandProduct && (
+                  <>
+                    <div className="pointer-events-none absolute -top-11 left-1/2 flex -translate-x-1/2 flex-col items-center text-[11px] font-semibold text-zinc-700">
+                      <span className="text-[10px] uppercase tracking-[0.25em] text-zinc-500">Top Of Image</span>
+                      <div className="mt-1 flex items-center gap-2 text-zinc-700">
+                        <span className="h-px w-12 bg-zinc-400" />
+                        <span>{widthLabelInches}</span>
+                        <span className="h-px w-12 bg-zinc-400" />
+                      </div>
+                    </div>
+                    <div className="pointer-events-none absolute -right-14 top-1/2 flex -translate-y-1/2 flex-col items-center text-[11px] font-semibold text-zinc-700">
+                      <span className="h-16 w-px bg-zinc-400" />
+                      <span className="my-2 -rotate-90">{heightLabelInches}</span>
+                      <span className="h-16 w-px bg-zinc-400" />
+                    </div>
+                    <div className="pointer-events-none absolute -bottom-7 left-1/2 -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.25em] text-zinc-500">
+                      Front Side
                     </div>
                   </>
                 )}
