@@ -174,6 +174,27 @@ function chooseBetterLayout(current: CoroSheetLayout, candidate: CoroSheetLayout
   return candidate.count > current.count ? candidate : current;
 }
 
+function centerPlacementsInSheet(placements: CoroSheetPlacement[]): CoroSheetPlacement[] {
+  if (placements.length === 0) return placements;
+
+  const minX = Math.min(...placements.map((placement) => placement.x));
+  const minY = Math.min(...placements.map((placement) => placement.y));
+  const maxX = Math.max(...placements.map((placement) => placement.x + placement.width));
+  const maxY = Math.max(...placements.map((placement) => placement.y + placement.height));
+
+  const usedWidth = maxX - minX;
+  const usedHeight = maxY - minY;
+
+  const offsetX = (CORO_SHEET.width - usedWidth) / 2 - minX;
+  const offsetY = (CORO_SHEET.height - usedHeight) / 2 - minY;
+
+  return placements.map((placement) => ({
+    ...placement,
+    x: Number((placement.x + offsetX).toFixed(4)),
+    y: Number((placement.y + offsetY).toFixed(4)),
+  }));
+}
+
 export function getBestSheetLayout(width: number, height: number): CoroSheetLayout {
   const normalPlacements = buildGridPlacements(
     0,
@@ -273,7 +294,7 @@ export function getBestSheetLayout(width: number, height: number): CoroSheetLayo
 
   return {
     count: Math.max(1, best.count),
-    placements: best.placements,
+    placements: centerPlacementsInSheet(best.placements),
   };
 }
 
