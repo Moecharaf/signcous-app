@@ -400,13 +400,27 @@ export default function VinylBannerBuilder({
       unit: form.unit,
       quantity: effectiveQtyNum,
       material: isNoCurlProduct ? "No-Curl Banner" : isPosterProduct ? "Poster" : isHdpeProduct ? "HDPE" : isCanvasProduct ? "Canvas" : isMeshProduct ? "Mesh Banner" : form.material,
-      doubleSided: (isCanvasProduct || isMeshProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct) ? false : form.doubleSided,
-      grommets: isNoCurlProduct ? true : (isCanvasProduct || isHdpeProduct || isPosterProduct) ? false : form.grommets,
-      edgeFinish: (isCanvasProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct) ? "none" : isMeshProduct ? meshEdgeFinish : form.edgeFinish,
-      polePockets: (isCanvasProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct) ? false : form.polePockets,
-      windSlits: (isCanvasProduct || isMeshProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct) ? false : form.windSlits,
-      hemming: (isCanvasProduct || isMeshProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct) ? false : form.hemming,
-      rush: (isCanvasProduct || isHdpeProduct || isPosterProduct) ? false : form.rush,
+      doubleSided: (isCanvasProduct || isMeshProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct || isEconomicalStandProduct) ? false : form.doubleSided,
+      grommets: isNoCurlProduct
+        ? true
+        : (isCanvasProduct || isHdpeProduct || isPosterProduct || isEconomicalStandProduct)
+          ? false
+          : form.grommets,
+      edgeFinish: (isCanvasProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct || isEconomicalStandProduct)
+        ? "none"
+        : isMeshProduct
+          ? meshEdgeFinish
+          : form.edgeFinish,
+      polePockets: (isCanvasProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct || isEconomicalStandProduct)
+        ? false
+        : form.polePockets,
+      windSlits: (isCanvasProduct || isMeshProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct || isEconomicalStandProduct)
+        ? false
+        : form.windSlits,
+      hemming: (isCanvasProduct || isMeshProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct || isEconomicalStandProduct)
+        ? false
+        : form.hemming,
+      rush: (isCanvasProduct || isHdpeProduct || isPosterProduct || isEconomicalStandProduct) ? false : form.rush,
       uploadedFileUrl,
       uploadedFileName,
       unitPrice: pricing.unitPrice,
@@ -577,19 +591,34 @@ export default function VinylBannerBuilder({
     if (!isEconomicalStandProduct) return;
 
     setForm((prev) => {
-      if (
-        prev.width === ECONOMICAL_STAND_WIDTH_IN.toString() &&
-        prev.height === ECONOMICAL_STAND_HEIGHT_IN.toString() &&
-        prev.unit === "inches"
-      ) {
+      const targetWidth = ECONOMICAL_STAND_WIDTH_IN.toString();
+      const targetHeight = ECONOMICAL_STAND_HEIGHT_IN.toString();
+      const needsUpdate =
+        prev.width !== targetWidth ||
+        prev.height !== targetHeight ||
+        prev.unit !== "inches" ||
+        prev.doubleSided !== false ||
+        prev.grommets !== false ||
+        prev.polePockets !== false ||
+        prev.windSlits !== false ||
+        prev.hemming !== false ||
+        prev.rush !== false;
+
+      if (!needsUpdate) {
         return prev;
       }
 
       return {
         ...prev,
-        width: ECONOMICAL_STAND_WIDTH_IN.toString(),
-        height: ECONOMICAL_STAND_HEIGHT_IN.toString(),
+        width: targetWidth,
+        height: targetHeight,
         unit: "inches",
+        doubleSided: false,
+        grommets: false,
+        polePockets: false,
+        windSlits: false,
+        hemming: false,
+        rush: false,
       };
     });
   }, [isEconomicalStandProduct]);
