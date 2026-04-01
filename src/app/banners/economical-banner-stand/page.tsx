@@ -13,7 +13,7 @@ export default function EconomicalBannerStandPage() {
       productName="Economical Banner Stand"
       productDescription='Standard 33.5" x 80" single-sided banner stand at $130 per banner.'
       pricingMode="economical-stand"
-      productId={124}
+      productId={70}
     />
   );
 }

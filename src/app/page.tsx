@@ -17,7 +17,7 @@ import {
 const MANUAL_BANNER_PRODUCTS: ManualBannerProductCard[] = [
   {
     id: "manual-economical-stand",
-    productId: 124,
+    productId: 70,
     name: "Economical Banner Stand",
     displayName: "ECONO STAND",
     titleImage: "/card-images/ECONOSTAND.png",
