@@ -95,6 +95,18 @@ const MANUAL_BANNER_PRODUCTS: ManualBannerProductCard[] = [
   },
 ];
 
+const MANUAL_RIGID_PRODUCTS: HomeCatalogProductCard[] = [
+  {
+    id: 130013,
+    name: "CORO",
+    href: "/rigid/coro",
+    priceLabel: "Custom Pricing",
+    summary: "Signs365-style CORO builder with per-sheet layout and live pricing.",
+    image: null,
+    imageAlt: "CORO Rigid Signs",
+  },
+];
+
 function stripHtml(input: string): string {
   return input.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
 }
@@ -243,9 +255,28 @@ export default async function HomePage() {
     };
   });
 
+  const sectionsWithManualRigid = sections.map((section) => {
+    if (section.key !== "rigid") return section;
+
+    const alreadyHasCoro = section.products.some(
+      (product) =>
+        product.href === "/rigid/coro" ||
+        product.name.toLowerCase().includes("coro") ||
+        product.name.toLowerCase().includes("coroplast")
+    );
+
+    if (alreadyHasCoro) return section;
+
+    return {
+      ...section,
+      productCount: section.productCount + MANUAL_RIGID_PRODUCTS.length,
+      products: [...MANUAL_RIGID_PRODUCTS, ...section.products],
+    };
+  });
+
   return (
     <HomeCatalogClient
-      sections={sections}
+      sections={sectionsWithManualRigid}
       manualBannerProducts={manualBannerProducts}
     />
   );
