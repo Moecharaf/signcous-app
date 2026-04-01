@@ -26,6 +26,7 @@ export interface CartItem {
   rush: boolean;
   uploadedFileUrl: string | null;
   uploadedFileName?: string | null;
+  customOptions?: Record<string, string>;
   unitPrice: number;
   totalPrice: number;
   addedAt: number;

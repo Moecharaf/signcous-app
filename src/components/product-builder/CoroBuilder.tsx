@@ -1,0 +1,458 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import Button from "@/components/ui/Button";
+import { useCart } from "@/context/CartContext";
+import {
+  CORO_SHEET,
+  CORO_SIZE_OPTIONS,
+  calculateCoroPricing,
+  formatCoroSize,
+  getSheetColumnsRows,
+  type CoroMaterial,
+  type CoroPrintMode,
+} from "@/lib/coro-pricing";
+
+interface CoroBuilderProps {
+  productId?: number;
+  productName?: string;
+}
+
+function formatPrice(value: number): string {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(value);
+}
+
+function formatSheetLabel(columns: number, rows: number): string {
+  return `${columns * rows} signs - Top of Sheet`;
+}
+
+export default function CoroBuilder({ productId = 13, productName = "CORO" }: CoroBuilderProps) {
+  const cart = useCart();
+
+  const [sizeId, setSizeId] = useState(CORO_SIZE_OPTIONS[0].id);
+  const [material, setMaterial] = useState<CoroMaterial>("4mm");
+  const [printMode, setPrintMode] = useState<CoroPrintMode>("single");
+  const [quantity, setQuantity] = useState(1);
+
+  const [stepStakes, setStepStakes] = useState(0);
+  const [heavyDutyStakes, setHeavyDutyStakes] = useState(0);
+  const [grommetsEnabled, setGrommetsEnabled] = useState(false);
+  const [grommetCount, setGrommetCount] = useState(4);
+  const [gloss, setGloss] = useState(false);
+  const [contourCut, setContourCut] = useState(false);
+  const [rush, setRush] = useState(false);
+
+  const [uploadingArtwork, setUploadingArtwork] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null);
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  const [added, setAdded] = useState(false);
+
+  const activeSize = useMemo(
+    () => CORO_SIZE_OPTIONS.find((size) => size.id === sizeId) ?? CORO_SIZE_OPTIONS[0],
+    [sizeId]
+  );
+
+  const pricing = useMemo(
+    () =>
+      calculateCoroPricing({
+        width: activeSize.width,
+        height: activeSize.height,
+        quantity,
+        material,
+        printMode,
+        stepStakes,
+        heavyDutyStakes,
+        grommetsEnabled,
+        grommetCount,
+        gloss,
+        contourCut,
+        rush,
+      }),
+    [
+      activeSize.width,
+      activeSize.height,
+      quantity,
+      material,
+      printMode,
+      stepStakes,
+      heavyDutyStakes,
+      grommetsEnabled,
+      grommetCount,
+      gloss,
+      contourCut,
+      rush,
+    ]
+  );
+
+  const layout = useMemo(
+    () => getSheetColumnsRows(activeSize.width, activeSize.height),
+    [activeSize.height, activeSize.width]
+  );
+
+  const cells = layout.columns * layout.rows;
+  const usedCellsOnFirstSheet = Math.min(cells, quantity);
+
+  async function onUploadArtwork(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploadingArtwork(true);
+    setUploadError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/upload-artwork", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = (await response.json()) as {
+        fileUrl?: string;
+        originalName?: string;
+        error?: string;
+      };
+
+      if (!response.ok || !data.fileUrl) {
+        setUploadError(data.error ?? "Artwork upload failed.");
+        return;
+      }
+
+      setUploadedFileUrl(data.fileUrl);
+      setUploadedFileName(data.originalName ?? file.name);
+    } catch {
+      setUploadError("Artwork upload failed. Please try again.");
+    } finally {
+      setUploadingArtwork(false);
+      event.target.value = "";
+    }
+  }
+
+  function addToCart() {
+    const safeQuantity = Math.max(1, Math.floor(quantity));
+    const materialLabel = `${productName} ${material} ${printMode === "single" ? "Single-Sided" : "Double-Sided"}`;
+
+    cart.addItem({
+      productId,
+      productName,
+      width: activeSize.width,
+      height: activeSize.height,
+      unit: "inches",
+      quantity: safeQuantity,
+      material: materialLabel,
+      doubleSided: printMode === "double",
+      grommets: grommetsEnabled,
+      edgeFinish: "none",
+      polePockets: false,
+      windSlits: false,
+      hemming: false,
+      rush,
+      uploadedFileUrl,
+      uploadedFileName,
+      customOptions: {
+        custom_sheet_size: `${CORO_SHEET.width}\" x ${CORO_SHEET.height}\"`,
+        custom_sign_size: formatCoroSize(activeSize),
+        custom_signs_per_sheet: String(pricing.signsPerSheet),
+        custom_sheets_required: String(pricing.sheetsRequired),
+        custom_material_thickness: material,
+        custom_print_mode: printMode === "single" ? "Single-Sided" : "Double-Sided",
+        custom_step_stakes: String(stepStakes),
+        custom_heavy_duty_stakes: String(heavyDutyStakes),
+        custom_grommet_count: grommetsEnabled ? String(grommetCount) : "0",
+        custom_gloss: gloss ? "yes" : "no",
+        custom_contour_cut: contourCut ? "yes" : "no",
+        custom_rush_surcharge_mode: rush ? "+120%" : "none",
+      },
+      unitPrice: pricing.unitPrice,
+      totalPrice: pricing.totalPrice,
+    });
+
+    setAdded(true);
+    window.setTimeout(() => setAdded(false), 1800);
+  }
+
+  return (
+    <div className="min-h-[calc(100vh-96px)] bg-[linear-gradient(145deg,#f4f4f5_0%,#ececef_55%,#e4e4e7_100%)] text-zinc-800">
+      <div className="mx-auto max-w-[1420px] px-3 py-4 md:px-5">
+        <div className="mb-3 grid gap-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm md:grid-cols-[1fr_auto] md:items-end">
+          <div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500">Rigid Product</div>
+            <h1 className="mt-1 text-3xl font-semibold tracking-tight text-zinc-900">CORO Configurator</h1>
+            <p className="mt-1 text-sm text-zinc-600">Signs365-style sheet layout using your custom markup and add-on pricing.</p>
+          </div>
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-right">
+            <div className="text-xs uppercase tracking-[0.14em] text-emerald-700">Live Total</div>
+            <div className="text-3xl font-semibold text-zinc-900">{formatPrice(pricing.totalPrice)}</div>
+            <div className="text-xs text-emerald-800/80">{quantity} sign{quantity !== 1 ? "s" : ""} · {pricing.sheetsRequired} sheet{pricing.sheetsRequired !== 1 ? "s" : ""}</div>
+          </div>
+        </div>
+
+        <div className="grid gap-3 xl:grid-cols-[1fr_420px]">
+          <section className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
+            <div className="border-b border-zinc-200 px-4 py-3">
+              <div className="text-sm font-medium text-zinc-700">{formatSheetLabel(layout.columns, layout.rows)}</div>
+            </div>
+
+            <div className="relative h-[62vh] min-h-[460px] overflow-hidden rounded-b-2xl bg-[#f7f7f7]">
+              <div
+                className="absolute left-1/2 top-1/2 grid -translate-x-1/2 -translate-y-1/2 gap-[2px] border border-zinc-500 bg-white p-[2px]"
+                style={{
+                  width: 220,
+                  height: 440,
+                  gridTemplateColumns: `repeat(${layout.columns}, minmax(0, 1fr))`,
+                }}
+              >
+                {Array.from({ length: cells }).map((_, index) => {
+                  const active = index < usedCellsOnFirstSheet;
+
+                  return (
+                    <div
+                      key={`cell-${index}`}
+                      className={`border ${active ? "border-blue-600 bg-blue-100" : "border-zinc-300 bg-zinc-50"}`}
+                    />
+                  );
+                })}
+              </div>
+
+              <div className="pointer-events-none absolute left-1/2 top-[calc(50%-236px)] -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+                Top of Sheet
+              </div>
+              <div className="pointer-events-none absolute left-1/2 top-[calc(50%+232px)] -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+                Front Side
+              </div>
+              <div className="pointer-events-none absolute left-[calc(50%-128px)] top-1/2 -translate-y-1/2 -rotate-90 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+                Left
+              </div>
+              <div className="pointer-events-none absolute left-[calc(50%+128px)] top-1/2 -translate-y-1/2 rotate-90 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+                Right
+              </div>
+            </div>
+
+            <div className="grid gap-2 border-t border-zinc-200 bg-zinc-50 p-3 md:grid-cols-4 xl:grid-cols-8">
+              <ControlBox title="Images">
+                <div className="flex h-9 items-center justify-between rounded border border-zinc-300 bg-white px-2 text-sm">
+                  <span>1</span>
+                  <span className="text-xs text-zinc-500">single artwork</span>
+                </div>
+              </ControlBox>
+
+              <ControlBox title="Size" className="md:col-span-2">
+                <select
+                  value={sizeId}
+                  onChange={(event) => setSizeId(event.target.value)}
+                  className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"
+                >
+                  {CORO_SIZE_OPTIONS.map((size) => (
+                    <option key={size.id} value={size.id}>{formatCoroSize(size)}</option>
+                  ))}
+                </select>
+              </ControlBox>
+
+              <ControlBox title="Material">
+                <select
+                  value={material}
+                  onChange={(event) => setMaterial(event.target.value as CoroMaterial)}
+                  className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"
+                >
+                  <option value="4mm">4mm</option>
+                  <option value="10mm">10mm</option>
+                </select>
+              </ControlBox>
+
+              <ControlBox title="Print Sides">
+                <select
+                  value={printMode}
+                  onChange={(event) => setPrintMode(event.target.value as CoroPrintMode)}
+                  className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"
+                >
+                  <option value="single">Single</option>
+                  <option value="double">Double</option>
+                </select>
+              </ControlBox>
+
+              <ControlBox title="Grommets">
+                <button
+                  type="button"
+                  onClick={() => setGrommetsEnabled((prev) => !prev)}
+                  className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"
+                >
+                  {grommetsEnabled ? "Yes" : "No"}
+                </button>
+              </ControlBox>
+
+              <ControlBox title="Qty / Add">
+                <div className="grid grid-cols-[68px_1fr] gap-1">
+                  <input
+                    type="number"
+                    min={1}
+                    value={quantity}
+                    onChange={(event) => setQuantity(Math.max(1, Number(event.target.value) || 1))}
+                    className="h-9 rounded border border-zinc-300 px-2 text-sm"
+                  />
+                  <Button className="h-9 rounded bg-orange-500 text-xs font-semibold text-white hover:bg-orange-400" onClick={addToCart}>
+                    {added ? "Added" : "Add"}
+                  </Button>
+                </div>
+              </ControlBox>
+            </div>
+          </section>
+
+          <aside className="space-y-3">
+            <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
+              <div className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">Pricing Breakdown</div>
+              <div className="mt-3 space-y-2 text-sm">
+                <Row label="Supplier Sheet" value={formatPrice(pricing.supplierSheetPrice)} />
+                <Row label="Signs / Sheet" value={String(pricing.signsPerSheet)} />
+                <Row label="Sheets Needed" value={String(pricing.sheetsRequired)} />
+                <Row label="Supplier Cost / Sign" value={formatPrice(pricing.supplierCostPerSign)} />
+                <Row label="Your Marked Unit" value={formatPrice(pricing.markedUpUnitPrice)} />
+                <Row label="Base Subtotal" value={formatPrice(pricing.baseSubtotal)} />
+                <Row label="Step Stakes" value={formatPrice(pricing.stepStakesFee)} />
+                <Row label="Heavy Stakes" value={formatPrice(pricing.heavyDutyStakesFee)} />
+                <Row label="Grommets" value={formatPrice(pricing.grommetFee)} />
+                <Row label="Gloss" value={formatPrice(pricing.glossFee)} />
+                <Row label="Contour Cut" value={formatPrice(pricing.contourCutFee)} />
+                <Row label="Rush (+120%)" value={formatPrice(pricing.rushFee)} />
+                <div className="my-2 border-t border-zinc-200" />
+                <Row label="Unit Price" value={formatPrice(pricing.unitPrice)} strong />
+                <Row label="Order Total" value={formatPrice(pricing.totalPrice)} strong className="text-orange-600" />
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
+              <div className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">Add-ons</div>
+              <div className="mt-3 space-y-3 text-sm">
+                <NumberField label="Step Stakes ($2.50 ea)" value={stepStakes} onChange={setStepStakes} />
+                <NumberField label="Heavy Duty Stakes ($4.00 ea)" value={heavyDutyStakes} onChange={setHeavyDutyStakes} />
+                <div>
+                  <label className="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">Grommets</label>
+                  <button
+                    type="button"
+                    onClick={() => setGrommetsEnabled((prev) => !prev)}
+                    className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-left text-sm"
+                  >
+                    {grommetsEnabled ? "Enabled" : "Disabled"}
+                  </button>
+                  {grommetsEnabled && (
+                    <input
+                      type="number"
+                      min={1}
+                      value={grommetCount}
+                      onChange={(event) => setGrommetCount(Math.max(1, Number(event.target.value) || 1))}
+                      className="mt-2 h-9 w-full rounded border border-zinc-300 px-2 text-sm"
+                    />
+                  )}
+                </div>
+                <ToggleField label="Gloss (+$6 / sign)" value={gloss} onChange={setGloss} />
+                <ToggleField label="Contour Cut (+20%)" value={contourCut} onChange={setContourCut} />
+                <ToggleField label="Rush (+120%)" value={rush} onChange={setRush} />
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
+              <div className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">Artwork</div>
+              <label className="mt-3 block cursor-pointer rounded-xl border border-dashed border-zinc-300 bg-zinc-50 px-3 py-5 text-center text-sm text-zinc-600 hover:border-orange-400 hover:bg-orange-50">
+                {uploadingArtwork ? "Uploading..." : "Upload Artwork"}
+                <input
+                  type="file"
+                  accept=".pdf,.ai,.eps,.png,.jpg,.jpeg,.tif,.tiff,.psd"
+                  className="hidden"
+                  onChange={onUploadArtwork}
+                  disabled={uploadingArtwork}
+                />
+              </label>
+              <div className="mt-2 text-xs text-zinc-500">Accepted: PDF, AI, EPS, PNG, JPG, TIFF, PSD (up to 100MB)</div>
+              {uploadedFileName && <div className="mt-2 rounded border border-emerald-200 bg-emerald-50 px-2 py-2 text-xs text-emerald-700">Uploaded: {uploadedFileName}</div>}
+              {uploadError && <div className="mt-2 rounded border border-rose-200 bg-rose-50 px-2 py-2 text-xs text-rose-700">{uploadError}</div>}
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ControlBox({
+  title,
+  className,
+  children,
+}: {
+  title: string;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className={`rounded-lg border border-zinc-200 bg-white p-2 ${className ?? ""}`}>
+      <div className="mb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">{title}</div>
+      {children}
+    </div>
+  );
+}
+
+function Row({
+  label,
+  value,
+  strong,
+  className,
+}: {
+  label: string;
+  value: string;
+  strong?: boolean;
+  className?: string;
+}) {
+  return (
+    <div className={`flex items-center justify-between ${strong ? "font-semibold text-zinc-900" : "text-zinc-700"} ${className ?? ""}`}>
+      <span>{label}</span>
+      <span>{value}</span>
+    </div>
+  );
+}
+
+function NumberField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  onChange: (value: number) => void;
+}) {
+  return (
+    <div>
+      <label className="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">{label}</label>
+      <input
+        type="number"
+        min={0}
+        value={value}
+        onChange={(event) => onChange(Math.max(0, Number(event.target.value) || 0))}
+        className="h-9 w-full rounded border border-zinc-300 px-2 text-sm"
+      />
+    </div>
+  );
+}
+
+function ToggleField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: boolean;
+  onChange: (value: boolean) => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={() => onChange(!value)}
+      className="flex h-9 w-full items-center justify-between rounded border border-zinc-300 bg-white px-3 text-sm"
+    >
+      <span>{label}</span>
+      <span className={value ? "text-emerald-600" : "text-zinc-500"}>{value ? "Yes" : "No"}</span>
+    </button>
+  );
+}

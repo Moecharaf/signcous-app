@@ -130,6 +130,13 @@ function findTopLevelCategory(
 }
 
 function buildProductHref(product: WooProduct, fallbackCategorySlug?: string): string {
+  const normalizedName = product.name.toLowerCase();
+
+  // Route CORO products to the custom rigid builder.
+  if (product.id === 13 || normalizedName.includes("coro") || normalizedName.includes("coroplast")) {
+    return "/rigid/coro";
+  }
+
   const matched = product.categories.find(
     (category) => getCollectionForCategory(category) !== undefined
   );

@@ -12,6 +12,21 @@ function formatPrice(n: number) {
 
 function LineItemCard({ item }: { item: CartItem }) {
   const { removeItem, updateQuantity } = useCart();
+  const customOptionEntries = Object.entries(item.customOptions ?? {});
+
+  const labelMap: Record<string, string> = {
+    custom_sheet_size: "Sheet Size",
+    custom_signs_per_sheet: "Signs / Sheet",
+    custom_sheets_required: "Sheets",
+    custom_print_mode: "Print",
+    custom_step_stakes: "Step Stakes",
+    custom_heavy_duty_stakes: "Heavy Stakes",
+    custom_grommet_count: "Grommet Count",
+    custom_gloss: "Gloss",
+    custom_contour_cut: "Contour Cut",
+    custom_rush_surcharge_mode: "Rush",
+  };
+
   return (
     <div className="rounded-2xl border border-white/10 bg-zinc-950 p-5">
       <div className="flex items-start justify-between gap-4">
@@ -28,6 +43,9 @@ function LineItemCard({ item }: { item: CartItem }) {
             {item.windSlits && <span>Wind slits</span>}
             {item.hemming && <span>Hemming</span>}
             {item.rush && <span className="text-orange-400">Rush</span>}
+            {customOptionEntries.map(([key, value]) => (
+              <span key={key}>{labelMap[key] ?? key.replace(/^custom_/, "").replace(/_/g, " ")}: {value}</span>
+            ))}
           </div>
         </div>
         <div className="text-right shrink-0">

@@ -60,6 +60,10 @@ export async function POST(req: NextRequest) {
         { key: "custom_file_name", value: item.uploadedFileName ?? "" },
         { key: "custom_unit_price", value: item.unitPrice.toFixed(2) },
         { key: "custom_total_price", value: item.totalPrice.toFixed(2) },
+        ...Object.entries(item.customOptions ?? {}).map(([key, value]) => ({
+          key,
+          value,
+        })),
       ],
     }));
 
