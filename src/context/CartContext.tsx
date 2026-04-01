@@ -27,6 +27,7 @@ export interface CartItem {
   uploadedFileUrl: string | null;
   uploadedFileName?: string | null;
   customOptions?: Record<string, string>;
+    uploadedFileUrls?: string[];
   unitPrice: number;
   totalPrice: number;
   addedAt: number;

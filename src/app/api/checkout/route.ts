@@ -58,6 +58,7 @@ export async function POST(req: NextRequest) {
         { key: "custom_rush", value: item.rush ? "yes" : "no" },
         { key: "custom_file_url", value: item.uploadedFileUrl ?? "" },
         { key: "custom_file_name", value: item.uploadedFileName ?? "" },
+          { key: "custom_file_urls", value: (item.uploadedFileUrls ?? []).join(", ") },
         { key: "custom_unit_price", value: item.unitPrice.toFixed(2) },
         { key: "custom_total_price", value: item.totalPrice.toFixed(2) },
         ...Object.entries(item.customOptions ?? {}).map(([key, value]) => ({

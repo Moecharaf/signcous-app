@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Button from "@/components/ui/Button";
 import { useCart } from "@/context/CartContext";
 import {
@@ -17,6 +17,17 @@ interface CoroBuilderProps {
   productId?: number;
   productName?: string;
 }
+
+  interface BlockUpload {
+    fileUrl: string;
+    fileName: string;
+    blobUrl: string | null;
+  }
+
+  const SLOT_COLORS = [
+    "bg-blue-400", "bg-emerald-400", "bg-violet-400", "bg-amber-400",
+    "bg-pink-400", "bg-cyan-400", "bg-orange-400", "bg-teal-400",
+  ];
 
 function formatPrice(value: number): string {
   return new Intl.NumberFormat("en-US", {
@@ -45,10 +56,13 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
   const [contourCut, setContourCut] = useState(false);
   const [rush, setRush] = useState(false);
 
-  const [uploadingArtwork, setUploadingArtwork] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-  const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null);
-  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  // Per-block upload state
+  const [imageCount, setImageCount] = useState(1);
+  const [blockUploads, setBlockUploads] = useState<Record<number, BlockUpload>>({});
+  const [uploadingBlock, setUploadingBlock] = useState<number | null>(null);
+  const [blockUploadErrors, setBlockUploadErrors] = useState<Record<number, string>>({});
+  const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
   const [added, setAdded] = useState(false);
 
   const activeSize = useMemo(
@@ -96,46 +110,71 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
   const cells = layout.columns * layout.rows;
   const usedCellsOnFirstSheet = Math.min(cells, quantity);
 
-  async function onUploadArtwork(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (!file) return;
+    const maxImages = cells;
+    const safeImageCount = Math.min(imageCount, maxImages);
 
-    setUploadingArtwork(true);
-    setUploadError(null);
-
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const response = await fetch("/api/upload-artwork", {
-        method: "POST",
-        body: formData,
+    async function uploadArtworkForBlock(blockIndex: number, file: File) {
+      setUploadingBlock(blockIndex);
+      setBlockUploadErrors((prev) => {
+        const n = { ...prev };
+        delete n[blockIndex];
+        return n;
       });
-
-      const data = (await response.json()) as {
-        fileUrl?: string;
-        originalName?: string;
-        error?: string;
-      };
-
-      if (!response.ok || !data.fileUrl) {
-        setUploadError(data.error ?? "Artwork upload failed.");
-        return;
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+        const response = await fetch("/api/upload-artwork", { method: "POST", body: formData });
+        const contentType = response.headers.get("content-type") ?? "";
+        let data: { fileUrl?: string; originalName?: string; error?: string } = {};
+        if (contentType.includes("application/json")) {
+          data = await response.json();
+        } else {
+          const raw = await response.text();
+          data = {
+            error:
+              response.status === 413
+                ? "Upload rejected: file too large. Ask support to increase Nginx client_max_body_size."
+                : `Upload failed (${response.status}). ${raw.slice(0, 120)}`,
+          };
+        }
+        if (!response.ok || !data.fileUrl) {
+          setBlockUploadErrors((prev) => ({ ...prev, [blockIndex]: data.error ?? "Upload failed." }));
+          return;
+        }
+        let blobUrl: string | null = null;
+        if (file.type.startsWith("image/")) {
+          blobUrl = URL.createObjectURL(file);
+        }
+        setBlockUploads((prev) => ({
+          ...prev,
+          [blockIndex]: { fileUrl: data.fileUrl!, fileName: data.originalName ?? file.name, blobUrl },
+        }));
+      } catch {
+        setBlockUploadErrors((prev) => ({ ...prev, [blockIndex]: "Upload failed. Please try again." }));
+      } finally {
+        setUploadingBlock(null);
       }
+    }
 
-      setUploadedFileUrl(data.fileUrl);
-      setUploadedFileName(data.originalName ?? file.name);
-    } catch {
-      setUploadError("Artwork upload failed. Please try again.");
-    } finally {
-      setUploadingArtwork(false);
+    function handleFileChange(blockIndex: number, event: React.ChangeEvent<HTMLInputElement>) {
+      const file = event.target.files?.[0];
+      if (file) void uploadArtworkForBlock(blockIndex, file);
       event.target.value = "";
     }
-  }
+
+    function removeBlockUpload(blockIndex: number) {
+      setBlockUploads((prev) => {
+        const n = { ...prev };
+        if (n[blockIndex]?.blobUrl) URL.revokeObjectURL(n[blockIndex].blobUrl!);
+        delete n[blockIndex];
+        return n;
+      });
+    }
 
   function addToCart() {
-    const safeQuantity = Math.max(1, Math.floor(quantity));
+    const safeQty = Math.max(1, Math.floor(quantity));
     const materialLabel = `${productName} ${material} ${printMode === "single" ? "Single-Sided" : "Double-Sided"}`;
+    const uploadedFileUrls = Array.from({ length: safeImageCount }, (_, i) => blockUploads[i]?.fileUrl ?? "").filter(Boolean);
 
     cart.addItem({
       productId,
@@ -143,7 +182,7 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
       width: activeSize.width,
       height: activeSize.height,
       unit: "inches",
-      quantity: safeQuantity,
+      quantity: safeQty,
       material: materialLabel,
       doubleSided: printMode === "double",
       grommets: grommetsEnabled,
@@ -152,8 +191,9 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
       windSlits: false,
       hemming: false,
       rush,
-      uploadedFileUrl,
-      uploadedFileName,
+      uploadedFileUrl: uploadedFileUrls[0] ?? null,
+      uploadedFileName: blockUploads[0]?.fileName ?? null,
+      uploadedFileUrls: uploadedFileUrls.length > 0 ? uploadedFileUrls : undefined,
       customOptions: {
         custom_sheet_size: `${CORO_SHEET.width}\" x ${CORO_SHEET.height}\"`,
         custom_sign_size: formatCoroSize(activeSize),
@@ -167,6 +207,7 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
         custom_gloss: gloss ? "yes" : "no",
         custom_contour_cut: contourCut ? "yes" : "no",
         custom_rush_surcharge_mode: rush ? "+120%" : "none",
+        custom_image_count: String(safeImageCount),
       },
       unitPrice: pricing.unitPrice,
       totalPrice: pricing.totalPrice,
@@ -176,6 +217,8 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
     window.setTimeout(() => setAdded(false), 1800);
   }
 
+    const uploadedCount = Object.keys(blockUploads).filter((k) => Number(k) < safeImageCount).length;
+
   return (
     <div className="min-h-[calc(100vh-96px)] bg-[linear-gradient(145deg,#f4f4f5_0%,#ececef_55%,#e4e4e7_100%)] text-zinc-800">
       <div className="mx-auto max-w-[1420px] px-3 py-4 md:px-5">
@@ -183,7 +226,7 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
           <div>
             <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500">Rigid Product</div>
             <h1 className="mt-1 text-3xl font-semibold tracking-tight text-zinc-900">CORO Configurator</h1>
-            <p className="mt-1 text-sm text-zinc-600">Signs365-style sheet layout using your custom markup and add-on pricing.</p>
+            <p className="mt-1 text-sm text-zinc-600">Signs365-style sheet layout with per-block artwork upload.</p>
           </div>
           <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-right">
             <div className="text-xs uppercase tracking-[0.14em] text-emerald-700">Live Total</div>
@@ -195,7 +238,9 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
         <div className="grid gap-3 xl:grid-cols-[1fr_420px]">
           <section className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
             <div className="border-b border-zinc-200 px-4 py-3">
-              <div className="text-sm font-medium text-zinc-700">{formatSheetLabel(layout.columns, layout.rows)}</div>
+              <div className="text-sm font-medium text-zinc-700">
+                Sheet #1 / {CORO_SHEET.width}&quot; × {CORO_SHEET.height}&quot; / Front Side — {cells} signs per sheet
+              </div>
             </div>
 
             <div className="relative h-[62vh] min-h-[460px] overflow-hidden rounded-b-2xl bg-[#f7f7f7]">
@@ -208,13 +253,35 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
                 }}
               >
                 {Array.from({ length: cells }).map((_, index) => {
-                  const active = index < usedCellsOnFirstSheet;
+                  const isActive = index < usedCellsOnFirstSheet;
+                  const slotIndex = index < safeImageCount ? index : null;
+                  const upload = slotIndex !== null ? blockUploads[slotIndex] : null;
+                  const colorClass = slotIndex !== null ? SLOT_COLORS[slotIndex % SLOT_COLORS.length] : "";
 
                   return (
-                    <div
+                    <button
                       key={`cell-${index}`}
-                      className={`border ${active ? "border-blue-600 bg-blue-100" : "border-zinc-300 bg-zinc-50"}`}
-                    />
+                      type="button"
+                      disabled={!isActive || slotIndex === null}
+                      onClick={() => { if (slotIndex !== null) fileInputRefs.current[slotIndex]?.click(); }}
+                      className={`relative overflow-hidden border ${
+                        isActive && slotIndex !== null ? "cursor-pointer hover:opacity-80" : "cursor-default"
+                      } ${
+                        upload ? "border-emerald-500" : isActive && slotIndex !== null ? "border-blue-400" : "border-zinc-300 bg-zinc-50"
+                      }`}
+                    >
+                      {upload?.blobUrl ? (
+                        <img src={upload.blobUrl} alt="" className="h-full w-full object-cover" />
+                      ) : isActive && slotIndex !== null ? (
+                        <div className={`flex h-full w-full items-center justify-center ${colorClass} opacity-30`}>
+                          <span className="text-[7px] font-bold text-zinc-700">
+                            {uploadingBlock === slotIndex ? "…" : slotIndex + 1}
+                          </span>
+                        </div>
+                      ) : isActive ? (
+                        <div className="h-full w-full bg-blue-100" />
+                      ) : null}
+                    </button>
                   );
                 })}
               </div>
@@ -235,10 +302,14 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
 
             <div className="grid gap-2 border-t border-zinc-200 bg-zinc-50 p-3 md:grid-cols-4 xl:grid-cols-8">
               <ControlBox title="Images">
-                <div className="flex h-9 items-center justify-between rounded border border-zinc-300 bg-white px-2 text-sm">
-                  <span>1</span>
-                  <span className="text-xs text-zinc-500">single artwork</span>
-                </div>
+                <input
+                  type="number"
+                  min={1}
+                  max={maxImages}
+                  value={safeImageCount}
+                  onChange={(e) => setImageCount(Math.min(maxImages, Math.max(1, Number(e.target.value) || 1)))}
+                  className="h-9 w-full rounded border border-zinc-300 px-2 text-sm"
+                />
               </ControlBox>
 
               <ControlBox title="Size" className="md:col-span-2">
@@ -356,19 +427,81 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
 
             <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
               <div className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">Artwork</div>
-              <label className="mt-3 block cursor-pointer rounded-xl border border-dashed border-zinc-300 bg-zinc-50 px-3 py-5 text-center text-sm text-zinc-600 hover:border-orange-400 hover:bg-orange-50">
-                {uploadingArtwork ? "Uploading..." : "Upload Artwork"}
-                <input
-                  type="file"
-                  accept=".pdf,.ai,.eps,.png,.jpg,.jpeg,.tif,.tiff,.psd"
-                  className="hidden"
-                  onChange={onUploadArtwork}
-                  disabled={uploadingArtwork}
-                />
-              </label>
-              <div className="mt-2 text-xs text-zinc-500">Accepted: PDF, AI, EPS, PNG, JPG, TIFF, PSD (up to 100MB)</div>
-              {uploadedFileName && <div className="mt-2 rounded border border-emerald-200 bg-emerald-50 px-2 py-2 text-xs text-emerald-700">Uploaded: {uploadedFileName}</div>}
-              {uploadError && <div className="mt-2 rounded border border-rose-200 bg-rose-50 px-2 py-2 text-xs text-rose-700">{uploadError}</div>}
+                <div className="flex items-center justify-between">
+                  <div className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">
+                    Artwork ({uploadedCount}/{safeImageCount} uploaded)
+                  </div>
+                  {uploadedCount > 0 && (
+                    <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
+                      {uploadedCount} ready
+                    </span>
+                  )}
+                </div>
+                <p className="mt-1 text-xs text-zinc-500">
+                  {safeImageCount === 1
+                    ? "Upload 1 artwork for all signs."
+                    : `Upload up to ${safeImageCount} artworks — one per block. Click a block on the sheet or use the slots below.`}
+                </p>
+                {/* Hidden file inputs — one per slot */}
+                {Array.from({ length: safeImageCount }).map((_, i) => (
+                  <input
+                    key={`file-input-${i}`}
+                    ref={(el) => { fileInputRefs.current[i] = el; }}
+                    type="file"
+                    accept=".pdf,.ai,.eps,.png,.jpg,.jpeg,.tif,.tiff,.psd"
+                    className="hidden"
+                    onChange={(e) => handleFileChange(i, e)}
+                    disabled={uploadingBlock !== null}
+                  />
+                ))}
+                {/* Upload slots */}
+                <div className="mt-3 space-y-2">
+                  {Array.from({ length: safeImageCount }).map((_, i) => {
+                    const upload = blockUploads[i];
+                    const error = blockUploadErrors[i];
+                    const isUploading = uploadingBlock === i;
+                    const color = SLOT_COLORS[i % SLOT_COLORS.length];
+                    return (
+                      <div key={`slot-${i}`} className="rounded-lg border border-zinc-200 bg-zinc-50 p-2">
+                        <div className="flex items-center gap-2">
+                          <div className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-sm ${color} text-[10px] font-bold text-white`}>
+                            {i + 1}
+                          </div>
+                          <div className="min-w-0 flex-1 text-xs font-medium text-zinc-700">Block {i + 1}</div>
+                          {upload ? (
+                            <div className="flex items-center gap-1">
+                              <span className="max-w-[100px] truncate text-[10px] text-emerald-700">{upload.fileName}</span>
+                              <button
+                                type="button"
+                                onClick={() => removeBlockUpload(i)}
+                                className="rounded px-1 text-[10px] text-zinc-400 hover:text-rose-500"
+                              >✕</button>
+                            </div>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => fileInputRefs.current[i]?.click()}
+                              disabled={isUploading}
+                              className="shrink-0 rounded border border-dashed border-zinc-300 px-2 py-1 text-[10px] text-zinc-500 hover:border-orange-400 hover:text-orange-500 disabled:opacity-50"
+                            >
+                              {isUploading ? "Uploading…" : "+ Upload"}
+                            </button>
+                          )}
+                        </div>
+                        {upload?.blobUrl && (
+                          <img src={upload.blobUrl} alt={upload.fileName} className="mt-2 h-16 w-full rounded object-contain" />
+                        )}
+                        {upload && !upload.blobUrl && (
+                          <div className="mt-1 rounded bg-emerald-50 px-2 py-1 text-[10px] text-emerald-700">✓ {upload.fileName}</div>
+                        )}
+                        {error && (
+                          <div className="mt-1 rounded bg-rose-50 px-2 py-1 text-[10px] text-rose-700">{error}</div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                <p className="mt-2 text-[10px] text-zinc-400">Accepted: PDF, AI, EPS, PNG, JPG, TIFF, PSD (up to 100MB)</p>
             </div>
           </aside>
         </div>
