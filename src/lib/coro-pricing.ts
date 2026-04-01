@@ -39,6 +39,19 @@ export interface CoroPricingResult {
   totalPrice: number;
 }
 
+export interface CoroSheetPlacement {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  rotated: boolean;
+}
+
+export interface CoroSheetLayout {
+  count: number;
+  placements: CoroSheetPlacement[];
+}
+
 export const CORO_SHEET = {
   width: 48,
   height: 96,
@@ -129,27 +142,143 @@ export function formatCoroSize(size: CoroSizeOption): string {
   return `${size.width}\" x ${size.height}\"`;
 }
 
-export function getSignsPerSheet(width: number, height: number): number {
-  const fitNormal = Math.floor(CORO_SHEET.width / width) * Math.floor(CORO_SHEET.height / height);
-  const fitRotated = Math.floor(CORO_SHEET.width / height) * Math.floor(CORO_SHEET.height / width);
-  return Math.max(1, fitNormal, fitRotated);
-}
+function buildGridPlacements(
+  originX: number,
+  originY: number,
+  regionWidth: number,
+  regionHeight: number,
+  signWidth: number,
+  signHeight: number,
+  rotated: boolean
+): CoroSheetPlacement[] {
+  const columns = Math.floor(regionWidth / signWidth);
+  const rows = Math.floor(regionHeight / signHeight);
+  const placements: CoroSheetPlacement[] = [];
 
-export function getSheetColumnsRows(width: number, height: number): { columns: number; rows: number } {
-  const normal = {
-    columns: Math.floor(CORO_SHEET.width / width),
-    rows: Math.floor(CORO_SHEET.height / height),
-  };
-  const rotated = {
-    columns: Math.floor(CORO_SHEET.width / height),
-    rows: Math.floor(CORO_SHEET.height / width),
-  };
-
-  if (normal.columns * normal.rows >= rotated.columns * rotated.rows) {
-    return normal;
+  for (let row = 0; row < rows; row += 1) {
+    for (let column = 0; column < columns; column += 1) {
+      placements.push({
+        x: originX + column * signWidth,
+        y: originY + row * signHeight,
+        width: signWidth,
+        height: signHeight,
+        rotated,
+      });
+    }
   }
 
-  return rotated;
+  return placements;
+}
+
+function chooseBetterLayout(current: CoroSheetLayout, candidate: CoroSheetLayout): CoroSheetLayout {
+  return candidate.count > current.count ? candidate : current;
+}
+
+export function getBestSheetLayout(width: number, height: number): CoroSheetLayout {
+  const normalPlacements = buildGridPlacements(
+    0,
+    0,
+    CORO_SHEET.width,
+    CORO_SHEET.height,
+    width,
+    height,
+    false
+  );
+  const rotatedPlacements = buildGridPlacements(
+    0,
+    0,
+    CORO_SHEET.width,
+    CORO_SHEET.height,
+    height,
+    width,
+    true
+  );
+
+  let best: CoroSheetLayout =
+    normalPlacements.length >= rotatedPlacements.length
+      ? { count: normalPlacements.length, placements: normalPlacements }
+      : { count: rotatedPlacements.length, placements: rotatedPlacements };
+
+  const splitXCandidates = new Set<number>([0, CORO_SHEET.width]);
+  const splitYCandidates = new Set<number>([0, CORO_SHEET.height]);
+
+  for (let x = width; x < CORO_SHEET.width; x += width) splitXCandidates.add(Number(x.toFixed(4)));
+  for (let x = height; x < CORO_SHEET.width; x += height) splitXCandidates.add(Number(x.toFixed(4)));
+  for (let y = height; y < CORO_SHEET.height; y += height) splitYCandidates.add(Number(y.toFixed(4)));
+  for (let y = width; y < CORO_SHEET.height; y += width) splitYCandidates.add(Number(y.toFixed(4)));
+
+  for (const splitX of splitXCandidates) {
+    const leftNormal = buildGridPlacements(0, 0, splitX, CORO_SHEET.height, width, height, false);
+    const rightRotated = buildGridPlacements(
+      splitX,
+      0,
+      CORO_SHEET.width - splitX,
+      CORO_SHEET.height,
+      height,
+      width,
+      true
+    );
+    best = chooseBetterLayout(best, {
+      count: leftNormal.length + rightRotated.length,
+      placements: [...leftNormal, ...rightRotated],
+    });
+
+    const leftRotated = buildGridPlacements(0, 0, splitX, CORO_SHEET.height, height, width, true);
+    const rightNormal = buildGridPlacements(
+      splitX,
+      0,
+      CORO_SHEET.width - splitX,
+      CORO_SHEET.height,
+      width,
+      height,
+      false
+    );
+    best = chooseBetterLayout(best, {
+      count: leftRotated.length + rightNormal.length,
+      placements: [...leftRotated, ...rightNormal],
+    });
+  }
+
+  for (const splitY of splitYCandidates) {
+    const topNormal = buildGridPlacements(0, 0, CORO_SHEET.width, splitY, width, height, false);
+    const bottomRotated = buildGridPlacements(
+      0,
+      splitY,
+      CORO_SHEET.width,
+      CORO_SHEET.height - splitY,
+      height,
+      width,
+      true
+    );
+    best = chooseBetterLayout(best, {
+      count: topNormal.length + bottomRotated.length,
+      placements: [...topNormal, ...bottomRotated],
+    });
+
+    const topRotated = buildGridPlacements(0, 0, CORO_SHEET.width, splitY, height, width, true);
+    const bottomNormal = buildGridPlacements(
+      0,
+      splitY,
+      CORO_SHEET.width,
+      CORO_SHEET.height - splitY,
+      width,
+      height,
+      false
+    );
+    best = chooseBetterLayout(best, {
+      count: topRotated.length + bottomNormal.length,
+      placements: [...topRotated, ...bottomNormal],
+    });
+  }
+
+  return {
+    count: Math.max(1, best.count),
+    placements: best.placements,
+  };
+}
+
+export function getSignsPerSheet(width: number, height: number): number {
+  return getBestSheetLayout(width, height).count;
 }
 
 export function getSupplierSheetPrice(quantity: number, material: CoroMaterial, printMode: CoroPrintMode): number {

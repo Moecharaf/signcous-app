@@ -8,7 +8,7 @@ import {
   CORO_SIZE_OPTIONS,
   calculateCoroPricing,
   formatCoroSize,
-  getSheetColumnsRows,
+  getBestSheetLayout,
   type CoroMaterial,
   type CoroPrintMode,
 } from "@/lib/coro-pricing";
@@ -34,10 +34,6 @@ function formatPrice(value: number): string {
     style: "currency",
     currency: "USD",
   }).format(value);
-}
-
-function formatSheetLabel(columns: number, rows: number): string {
-  return `${columns * rows} signs - Top of Sheet`;
 }
 
 export default function CoroBuilder({ productId = 13, productName = "CORO" }: CoroBuilderProps) {
@@ -102,15 +98,12 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
     ]
   );
 
-  const layout = useMemo(
-    () => getSheetColumnsRows(activeSize.width, activeSize.height),
+  const sheetLayout = useMemo(
+    () => getBestSheetLayout(activeSize.width, activeSize.height),
     [activeSize.height, activeSize.width]
   );
 
-  const cells = layout.columns * layout.rows;
-  const usedCellsOnFirstSheet = Math.min(cells, quantity);
-
-    const maxImages = cells;
+    const maxImages = sheetLayout.count;
     const safeImageCount = Math.min(imageCount, maxImages);
 
     async function uploadArtworkForBlock(blockIndex: number, file: File) {
@@ -239,21 +232,19 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
           <section className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
             <div className="border-b border-zinc-200 px-4 py-3">
               <div className="text-sm font-medium text-zinc-700">
-                Sheet #1 / {CORO_SHEET.width}&quot; × {CORO_SHEET.height}&quot; / Front Side — {cells} signs per sheet
+                Sheet #1 / {CORO_SHEET.width}&quot; × {CORO_SHEET.height}&quot; / Front Side — {sheetLayout.count} signs per sheet
               </div>
             </div>
 
             <div className="relative h-[62vh] min-h-[460px] overflow-hidden rounded-b-2xl bg-[#f7f7f7]">
               <div
-                className="absolute left-1/2 top-1/2 grid -translate-x-1/2 -translate-y-1/2 gap-[2px] border border-zinc-500 bg-white p-[2px]"
+                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 border border-zinc-500 bg-white"
                 style={{
                   width: 220,
                   height: 440,
-                  gridTemplateColumns: `repeat(${layout.columns}, minmax(0, 1fr))`,
                 }}
               >
-                {Array.from({ length: cells }).map((_, index) => {
-                  const isActive = index < usedCellsOnFirstSheet;
+                {sheetLayout.placements.map((placement, index) => {
                   const slotIndex = index < safeImageCount ? index : null;
                   const upload = slotIndex !== null ? blockUploads[slotIndex] : null;
                   const colorClass = slotIndex !== null ? SLOT_COLORS[slotIndex % SLOT_COLORS.length] : "";
@@ -262,24 +253,26 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
                     <button
                       key={`cell-${index}`}
                       type="button"
-                      disabled={!isActive || slotIndex === null}
+                      disabled={slotIndex === null}
                       onClick={() => { if (slotIndex !== null) fileInputRefs.current[slotIndex]?.click(); }}
-                      className={`relative overflow-hidden border ${
-                        isActive && slotIndex !== null ? "cursor-pointer hover:opacity-80" : "cursor-default"
-                      } ${
-                        upload ? "border-emerald-500" : isActive && slotIndex !== null ? "border-blue-400" : "border-zinc-300 bg-zinc-50"
-                      }`}
+                      className={`absolute overflow-hidden border ${
+                        slotIndex !== null ? "cursor-pointer hover:opacity-85" : "cursor-default"
+                      } ${upload ? "border-emerald-500" : "border-blue-400 bg-zinc-50"}`}
+                      style={{
+                        left: `${(placement.x / CORO_SHEET.width) * 100}%`,
+                        top: `${(placement.y / CORO_SHEET.height) * 100}%`,
+                        width: `${(placement.width / CORO_SHEET.width) * 100}%`,
+                        height: `${(placement.height / CORO_SHEET.height) * 100}%`,
+                      }}
                     >
                       {upload?.blobUrl ? (
                         <img src={upload.blobUrl} alt="" className="h-full w-full object-cover" />
-                      ) : isActive && slotIndex !== null ? (
+                      ) : slotIndex !== null ? (
                         <div className={`flex h-full w-full items-center justify-center ${colorClass} opacity-30`}>
                           <span className="text-[7px] font-bold text-zinc-700">
                             {uploadingBlock === slotIndex ? "…" : slotIndex + 1}
                           </span>
                         </div>
-                      ) : isActive ? (
-                        <div className="h-full w-full bg-blue-100" />
                       ) : null}
                     </button>
                   );
