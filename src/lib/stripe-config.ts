@@ -3,8 +3,8 @@ import path from "node:path";
 
 function readEnvFileValue(key: string): string {
   const candidatePaths = [
-    path.join(process.cwd(), ".env.local"),
-    path.join(process.cwd(), "signcous-app", ".env.local"),
+    path.join(/*turbopackIgnore: true*/ process.cwd(), ".env.local"),
+    path.join(/*turbopackIgnore: true*/ process.cwd(), "signcous-app", ".env.local"),
   ];
 
   try {

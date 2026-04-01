@@ -4,6 +4,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
+export type ManualBannerThemeKey =
+  | "manual-economical-stand"
+  | "manual-hd-banner"
+  | "manual-hdpe"
+  | "manual-canvas"
+  | "manual-mesh"
+  | "manual-no-curl"
+  | "manual-poster";
+
 export interface ManualBannerProductCard {
   id: string;
   productId: number;
@@ -16,6 +25,7 @@ export interface ManualBannerProductCard {
   label: string;
   image: string | null;
   imageAlt: string;
+  theme?: ManualBannerThemeKey;
 }
 
 export interface HomeCatalogProductCard {
@@ -45,7 +55,7 @@ interface HomeCatalogClientProps {
   manualBannerProducts: ManualBannerProductCard[];
 }
 
-const MANUAL_CARD_THEME: Record<string, { texture: string; ghost: string; eyebrow: string }> = {
+const MANUAL_CARD_THEME: Record<ManualBannerThemeKey, { texture: string; ghost: string; eyebrow: string }> = {
   "manual-economical-stand": {
     texture: "from-[#ffffff]/95 via-[#f3f3f3]/78 to-[#ececec]/88",
     ghost: "STAND",
@@ -82,6 +92,14 @@ const MANUAL_CARD_THEME: Record<string, { texture: string; ghost: string; eyebro
     eyebrow: "Retail Prints",
   },
 };
+
+function resolveManualBannerTheme(value?: string | null): ManualBannerThemeKey | null {
+  if (!value) {
+    return null;
+  }
+
+  return value in MANUAL_CARD_THEME ? (value as ManualBannerThemeKey) : null;
+}
 
 const CATEGORY_ICON: Record<HomeCatalogSection["key"], string> = {
   banner: "▦",
@@ -263,7 +281,10 @@ export default function HomeCatalogClient({ sections, manualBannerProducts }: Ho
         {activeSection.key === "banner" && (
           <div className="mb-6 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
             {manualBannerProducts.map((manualProduct) => {
-              const visual = MANUAL_CARD_THEME[manualProduct.id] ?? {
+              const themeKey =
+                resolveManualBannerTheme(manualProduct.theme) ??
+                resolveManualBannerTheme(manualProduct.id);
+              const visual = (themeKey ? MANUAL_CARD_THEME[themeKey] : undefined) ?? {
                 texture: "from-[#ffffff]/95 via-[#f3f3f3]/78 to-[#ececec]/88",
                 ghost: "PRINT",
                 eyebrow: "Builder",
