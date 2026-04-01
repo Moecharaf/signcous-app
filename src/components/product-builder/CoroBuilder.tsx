@@ -266,7 +266,9 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
                       }}
                     >
                       {upload?.blobUrl ? (
-                        <img src={upload.blobUrl} alt="" className="h-full w-full object-cover" />
+                        <div className="flex h-full w-full items-center justify-center bg-white p-[1px]">
+                          <img src={upload.blobUrl} alt="" className="h-full w-full object-contain" />
+                        </div>
                       ) : slotIndex !== null ? (
                         <div className={`flex h-full w-full items-center justify-center ${colorClass} opacity-30`}>
                           <span className="text-[7px] font-bold text-zinc-700">
