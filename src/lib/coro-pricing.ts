@@ -65,6 +65,7 @@ const SIGNS365_SIGNS_PER_SHEET_OVERRIDES: Record<string, number> = {
   "14x10": 27,
   "14x22": 12,
   "18x12": 16,
+  "18x24": 8,
   "12x16": 24,
   "12x18": 20,
   "12x34": 10,
