@@ -63,6 +63,7 @@ export const CORO_MARKUP = 1.6;
 const SIGNS365_SIGNS_PER_SHEET_OVERRIDES: Record<string, number> = {
   "11x11": 32,
   "14x10": 27,
+  "14x22": 12,
   "12x16": 24,
   "12x18": 20,
   "12x34": 10,
