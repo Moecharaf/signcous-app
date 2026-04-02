@@ -193,6 +193,27 @@ function getSizeKey(width: number, height: number): string {
   return `${Number(width)}x${Number(height)}`;
 }
 
+function getFixedSigns365Layout(width: number, height: number): CoroSheetLayout | null {
+  const sizeKey = getSizeKey(width, height);
+
+  if (sizeKey === "18x36") {
+    const placements: CoroSheetPlacement[] = [
+      { x: 0, y: 0, width: 18, height: 36, rotated: false },
+      { x: 18, y: 0, width: 18, height: 36, rotated: false },
+      { x: 0, y: 36, width: 36, height: 18, rotated: true },
+      { x: 0, y: 54, width: 18, height: 36, rotated: false },
+      { x: 18, y: 54, width: 18, height: 36, rotated: false },
+    ];
+
+    return {
+      count: placements.length,
+      placements: centerPlacementsInSheet(placements),
+    };
+  }
+
+  return null;
+}
+
 function centerPlacementsInSheet(placements: CoroSheetPlacement[]): CoroSheetPlacement[] {
   if (placements.length === 0) return placements;
 
@@ -215,6 +236,9 @@ function centerPlacementsInSheet(placements: CoroSheetPlacement[]): CoroSheetPla
 }
 
 export function getBestSheetLayout(width: number, height: number): CoroSheetLayout {
+  const fixedLayout = getFixedSigns365Layout(width, height);
+  if (fixedLayout) return fixedLayout;
+
   const normalPlacements = buildGridPlacements(
     0,
     0,
