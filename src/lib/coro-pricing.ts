@@ -71,7 +71,8 @@ const SIGNS365_SIGNS_PER_SHEET_OVERRIDES: Record<string, number> = {
   "12x16": 24,
   "12x18": 20,
   "12x34": 10,
-  "24x36": 5,
+  "24x36": 4,
+  "36x24": 4,
   "30x18": 6,
 };
 
@@ -204,6 +205,20 @@ function getFixedSigns365Layout(width: number, height: number): CoroSheetLayout 
       { x: 0, y: 36, width: 36, height: 18, rotated: true },
       { x: 0, y: 54, width: 18, height: 36, rotated: false },
       { x: 18, y: 54, width: 18, height: 36, rotated: false },
+    ];
+
+    return {
+      count: placements.length,
+      placements: centerPlacementsInSheet(placements),
+    };
+  }
+
+  if (sizeKey === "24x36") {
+    const placements: CoroSheetPlacement[] = [
+      { x: 0, y: 0, width: 36, height: 24, rotated: true },
+      { x: 0, y: 24, width: 36, height: 24, rotated: true },
+      { x: 0, y: 48, width: 36, height: 24, rotated: true },
+      { x: 0, y: 72, width: 36, height: 24, rotated: true },
     ];
 
     return {
