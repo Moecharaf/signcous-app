@@ -74,6 +74,7 @@ const SIGNS365_SIGNS_PER_SHEET_OVERRIDES: Record<string, number> = {
   "24x36": 4,
   "36x24": 4,
   "30x18": 8,
+  "32x16": 9,
 };
 
 export const CORO_SIZE_OPTIONS: CoroSizeOption[] = [
