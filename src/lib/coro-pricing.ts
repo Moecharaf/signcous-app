@@ -66,10 +66,12 @@ const SIGNS365_SIGNS_PER_SHEET_OVERRIDES: Record<string, number> = {
   "14x22": 12,
   "18x12": 16,
   "18x24": 8,
+  "18x30": 6,
   "12x16": 24,
   "12x18": 20,
   "12x34": 10,
   "24x36": 5,
+  "30x18": 6,
 };
 
 export const CORO_SIZE_OPTIONS: CoroSizeOption[] = [
