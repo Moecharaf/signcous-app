@@ -372,11 +372,8 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
             <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
               <div className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">Pricing Breakdown</div>
               <div className="mt-3 space-y-2 text-sm">
-                <Row label="Supplier Sheet" value={formatPrice(pricing.supplierSheetPrice)} />
                 <Row label="Signs / Sheet" value={String(pricing.signsPerSheet)} />
                 <Row label="Sheets Needed" value={String(pricing.sheetsRequired)} />
-                <Row label="Supplier Cost / Sign" value={formatPrice(pricing.supplierCostPerSign)} />
-                <Row label="Your Marked Unit" value={formatPrice(pricing.markedUpUnitPrice)} />
                 <Row label="Base Subtotal" value={formatPrice(pricing.baseSubtotal)} />
                 <Row label="Step Stakes" value={formatPrice(pricing.stepStakesFee)} />
                 <Row label="Heavy Stakes" value={formatPrice(pricing.heavyDutyStakesFee)} />
