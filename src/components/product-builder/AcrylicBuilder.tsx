@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useCart } from "@/context/CartContext";
 import {
   ACRYLIC_CORNER_OPTIONS,
@@ -17,35 +17,29 @@ import {
 
 // ─── Helpers ──────────────────────────────────────────────────
 
-function fmt(value: number): string {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
+function fmt(v: number) {
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(v);
 }
 
-function RowItem({
+function Row({
   label,
   value,
   strong,
   accent,
-  faint,
 }: {
   label: string;
   value: string;
   strong?: boolean;
   accent?: boolean;
-  faint?: boolean;
 }) {
   return (
-    <div className={`flex items-center justify-between ${faint ? "opacity-50" : ""}`}>
-      <span className={`text-sm ${strong ? "font-semibold text-zinc-900" : "text-zinc-500"}`}>
+    <div className="flex items-center justify-between py-0.5">
+      <span className={`text-xs ${strong ? "font-semibold text-zinc-800" : "text-zinc-500"}`}>
         {label}
       </span>
       <span
-        className={`text-sm tabular-nums ${
-          strong
-            ? accent
-              ? "font-bold text-orange-600"
-              : "font-semibold text-zinc-900"
-            : "text-zinc-700"
+        className={`text-xs tabular-nums ${
+          strong ? (accent ? "font-bold text-orange-500" : "font-semibold text-zinc-800") : "text-zinc-600"
         }`}
       >
         {value}
@@ -54,101 +48,175 @@ function RowItem({
   );
 }
 
-function OptionSelect<T extends string>({
-  label,
-  value,
-  options,
-  onChange,
-  note,
+// ─── Sign preview ──────────────────────────────────────────────
+
+function SignPreview({
+  width,
+  height,
+  isValid,
 }: {
-  label: string;
-  value: T;
-  options: { label: string; value: T; note?: string; price?: number }[];
-  onChange: (val: T) => void;
-  note?: string;
+  width: number;
+  height: number;
+  isValid: boolean;
 }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const CANVAS_W = 560;
+  const CANVAS_H = 380;
+  const PAD = 60;
+
+  const scale =
+    isValid && width > 0 && height > 0
+      ? Math.min((CANVAS_W - PAD * 2) / width, (CANVAS_H - PAD * 2) / height)
+      : 0;
+
+  const previewW = width * scale;
+  const previewH = height * scale;
+
   return (
-    <div>
-      <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
-        {label}
-      </label>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value as T)}
-        className="h-10 w-full rounded-lg border border-zinc-300 bg-white px-3 text-sm text-zinc-800 shadow-sm focus:border-zinc-500 focus:outline-none"
-      >
-        {options.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-            {opt.price ? ` (+${fmt(opt.price)})` : ""}
-          </option>
-        ))}
-      </select>
-      {note && <p className="mt-1 text-[10px] italic text-zinc-400">{note}</p>}
+    <div
+      ref={containerRef}
+      className="relative flex h-full w-full items-center justify-center overflow-hidden"
+      style={{
+        backgroundImage:
+          "linear-gradient(rgba(200,210,220,0.25) 1px,transparent 1px),linear-gradient(90deg,rgba(200,210,220,0.25) 1px,transparent 1px)",
+        backgroundSize: "24px 24px",
+        backgroundColor: "#f7f8f9",
+      }}
+    >
+      {isValid && scale > 0 ? (
+        <>
+          {/* Sign body */}
+          <div
+            className="relative rounded-sm border-2 border-dashed border-blue-500 bg-white/90 shadow-lg"
+            style={{ width: previewW, height: previewH }}
+          >
+            {/* Corner dots */}
+            {[
+              "top-0 left-0 -translate-x-1/2 -translate-y-1/2",
+              "top-0 right-0 translate-x-1/2 -translate-y-1/2",
+              "bottom-0 left-0 -translate-x-1/2 translate-y-1/2",
+              "bottom-0 right-0 translate-x-1/2 translate-y-1/2",
+            ].map((cls) => (
+              <span
+                key={cls}
+                className={`absolute h-2.5 w-2.5 rounded-full border-2 border-blue-500 bg-white ${cls}`}
+              />
+            ))}
+
+            {/* Center label */}
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+              <span className="rounded bg-blue-500/10 px-2 py-0.5 text-[11px] font-semibold text-blue-700">
+                {width}" × {height}"
+              </span>
+            </div>
+          </div>
+
+          {/* Width dimension */}
+          <div
+            className="pointer-events-none absolute flex items-center justify-center text-[10px] font-semibold text-zinc-400"
+            style={{
+              left: "50%",
+              transform: "translateX(-50%)",
+              top: `calc(50% - ${previewH / 2}px - 22px)`,
+              width: previewW,
+            }}
+          >
+            <span className="mr-1 flex-1 border-t border-dashed border-zinc-300" />
+            {width}"
+            <span className="ml-1 flex-1 border-t border-dashed border-zinc-300" />
+          </div>
+
+          {/* Height dimension */}
+          <div
+            className="pointer-events-none absolute flex flex-col items-center justify-center text-[10px] font-semibold text-zinc-400"
+            style={{
+              top: "50%",
+              transform: "translateY(-50%)",
+              left: `calc(50% + ${previewW / 2}px + 10px)`,
+              height: previewH,
+            }}
+          >
+            <span className="mb-1 flex-1 border-l border-dashed border-zinc-300" />
+            <span className="-rotate-90 whitespace-nowrap">{height}"</span>
+            <span className="mt-1 flex-1 border-l border-dashed border-zinc-300" />
+          </div>
+        </>
+      ) : (
+        <div className="flex flex-col items-center gap-3 text-zinc-400">
+          <svg
+            className="h-10 w-10 opacity-40"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={1.2}
+          >
+            <rect x="3" y="3" width="18" height="18" rx="2" strokeDasharray="3 2" />
+            <path d="M3 9h18M9 3v18" strokeDasharray="3 2" />
+          </svg>
+          <p className="text-sm font-medium">PLEASE SPECIFY DIMENSIONS</p>
+        </div>
+      )}
     </div>
   );
 }
 
-function ToggleCheckbox({
+// ─── Bottom bar control ────────────────────────────────────────
+
+function BarControl({
   label,
-  checked,
-  onChange,
-  suffix,
+  children,
 }: {
   label: string;
-  checked: boolean;
-  onChange: (v: boolean) => void;
-  suffix?: string;
+  children: React.ReactNode;
 }) {
   return (
-    <label className="flex cursor-pointer items-center justify-between rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3 transition hover:border-zinc-300 hover:bg-white">
-      <span className="text-sm text-zinc-700">
+    <div className="flex min-w-0 flex-1 flex-col border-r border-zinc-300 last:border-r-0">
+      <div className="border-b border-zinc-300 px-3 py-1 text-[9px] font-bold uppercase tracking-[0.18em] text-zinc-500">
         {label}
-        {suffix && <span className="ml-1 text-xs text-zinc-400">{suffix}</span>}
+      </div>
+      <div className="flex items-center px-3 py-2">{children}</div>
+    </div>
+  );
+}
+
+// ─── Toggle ────────────────────────────────────────────────────
+
+function Toggle({
+  label,
+  suffix,
+  checked,
+  onChange,
+}: {
+  label: string;
+  suffix?: string;
+  checked: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  return (
+    <label className="flex cursor-pointer items-center justify-between gap-3">
+      <span className="text-xs text-zinc-600">
+        {label}
+        {suffix && <span className="ml-1 text-zinc-400">{suffix}</span>}
       </span>
-      <div
-        className={`relative h-5 w-9 rounded-full transition-colors ${checked ? "bg-orange-500" : "bg-zinc-300"}`}
-        onClick={() => onChange(!checked)}
-        role="checkbox"
+      <button
+        type="button"
+        role="switch"
         aria-checked={checked}
-        tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === " " || e.key === "Enter") onChange(!checked);
-        }}
+        onClick={() => onChange(!checked)}
+        className={`relative h-5 w-9 rounded-full transition-colors ${checked ? "bg-orange-500" : "bg-zinc-300"}`}
       >
         <span
           className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform ${
             checked ? "translate-x-4" : "translate-x-0.5"
           }`}
         />
-      </div>
+      </button>
     </label>
   );
 }
 
-// ─── Validation ──────────────────────────────────────────────
-
-function validateDimensions(
-  width: number,
-  height: number
-): { widthError: string | null; heightError: string | null } {
-  return {
-    widthError:
-      width <= 0
-        ? "Width must be greater than 0"
-        : width > ACRYLIC_MAX_WIDTH
-          ? `Max width is ${ACRYLIC_MAX_WIDTH}"`
-          : null,
-    heightError:
-      height <= 0
-        ? "Height must be greater than 0"
-        : height > ACRYLIC_MAX_HEIGHT
-          ? `Max height is ${ACRYLIC_MAX_HEIGHT}"`
-          : null,
-  };
-}
-
-// ─── Main builder ────────────────────────────────────────────
+// ─── Main component ────────────────────────────────────────────
 
 interface AcrylicBuilderProps {
   productId?: number;
@@ -157,43 +225,50 @@ interface AcrylicBuilderProps {
 export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
   const cart = useCart();
 
-  const [widthStr, setWidthStr]   = useState("24");
+  const [widthStr, setWidthStr] = useState("24");
   const [heightStr, setHeightStr] = useState("18");
-  const [quantity, setQuantity]   = useState(1);
+  const [quantity, setQuantity] = useState(1);
   const [thickness, setThickness] = useState<AcrylicThickness>("1/8");
-  const [mounting, setMounting]   = useState<AcrylicMounting>("none");
+  const [mounting, setMounting] = useState<AcrylicMounting>("none");
   const [roundedCorners, setRoundedCorners] = useState<AcrylicRoundedCorner>("none");
   const [contourCut, setContourCut] = useState(false);
-  const [rush, setRush]             = useState(false);
-  const [added, setAdded]           = useState(false);
+  const [rush, setRush] = useState(false);
+  const [added, setAdded] = useState(false);
 
-  const width  = parseFloat(widthStr)  || 0;
+  const width = parseFloat(widthStr) || 0;
   const height = parseFloat(heightStr) || 0;
 
-  const { widthError, heightError } = validateDimensions(width, height);
+  const widthError =
+    widthStr !== "" &&
+    (width <= 0 ? 'Width must be > 0"' : width > ACRYLIC_MAX_WIDTH ? `Max ${ACRYLIC_MAX_WIDTH}"` : null);
+  const heightError =
+    heightStr !== "" &&
+    (height <= 0 ? 'Height must be > 0"' : height > ACRYLIC_MAX_HEIGHT ? `Max ${ACRYLIC_MAX_HEIGHT}"` : null);
   const isValid = !widthError && !heightError && width > 0 && height > 0;
 
-  const pricing = useMemo(() => {
-    if (!isValid) return null;
-    return calculateAcrylicPricing({
-      width,
-      height,
-      quantity: Math.max(1, quantity),
-      thickness,
-      mounting,
-      roundedCorners,
-      contourCut,
-      rush,
-    });
-  }, [width, height, quantity, thickness, mounting, roundedCorners, contourCut, rush, isValid]);
+  const pricing = useMemo(
+    () =>
+      isValid
+        ? calculateAcrylicPricing({
+            width,
+            height,
+            quantity: Math.max(1, quantity),
+            thickness,
+            mounting,
+            roundedCorners,
+            contourCut,
+            rush,
+          })
+        : null,
+    [width, height, quantity, thickness, mounting, roundedCorners, contourCut, rush, isValid]
+  );
 
-  const mountingOption = ACRYLIC_MOUNTING_OPTIONS.find((m) => m.value === mounting);
-  const thicknessOption = ACRYLIC_THICKNESS_OPTIONS.find((t) => t.value === thickness);
-  const cornerOption = ACRYLIC_CORNER_OPTIONS.find((c) => c.value === roundedCorners);
+  const thicknessOption = ACRYLIC_THICKNESS_OPTIONS.find((t) => t.value === thickness)!;
+  const mountingOption = ACRYLIC_MOUNTING_OPTIONS.find((m) => m.value === mounting)!;
+  const cornerOption = ACRYLIC_CORNER_OPTIONS.find((c) => c.value === roundedCorners)!;
 
   function addToCart() {
     if (!isValid || !pricing) return;
-
     cart.addItem({
       productId,
       productName: "Acrylic Signs",
@@ -201,7 +276,7 @@ export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
       height,
       unit: "inches",
       quantity: Math.max(1, quantity),
-      material: `Acrylic ${thicknessOption?.label ?? thickness}`,
+      material: `Acrylic ${thicknessOption.label}`,
       doubleSided: false,
       grommets: false,
       edgeFinish: "none",
@@ -213,9 +288,9 @@ export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
       customOptions: {
         custom_width: `${width}"`,
         custom_height: `${height}"`,
-        custom_thickness: thicknessOption?.label ?? thickness,
-        custom_mounting: mountingOption?.label ?? "None",
-        custom_rounded_corners: cornerOption?.label ?? "None",
+        custom_thickness: thicknessOption.label,
+        custom_mounting: mountingOption.label,
+        custom_rounded_corners: cornerOption.label,
         custom_contour_cut: contourCut ? "Yes" : "No",
         custom_rush: rush ? "Yes" : "No",
         custom_area_sqin: String(pricing.area),
@@ -223,296 +298,231 @@ export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
       unitPrice: pricing.perItemTotal,
       totalPrice: pricing.grandTotal,
     });
-
     setAdded(true);
     window.setTimeout(() => setAdded(false), 1800);
   }
 
-  return (
-    <div className="min-h-[calc(100vh-96px)] bg-[linear-gradient(145deg,#f4f4f5_0%,#ececef_55%,#e4e4e7_100%)] text-zinc-800">
-      <div className="mx-auto max-w-[1420px] px-3 py-5 md:px-5 md:py-7">
+  // ── Render ─────────────────────────────────────────────────
 
-        {/* ── Page intro ── */}
-        <div className="mb-6 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">
-            Rigid Product
-          </div>
-          <h1 className="mt-1 text-3xl font-semibold tracking-tight text-zinc-900">
-            Acrylic Signs
-          </h1>
-          <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-zinc-500">
-            Premium clear and rigid signage for offices, lobbies, branding, and wall-mounted displays.
-            Optionally add standoff hardware for a floating, high-end finish.
+  return (
+    <div className="flex min-h-[calc(100vh-96px)] flex-col bg-[#f5f6f8] text-zinc-800">
+
+      {/* Top header bar */}
+      <div className="flex items-center justify-between border-b border-zinc-300 bg-white px-5 py-3 shadow-sm">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-400">Rigid Product</div>
+          <h1 className="text-xl font-black uppercase tracking-[0.05em] text-zinc-900">Acrylic Signs</h1>
+          <p className="text-[11px] text-zinc-500">
+            Acrylic {thicknessOption.label}
+            {isValid ? ` · ${width}" × ${height}"` : " · please set dimensions"}
           </p>
         </div>
 
-        {/* ── Two-column layout ── */}
-        <div className="grid gap-4 xl:grid-cols-[1fr_380px]">
-
-          {/* Left: configurator */}
-          <div className="space-y-4">
-
-            {/* Dimensions + Quantity */}
-            <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-              <div className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">
-                Dimensions &amp; Quantity
+        <div className="text-right">
+          <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-zinc-400">Pricing &amp; Info</div>
+          <div className="text-[11px] text-zinc-500">
+            Single-Sided · <span className="font-semibold">$0.16 / sq in</span>
+          </div>
+          {isValid && pricing ? (
+            <>
+              <div className="text-2xl font-black text-orange-500">{fmt(pricing.grandTotal)}</div>
+              <div className="text-[10px] text-zinc-400">
+                {pricing.area.toFixed(0)} sq in · qty {pricing.quantity} · 24h production
               </div>
-              <div className="grid gap-4 sm:grid-cols-3">
+            </>
+          ) : (
+            <div className="text-2xl font-black text-zinc-300">$0.00</div>
+          )}
+        </div>
+      </div>
 
-                <div>
-                  <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
-                    Width (inches)
-                  </label>
-                  <input
-                    type="number"
-                    min={0.1}
-                    max={ACRYLIC_MAX_WIDTH}
-                    step={0.5}
-                    value={widthStr}
-                    onChange={(e) => setWidthStr(e.target.value)}
-                    className={`h-10 w-full rounded-lg border px-3 text-sm shadow-sm focus:outline-none ${
-                      widthError
-                        ? "border-red-400 bg-red-50 focus:border-red-500"
-                        : "border-zinc-300 bg-white focus:border-zinc-500"
-                    }`}
-                  />
-                  {widthError && (
-                    <p className="mt-1 text-[10px] text-red-500">{widthError}</p>
-                  )}
-                </div>
+      {/* Main: canvas + right panel */}
+      <div className="flex min-h-0 flex-1 overflow-hidden">
 
-                <div>
-                  <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
-                    Height (inches)
-                  </label>
-                  <input
-                    type="number"
-                    min={0.1}
-                    max={ACRYLIC_MAX_HEIGHT}
-                    step={0.5}
-                    value={heightStr}
-                    onChange={(e) => setHeightStr(e.target.value)}
-                    className={`h-10 w-full rounded-lg border px-3 text-sm shadow-sm focus:outline-none ${
-                      heightError
-                        ? "border-red-400 bg-red-50 focus:border-red-500"
-                        : "border-zinc-300 bg-white focus:border-zinc-500"
-                    }`}
-                  />
-                  {heightError && (
-                    <p className="mt-1 text-[10px] text-red-500">{heightError}</p>
-                  )}
-                </div>
+        {/* Canvas */}
+        <div className="relative flex flex-1 flex-col">
+          <div className="flex-1">
+            <SignPreview width={width} height={height} isValid={isValid} />
+          </div>
 
-                <div>
-                  <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
-                    Quantity
-                  </label>
-                  <input
-                    type="number"
-                    min={1}
-                    step={1}
-                    value={quantity}
-                    onChange={(e) => setQuantity(Math.max(1, Math.floor(Number(e.target.value) || 1)))}
-                    className="h-10 w-full rounded-lg border border-zinc-300 bg-white px-3 text-sm shadow-sm focus:border-zinc-500 focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              {isValid && (
-                <p className="mt-3 text-[11px] text-zinc-400">
-                  Area: <strong className="text-zinc-600">{(width * height).toFixed(1)} sq in</strong>
-                  &nbsp;·&nbsp;
-                  Base rate: <strong className="text-zinc-600">$0.16 / sq in</strong>
-                  &nbsp;·&nbsp;
-                  Minimum per item: <strong className="text-zinc-600">{fmt(ACRYLIC_MINIMUM_PRICE)}</strong>
-                </p>
-              )}
+          {(widthError || heightError) && (
+            <div className="absolute right-3 top-3 rounded border border-red-300 bg-red-50 px-3 py-1.5 text-[11px] font-semibold text-red-600 shadow">
+              {widthError || heightError}
             </div>
+          )}
+        </div>
 
-            {/* Material options */}
-            <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-              <div className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">
-                Material &amp; Options
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <OptionSelect
-                  label="Thickness"
+        {/* Right panel */}
+        <div className="flex w-[300px] shrink-0 flex-col gap-3 overflow-y-auto border-l border-zinc-300 bg-white p-4">
+
+          {/* Options */}
+          <div>
+            <div className="mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-zinc-400">Options</div>
+            <div className="space-y-2">
+              <div>
+                <label className="mb-1 block text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-400">
+                  Thickness
+                </label>
+                <select
                   value={thickness}
-                  options={ACRYLIC_THICKNESS_OPTIONS.map((t) => ({
-                    label: t.label,
-                    value: t.value,
-                    note: t.modifier > 0 ? `+${Math.round(t.modifier * 100)}%` : undefined,
-                  }))}
-                  onChange={setThickness}
-                />
-                <OptionSelect
-                  label="Rounded Corners"
-                  value={roundedCorners}
-                  options={ACRYLIC_CORNER_OPTIONS}
-                  onChange={setRoundedCorners}
-                />
-                <OptionSelect
-                  label="Mounting / Standoff"
-                  value={mounting}
-                  options={ACRYLIC_MOUNTING_OPTIONS}
-                  onChange={setMounting}
-                  note={
-                    mounting !== "none"
-                      ? "✦ Standoff hardware gives a floating premium wall-mount look"
-                      : undefined
-                  }
-                />
+                  onChange={(e) => setThickness(e.target.value as AcrylicThickness)}
+                  className="h-9 w-full rounded border border-zinc-300 bg-zinc-50 px-2 text-xs text-zinc-800 focus:border-zinc-500 focus:outline-none"
+                >
+                  {ACRYLIC_THICKNESS_OPTIONS.map((t) => (
+                    <option key={t.value} value={t.value}>
+                      {t.label}{t.modifier > 0 ? ` (+${Math.round(t.modifier * 100)}%)` : ""}
+                    </option>
+                  ))}
+                </select>
               </div>
-            </div>
 
-            {/* Add-ons */}
-            <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-              <div className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">
-                Add-ons
-              </div>
-              <div className="space-y-2">
-                <ToggleCheckbox
-                  label="Contour Cut"
-                  checked={contourCut}
-                  onChange={setContourCut}
-                  suffix="(+20% of adjusted base)"
-                />
-                <ToggleCheckbox
-                  label="Rush Production"
-                  checked={rush}
-                  onChange={setRush}
-                  suffix="(+25%)"
+              <div>
+                <label className="mb-1 block text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-400">
+                  Quantity
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  value={quantity}
+                  onChange={(e) => setQuantity(Math.max(1, Math.floor(Number(e.target.value) || 1)))}
+                  className="h-9 w-full rounded border border-zinc-300 bg-zinc-50 px-2 text-xs text-zinc-800 focus:border-zinc-500 focus:outline-none"
                 />
               </div>
-            </div>
 
-            {/* Features */}
-            <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-              <div className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">
-                Product Features
-              </div>
-              <ul className="space-y-2 text-sm text-zinc-600">
-                {[
-                  `Custom sizes up to ${ACRYLIC_MAX_WIDTH}" × ${ACRYLIC_MAX_HEIGHT}"`,
-                  "Premium cast acrylic — rigid, clear, durable",
-                  "Optional rounded corners for a polished finish",
-                  "Optional silver or black standoff hardware for wall-mount displays",
-                  "Great for office, lobby, retail, and wayfinding signage",
-                ].map((f) => (
-                  <li key={f} className="flex items-start gap-2">
-                    <span className="mt-0.5 text-orange-400">✦</span>
-                    {f}
-                  </li>
-                ))}
-              </ul>
+              <Toggle label="Contour Cut" suffix="(+20%)" checked={contourCut} onChange={setContourCut} />
+              <Toggle label="Rush Production" suffix="(+25%)" checked={rush} onChange={setRush} />
             </div>
           </div>
 
-          {/* Right: summary + breakdown */}
-          <aside className="space-y-4">
+          <div className="border-t border-zinc-100" />
 
-            {/* Live total */}
-            <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-              <div className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">
-                Live Total
+          {/* Pricing breakdown */}
+          {isValid && pricing ? (
+            <div>
+              <div className="mb-2 text-[9px] font-bold uppercase tracking-[0.2em] text-zinc-400">
+                Pricing Breakdown
               </div>
-              <div className="mt-2 text-4xl font-semibold tracking-tight text-zinc-900">
-                {isValid && pricing ? fmt(pricing.grandTotal) : "—"}
+              <div className="space-y-0.5">
+                <Row label="Area"         value={`${pricing.area.toFixed(1)} sq in`} />
+                <Row label="Base Price"   value={fmt(pricing.rawBase)} />
+                {pricing.rawBase < ACRYLIC_MINIMUM_PRICE && (
+                  <Row label="Min. Applied" value={fmt(pricing.minAdjustedBase)} />
+                )}
+                {pricing.thicknessCharge > 0 && (
+                  <Row label={`Thickness (${thicknessOption.label})`} value={`+${fmt(pricing.thicknessCharge)}`} />
+                )}
+                {pricing.contourCutCharge > 0 && (
+                  <Row label="Contour Cut" value={`+${fmt(pricing.contourCutCharge)}`} />
+                )}
+                {pricing.roundedCornersCharge > 0 && (
+                  <Row label={`Corners (${cornerOption.label})`} value={`+${fmt(pricing.roundedCornersCharge)}`} />
+                )}
+                {pricing.standoffCharge > 0 && (
+                  <Row label="Standoffs"   value={`+${fmt(pricing.standoffCharge)}`} />
+                )}
+                {pricing.rushCharge > 0 && (
+                  <Row label="Rush (+25%)" value={`+${fmt(pricing.rushCharge)}`} />
+                )}
+                <div className="my-1 border-t border-zinc-100" />
+                <Row label="Per-Item"       value={fmt(pricing.perItemTotal)} strong />
+                <Row label={`Total (×${pricing.quantity})`} value={fmt(pricing.grandTotal)} strong accent />
               </div>
-              {isValid && pricing && (
-                <div className="mt-1 text-xs text-zinc-400">
-                  {quantity} sign{quantity !== 1 ? "s" : ""} · {fmt(pricing.perItemTotal)} each
-                </div>
-              )}
             </div>
+          ) : (
+            <div className="rounded border border-dashed border-zinc-200 p-3 text-center text-[11px] text-zinc-400">
+              Enter dimensions to see pricing
+            </div>
+          )}
 
-            {/* Breakdown */}
-            {isValid && pricing && (
-              <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-                <div className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">
-                  Pricing Breakdown
-                </div>
-                <div className="space-y-2">
-                  <RowItem label="Area" value={`${pricing.area.toFixed(1)} sq in`} />
-                  <RowItem label="Base Price" value={fmt(pricing.rawBase)} />
-                  {pricing.rawBase < ACRYLIC_MINIMUM_PRICE && (
-                    <RowItem label="Min. Price Applied" value={fmt(pricing.minAdjustedBase)} />
-                  )}
-                  {pricing.thicknessCharge > 0 && (
-                    <RowItem
-                      label={`Thickness (${thicknessOption?.label})`}
-                      value={`+${fmt(pricing.thicknessCharge)}`}
-                    />
-                  )}
-                  {pricing.contourCutCharge > 0 && (
-                    <RowItem label="Contour Cut (+20%)" value={`+${fmt(pricing.contourCutCharge)}`} />
-                  )}
-                  {pricing.roundedCornersCharge > 0 && (
-                    <RowItem
-                      label={`Rounded Corners (${cornerOption?.label})`}
-                      value={`+${fmt(pricing.roundedCornersCharge)}`}
-                    />
-                  )}
-                  {pricing.standoffCharge > 0 && (
-                    <RowItem
-                      label={`Standoff Kit (${mountingOption?.label})`}
-                      value={`+${fmt(pricing.standoffCharge)}`}
-                    />
-                  )}
-                  {pricing.rushCharge > 0 && (
-                    <RowItem label="Rush (+25%)" value={`+${fmt(pricing.rushCharge)}`} />
-                  )}
-                  <div className="my-1 border-t border-zinc-100" />
-                  <RowItem label="Per-Item Total" value={fmt(pricing.perItemTotal)} strong />
-                  <RowItem label="Quantity" value={`× ${pricing.quantity}`} />
-                  <div className="my-1 border-t border-zinc-200" />
-                  <RowItem label="Order Total" value={fmt(pricing.grandTotal)} strong accent />
-                </div>
-              </div>
-            )}
-
-            {/* Configuration summary */}
-            {isValid && (
-              <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
-                <div className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">
-                  Configuration
-                </div>
-                <div className="space-y-1.5 text-sm text-zinc-600">
-                  {[
-                    ["Size",            `${width}" × ${height}"`],
-                    ["Quantity",        String(quantity)],
-                    ["Thickness",       thicknessOption?.label ?? thickness],
-                    ["Mounting",        mountingOption?.label ?? "None"],
-                    ["Rounded Corners", cornerOption?.label ?? "None"],
-                    ["Contour Cut",     contourCut ? "Yes" : "No"],
-                    ["Rush Production", rush ? "Yes" : "No"],
-                  ].map(([label, value]) => (
-                    <div key={label} className="flex justify-between gap-3">
-                      <span className="text-zinc-400">{label}</span>
-                      <span className="font-medium text-zinc-700">{value}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Add to Cart */}
-            <button
-              type="button"
-              disabled={!isValid}
-              onClick={addToCart}
-              className={`w-full rounded-xl py-3.5 text-sm font-bold uppercase tracking-[0.16em] transition ${
-                !isValid
-                  ? "cursor-not-allowed bg-zinc-200 text-zinc-400"
-                  : added
-                    ? "bg-emerald-500 text-white"
-                    : "bg-orange-500 text-white hover:bg-orange-400 active:bg-orange-600"
-              }`}
-            >
-              {!isValid ? "Fix Dimensions to Continue" : added ? "Added to Cart ✓" : "Add to Cart"}
-            </button>
-          </aside>
+          {/* Add to Cart */}
+          <button
+            type="button"
+            disabled={!isValid}
+            onClick={addToCart}
+            className={`mt-auto w-full rounded py-3 text-xs font-bold uppercase tracking-[0.16em] transition ${
+              !isValid
+                ? "cursor-not-allowed bg-zinc-200 text-zinc-400"
+                : added
+                ? "bg-emerald-500 text-white"
+                : "bg-orange-500 text-white hover:bg-orange-400 active:bg-orange-600"
+            }`}
+          >
+            {!isValid ? "Set Dimensions" : added ? "Added ✓" : "Add to Cart"}
+          </button>
         </div>
+      </div>
+
+      {/* Bottom control bar --- Signs365 style */}
+      <div className="flex h-14 shrink-0 items-stretch border-t border-zinc-300 bg-white shadow-[0_-1px_4px_rgba(0,0,0,0.06)]">
+
+        {/* Size */}
+        <BarControl label="Size (inches)">
+          <div className="flex items-center gap-1.5">
+            <input
+              type="number"
+              min={0.1}
+              max={ACRYLIC_MAX_WIDTH}
+              step={0.5}
+              value={widthStr}
+              onChange={(e) => setWidthStr(e.target.value)}
+              placeholder="W"
+              className={`h-8 w-16 rounded border px-2 text-center text-sm font-semibold focus:outline-none ${
+                widthError ? "border-red-400 bg-red-50 text-red-600" : "border-zinc-300 bg-zinc-50"
+              }`}
+            />
+            <span className="text-zinc-400">×</span>
+            <input
+              type="number"
+              min={0.1}
+              max={ACRYLIC_MAX_HEIGHT}
+              step={0.5}
+              value={heightStr}
+              onChange={(e) => setHeightStr(e.target.value)}
+              placeholder="H"
+              className={`h-8 w-16 rounded border px-2 text-center text-sm font-semibold focus:outline-none ${
+                heightError ? "border-red-400 bg-red-50 text-red-600" : "border-zinc-300 bg-zinc-50"
+              }`}
+            />
+          </div>
+        </BarControl>
+
+        {/* Standoffs */}
+        <BarControl label="Standoffs">
+          <select
+            value={mounting}
+            onChange={(e) => setMounting(e.target.value as AcrylicMounting)}
+            className="h-8 rounded border border-zinc-300 bg-zinc-50 px-2 text-xs font-semibold uppercase tracking-[0.1em] text-zinc-700 focus:outline-none"
+          >
+            {ACRYLIC_MOUNTING_OPTIONS.map((m) => (
+              <option key={m.value} value={m.value}>
+                {m.label}
+              </option>
+            ))}
+          </select>
+        </BarControl>
+
+        {/* Rounded corners */}
+        <BarControl label="Rounded Corners">
+          <select
+            value={roundedCorners}
+            onChange={(e) => setRoundedCorners(e.target.value as AcrylicRoundedCorner)}
+            className="h-8 rounded border border-zinc-300 bg-zinc-50 px-2 text-xs font-semibold uppercase tracking-[0.1em] text-zinc-700 focus:outline-none"
+          >
+            {ACRYLIC_CORNER_OPTIONS.map((c) => (
+              <option key={c.value} value={c.value}>
+                {c.label}
+              </option>
+            ))}
+          </select>
+        </BarControl>
+
+        {/* Material */}
+        <BarControl label="Material">
+          <span className="text-xs font-semibold uppercase tracking-[0.08em] text-zinc-600">
+            Acrylic · {thicknessOption.label}
+          </span>
+        </BarControl>
+
       </div>
     </div>
   );
