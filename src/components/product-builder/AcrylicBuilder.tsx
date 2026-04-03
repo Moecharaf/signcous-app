@@ -221,15 +221,6 @@ function SummaryItem({ label, value }: { label: string; value: string }) {
   );
 }
 
-function QuickStat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-[22px] border border-white/70 bg-white/85 px-4 py-3 shadow-sm backdrop-blur">
-      <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400">{label}</div>
-      <div className="mt-2 text-sm font-semibold text-zinc-800">{value}</div>
-    </div>
-  );
-}
-
 function AcrylicPreview({
   width,
   height,
@@ -433,59 +424,61 @@ export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
   }
 
   return (
-    <div className="bg-[radial-gradient(circle_at_top,#fff9f4_0%,#f7f8fb_38%,#eff2f6_100%)] text-zinc-900">
-      <div className="mx-auto max-w-[1440px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-        <div className="rounded-[36px] border border-white/70 bg-white/70 p-5 shadow-[0_30px_90px_rgba(15,23,42,0.08)] backdrop-blur sm:p-6 lg:p-8">
-          <nav aria-label="Breadcrumb" className="mb-5 flex flex-wrap items-center gap-2 text-sm text-zinc-500">
-            <Link href="/" className="transition hover:text-zinc-900">
-              Home
-            </Link>
-            <span>/</span>
-            <Link href="/shop/rigid" className="transition hover:text-zinc-900">
-              Rigid Signs
-            </Link>
-            <span>/</span>
-            <span className="font-medium text-zinc-900">Acrylic Signs</span>
-          </nav>
-
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
-            <div>
-              <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-orange-500">Premium Rigid Signage</div>
-              <h1 className="mt-3 text-4xl font-semibold tracking-tight text-zinc-950 sm:text-5xl">Acrylic Signs</h1>
-              <p className="mt-4 max-w-3xl text-base leading-7 text-zinc-600 sm:text-lg">
-                Premium clear and rigid signage for offices, lobbies, branding, and wall-mounted displays.
-              </p>
-              <div className="mt-6 flex flex-wrap gap-3">
-                {[
-                  "Custom Sizes",
-                  "Premium Rigid Material",
-                  "Optional Standoff Hardware",
-                  "Fast Turnaround",
-                ].map((item) => (
-                  <TrustPill key={item} label={item} />
-                ))}
-              </div>
+    <div className="min-h-[calc(100vh-96px)] bg-[linear-gradient(145deg,#f4f4f5_0%,#ececef_55%,#e4e4e7_100%)] text-zinc-800">
+      <div className="mx-auto max-w-[1420px] px-3 py-4 md:px-5">
+        <div className="mb-3 grid gap-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm md:grid-cols-[1fr_auto] md:items-end">
+          <div>
+            <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-xs text-zinc-500">
+              <Link href="/" className="transition hover:text-zinc-900">Home</Link>
+              <span>/</span>
+              <Link href="/shop/rigid" className="transition hover:text-zinc-900">Rigid Signs</Link>
+              <span>/</span>
+              <span className="font-semibold text-zinc-900">Acrylic Signs</span>
+            </nav>
+            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-900">Acrylic Signs</h1>
+            <p className="mt-1 max-w-3xl text-sm text-zinc-600">
+              Premium clear and rigid signage for offices, lobbies, branding, and wall-mounted displays.
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {["Custom Sizes", "Premium Rigid Material", "Optional Standoff Hardware", "Fast Turnaround"].map((item) => (
+                <TrustPill key={item} label={item} />
+              ))}
             </div>
+          </div>
 
-            <div className="rounded-[28px] border border-emerald-200 bg-[linear-gradient(145deg,#f5fff6_0%,#effbf2_100%)] p-5 shadow-sm">
-              <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-emerald-700">Live Quote</div>
-              <div className="mt-3 text-4xl font-semibold text-zinc-950">
-                {pricing ? formatCurrency(pricing.grandTotal) : formatCurrency(0)}
-              </div>
-              <div className="mt-2 text-sm text-zinc-600">
-                {pricing
-                  ? `${pricing.quantity} item${pricing.quantity === 1 ? "" : "s"} · ${pricing.area.toFixed(0)} sq in each`
-                  : "Configure your sign to see live pricing."}
-              </div>
-              <div className="mt-4 rounded-2xl border border-emerald-100 bg-white/80 px-4 py-3 text-sm leading-6 text-zinc-600">
-                {productionMessage}
-              </div>
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-right">
+            <div className="text-xs uppercase tracking-[0.14em] text-emerald-700">Live Total</div>
+            <div className="text-3xl font-semibold text-zinc-900">{pricing ? formatCurrency(pricing.grandTotal) : formatCurrency(0)}</div>
+            <div className="text-xs text-emerald-800/80">
+              {pricing
+                ? `${pricing.quantity} sign${pricing.quantity === 1 ? "" : "s"} · ${pricing.area.toFixed(0)} sq in each`
+                : "Configure dimensions to view live pricing"}
             </div>
+            <div className="mt-2 max-w-[320px] text-left text-xs leading-5 text-zinc-600 md:text-right">{productionMessage}</div>
           </div>
         </div>
 
-        <div className="mt-8 grid gap-6 xl:grid-cols-[minmax(0,1.12fr)_390px] xl:items-start">
-          <div className="space-y-6">
+        <div className="grid gap-3 xl:grid-cols-[1fr_420px]">
+          <section className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
+            <div className="border-b border-zinc-200 px-4 py-3">
+              <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
+                <div>
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500">Rigid Builder</div>
+                  <div className="mt-1 text-sm font-medium text-zinc-700">
+                    Acrylic {thicknessOption.label} / {isValid ? `${formatInches(width)} x ${formatInches(height)}` : "Set dimensions"}
+                  </div>
+                </div>
+                <div className="text-xs text-zinc-500">
+                  {mountingOption.label} · {cornerOption.label} corners · {contourCut ? "Contour cut" : "Square cut"}
+                </div>
+              </div>
+              {(widthError || heightError) && (
+                <div className="mt-2 inline-flex rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-semibold text-red-600">
+                  {widthError || heightError}
+                </div>
+              )}
+            </div>
+
             <AcrylicPreview
               width={width}
               height={height}
@@ -495,79 +488,9 @@ export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
               contourCut={contourCut}
               thickness={thickness}
             />
+          </section>
 
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              <QuickStat label="Size" value={isValid ? `${formatInches(width)} × ${formatInches(height)}` : "Set dimensions"} />
-              <QuickStat label="Standoffs" value={mountingOption.label} />
-              <QuickStat label="Rounded Corners" value={cornerOption.label} />
-              <QuickStat label="Quantity" value={`${Math.max(1, quantity)} piece${Math.max(1, quantity) === 1 ? "" : "s"}`} />
-            </div>
-
-            <div className="grid gap-6 lg:grid-cols-2">
-              <SurfaceCard eyebrow="Why Choose Acrylic Signs" title="Premium presentation with dimensional depth">
-                <div className="space-y-4 text-sm leading-7 text-zinc-600">
-                  <p>
-                    Acrylic signs deliver a crystal-clear, rigid presentation that feels elevated in professional interiors. They are ideal when you want branding to look architectural instead of temporary.
-                  </p>
-                  <ul className="grid gap-3 sm:grid-cols-2">
-                    <li className="rounded-2xl border border-zinc-200 bg-zinc-50/80 px-4 py-3">Crystal-clear premium look</li>
-                    <li className="rounded-2xl border border-zinc-200 bg-zinc-50/80 px-4 py-3">Ideal for branding, office, and lobby signage</li>
-                    <li className="rounded-2xl border border-zinc-200 bg-zinc-50/80 px-4 py-3">Clean modern presentation</li>
-                    <li className="rounded-2xl border border-zinc-200 bg-zinc-50/80 px-4 py-3">Optional standoff hardware for a floating effect</li>
-                  </ul>
-                </div>
-              </SurfaceCard>
-
-              <SurfaceCard eyebrow="Popular Uses" title="Designed for polished interior branding">
-                <div className="grid gap-3 text-sm text-zinc-600 sm:grid-cols-2">
-                  {[
-                    "Lobby signs",
-                    "Office signs",
-                    "Reception displays",
-                    "Interior branding",
-                    "Directional signage",
-                    "Wall-mounted business signage",
-                  ].map((item) => (
-                    <div key={item} className="rounded-2xl border border-zinc-200 bg-zinc-50/80 px-4 py-3 font-medium text-zinc-700">
-                      {item}
-                    </div>
-                  ))}
-                </div>
-              </SurfaceCard>
-            </div>
-
-            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)]">
-              <SurfaceCard eyebrow="Product Features" title="Built for custom rigid sign programs">
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {[
-                    `Custom sizes up to ${ACRYLIC_MAX_WIDTH}\" × ${ACRYLIC_MAX_HEIGHT}\"`,
-                    "Multiple thickness options",
-                    "Optional rounded corners",
-                    "Optional contour cut",
-                    "Optional silver or black standoff hardware",
-                    "Premium polished finish",
-                  ].map((feature) => (
-                    <div key={feature} className="rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm font-medium text-zinc-700 shadow-sm">
-                      {feature}
-                    </div>
-                  ))}
-                </div>
-              </SurfaceCard>
-
-              <SurfaceCard eyebrow="Installation / Mounting" title="Raised wall-mounted finish">
-                <div className="space-y-4 text-sm leading-7 text-zinc-600">
-                  <p>
-                    Standoff hardware creates a premium wall-mounted appearance by lifting the acrylic slightly off the surface. The result is a clean floating look that works especially well in reception areas, conference rooms, and branded office environments.
-                  </p>
-                  <div className="rounded-2xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm font-medium text-orange-900">
-                    Silver and black hardware options are both reflected in the live preview so customers can compare the overall finish before adding to cart.
-                  </div>
-                </div>
-              </SurfaceCard>
-            </div>
-          </div>
-
-          <aside className="space-y-5 xl:sticky xl:top-6">
+          <aside className="space-y-3">
             <SurfaceCard eyebrow="Configurator" title="Build your acrylic sign">
               <div className="space-y-6">
                 <div>
@@ -613,7 +536,7 @@ export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
 
                 <div>
                   <div className="mb-3 text-sm font-semibold text-zinc-900">Thickness</div>
-                  <div className="grid gap-3">
+                  <div className="grid gap-2">
                     {ACRYLIC_THICKNESS_OPTIONS.map((option) => (
                       <OptionButton
                         key={option.value}
@@ -633,7 +556,7 @@ export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
 
                 <div>
                   <div className="mb-3 text-sm font-semibold text-zinc-900">Standoffs</div>
-                  <div className="grid gap-3">
+                  <div className="grid gap-2">
                     {ACRYLIC_MOUNTING_OPTIONS.map((option) => (
                       <OptionButton
                         key={option.value}
@@ -650,7 +573,7 @@ export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
 
                 <div>
                   <div className="mb-3 text-sm font-semibold text-zinc-900">Rounded Corners</div>
-                  <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="grid gap-2 sm:grid-cols-2">
                     {ACRYLIC_CORNER_OPTIONS.map((option) => (
                       <OptionButton
                         key={option.value}
@@ -667,7 +590,7 @@ export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
 
                 <div>
                   <div className="mb-3 text-sm font-semibold text-zinc-900">Quantity & Finishing</div>
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     <label className="block rounded-2xl border border-zinc-200 bg-zinc-50/80 px-4 py-3">
                       <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-400">Quantity</span>
                       <input
@@ -698,8 +621,8 @@ export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
             </SurfaceCard>
 
             <SurfaceCard eyebrow="Live Summary" title="Your Configuration">
-              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-                <SummaryItem label="Size" value={isValid ? `${formatInches(width)} × ${formatInches(height)}` : "Set dimensions"} />
+              <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
+                <SummaryItem label="Size" value={isValid ? `${formatInches(width)} x ${formatInches(height)}` : "Set dimensions"} />
                 <SummaryItem label="Thickness" value={thicknessOption.label} />
                 <SummaryItem label="Mounting" value={mountingOption.label} />
                 <SummaryItem label="Rounded Corners" value={cornerOption.label} />
@@ -710,8 +633,8 @@ export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
             </SurfaceCard>
 
             <SurfaceCard eyebrow="Pricing" title="Transparent price breakdown">
-              <div className="space-y-2">
-                <BreakdownRow label="Width × Height" value={isValid ? `${formatInches(width)} × ${formatInches(height)}` : "--"} muted={!isValid} />
+              <div className="space-y-1">
+                <BreakdownRow label="Width x Height" value={isValid ? `${formatInches(width)} x ${formatInches(height)}` : "--"} muted={!isValid} />
                 <BreakdownRow label="Area" value={pricing ? `${pricing.area.toFixed(1)} sq in` : "--"} muted={!pricing} />
                 <BreakdownRow label={`Base price (${formatCurrency(ACRYLIC_BASE_RATE)}/sq in)`} value={pricing ? formatCurrency(pricing.rawBase) : formatCurrency(0)} muted={!pricing} />
                 <BreakdownRow label="Minimum price adjustment" value={pricing ? formatCharge(minimumAdjustment) : formatCurrency(0)} muted={!pricing || minimumAdjustment === 0} />
@@ -720,7 +643,7 @@ export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
                 <BreakdownRow label="Rounded corners charge" value={pricing ? formatCharge(pricing.roundedCornersCharge) : formatCurrency(0)} muted={!pricing || pricing.roundedCornersCharge === 0} />
                 <BreakdownRow label="Standoff charge" value={pricing ? formatCharge(pricing.standoffCharge) : formatCurrency(0)} muted={!pricing || pricing.standoffCharge === 0} />
                 <BreakdownRow label="Rush charge" value={pricing ? formatCharge(pricing.rushCharge) : formatCurrency(0)} muted={!pricing || pricing.rushCharge === 0} />
-                <div className="my-3 border-t border-zinc-100" />
+                <div className="my-2 border-t border-zinc-200" />
                 <BreakdownRow label="Per-item total" value={pricing ? formatCurrency(pricing.perItemTotal) : formatCurrency(0)} emphasized />
                 <BreakdownRow label="Quantity" value={String(pricing?.quantity ?? Math.max(1, quantity))} emphasized />
                 <div className="rounded-2xl border border-orange-200 bg-orange-50 px-4 py-3">
@@ -734,19 +657,25 @@ export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
                 <div className="pt-1 text-xs leading-5 text-zinc-500">Final pricing updates instantly as you configure your sign.</div>
               </div>
 
-              <div className="mt-5 rounded-2xl border border-zinc-200 bg-zinc-50/80 px-4 py-3 text-sm leading-6 text-zinc-600">
+              <div className="mt-3 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-3 text-xs leading-5 text-zinc-600">
                 {productionMessage}
               </div>
 
-              <Button
-                type="button"
-                size="lg"
-                className="mt-5 w-full rounded-2xl"
-                disabled={!isValid}
-                onClick={addToCart}
-              >
-                {!isValid ? "Set dimensions to continue" : added ? "Added to cart" : "Add to cart"}
+              <Button type="button" size="lg" className="mt-4 w-full rounded-2xl" disabled={!isValid} onClick={addToCart}>
+                {!isValid ? "Set dimensions to continue" : added ? "Added" : "Add to cart"}
               </Button>
+            </SurfaceCard>
+
+            <SurfaceCard eyebrow="Acrylic Notes" title="Why customers choose this finish">
+              <div className="space-y-3 text-sm leading-6 text-zinc-600">
+                <p>Crystal-clear acrylic gives branding a clean, modern presentation for offices, lobbies, reception areas, and wall-mounted business signage.</p>
+                <ul className="grid gap-2">
+                  <li className="rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2">Custom sizes up to 96&quot; x 48&quot;</li>
+                  <li className="rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2">Multiple thickness options with premium rigid finish</li>
+                  <li className="rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2">Optional silver or black standoff hardware for a floating look</li>
+                  <li className="rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2">Optional rounded corners and contour cut finishing</li>
+                </ul>
+              </div>
             </SurfaceCard>
           </aside>
         </div>
