@@ -171,7 +171,132 @@ interface ShowcaseCardData {
   image: string | null;
   imageAlt: string;
   eyebrow: string;
+  texture: string;
+  ghost: string;
   priceLabel?: string;
+}
+
+function createGhostLabel(value: string): string {
+  return value
+    .replace(/[^a-z0-9]+/gi, " ")
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .join(" ")
+    .toUpperCase();
+}
+
+function inferShowcaseTheme(
+  sectionKey: HomeCatalogSection["key"],
+  productName: string
+): { texture: string; ghost: string; eyebrow: string } {
+  const normalized = productName.toLowerCase();
+
+  if (sectionKey === "rigid") {
+    if (normalized.includes("coro") || normalized.includes("coroplast")) {
+      return MANUAL_CARD_THEME["manual-coro"];
+    }
+    if (normalized.includes("acrylic") || normalized.includes("plex")) {
+      return {
+        texture: "from-[#ffffff]/95 via-[#eef7ff]/80 to-[#dcecff]/88",
+        ghost: "ACRYLIC",
+        eyebrow: "Clear Rigid",
+      };
+    }
+    if (normalized.includes("foam") || normalized.includes("foamcore")) {
+      return {
+        texture: "from-[#ffffff]/95 via-[#f4f6f8]/80 to-[#e7ecef]/88",
+        ghost: "FOAM",
+        eyebrow: "Lightweight Board",
+      };
+    }
+    if (normalized.includes("pvc") || normalized.includes("sintra")) {
+      return {
+        texture: "from-[#ffffff]/95 via-[#f0f4f8]/80 to-[#dde7f0]/88",
+        ghost: "PVC",
+        eyebrow: "Durable Sheet",
+      };
+    }
+    if (normalized.includes("aluminum") || normalized.includes("dibond") || normalized.includes("metal")) {
+      return {
+        texture: "from-[#ffffff]/95 via-[#f3f4f5]/80 to-[#dde1e5]/88",
+        ghost: "METAL",
+        eyebrow: "Premium Panel",
+      };
+    }
+    if (normalized.includes("styrene")) {
+      return {
+        texture: "from-[#ffffff]/95 via-[#f7f7f7]/80 to-[#ececec]/88",
+        ghost: "STYRENE",
+        eyebrow: "Flexible Rigid",
+      };
+    }
+
+    return {
+      texture: "from-[#ffffff]/95 via-[#edf4fb]/80 to-[#deebf9]/88",
+      ghost: createGhostLabel(productName),
+      eyebrow: "Rigid Print",
+    };
+  }
+
+  if (sectionKey === "adhesive") {
+    if (normalized.includes("wrap")) {
+      return {
+        texture: "from-[#ffffff]/95 via-[#fff2e7]/80 to-[#ffe0c8]/88",
+        ghost: "WRAP",
+        eyebrow: "Vehicle Film",
+      };
+    }
+    if (normalized.includes("window") || normalized.includes("cling") || normalized.includes("perf")) {
+      return {
+        texture: "from-[#ffffff]/95 via-[#eef5ff]/80 to-[#dfeaff]/88",
+        ghost: "WINDOW",
+        eyebrow: "Glass Graphics",
+      };
+    }
+    if (normalized.includes("wall")) {
+      return {
+        texture: "from-[#ffffff]/95 via-[#f8f2ec]/80 to-[#eedfce]/88",
+        ghost: "WALL",
+        eyebrow: "Interior Surface",
+      };
+    }
+    if (normalized.includes("floor")) {
+      return {
+        texture: "from-[#ffffff]/95 via-[#f7f4ef]/80 to-[#e8dfd0]/88",
+        ghost: "FLOOR",
+        eyebrow: "Walk-Safe Graphic",
+      };
+    }
+
+    return {
+      texture: "from-[#ffffff]/95 via-[#fff0ea]/80 to-[#ffe0d3]/88",
+      ghost: createGhostLabel(productName),
+      eyebrow: "Adhesive Film",
+    };
+  }
+
+  if (sectionKey === "magnet") {
+    if (normalized.includes("vehicle")) {
+      return {
+        texture: "from-[#ffffff]/95 via-[#eef0f2]/80 to-[#dfe3e8]/88",
+        ghost: "VEHICLE",
+        eyebrow: "Mobile Branding",
+      };
+    }
+
+    return {
+      texture: "from-[#ffffff]/95 via-[#f2f3f5]/80 to-[#e2e5e8]/88",
+      ghost: createGhostLabel(productName),
+      eyebrow: "Magnetic Sign",
+    };
+  }
+
+  return {
+    texture: "from-[#ffffff]/95 via-[#f3f3f3]/78 to-[#ececec]/88",
+    ghost: createGhostLabel(productName),
+    eyebrow: "Builder",
+  };
 }
 
 function ShowcaseCard({
@@ -215,6 +340,11 @@ function ShowcaseCard({
       )}
 
       <div
+        className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${card.texture} transition duration-300 group-hover:opacity-0 group-focus:opacity-0 group-focus-within:opacity-0 ${isExpanded ? "opacity-0" : "opacity-100"}`}
+        aria-hidden="true"
+      />
+
+      <div
         className={`pointer-events-none absolute inset-0 bg-white/68 backdrop-blur-[1px] transition duration-300 group-hover:opacity-0 group-focus:opacity-0 group-focus-within:opacity-0 ${isExpanded ? "opacity-0" : ""}`}
         aria-hidden="true"
       />
@@ -233,6 +363,9 @@ function ShowcaseCard({
           />
         ) : (
           <>
+            <div className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 text-center text-[clamp(2.6rem,5vw,4.8rem)] font-black uppercase tracking-[0.08em] text-[#1a1a1a]/[0.06]">
+              {card.ghost}
+            </div>
             <h2 className="text-center text-3xl font-black uppercase leading-none tracking-[0.02em] text-[#1a1a1a] md:text-4xl">
               {card.displayName ?? card.name}
             </h2>
@@ -245,23 +378,27 @@ function ShowcaseCard({
 
       <div className="absolute inset-0 flex overflow-hidden">
         <div
-          className={`flex w-[55%] -translate-x-full flex-col justify-center gap-2 bg-white p-5 transition duration-500 ease-out group-hover:translate-x-0 group-focus:translate-x-0 group-focus-within:translate-x-0 ${isExpanded ? "translate-x-0" : ""}`}
+          className={`relative flex w-[55%] -translate-x-full flex-col justify-center gap-2 bg-white p-5 transition duration-500 ease-out group-hover:translate-x-0 group-focus:translate-x-0 group-focus-within:translate-x-0 ${isExpanded ? "translate-x-0" : ""}`}
         >
+          <div className={`absolute inset-0 bg-gradient-to-br ${card.texture} opacity-55`} aria-hidden="true" />
+          <div className="pointer-events-none absolute right-3 top-2 text-[2rem] font-black uppercase tracking-[0.08em] text-[#1a1a1a]/[0.05]">
+            {card.ghost}
+          </div>
           <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#888]">
             {card.eyebrow}
           </div>
-          <h2 className="text-xl font-black uppercase leading-tight tracking-[0.01em] text-[#1a1a1a]">
+          <h2 className="relative text-xl font-black uppercase leading-tight tracking-[0.01em] text-[#1a1a1a]">
             {card.displayName ?? card.name}
           </h2>
-          <p className="text-[11px] leading-5 text-[#555]">
+          <p className="relative text-[11px] leading-5 text-[#555]">
             {card.description}
           </p>
           {card.priceLabel && (
-            <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#2f2f2f]">
+            <div className="relative text-[10px] font-bold uppercase tracking-[0.14em] text-[#2f2f2f]">
               {card.priceLabel}
             </div>
           )}
-          <div className="mt-1 flex flex-col gap-1.5">
+          <div className="relative mt-1 flex flex-col gap-1.5">
             <Link
               href={card.href}
               className="border border-[#bbb] px-3 py-1.5 text-center text-[10px] font-bold uppercase tracking-[0.16em] text-[#333] transition hover:border-[#333] hover:bg-[#f5f5f5]"
@@ -439,9 +576,15 @@ export default function HomeCatalogClient({
       </section>
 
       <section className="w-full bg-[#f3f3f3] px-4 pb-4 pt-1 md:px-6 md:pb-5 md:pt-1">
-        {(activeSection.key === "banner" || activeSection.key === "rigid") && (
+        {(activeSection.key === "banner" || activeSection.key === "rigid" || activeSection.key === "adhesive" || activeSection.key === "magnet") && (
           <h2 className="mb-4 text-[25px] font-normal leading-none tracking-[-0.01em] text-[#3b3b3b] [font-family:'Roboto_Condensed','Arial_Narrow',Arial,sans-serif] md:mb-5 md:text-[29px]">
-            {activeSection.key === "banner" ? "Banner Products" : "Rigid Products"}
+            {activeSection.key === "banner"
+              ? "Banner Products"
+              : activeSection.key === "rigid"
+                ? "Rigid Products"
+                : activeSection.key === "adhesive"
+                  ? "Adhesive Products"
+                  : "Magnet Products"}
           </h2>
         )}
 
@@ -472,6 +615,8 @@ export default function HomeCatalogClient({
                     image: manualProduct.image,
                     imageAlt: manualProduct.imageAlt,
                     eyebrow: visual.eyebrow,
+                    texture: visual.texture,
+                    ghost: visual.ghost,
                   }}
                   isCoarsePointer={isCoarsePointer}
                   isExpanded={isMobileExpanded}
@@ -486,11 +631,12 @@ export default function HomeCatalogClient({
           <div className="rounded-lg border border-[#d4d4d4] bg-white p-6 text-sm text-[#666]">
             No products are currently available in this category.
           </div>
-        ) : activeSection.key === "rigid" ? (
+        ) : activeSection.key === "rigid" || activeSection.key === "adhesive" || activeSection.key === "magnet" ? (
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
             {visibleProducts.map((product) => {
-              const cardId = `rigid-${product.id}`;
+              const cardId = `${activeSection.key}-${product.id}`;
               const isMobileExpanded = isCoarsePointer && expandedMobileCardId === cardId;
+              const visual = inferShowcaseTheme(activeSection.key, product.name);
 
               return (
                 <ShowcaseCard
@@ -499,10 +645,12 @@ export default function HomeCatalogClient({
                     id: cardId,
                     name: product.name,
                     href: product.href,
-                    description: product.summary || "Custom rigid print product.",
+                    description: product.summary || `Custom ${activeSection.name.toLowerCase()} print product.`,
                     image: product.image,
                     imageAlt: product.imageAlt,
-                    eyebrow: "Rigid Print",
+                    eyebrow: visual.eyebrow,
+                    texture: visual.texture,
+                    ghost: visual.ghost,
                     priceLabel: product.priceLabel,
                   }}
                   isCoarsePointer={isCoarsePointer}
