@@ -110,6 +110,18 @@ const MANUAL_RIGID_PRODUCTS: ManualBannerProductCard[] = [
     imageAlt: "CORO yard sign display",
     theme: "manual-coro",
   },
+  {
+    id: "manual-acrylic",
+    productId: 0,
+    name: "Acrylic Signs",
+    displayName: "ACRYLIC",
+    href: "/rigid/acrylic-signs",
+    description: "Premium clear rigid signs for offices, lobbies, and wall-mounted displays.",
+    label: "Builder",
+    image: null,
+    imageAlt: "Acrylic Signs",
+    theme: "manual-acrylic",
+  },
 ];
 
 function stripHtml(input: string): string {

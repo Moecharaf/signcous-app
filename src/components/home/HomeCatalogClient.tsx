@@ -12,7 +12,8 @@ export type ManualBannerThemeKey =
   | "manual-mesh"
   | "manual-no-curl"
   | "manual-poster"
-  | "manual-coro";
+  | "manual-coro"
+  | "manual-acrylic";
 
 export interface ManualBannerProductCard {
   id: string;
@@ -97,6 +98,11 @@ const MANUAL_CARD_THEME: Record<ManualBannerThemeKey, { texture: string; ghost: 
     texture: "from-[#ffffff]/95 via-[#edf4fb]/80 to-[#deebf9]/88",
     ghost: "CORO",
     eyebrow: "Yard Signs",
+  },
+  "manual-acrylic": {
+    texture: "from-[#ffffff]/95 via-[#eef8ff]/80 to-[#d8eeff]/88",
+    ghost: "ACRYLIC",
+    eyebrow: "Clear Rigid",
   },
 };
 
