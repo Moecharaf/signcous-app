@@ -160,6 +160,145 @@ function getCategoryFromHash(hash: string): HomeCatalogSection["key"] | null {
     : null;
 }
 
+interface ShowcaseCardData {
+  id: string;
+  name: string;
+  displayName?: string;
+  titleImage?: string;
+  titleImageAlt?: string;
+  href: string;
+  description: string;
+  image: string | null;
+  imageAlt: string;
+  eyebrow: string;
+  priceLabel?: string;
+}
+
+function ShowcaseCard({
+  card,
+  isCoarsePointer,
+  isExpanded,
+  onExpand,
+}: {
+  card: ShowcaseCardData;
+  isCoarsePointer: boolean;
+  isExpanded: boolean;
+  onExpand: () => void;
+}) {
+  return (
+    <div
+      className="group relative aspect-[1.82/1] overflow-hidden rounded-2xl border border-[#e8e8e8] bg-[#fdfdfd] shadow-[0_1px_0_rgba(0,0,0,0.04)] focus:outline-none"
+      tabIndex={0}
+      onClick={(event) => {
+        if (!isCoarsePointer) return;
+        if ((event.target as HTMLElement).closest("a, button")) return;
+
+        if (isExpanded) {
+          window.location.href = card.href;
+          return;
+        }
+
+        onExpand();
+      }}
+    >
+      {card.image && (
+        <Image
+          src={card.image}
+          alt=""
+          fill
+          quality={60}
+          loading="lazy"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          className={`object-cover opacity-65 saturate-110 transition duration-500 group-hover:opacity-0 group-focus:opacity-0 group-focus-within:opacity-0 ${isExpanded ? "opacity-0" : ""}`}
+          aria-hidden="true"
+        />
+      )}
+
+      <div
+        className={`pointer-events-none absolute inset-0 bg-white/68 backdrop-blur-[1px] transition duration-300 group-hover:opacity-0 group-focus:opacity-0 group-focus-within:opacity-0 ${isExpanded ? "opacity-0" : ""}`}
+        aria-hidden="true"
+      />
+
+      <div
+        className={`absolute inset-0 flex flex-col items-center justify-center p-5 transition duration-300 group-hover:opacity-0 group-focus:opacity-0 group-focus-within:opacity-0 ${isExpanded ? "opacity-0" : ""}`}
+      >
+        {card.titleImage ? (
+          <Image
+            src={card.titleImage}
+            alt={card.titleImageAlt ?? `${card.name} title`}
+            width={900}
+            height={260}
+            className="w-[82%] max-w-[420px] object-contain"
+            sizes="(max-width: 640px) 70vw, (max-width: 1024px) 36vw, 20vw"
+          />
+        ) : (
+          <>
+            <h2 className="text-center text-3xl font-black uppercase leading-none tracking-[0.02em] text-[#1a1a1a] md:text-4xl">
+              {card.displayName ?? card.name}
+            </h2>
+            <p className="mt-2 text-center text-xs font-medium text-[#666]">
+              {card.description}
+            </p>
+          </>
+        )}
+      </div>
+
+      <div className="absolute inset-0 flex overflow-hidden">
+        <div
+          className={`flex w-[55%] -translate-x-full flex-col justify-center gap-2 bg-white p-5 transition duration-500 ease-out group-hover:translate-x-0 group-focus:translate-x-0 group-focus-within:translate-x-0 ${isExpanded ? "translate-x-0" : ""}`}
+        >
+          <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#888]">
+            {card.eyebrow}
+          </div>
+          <h2 className="text-xl font-black uppercase leading-tight tracking-[0.01em] text-[#1a1a1a]">
+            {card.displayName ?? card.name}
+          </h2>
+          <p className="text-[11px] leading-5 text-[#555]">
+            {card.description}
+          </p>
+          {card.priceLabel && (
+            <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#2f2f2f]">
+              {card.priceLabel}
+            </div>
+          )}
+          <div className="mt-1 flex flex-col gap-1.5">
+            <Link
+              href={card.href}
+              className="border border-[#bbb] px-3 py-1.5 text-center text-[10px] font-bold uppercase tracking-[0.16em] text-[#333] transition hover:border-[#333] hover:bg-[#f5f5f5]"
+            >
+              More Info
+            </Link>
+            <Link
+              href={card.href}
+              className="bg-[#f5c800] px-3 py-1.5 text-center text-[10px] font-bold uppercase tracking-[0.16em] text-[#1a1a1a] transition hover:bg-[#e6b800]"
+            >
+              Order
+            </Link>
+          </div>
+        </div>
+
+        <div
+          className={`relative w-[45%] translate-x-full transition duration-500 ease-out group-hover:translate-x-0 group-focus:translate-x-0 group-focus-within:translate-x-0 ${isExpanded ? "translate-x-0" : ""}`}
+        >
+          {card.image ? (
+            <Image
+              src={card.image}
+              alt={card.imageAlt}
+              fill
+              quality={75}
+              loading="lazy"
+              sizes="(max-width: 640px) 45vw, (max-width: 1024px) 22vw, 15vw"
+              className="object-cover"
+            />
+          ) : (
+            <div className="h-full bg-[#f0f0f0]" />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function HomeCatalogClient({
   sections,
   manualBannerProducts,
@@ -320,118 +459,24 @@ export default function HomeCatalogClient({
               const isMobileExpanded = isCoarsePointer && expandedMobileCardId === manualProduct.id;
 
               return (
-                <div
+                <ShowcaseCard
                   key={manualProduct.id}
-                  className="group relative aspect-[1.82/1] overflow-hidden rounded-2xl border border-[#e8e8e8] bg-[#fdfdfd] shadow-[0_1px_0_rgba(0,0,0,0.04)] focus:outline-none"
-                  tabIndex={0}
-                  onClick={(event) => {
-                    if (!isCoarsePointer) return;
-                    if ((event.target as HTMLElement).closest("a, button")) return;
-
-                    if (expandedMobileCardId === manualProduct.id) {
-                      window.location.href = manualProduct.href;
-                      return;
-                    }
-
-                    setExpandedMobileCardId(manualProduct.id);
+                  card={{
+                    id: manualProduct.id,
+                    name: manualProduct.name,
+                    displayName: manualProduct.displayName,
+                    titleImage: manualProduct.titleImage,
+                    titleImageAlt: manualProduct.titleImageAlt,
+                    href: manualProduct.href,
+                    description: manualProduct.description,
+                    image: manualProduct.image,
+                    imageAlt: manualProduct.imageAlt,
+                    eyebrow: visual.eyebrow,
                   }}
-                >
-                  {/* Faded background image — default state only */}
-                  {manualProduct.image && (
-                    <Image
-                      src={manualProduct.image}
-                      alt=""
-                      fill
-                      quality={60}
-                      loading="lazy"
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      className={`object-cover opacity-65 saturate-110 transition duration-500 group-hover:opacity-0 group-focus:opacity-0 group-focus-within:opacity-0 ${isMobileExpanded ? "opacity-0" : ""}`}
-                      aria-hidden="true"
-                    />
-                  )}
-
-                  {/* Glassy white veil over the image in default state */}
-                  <div
-                    className={`pointer-events-none absolute inset-0 bg-white/68 backdrop-blur-[1px] transition duration-300 group-hover:opacity-0 group-focus:opacity-0 group-focus-within:opacity-0 ${isMobileExpanded ? "opacity-0" : ""}`}
-                    aria-hidden="true"
-                  />
-
-                  {/* DEFAULT STATE: large product name centered */}
-                  <div
-                    className={`absolute inset-0 flex flex-col items-center justify-center p-5 transition duration-300 group-hover:opacity-0 group-focus:opacity-0 group-focus-within:opacity-0 ${isMobileExpanded ? "opacity-0" : ""}`}
-                  >
-                    {manualProduct.titleImage ? (
-                      <Image
-                        src={manualProduct.titleImage}
-                        alt={manualProduct.titleImageAlt ?? `${manualProduct.name} title`}
-                        width={900}
-                        height={260}
-                        className="w-[82%] max-w-[420px] object-contain"
-                        sizes="(max-width: 640px) 70vw, (max-width: 1024px) 36vw, 20vw"
-                      />
-                    ) : (
-                      <>
-                        <h2 className="text-center text-3xl font-black uppercase leading-none tracking-[0.02em] text-[#1a1a1a] md:text-4xl">
-                          {manualProduct.displayName ?? manualProduct.name}
-                        </h2>
-                        <p className="mt-2 text-center text-xs font-medium text-[#666]">
-                          {manualProduct.description}
-                        </p>
-                      </>
-                    )}
-                  </div>
-
-                  {/* HOVER STATE: split — left info slides in from left, right photo slides in from right */}
-                  <div className="absolute inset-0 flex overflow-hidden">
-                    {/* Left panel */}
-                    <div
-                      className={`flex w-[55%] -translate-x-full flex-col justify-center gap-2 bg-white p-5 transition duration-500 ease-out group-hover:translate-x-0 group-focus:translate-x-0 group-focus-within:translate-x-0 ${isMobileExpanded ? "translate-x-0" : ""}`}
-                    >
-                      <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#888]">
-                        {visual.eyebrow}
-                      </div>
-                      <h2 className="text-xl font-black uppercase leading-tight tracking-[0.01em] text-[#1a1a1a]">
-                        {manualProduct.displayName ?? manualProduct.name}
-                      </h2>
-                      <p className="text-[11px] leading-5 text-[#555]">
-                        {manualProduct.description}
-                      </p>
-                      <div className="mt-1 flex flex-col gap-1.5">
-                        <Link
-                          href={manualProduct.href}
-                          className="border border-[#bbb] px-3 py-1.5 text-center text-[10px] font-bold uppercase tracking-[0.16em] text-[#333] transition hover:border-[#333] hover:bg-[#f5f5f5]"
-                        >
-                          More Info
-                        </Link>
-                        <Link
-                          href={manualProduct.href}
-                          className="bg-[#f5c800] px-3 py-1.5 text-center text-[10px] font-bold uppercase tracking-[0.16em] text-[#1a1a1a] transition hover:bg-[#e6b800]"
-                        >
-                          Order
-                        </Link>
-                      </div>
-                    </div>
-
-                    {/* Right panel: slides in from right */}
-                    <div
-                      className={`relative w-[45%] translate-x-full transition duration-500 ease-out group-hover:translate-x-0 group-focus:translate-x-0 group-focus-within:translate-x-0 ${isMobileExpanded ? "translate-x-0" : ""}`}
-                    >
-                      {manualProduct.image ? (
-                        <Image
-                          src={manualProduct.image}
-                          alt={manualProduct.imageAlt}
-                          fill
-                          quality={75}
-                          loading="lazy"
-                          sizes="(max-width: 640px) 45vw, (max-width: 1024px) 22vw, 15vw"
-                          className="object-cover"
-                        />
-                      ) : (
-                        <div className="h-full bg-[#f0f0f0]" />
-                      )}
-                    </div>
-                  </div>
-                </div>
+                  isCoarsePointer={isCoarsePointer}
+                  isExpanded={isMobileExpanded}
+                  onExpand={() => setExpandedMobileCardId(manualProduct.id)}
+                />
               );
             })}
           </div>
@@ -440,6 +485,32 @@ export default function HomeCatalogClient({
         {visibleProducts.length === 0 ? (
           <div className="rounded-lg border border-[#d4d4d4] bg-white p-6 text-sm text-[#666]">
             No products are currently available in this category.
+          </div>
+        ) : activeSection.key === "rigid" ? (
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+            {visibleProducts.map((product) => {
+              const cardId = `rigid-${product.id}`;
+              const isMobileExpanded = isCoarsePointer && expandedMobileCardId === cardId;
+
+              return (
+                <ShowcaseCard
+                  key={product.id}
+                  card={{
+                    id: cardId,
+                    name: product.name,
+                    href: product.href,
+                    description: product.summary || "Custom rigid print product.",
+                    image: product.image,
+                    imageAlt: product.imageAlt,
+                    eyebrow: "Rigid Print",
+                    priceLabel: product.priceLabel,
+                  }}
+                  isCoarsePointer={isCoarsePointer}
+                  isExpanded={isMobileExpanded}
+                  onExpand={() => setExpandedMobileCardId(cardId)}
+                />
+              );
+            })}
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
