@@ -733,6 +733,28 @@ export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
               </div>
             </PanelCard>
 
+            <PanelCard eyebrow="Product Gallery" title="Acrylic Sign Examples">
+              <div className="space-y-3">
+                <div className="relative h-48 w-full overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50">
+                  <Image
+                    src="/card-images/Acrylic.png"
+                    alt="Acrylic Signs Product"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <div className="relative h-16 w-full overflow-hidden rounded-xl border border-zinc-200 bg-white flex items-center justify-center">
+                  <Image
+                    src="/card-images/Acrylic-Logo.png"
+                    alt="Acrylic Logo"
+                    width={200}
+                    height={60}
+                    className="object-contain"
+                  />
+                </div>
+              </div>
+            </PanelCard>
+
             <PanelCard eyebrow="Acrylic Notes" title="Why customers choose this finish">
               <div className="space-y-3 text-sm leading-6 text-zinc-600">
                 <p>
