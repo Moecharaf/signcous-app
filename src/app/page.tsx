@@ -95,15 +95,20 @@ const MANUAL_BANNER_PRODUCTS: ManualBannerProductCard[] = [
   },
 ];
 
-const MANUAL_RIGID_PRODUCTS: HomeCatalogProductCard[] = [
+const MANUAL_RIGID_PRODUCTS: ManualBannerProductCard[] = [
   {
-    id: 130013,
+    id: "manual-coro",
+    productId: 13,
     name: "CORO",
+    displayName: "CORO",
+    titleImage: "/card-images/Coro-Logo.png",
+    titleImageAlt: "CORO high definition yard signs",
     href: "/rigid/coro",
-    priceLabel: "Custom Pricing",
-    summary: "Signs365-style CORO builder with per-sheet layout and live pricing.",
-    image: null,
-    imageAlt: "CORO Rigid Signs",
+    description: "High definition yard signs with live sheet-layout pricing and builder ordering.",
+    label: "Builder",
+    image: "/card-images/CoroIMG.png",
+    imageAlt: "CORO yard sign display",
+    theme: "manual-coro",
   },
 ];
 
@@ -270,7 +275,6 @@ export default async function HomePage() {
     return {
       ...section,
       productCount: section.productCount + MANUAL_RIGID_PRODUCTS.length,
-      products: [...MANUAL_RIGID_PRODUCTS, ...section.products],
     };
   });
 
@@ -278,6 +282,7 @@ export default async function HomePage() {
     <HomeCatalogClient
       sections={sectionsWithManualRigid}
       manualBannerProducts={manualBannerProducts}
+      manualRigidProducts={MANUAL_RIGID_PRODUCTS}
     />
   );
 }

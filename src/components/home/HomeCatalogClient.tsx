@@ -11,7 +11,8 @@ export type ManualBannerThemeKey =
   | "manual-canvas"
   | "manual-mesh"
   | "manual-no-curl"
-  | "manual-poster";
+  | "manual-poster"
+  | "manual-coro";
 
 export interface ManualBannerProductCard {
   id: string;
@@ -53,6 +54,7 @@ export interface HomeCatalogSection {
 interface HomeCatalogClientProps {
   sections: HomeCatalogSection[];
   manualBannerProducts: ManualBannerProductCard[];
+  manualRigidProducts: ManualBannerProductCard[];
 }
 
 const MANUAL_CARD_THEME: Record<ManualBannerThemeKey, { texture: string; ghost: string; eyebrow: string }> = {
@@ -90,6 +92,11 @@ const MANUAL_CARD_THEME: Record<ManualBannerThemeKey, { texture: string; ghost: 
     texture: "from-[#ffffff]/95 via-[#f0f5fb]/78 to-[#e7eef7]/88",
     ghost: "POSTER",
     eyebrow: "Retail Prints",
+  },
+  "manual-coro": {
+    texture: "from-[#ffffff]/95 via-[#edf4fb]/80 to-[#deebf9]/88",
+    ghost: "CORO",
+    eyebrow: "Yard Signs",
   },
 };
 
@@ -153,7 +160,11 @@ function getCategoryFromHash(hash: string): HomeCatalogSection["key"] | null {
     : null;
 }
 
-export default function HomeCatalogClient({ sections, manualBannerProducts }: HomeCatalogClientProps) {
+export default function HomeCatalogClient({
+  sections,
+  manualBannerProducts,
+  manualRigidProducts,
+}: HomeCatalogClientProps) {
   const currentHash = useSyncExternalStore(subscribeToHashChange, getHashSnapshot, getServerSnapshot);
   const activeKeyFromHash = getCategoryFromHash(currentHash);
   const activeKey = activeKeyFromHash ?? sections[0]?.key ?? "banner";
@@ -205,6 +216,18 @@ export default function HomeCatalogClient({ sections, manualBannerProducts }: Ho
   const heroOverride = HERO_IMAGE_OVERRIDE[activeSection.key] ?? null;
   const activeHeroImage = heroOverride ??
     activeSection.heroImages[heroFrame % Math.max(activeSection.heroImages.length, 1)] ?? null;
+  const activeManualProducts =
+    activeSection.key === "banner"
+      ? manualBannerProducts
+      : activeSection.key === "rigid"
+        ? manualRigidProducts
+        : [];
+  const visibleProducts = activeSection.products.filter((product) => {
+    if (activeSection.key !== "rigid") return true;
+
+    const normalizedName = product.name.toLowerCase();
+    return product.href !== "/rigid/coro" && !normalizedName.includes("coro") && !normalizedName.includes("coroplast");
+  });
 
   return (
     <div className="min-h-screen bg-[#f3f3f3] text-[#2f2f2f]">
@@ -277,15 +300,15 @@ export default function HomeCatalogClient({ sections, manualBannerProducts }: Ho
       </section>
 
       <section className="w-full bg-[#f3f3f3] px-4 pb-4 pt-1 md:px-6 md:pb-5 md:pt-1">
-        {activeSection.key === "banner" && (
+        {(activeSection.key === "banner" || activeSection.key === "rigid") && (
           <h2 className="mb-4 text-[25px] font-normal leading-none tracking-[-0.01em] text-[#3b3b3b] [font-family:'Roboto_Condensed','Arial_Narrow',Arial,sans-serif] md:mb-5 md:text-[29px]">
-            Banner Products
+            {activeSection.key === "banner" ? "Banner Products" : "Rigid Products"}
           </h2>
         )}
 
-        {activeSection.key === "banner" && (
+        {activeManualProducts.length > 0 && (
           <div className="mb-6 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
-            {manualBannerProducts.map((manualProduct) => {
+            {activeManualProducts.map((manualProduct) => {
               const themeKey =
                 resolveManualBannerTheme(manualProduct.theme) ??
                 resolveManualBannerTheme(manualProduct.id);
@@ -414,13 +437,13 @@ export default function HomeCatalogClient({ sections, manualBannerProducts }: Ho
           </div>
         )}
 
-        {activeSection.products.length === 0 ? (
+        {visibleProducts.length === 0 ? (
           <div className="rounded-lg border border-[#d4d4d4] bg-white p-6 text-sm text-[#666]">
             No products are currently available in this category.
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {activeSection.products.map((product) => (
+            {visibleProducts.map((product) => (
               <article
                 key={product.id}
                 className="overflow-hidden rounded-lg border border-[#d0d0d0] bg-white shadow-[0_1px_0_0_rgba(0,0,0,0.03)]"
