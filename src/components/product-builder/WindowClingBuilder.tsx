@@ -264,8 +264,33 @@ export default function WindowClingBuilder({ productId = 137 }: WindowClingBuild
     window.setTimeout(() => setAdded(false), 1800);
   }
 
-  const previewWidth = isValid ? Math.max(220, Math.min(620, width * 4)) : 300;
-  const previewHeight = isValid ? Math.max(180, Math.min(440, height * 4)) : 220;
+  const preview = useMemo(() => {
+    if (!isValid) {
+      return { width: 300, height: 220 };
+    }
+
+    const maxPreviewWidth = 620;
+    const maxPreviewHeight = 440;
+    const minPreviewWidth = 220;
+    const minPreviewHeight = 180;
+
+    const fitScale = Math.min(maxPreviewWidth / width, maxPreviewHeight / height);
+    const fittedWidth = width * fitScale;
+    const fittedHeight = height * fitScale;
+
+    // Keep aspect ratio but avoid tiny previews when dimensions are very small.
+    if (fittedWidth < minPreviewWidth || fittedHeight < minPreviewHeight) {
+      const boost = Math.max(minPreviewWidth / fittedWidth, minPreviewHeight / fittedHeight);
+      const boostedWidth = fittedWidth * boost;
+      const boostedHeight = fittedHeight * boost;
+
+      if (boostedWidth <= maxPreviewWidth && boostedHeight <= maxPreviewHeight) {
+        return { width: boostedWidth, height: boostedHeight };
+      }
+    }
+
+    return { width: fittedWidth, height: fittedHeight };
+  }, [isValid, width, height]);
 
   return (
     <div className="min-h-[calc(100vh-96px)] bg-[linear-gradient(145deg,#f4f4f5_0%,#ececef_55%,#e4e4e7_100%)] text-zinc-800">
@@ -341,7 +366,7 @@ export default function WindowClingBuilder({ productId = 137 }: WindowClingBuild
                   <>
                     <div
                       className="absolute border border-dashed border-zinc-400/70"
-                      style={{ width: previewWidth + 18, height: previewHeight + 18 }}
+                      style={{ width: preview.width + 18, height: preview.height + 18 }}
                     >
                       <div className="absolute -top-7 left-1/2 -translate-x-1/2 text-xs font-semibold text-zinc-500">
                         {formatInches(width)}
@@ -353,7 +378,7 @@ export default function WindowClingBuilder({ productId = 137 }: WindowClingBuild
 
                     <div
                       className="relative overflow-hidden border border-zinc-300 bg-white shadow-[0_26px_70px_rgba(15,23,42,0.13)]"
-                      style={{ width: previewWidth, height: previewHeight }}
+                      style={{ width: preview.width, height: preview.height }}
                     >
                       <div className="absolute inset-0 bg-[#f6f6f6]" />
                       {uploadedImage ? (
