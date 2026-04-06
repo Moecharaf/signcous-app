@@ -14,7 +14,8 @@ export type ManualBannerThemeKey =
   | "manual-poster"
   | "manual-coro"
   | "manual-acrylic"
-  | "manual-ij35c";
+  | "manual-ij35c"
+  | "manual-print-wrap-film";
 
 export interface ManualBannerProductCard {
   id: string;
@@ -110,6 +111,11 @@ const MANUAL_CARD_THEME: Record<ManualBannerThemeKey, { texture: string; ghost: 
     texture: "from-[#ffffff]/95 via-[#f7f8fb]/80 to-[#e7ecf4]/88",
     ghost: "IJ-35C",
     eyebrow: "Adhesive Vinyl",
+  },
+  "manual-print-wrap-film": {
+    texture: "from-[#ffffff]/95 via-[#fff2ea]/80 to-[#ffe1d3]/88",
+    ghost: "WRAP FILM",
+    eyebrow: "Vehicle Wrap",
   },
 };
 
@@ -516,7 +522,14 @@ export default function HomeCatalogClient({
     }
 
     if (activeSection.key === "adhesive") {
-      return product.href !== "/adhesive/3m-ij-35c" && !normalizedName.includes("ij-35c") && !normalizedName.includes("ij35c");
+      return (
+        product.href !== "/adhesive/3m-ij-35c" &&
+        product.href !== "/adhesive/3m-print-wrap-film" &&
+        !normalizedName.includes("ij-35c") &&
+        !normalizedName.includes("ij35c") &&
+        !normalizedName.includes("print wrap") &&
+        !normalizedName.includes("wrap film")
+      );
     }
 
     return true;

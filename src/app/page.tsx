@@ -128,6 +128,18 @@ const MANUAL_RIGID_PRODUCTS: ManualBannerProductCard[] = [
 
 const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
   {
+    id: "manual-print-wrap-film",
+    productId: 136,
+    name: "3M PRINT WRAP FILM",
+    displayName: "3M PRINT WRAP FILM",
+    href: "/adhesive/3m-print-wrap-film",
+    description: "Premium wrap film builder with custom size, contour cut, laminate options, rush pricing, and panel splitting.",
+    label: "Builder",
+    image: null,
+    imageAlt: "3M Print Wrap Film",
+    theme: "manual-print-wrap-film",
+  },
+  {
     id: "manual-ij35c",
     productId: 135,
     name: "3M IJ-35C",
@@ -187,6 +199,10 @@ function buildProductHref(product: WooProduct, fallbackCategorySlug?: string): s
 
   if (normalizedName.includes("ij-35c") || normalizedName.includes("ij35c")) {
     return "/adhesive/3m-ij-35c";
+  }
+
+  if (normalizedName.includes("print wrap") || normalizedName.includes("wrap film")) {
+    return "/adhesive/3m-print-wrap-film";
   }
 
   const matched = product.categories.find(
@@ -323,18 +339,25 @@ export default async function HomePage() {
     }
 
     if (section.key === "adhesive") {
-      const alreadyHasIj35c = section.products.some(
-        (product) =>
-          product.href === "/adhesive/3m-ij-35c" ||
-          product.name.toLowerCase().includes("ij-35c") ||
-          product.name.toLowerCase().includes("ij35c")
-      );
+      const missingManualCount = MANUAL_ADHESIVE_PRODUCTS.filter((manualProduct) => {
+        const normalizedTarget = manualProduct.name.toLowerCase();
 
-      if (alreadyHasIj35c) return section;
+        return !section.products.some((product) => {
+          const normalizedName = product.name.toLowerCase();
+          return (
+            product.href === manualProduct.href ||
+            normalizedName.includes(normalizedTarget) ||
+            (manualProduct.id === "manual-ij35c" && (normalizedName.includes("ij-35c") || normalizedName.includes("ij35c"))) ||
+            (manualProduct.id === "manual-print-wrap-film" && (normalizedName.includes("print wrap") || normalizedName.includes("wrap film")))
+          );
+        });
+      }).length;
+
+      if (missingManualCount === 0) return section;
 
       return {
         ...section,
-        productCount: section.productCount + MANUAL_ADHESIVE_PRODUCTS.length,
+        productCount: section.productCount + missingManualCount,
       };
     }
 
