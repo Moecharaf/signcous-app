@@ -128,6 +128,18 @@ const MANUAL_RIGID_PRODUCTS: ManualBannerProductCard[] = [
 
 const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
   {
+    id: "manual-gf2030",
+    productId: 138,
+    name: "GF 2030APAE",
+    displayName: "GF 2030APAE",
+    href: "/adhesive/gf-2030apae",
+    description: "Air-egress polymeric vinyl builder with 52in panel splitting, laminate options, contour cut, and rush pricing.",
+    label: "Builder",
+    image: null,
+    imageAlt: "GF 2030APAE Polymeric Vinyl",
+    theme: "manual-gf2030",
+  },
+  {
     id: "manual-window-cling",
     productId: 137,
     name: "Window Cling",
@@ -219,6 +231,10 @@ function buildProductHref(product: WooProduct, fallbackCategorySlug?: string): s
 
   if (normalizedName.includes("window cling")) {
     return "/adhesive/window-cling";
+  }
+
+  if (normalizedName.includes("2030") || normalizedName.includes("gf 2030")) {
+    return "/adhesive/gf-2030apae";
   }
 
   const matched = product.categories.find(

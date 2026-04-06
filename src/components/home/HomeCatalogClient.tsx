@@ -16,7 +16,8 @@ export type ManualBannerThemeKey =
   | "manual-acrylic"
   | "manual-ij35c"
   | "manual-print-wrap-film"
-  | "manual-window-cling";
+  | "manual-window-cling"
+  | "manual-gf2030";
 
 export interface ManualBannerProductCard {
   id: string;
@@ -122,6 +123,11 @@ const MANUAL_CARD_THEME: Record<ManualBannerThemeKey, { texture: string; ghost: 
     texture: "from-[#ffffff]/95 via-[#eef6ff]/80 to-[#dcecff]/88",
     ghost: "CLING",
     eyebrow: "Window Graphic",
+  },
+  "manual-gf2030": {
+    texture: "from-[#ffffff]/95 via-[#f0f6fb]/80 to-[#dceef9]/88",
+    ghost: "GF 2030",
+    eyebrow: "Polymeric Vinyl",
   },
 };
 
@@ -531,11 +537,15 @@ export default function HomeCatalogClient({
       return (
         product.href !== "/adhesive/3m-ij-35c" &&
         product.href !== "/adhesive/3m-print-wrap-film" &&
+        product.href !== "/adhesive/window-cling" &&
+        product.href !== "/adhesive/gf-2030apae" &&
         !normalizedName.includes("ij-35c") &&
         !normalizedName.includes("ij35c") &&
         !normalizedName.includes("print wrap") &&
         !normalizedName.includes("wrap film") &&
-        !normalizedName.includes("window cling")
+        !normalizedName.includes("window cling") &&
+        !normalizedName.includes("2030") &&
+        !normalizedName.includes("gf 2030")
       );
     }
 
