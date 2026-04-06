@@ -214,7 +214,7 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
 
   return (
     <div className="min-h-[calc(100vh-96px)] bg-[linear-gradient(145deg,#f4f4f5_0%,#ececef_55%,#e4e4e7_100%)] text-zinc-800">
-      <div className="mx-auto max-w-[1420px] px-3 py-4 md:px-5">
+      <div className="w-full px-3 py-3 md:px-4">
         <div className="mb-3 grid gap-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm md:grid-cols-[1fr_auto] md:items-end">
           <div>
             <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500">Rigid Product</div>
@@ -228,7 +228,7 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
           </div>
         </div>
 
-        <div className="grid gap-3 xl:grid-cols-[1fr_420px]">
+        <div className="grid gap-3">
           <section className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
             <div className="border-b border-zinc-200 px-4 py-3">
               <div className="text-sm font-medium text-zinc-700">
@@ -236,7 +236,7 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
               </div>
             </div>
 
-            <div className="relative h-[62vh] min-h-[460px] overflow-hidden rounded-b-2xl bg-[#f7f7f7]">
+            <div className="relative h-[calc(100vh-290px)] min-h-[560px] overflow-hidden rounded-b-2xl bg-[#f7f7f7]">
               <div
                 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 border border-zinc-500 bg-white"
                 style={{

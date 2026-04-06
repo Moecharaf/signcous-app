@@ -197,7 +197,7 @@ export default function HdpeBuilder() {
 
   return (
     <div className="min-h-[calc(100vh-96px)] bg-[linear-gradient(145deg,#f4f4f5_0%,#ececef_55%,#e4e4e7_100%)] text-zinc-800">
-      <div className="mx-auto max-w-[1400px] px-4 py-5">
+      <div className="w-full px-3 py-3 md:px-4">
 
         {/* Header bar */}
         <div className="mb-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
@@ -220,7 +220,7 @@ export default function HdpeBuilder() {
           </div>
         </div>
 
-        <div className="grid gap-4 xl:grid-cols-[1fr_340px]">
+        <div className="grid gap-4">
           {/* Canvas panel */}
           <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
             {/* Toolbar */}
@@ -244,7 +244,7 @@ export default function HdpeBuilder() {
             {/* Artboard */}
             <div
               ref={workspaceRef}
-              className="relative h-[56vh] min-h-[380px] overflow-hidden rounded-b-2xl bg-[#fafaf9]"
+              className="relative h-[calc(100vh-290px)] min-h-[560px] overflow-hidden rounded-b-2xl bg-[#fafaf9]"
               style={{
                 backgroundImage:
                   "linear-gradient(to right, rgba(63,63,70,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(63,63,70,0.08) 1px, transparent 1px)",
