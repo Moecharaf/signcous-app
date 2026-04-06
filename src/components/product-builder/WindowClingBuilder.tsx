@@ -294,7 +294,7 @@ export default function WindowClingBuilder({ productId = 137 }: WindowClingBuild
 
   return (
     <div className="min-h-[calc(100vh-96px)] bg-[linear-gradient(145deg,#f4f4f5_0%,#ececef_55%,#e4e4e7_100%)] text-zinc-800">
-      <div className="mx-auto max-w-[1400px] px-4 py-5">
+      <div className="w-full px-3 py-3 md:px-4">
         <div className="mb-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
           <div className="grid items-end gap-4 lg:grid-cols-[1fr_auto]">
             <div>
@@ -331,7 +331,7 @@ export default function WindowClingBuilder({ productId = 137 }: WindowClingBuild
           </div>
         </div>
 
-        <div className="grid gap-4 xl:grid-cols-[1fr_360px]">
+        <div className="grid gap-4">
           <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
             <div className="border-b border-zinc-200 px-4 py-3">
               <div className="flex flex-wrap items-center justify-between gap-3">
@@ -350,14 +350,14 @@ export default function WindowClingBuilder({ productId = 137 }: WindowClingBuild
             </div>
 
             <div
-              className="relative h-[58vh] min-h-[430px] overflow-hidden rounded-b-2xl bg-[#fafaf9]"
+              className="relative h-[calc(100vh-290px)] min-h-[560px] overflow-hidden rounded-b-2xl bg-[#fafaf9]"
               style={{
                 backgroundImage:
                   "linear-gradient(to right, rgba(63,63,70,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(63,63,70,0.08) 1px, transparent 1px)",
                 backgroundSize: "26px 26px",
               }}
             >
-              <div className="absolute left-5 top-5 z-10 rounded-md border border-zinc-200 bg-white/95 px-3 py-1 text-xs font-medium text-zinc-600 shadow-sm">
+              <div className="absolute bottom-4 left-4 z-10 rounded-md border border-zinc-200 bg-white/95 px-3 py-1 text-xs font-medium text-zinc-600 shadow-sm">
                 For best results on clear or spot-white artwork, upload a PNG with a transparent background.
               </div>
 
@@ -372,7 +372,7 @@ export default function WindowClingBuilder({ productId = 137 }: WindowClingBuild
                 </>
               )}
 
-              <div className="relative flex h-full items-center justify-center px-8 py-14">
+              <div className="relative flex h-full items-center justify-center px-8 py-16">
                 {isValid ? (
                   <>
                     <div
