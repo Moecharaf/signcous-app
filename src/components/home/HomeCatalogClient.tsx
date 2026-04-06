@@ -15,7 +15,8 @@ export type ManualBannerThemeKey =
   | "manual-coro"
   | "manual-acrylic"
   | "manual-ij35c"
-  | "manual-print-wrap-film";
+  | "manual-print-wrap-film"
+  | "manual-window-cling";
 
 export interface ManualBannerProductCard {
   id: string;
@@ -116,6 +117,11 @@ const MANUAL_CARD_THEME: Record<ManualBannerThemeKey, { texture: string; ghost: 
     texture: "from-[#ffffff]/95 via-[#fff2ea]/80 to-[#ffe1d3]/88",
     ghost: "WRAP FILM",
     eyebrow: "Vehicle Wrap",
+  },
+  "manual-window-cling": {
+    texture: "from-[#ffffff]/95 via-[#eef6ff]/80 to-[#dcecff]/88",
+    ghost: "CLING",
+    eyebrow: "Window Graphic",
   },
 };
 
@@ -528,7 +534,8 @@ export default function HomeCatalogClient({
         !normalizedName.includes("ij-35c") &&
         !normalizedName.includes("ij35c") &&
         !normalizedName.includes("print wrap") &&
-        !normalizedName.includes("wrap film")
+        !normalizedName.includes("wrap film") &&
+        !normalizedName.includes("window cling")
       );
     }
 

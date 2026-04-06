@@ -128,6 +128,18 @@ const MANUAL_RIGID_PRODUCTS: ManualBannerProductCard[] = [
 
 const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
   {
+    id: "manual-window-cling",
+    productId: 137,
+    name: "Window Cling",
+    displayName: "WINDOW CLING",
+    href: "/adhesive/window-cling",
+    description: "Square-inch priced static cling builder with inside/outside application and viewable controls.",
+    label: "Builder",
+    image: null,
+    imageAlt: "Window Cling",
+    theme: "manual-window-cling",
+  },
+  {
     id: "manual-print-wrap-film",
     productId: 136,
     name: "3M PRINT WRAP FILM",
@@ -203,6 +215,10 @@ function buildProductHref(product: WooProduct, fallbackCategorySlug?: string): s
 
   if (normalizedName.includes("print wrap") || normalizedName.includes("wrap film")) {
     return "/adhesive/3m-print-wrap-film";
+  }
+
+  if (normalizedName.includes("window cling")) {
+    return "/adhesive/window-cling";
   }
 
   const matched = product.categories.find(
@@ -348,7 +364,8 @@ export default async function HomePage() {
             product.href === manualProduct.href ||
             normalizedName.includes(normalizedTarget) ||
             (manualProduct.id === "manual-ij35c" && (normalizedName.includes("ij-35c") || normalizedName.includes("ij35c"))) ||
-            (manualProduct.id === "manual-print-wrap-film" && (normalizedName.includes("print wrap") || normalizedName.includes("wrap film")))
+            (manualProduct.id === "manual-print-wrap-film" && (normalizedName.includes("print wrap") || normalizedName.includes("wrap film"))) ||
+            (manualProduct.id === "manual-window-cling" && normalizedName.includes("window cling"))
           );
         });
       }).length;
