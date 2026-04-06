@@ -126,6 +126,21 @@ const MANUAL_RIGID_PRODUCTS: ManualBannerProductCard[] = [
   },
 ];
 
+const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
+  {
+    id: "manual-ij35c",
+    productId: 135,
+    name: "3M IJ-35C",
+    displayName: "3M IJ-35C",
+    href: "/adhesive/3m-ij-35c",
+    description: "Adhesive vinyl builder with panel splitting, laminate options, contour cut, and rush pricing.",
+    label: "Builder",
+    image: null,
+    imageAlt: "3M IJ-35C adhesive vinyl",
+    theme: "manual-ij35c",
+  },
+];
+
 function stripHtml(input: string): string {
   return input.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
 }
@@ -166,6 +181,10 @@ function buildProductHref(product: WooProduct, fallbackCategorySlug?: string): s
   // Route CORO products to the custom rigid builder.
   if (product.id === 13 || normalizedName.includes("coro") || normalizedName.includes("coroplast")) {
     return "/rigid/coro";
+  }
+
+  if (normalizedName.includes("ij-35c") || normalizedName.includes("ij35c")) {
+    return "/adhesive/3m-ij-35c";
   }
 
   const matched = product.categories.find(
@@ -274,29 +293,58 @@ export default async function HomePage() {
     };
   });
 
-  const sectionsWithManualRigid = sections.map((section) => {
-    if (section.key !== "rigid") return section;
-
-    const alreadyHasCoro = section.products.some(
-      (product) =>
-        product.href === "/rigid/coro" ||
-        product.name.toLowerCase().includes("coro") ||
-        product.name.toLowerCase().includes("coroplast")
-    );
-
-    if (alreadyHasCoro) return section;
+  const manualAdhesiveProducts = MANUAL_ADHESIVE_PRODUCTS.map((product) => {
+    const visual = imageByProductId.get(product.productId);
 
     return {
-      ...section,
-      productCount: section.productCount + MANUAL_RIGID_PRODUCTS.length,
+      ...product,
+      image: product.image ?? visual?.image ?? null,
+      imageAlt: product.imageAlt || visual?.imageAlt || product.name,
     };
+  });
+
+  const sectionsWithManualBuilders = sections.map((section) => {
+    if (section.key === "rigid") {
+      const alreadyHasCoro = section.products.some(
+        (product) =>
+          product.href === "/rigid/coro" ||
+          product.name.toLowerCase().includes("coro") ||
+          product.name.toLowerCase().includes("coroplast")
+      );
+
+      if (alreadyHasCoro) return section;
+
+      return {
+        ...section,
+        productCount: section.productCount + MANUAL_RIGID_PRODUCTS.length,
+      };
+    }
+
+    if (section.key === "adhesive") {
+      const alreadyHasIj35c = section.products.some(
+        (product) =>
+          product.href === "/adhesive/3m-ij-35c" ||
+          product.name.toLowerCase().includes("ij-35c") ||
+          product.name.toLowerCase().includes("ij35c")
+      );
+
+      if (alreadyHasIj35c) return section;
+
+      return {
+        ...section,
+        productCount: section.productCount + MANUAL_ADHESIVE_PRODUCTS.length,
+      };
+    }
+
+    return section;
   });
 
   return (
     <HomeCatalogClient
-      sections={sectionsWithManualRigid}
+      sections={sectionsWithManualBuilders}
       manualBannerProducts={manualBannerProducts}
       manualRigidProducts={MANUAL_RIGID_PRODUCTS}
+      manualAdhesiveProducts={manualAdhesiveProducts}
     />
   );
 }

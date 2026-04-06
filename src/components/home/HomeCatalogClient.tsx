@@ -13,7 +13,8 @@ export type ManualBannerThemeKey =
   | "manual-no-curl"
   | "manual-poster"
   | "manual-coro"
-  | "manual-acrylic";
+  | "manual-acrylic"
+  | "manual-ij35c";
 
 export interface ManualBannerProductCard {
   id: string;
@@ -56,6 +57,7 @@ interface HomeCatalogClientProps {
   sections: HomeCatalogSection[];
   manualBannerProducts: ManualBannerProductCard[];
   manualRigidProducts: ManualBannerProductCard[];
+  manualAdhesiveProducts: ManualBannerProductCard[];
 }
 
 const MANUAL_CARD_THEME: Record<ManualBannerThemeKey, { texture: string; ghost: string; eyebrow: string }> = {
@@ -103,6 +105,11 @@ const MANUAL_CARD_THEME: Record<ManualBannerThemeKey, { texture: string; ghost: 
     texture: "from-[#ffffff]/95 via-[#eef8ff]/80 to-[#d8eeff]/88",
     ghost: "ACRYLIC",
     eyebrow: "Clear Rigid",
+  },
+  "manual-ij35c": {
+    texture: "from-[#ffffff]/95 via-[#f7f8fb]/80 to-[#e7ecf4]/88",
+    ghost: "IJ-35C",
+    eyebrow: "Adhesive Vinyl",
   },
 };
 
@@ -446,6 +453,7 @@ export default function HomeCatalogClient({
   sections,
   manualBannerProducts,
   manualRigidProducts,
+  manualAdhesiveProducts,
 }: HomeCatalogClientProps) {
   const currentHash = useSyncExternalStore(subscribeToHashChange, getHashSnapshot, getServerSnapshot);
   const activeKeyFromHash = getCategoryFromHash(currentHash);
@@ -478,12 +486,6 @@ export default function HomeCatalogClient({
     return () => mediaQuery.removeEventListener("change", updatePointerMode);
   }, []);
 
-  useEffect(() => {
-    if (!isCoarsePointer && expandedMobileCardId) {
-      setExpandedMobileCardId(null);
-    }
-  }, [expandedMobileCardId, isCoarsePointer]);
-
   if (!activeSection) {
     return (
       <div className="min-h-screen bg-[#f3f3f3] px-4 py-10 text-[#3a3a3a] md:px-8">
@@ -503,12 +505,21 @@ export default function HomeCatalogClient({
       ? manualBannerProducts
       : activeSection.key === "rigid"
         ? manualRigidProducts
+        : activeSection.key === "adhesive"
+          ? manualAdhesiveProducts
         : [];
   const visibleProducts = activeSection.products.filter((product) => {
-    if (activeSection.key !== "rigid") return true;
-
     const normalizedName = product.name.toLowerCase();
-    return product.href !== "/rigid/coro" && !normalizedName.includes("coro") && !normalizedName.includes("coroplast");
+
+    if (activeSection.key === "rigid") {
+      return product.href !== "/rigid/coro" && !normalizedName.includes("coro") && !normalizedName.includes("coroplast");
+    }
+
+    if (activeSection.key === "adhesive") {
+      return product.href !== "/adhesive/3m-ij-35c" && !normalizedName.includes("ij-35c") && !normalizedName.includes("ij35c");
+    }
+
+    return true;
   });
 
   return (
