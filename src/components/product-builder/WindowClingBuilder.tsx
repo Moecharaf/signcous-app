@@ -357,9 +357,20 @@ export default function WindowClingBuilder({ productId = 137 }: WindowClingBuild
                 backgroundSize: "26px 26px",
               }}
             >
-              <div className="absolute left-5 top-5 rounded-md border border-zinc-200 bg-white px-3 py-1 text-xs font-medium text-zinc-600 shadow-sm">
+              <div className="absolute left-5 top-5 z-10 rounded-md border border-zinc-200 bg-white/95 px-3 py-1 text-xs font-medium text-zinc-600 shadow-sm">
                 For best results on clear or spot-white artwork, upload a PNG with a transparent background.
               </div>
+
+              {isValid && (
+                <>
+                  <div className="pointer-events-none absolute left-1/2 top-5 -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+                    Top of Image
+                  </div>
+                  <div className="pointer-events-none absolute bottom-5 left-1/2 -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+                    Front Side
+                  </div>
+                </>
+              )}
 
               <div className="relative flex h-full items-center justify-center px-8 py-14">
                 {isValid ? (
@@ -370,6 +381,12 @@ export default function WindowClingBuilder({ productId = 137 }: WindowClingBuild
                     >
                       <div className="absolute -top-7 left-1/2 -translate-x-1/2 text-xs font-semibold text-zinc-500">
                         {formatInches(width)}
+                      </div>
+                      <div className="absolute -bottom-7 left-1/2 -translate-x-1/2 text-xs font-semibold text-zinc-500">
+                        {formatInches(width)}
+                      </div>
+                      <div className="absolute -left-9 top-1/2 -translate-y-1/2 -rotate-90 text-xs font-semibold text-zinc-500">
+                        {formatInches(height)}
                       </div>
                       <div className="absolute -right-9 top-1/2 -translate-y-1/2 rotate-90 text-xs font-semibold text-zinc-500">
                         {formatInches(height)}
