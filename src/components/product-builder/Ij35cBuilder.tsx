@@ -456,8 +456,8 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
               </div>
             </div>
 
-            <div className="grid gap-2 border-t border-zinc-200 bg-zinc-50 p-3 md:grid-cols-4 xl:grid-cols-8">
-              <ControlBox title="Artwork" className="md:col-span-2" helper="Upload JPG, PNG, PDF, AI, EPS, PSD, or SVG.">
+            <div className="grid gap-2 border-t border-zinc-200 bg-zinc-50 p-3 md:grid-cols-6 xl:grid-cols-12">
+              <ControlBox title="Artwork" className="md:col-span-3 xl:col-span-4" helper="Upload JPG, PNG, PDF, AI, EPS, PSD, or SVG.">
                 <div className="space-y-2">
                   <label className="inline-flex h-9 w-full cursor-pointer items-center justify-center rounded border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-700 hover:border-zinc-400">
                     <input
@@ -480,7 +480,7 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
                 </div>
               </ControlBox>
 
-              <ControlBox title="Size" className="md:col-span-2" helper="Up to 300in / 25ft per side.">
+              <ControlBox title="Size" className="md:col-span-3 xl:col-span-3" helper="Up to 300in / 25ft per side.">
                 <div className="grid grid-cols-[1fr_auto_1fr] gap-1">
                   <input
                     type="number"
@@ -504,7 +504,7 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
                 </div>
               </ControlBox>
 
-              <ControlBox title="Units" helper="Switch between inches and feet.">
+              <ControlBox title="Units" className="md:col-span-2 xl:col-span-2" helper="Switch between inches and feet.">
                 <select
                   value={unit}
                   onChange={(event) => setUnit(event.target.value as IJ35CUnit)}
@@ -515,7 +515,7 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
                 </select>
               </ControlBox>
 
-              <ControlBox title="Laminate" className="md:col-span-2" helper={selectedLaminate.note}>
+              <ControlBox title="Laminate" className="md:col-span-2 xl:col-span-3" helper={selectedLaminate.note}>
                 <select
                   value={laminate}
                   onChange={(event) => setLaminate(event.target.value as IJ35CLaminate)}
@@ -529,7 +529,7 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
                 </select>
               </ControlBox>
 
-              <ControlBox title="Split Direction" className="md:col-span-2" helper="Auto follows 52in roll logic.">
+              <ControlBox title="Split Direction" className="md:col-span-3 xl:col-span-4" helper="Auto follows 52in roll logic.">
                 <select
                   value={splitDirection}
                   onChange={(event) => setSplitDirection(event.target.value as IJ35CSplitDirection)}
@@ -541,7 +541,7 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
                 </select>
               </ControlBox>
 
-              <ControlBox title="Contour / Rush" helper="Contour +15%, Rush +100%.">
+              <ControlBox title="Contour / Rush" className="md:col-span-2 xl:col-span-3" helper="Contour +15%, Rush +100%.">
                 <div className="grid grid-cols-2 gap-1">
                   <button
                     type="button"
@@ -568,7 +568,7 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
                 </div>
               </ControlBox>
 
-              <ControlBox title="Qty / Add" className="md:col-span-2">
+              <ControlBox title="Qty / Add" className="md:col-span-3 xl:col-span-5">
                 <div className="grid grid-cols-[68px_1fr] gap-1">
                   <input
                     type="number"
