@@ -31,6 +31,7 @@ export interface IJ35CPricingResult {
   panelCount: number;
   panelWidthIn: number;
   panelHeightIn: number;
+  panelOverlap: boolean;
 }
 
 export const IJ35C_BASE_RATE = 3.49;
@@ -115,6 +116,7 @@ export function calculateIJ35CPricing(input: IJ35CPricingInput): IJ35CPricingRes
 
   const resolvedSplitDirection = resolveSplitDirection(widthIn, heightIn, input.splitDirection);
   const panelCount = getPanelsForDirection(resolvedSplitDirection, widthIn, heightIn);
+  const panelOverlap = widthIn > IJ35C_MAX_ROLL_WIDTH;
 
   const panelWidthIn = resolvedSplitDirection === "vertical"
     ? widthIn / panelCount
@@ -141,5 +143,6 @@ export function calculateIJ35CPricing(input: IJ35CPricingInput): IJ35CPricingRes
     panelCount,
     panelWidthIn,
     panelHeightIn,
+    panelOverlap,
   };
 }

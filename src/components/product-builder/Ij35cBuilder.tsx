@@ -198,6 +198,8 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
     [width, height, unit, safeQuantity, contourCut, rush, splitDirection, isValid]
   );
 
+  const showPanelOverlapWarning = Boolean(pricing && pricing.panelOverlap);
+
   const selectedLaminate = IJ35C_LAMINATE_OPTIONS.find((option) => option.value === laminate)!;
 
   useEffect(() => {
@@ -382,6 +384,11 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
               {(widthError || heightError) && (
                 <div className="mt-2 inline-flex rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-semibold text-red-600">
                   {widthError || heightError}
+                </div>
+              )}
+              {showPanelOverlapWarning && !widthError && !heightError && (
+                <div className="mt-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-900">
+                  This design will be printed in panels with overlap.
                 </div>
               )}
             </div>
