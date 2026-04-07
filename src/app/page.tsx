@@ -16,6 +16,19 @@ import {
 
 const MANUAL_BANNER_PRODUCTS: ManualBannerProductCard[] = [
   {
+    id: "manual-hd-banner",
+    productId: 26,
+    name: "HD Banner",
+    displayName: "HD BANNER",
+    titleImage: "/card-images/HD-Banner-title.png",
+    titleImageAlt: "HD Banner high-definition vinyl banner",
+    href: "/banners/vinyl-banner",
+    description: "Custom HD vinyl banner with live sizing, finishing options, and rush production.",
+    label: "Builder",
+    image: "/card-images/HD-Banner.png",
+    imageAlt: "HD Banner",
+  },
+  {
     id: "manual-economical-stand",
     productId: 70,
     name: "Economical Banner Stand",
