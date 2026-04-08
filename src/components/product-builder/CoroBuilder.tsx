@@ -221,10 +221,10 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
             <h1 className="mt-1 text-3xl font-semibold tracking-tight text-zinc-900">CORO Configurator</h1>
             <p className="mt-1 text-sm text-zinc-600">Signs365-style sheet layout with per-block artwork upload.</p>
           </div>
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-right">
-            <div className="text-xs uppercase tracking-[0.14em] text-emerald-700">Live Total</div>
+          <div className="rounded-xl border border-orange-200 bg-gradient-to-r from-orange-50 to-amber-50 px-4 py-2 text-right">
+            <div className="text-xs uppercase tracking-[0.14em] text-orange-700">Live Total</div>
             <div className="text-3xl font-semibold text-zinc-900">{formatPrice(pricing.totalPrice)}</div>
-            <div className="text-xs text-emerald-800/80">{quantity} sign{quantity !== 1 ? "s" : ""} · {pricing.sheetsRequired} sheet{pricing.sheetsRequired !== 1 ? "s" : ""}</div>
+            <div className="text-xs text-orange-700/80">{quantity} sign{quantity !== 1 ? "s" : ""} · {pricing.sheetsRequired} sheet{pricing.sheetsRequired !== 1 ? "s" : ""}</div>
           </div>
         </div>
 
