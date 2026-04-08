@@ -236,7 +236,14 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
               </div>
             </div>
 
-            <div className="relative h-[calc(100vh-290px)] min-h-[560px] overflow-hidden rounded-b-2xl bg-[#f7f7f7]">
+            <div
+              className="relative h-[calc(100vh-290px)] min-h-[560px] overflow-hidden rounded-b-2xl bg-[#fafaf9]"
+              style={{
+                backgroundImage:
+                  "linear-gradient(to right, rgba(63,63,70,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(63,63,70,0.08) 1px, transparent 1px)",
+                backgroundSize: "26px 26px",
+              }}
+            >
               <div
                 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 border border-zinc-500 bg-white"
                 style={{
