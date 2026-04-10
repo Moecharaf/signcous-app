@@ -19,7 +19,8 @@ export type ManualBannerThemeKey =
   | "manual-window-cling"
   | "manual-gf2030"
   | "manual-gf830"
-  | "manual-orajet-clear";
+  | "manual-orajet-clear"
+  | "manual-one-way-window";
 
 export interface ManualBannerProductCard {
   id: string;
@@ -140,6 +141,11 @@ const MANUAL_CARD_THEME: Record<ManualBannerThemeKey, { texture: string; ghost: 
     texture: "from-[#ffffff]/95 via-[#ecf7ff]/80 to-[#d6eeff]/88",
     ghost: "CLEAR",
     eyebrow: "Clear Vinyl",
+  },
+  "manual-one-way-window": {
+    texture: "from-[#ffffff]/95 via-[#edfaf3]/80 to-[#d4f5e2]/88",
+    ghost: "PERF",
+    eyebrow: "Perforated Vinyl",
   },
 };
 

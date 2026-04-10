@@ -141,6 +141,18 @@ const MANUAL_RIGID_PRODUCTS: ManualBannerProductCard[] = [
 
 const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
   {
+    id: "manual-one-way-window",
+    productId: 0,
+    name: "One Way Window",
+    displayName: "ONE WAY WINDOW",
+    href: "/adhesive/one-way-window",
+    description: "Perforated vinyl with 50/50 & 70/30 options, 50in strict panel logic, optional laminate, contour cut, and tiered pricing.",
+    label: "Builder",
+    image: null,
+    imageAlt: "One Way Window Perforated Vinyl",
+    theme: "manual-one-way-window",
+  },
+  {
     id: "manual-orajet-clear",
     productId: 0,
     name: "Orajet Clear",
