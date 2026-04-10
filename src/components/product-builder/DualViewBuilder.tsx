@@ -453,7 +453,20 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
               )}
 
               <div className="relative flex h-full items-center justify-center px-8 py-14">
-                {pricing ? (
+                {(widthError || heightError) ? (
+                  <div className="flex flex-col items-center justify-center rounded border-2 border-red-500 bg-white px-10 py-8 text-center shadow-lg" style={{ minWidth: 280, maxWidth: 440 }}>
+                    <div className="text-base font-semibold leading-relaxed text-red-600">
+                      The maximum dimensions for this material are{" "}
+                      <span className="font-bold">
+                        {constraints.maxWidth} inches by {constraints.maxHeight} inches
+                      </span>
+                      .
+                    </div>
+                    <div className="mt-3 text-sm text-red-400">
+                      {side === "single" ? "Single-Sided" : "Double-Sided"} · {constraints.maxWidth}" W × {constraints.maxHeight}" H
+                    </div>
+                  </div>
+                ) : pricing ? (
                   <>
                     <div
                       className="absolute border border-dashed border-violet-400/70"
