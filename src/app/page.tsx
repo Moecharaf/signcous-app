@@ -141,6 +141,18 @@ const MANUAL_RIGID_PRODUCTS: ManualBannerProductCard[] = [
 
 const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
   {
+    id: "manual-dual-view",
+    productId: 0,
+    name: "Dual View",
+    displayName: "DUAL VIEW",
+    href: "/adhesive/dual-view",
+    description: "Single or double-sided window graphic with 52in panel logic, tiered pricing, and contour cut option.",
+    label: "Builder",
+    image: null,
+    imageAlt: "Dual View Window Graphic",
+    theme: "manual-dual-view",
+  },
+  {
     id: "manual-one-way-window",
     productId: 0,
     name: "One Way Window",
