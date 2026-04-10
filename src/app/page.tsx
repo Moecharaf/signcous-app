@@ -141,6 +141,18 @@ const MANUAL_RIGID_PRODUCTS: ManualBannerProductCard[] = [
 
 const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
   {
+    id: "manual-orajet-clear",
+    productId: 0,
+    name: "Orajet Clear",
+    displayName: "ORAJET CLEAR",
+    href: "/adhesive/orajet-clear",
+    description: "Translucent clear vinyl with tiered pricing, 54in panel splitting, contour cut, and rush production.",
+    label: "Builder",
+    image: null,
+    imageAlt: "Orajet Clear Translucent Vinyl",
+    theme: "manual-orajet-clear",
+  },
+  {
     id: "manual-gf830",
     productId: 0,
     name: "GF830 AutoMark",
