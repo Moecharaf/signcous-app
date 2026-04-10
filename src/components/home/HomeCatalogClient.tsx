@@ -17,7 +17,8 @@ export type ManualBannerThemeKey =
   | "manual-ij35c"
   | "manual-print-wrap-film"
   | "manual-window-cling"
-  | "manual-gf2030";
+  | "manual-gf2030"
+  | "manual-gf830";
 
 export interface ManualBannerProductCard {
   id: string;
@@ -128,6 +129,11 @@ const MANUAL_CARD_THEME: Record<ManualBannerThemeKey, { texture: string; ghost: 
     texture: "from-[#ffffff]/95 via-[#f0f6fb]/80 to-[#dceef9]/88",
     ghost: "GF 2030",
     eyebrow: "Polymeric Vinyl",
+  },
+  "manual-gf830": {
+    texture: "from-[#ffffff]/95 via-[#fef3e8]/80 to-[#fde0c2]/88",
+    ghost: "GF830",
+    eyebrow: "Wrap Vinyl",
   },
 };
 
