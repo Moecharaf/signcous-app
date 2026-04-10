@@ -622,9 +622,6 @@ export default function OrajetClearBuilder({ productId = 0 }: OrajetClearBuilder
                 <BreakdownRow label="Quantity" value={String(pricing?.quantity ?? safeQuantity)} strong />
                 <BreakdownRow label="Grand total" value={pricing ? formatCurrency(pricing.grandTotal) : formatCurrency(0)} strong accent />
               </div>
-              <div className="mt-3 text-xs leading-5 text-zinc-500">
-                Tiered rate: {`<10 sqft → $8.50 · <50 → $7.75 · <150 → $7.25 · 150+ → $6.95`}. +10% contour, +75% rush, {formatCurrency(ORAJET_CLEAR_MINIMUM_PRICE)} minimum. Panel cost ({formatCurrency(ORAJET_CLEAR_PANEL_EXTRA_COST)}/extra) added after minimum.
-              </div>
             </PanelCard>
 
             <PanelCard eyebrow="Split Logic" title="Panel Planning">

@@ -611,7 +611,7 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
                 <BreakdownRow label="Grand total" value={pricing ? formatCurrency(pricing.grandTotal) : formatCurrency(0)} strong accent />
               </div>
               <div className="mt-3 text-xs leading-5 text-zinc-500">
-                Signs365 model adapted for Signcous: $3.49/sq ft base, +15% contour cut, +100% rush, and $25 minimum.
+
               </div>
             </PanelCard>
 

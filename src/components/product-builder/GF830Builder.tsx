@@ -622,9 +622,6 @@ export default function GF830Builder({ productId = 0 }: GF830BuilderProps) {
                 <BreakdownRow label="Quantity" value={String(pricing?.quantity ?? safeQuantity)} strong />
                 <BreakdownRow label="Grand total" value={pricing ? formatCurrency(pricing.grandTotal) : formatCurrency(0)} strong accent />
               </div>
-              <div className="mt-3 text-xs leading-5 text-zinc-500">
-                Tiered rate: {`<10 sqft → $6.75 · <50 → $6.25 · <150 → $5.95 · 150+ → $5.75`}. +10% contour, +100% rush, {formatCurrency(GF830_MINIMUM_PRICE)} minimum. Panel cost ({formatCurrency(GF830_PANEL_EXTRA_COST)}/extra) added after minimum.
-              </div>
             </PanelCard>
 
             <PanelCard eyebrow="Split Logic" title="Panel Planning">

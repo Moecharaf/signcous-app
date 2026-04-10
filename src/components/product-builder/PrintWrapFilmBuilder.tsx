@@ -611,9 +611,7 @@ export default function PrintWrapFilmBuilder({ productId = 136 }: PrintWrapFilmB
                 <BreakdownRow label="Quantity" value={String(pricing?.quantity ?? safeQuantity)} strong />
                 <BreakdownRow label="Grand total" value={pricing ? formatCurrency(pricing.grandTotal) : formatCurrency(0)} strong accent />
               </div>
-              <div className="mt-3 text-xs leading-5 text-zinc-500">
-                Signs365 model adapted for Signcous: {formatCurrency(PRINT_WRAP_BASE_RATE)}/sq ft base, +15% contour cut, +100% rush, and {formatCurrency(PRINT_WRAP_MINIMUM_PRICE)} minimum.
-              </div>
+
             </PanelCard>
 
             <PanelCard eyebrow="Split Logic" title="Panel Planning">

@@ -677,9 +677,6 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
                   accent
                 />
               </div>
-              <div className="mt-3 text-xs leading-5 text-zinc-500">
-                Tiered rate: {`<10 sqft → $6.25 · <50 → $5.75 · <150 → $5.45 · 150+ → $5.25`}. Laminate +{formatCurrency(ONE_WAY_LAMINATE_RATE)}/sq ft, +10% contour, {formatCurrency(ONE_WAY_MINIMUM_PRICE)} minimum. Panel cost ({formatCurrency(ONE_WAY_PANEL_EXTRA_COST)}/extra) added after minimum.
-              </div>
             </PanelCard>
 
             <PanelCard eyebrow="Split Logic" title="Panel Planning">
