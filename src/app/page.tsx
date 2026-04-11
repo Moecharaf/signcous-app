@@ -225,6 +225,18 @@ const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
     theme: "manual-print-wrap-film",
   },
   {
+    id: "manual-dry-erase",
+    productId: 0,
+    name: "Dry Erase Wall Graphics",
+    displayName: "DRY ERASE",
+    href: "/adhesive/dry-erase",
+    description: "Writable dry erase wall graphics at $4.35/sq ft. Perfect for offices, classrooms, and collaborative spaces. Contour cut and rush available.",
+    label: "Builder",
+    image: null,
+    imageAlt: "Dry Erase Wall Graphics",
+    theme: "manual-dry-erase",
+  },
+  {
     id: "manual-low-tac-wall",
     productId: 0,
     name: "Removable Wall Decals",
