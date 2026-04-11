@@ -225,6 +225,18 @@ const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
     theme: "manual-print-wrap-film",
   },
   {
+    id: "manual-reflective-vinyl",
+    productId: 0,
+    name: "Reflective Vinyl",
+    displayName: "REFLECTIVE",
+    href: "/adhesive/reflective-vinyl",
+    description: "High-visibility reflective vinyl graphics at $5.95/sq ft. Ideal for safety signage, vehicle markings, and outdoor installations. Contour cut and rush available.",
+    label: "Builder",
+    image: null,
+    imageAlt: "Reflective Vinyl High-Visibility Graphics",
+    theme: "manual-reflective-vinyl",
+  },
+  {
     id: "manual-dry-erase",
     productId: 0,
     name: "Dry Erase Wall Graphics",

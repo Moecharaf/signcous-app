@@ -25,7 +25,8 @@ export type ManualBannerThemeKey =
   | "manual-footprints"
   | "manual-bootprints"
   | "manual-low-tac-wall"
-  | "manual-dry-erase";
+  | "manual-dry-erase"
+  | "manual-reflective-vinyl";
 
 export interface ManualBannerProductCard {
   id: string;
@@ -176,6 +177,11 @@ const MANUAL_CARD_THEME: Record<ManualBannerThemeKey, { texture: string; ghost: 
     texture: "from-[#ffffff]/95 via-[#f8fafc]/80 to-[#f1f5f9]/88",
     ghost: "DRY ERASE",
     eyebrow: "Writable Surface",
+  },
+  "manual-reflective-vinyl": {
+    texture: "from-[#ffffff]/95 via-[#fffbeb]/80 to-[#fef3c7]/88",
+    ghost: "REFLECT",
+    eyebrow: "High-Visibility",
   },
 };
 
