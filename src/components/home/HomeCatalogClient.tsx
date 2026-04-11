@@ -23,7 +23,8 @@ export type ManualBannerThemeKey =
   | "manual-one-way-window"
   | "manual-dual-view"
   | "manual-footprints"
-  | "manual-bootprints";
+  | "manual-bootprints"
+  | "manual-low-tac-wall";
 
 export interface ManualBannerProductCard {
   id: string;
@@ -164,6 +165,11 @@ const MANUAL_CARD_THEME: Record<ManualBannerThemeKey, { texture: string; ghost: 
     texture: "from-[#ffffff]/95 via-[#fff7ed]/80 to-[#ffedd5]/88",
     ghost: "BOOT",
     eyebrow: "Outdoor Floor",
+  },
+  "manual-low-tac-wall": {
+    texture: "from-[#ffffff]/95 via-[#f0f9ff]/80 to-[#e0f2fe]/88",
+    ghost: "WALL",
+    eyebrow: "Wall Decal",
   },
 };
 

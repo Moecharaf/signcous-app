@@ -225,6 +225,18 @@ const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
     theme: "manual-print-wrap-film",
   },
   {
+    id: "manual-low-tac-wall",
+    productId: 0,
+    name: "Removable Wall Decals",
+    displayName: "LOW TAC WALL",
+    href: "/adhesive/low-tac-wall",
+    description: "Repositionable low-tac wall graphics at $4.25/sq ft. Easy to apply and remove without residue. Contour cut and rush available.",
+    label: "Builder",
+    image: null,
+    imageAlt: "Removable Wall Decals Low-Tac Wall Graphics",
+    theme: "manual-low-tac-wall",
+  },
+  {
     id: "manual-bootprints",
     productId: 0,
     name: "Outdoor Boot Prints",
