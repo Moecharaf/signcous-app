@@ -225,6 +225,18 @@ const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
     theme: "manual-print-wrap-film",
   },
   {
+    id: "manual-bootprints",
+    productId: 0,
+    name: "Outdoor Boot Prints",
+    displayName: "BOOT PRINTS",
+    href: "/adhesive/bootprints",
+    description: "Heavy-duty outdoor floor graphic panels at $14.95/sq ft. Built for high-traffic exterior environments. Contour cut and rush available.",
+    label: "Builder",
+    image: null,
+    imageAlt: "Outdoor Boot Prints Heavy-Duty Floor Graphics",
+    theme: "manual-bootprints",
+  },
+  {
     id: "manual-footprints",
     productId: 0,
     name: "Footprints",
