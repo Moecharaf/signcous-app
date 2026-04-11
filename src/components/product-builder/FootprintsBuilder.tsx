@@ -13,7 +13,7 @@ import {
 } from "@/lib/pricing/footprints";
 
 type DimensionUnit = "inches" | "feet";
-type SplitDirection = "horizontal" | "vertical" | "split-selected" | "all-splits";
+type SplitDirection = "vertical" | "horizontal";
 
 interface FootprintsBuilderProps {
   productId?: number;
@@ -120,9 +120,9 @@ export default function FootprintsBuilder({ productId = 0 }: FootprintsBuilderPr
   const [quantity, setQuantity] = useState(1);
   const [contourCut, setContourCut] = useState(false);
   const [rush, setRush] = useState(false);
-  const [splitDirection, setSplitDirection] = useState<SplitDirection>("horizontal");
-  const [offsetX, setOffsetX] = useState(0);
-  const [offsetY, setOffsetY] = useState(0);
+  const [splitDirection, setSplitDirection] = useState<SplitDirection>("vertical");
+  const [selectedSplit, setSelectedSplit] = useState<"all" | number>("all");
+  const [splitOffsets, setSplitOffsets] = useState<Record<number, number>>({});
   const [added, setAdded] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null);
@@ -259,8 +259,8 @@ export default function FootprintsBuilder({ productId = 0 }: FootprintsBuilderPr
         custom_contour_cut: contourCut ? "Yes" : "No",
         custom_rush: rush ? "Yes" : "No",
         custom_split_direction: splitDirection,
-        custom_offset_x: `${offsetX}"`,
-        custom_offset_y: `${offsetY}"`,
+        custom_split_count: String(splitCount),
+        custom_split_offsets: JSON.stringify(splitOffsets),
       },
     });
 
@@ -294,18 +294,57 @@ export default function FootprintsBuilder({ productId = 0 }: FootprintsBuilderPr
     return { width: pw, height: ph };
   }, [isValid, widthIn, heightIn]);
 
-  // Panel grid lines for preview (visual only)
+  // How many active split lines based on direction
+  const splitCount = panelInfo
+    ? splitDirection === "vertical"
+      ? panelInfo.panelsWide - 1
+      : panelInfo.panelsHigh - 1
+    : 0;
+
+  // Position label for the selected split
+  const positionDisplay = useMemo(() => {
+    const BASE = 48;
+    if (selectedSplit === "all") return `${BASE}.00in`;
+    const base = (selectedSplit as number) * BASE;
+    const offset = splitOffsets[selectedSplit as number] ?? 0;
+    return `${(base + offset).toFixed(2)}in`;
+  }, [selectedSplit, splitOffsets]);
+
+  function adjustSplitPosition(delta: number) {
+    if (splitCount === 0) return;
+    if (selectedSplit === "all") {
+      setSplitOffsets((prev) => {
+        const next = { ...prev };
+        for (let i = 1; i <= splitCount; i++) next[i] = (next[i] ?? 0) + delta;
+        return next;
+      });
+    } else {
+      const idx = selectedSplit as number;
+      setSplitOffsets((prev) => ({ ...prev, [idx]: (prev[idx] ?? 0) + delta }));
+    }
+  }
+
+  // Panel grid lines for preview (visual only, respect per-split offsets)
   const panelLines = useMemo(() => {
-    if (!isValid || !panelInfo || !pricing) return { verticals: [] as number[], horizontals: [] as number[] };
+    if (!isValid || !panelInfo) return { verticals: [] as number[], horizontals: [] as number[] };
     const PANEL_MAX_IN = 48;
     const scaleX = preview.width / widthIn;
     const scaleY = preview.height / heightIn;
     const verticals: number[] = [];
     const horizontals: number[] = [];
-    for (let i = 1; i < panelInfo.panelsWide; i++) verticals.push(i * PANEL_MAX_IN * scaleX);
-    for (let j = 1; j < panelInfo.panelsHigh; j++) horizontals.push(j * PANEL_MAX_IN * scaleY);
+    if (splitDirection === "vertical") {
+      for (let i = 1; i < panelInfo.panelsWide; i++) {
+        const off = splitOffsets[i] ?? 0;
+        verticals.push((i * PANEL_MAX_IN + off) * scaleX);
+      }
+    } else {
+      for (let j = 1; j < panelInfo.panelsHigh; j++) {
+        const off = splitOffsets[j] ?? 0;
+        horizontals.push((j * PANEL_MAX_IN + off) * scaleY);
+      }
+    }
     return { verticals, horizontals };
-  }, [isValid, panelInfo, preview, widthIn, heightIn, pricing]);
+  }, [isValid, panelInfo, preview, widthIn, heightIn, splitOffsets, splitDirection]);
 
   return (
     <div className="min-h-[calc(100vh-96px)] bg-[linear-gradient(145deg,#f4f4f5_0%,#ececef_55%,#e4e4e7_100%)] text-zinc-800">
@@ -378,14 +417,13 @@ export default function FootprintsBuilder({ productId = 0 }: FootprintsBuilderPr
               Total Area:{" "}
               <span className="font-semibold">{pricing.sqFt} sq ft</span>
             </span>
-            {panelInfo && panelInfo.totalPanels > 1 && (
+            {splitCount > 0 && (
               <>
                 <span className="text-blue-400">·</span>
                 <span>
-                  Panels:{" "}
+                  Cuts:{" "}
                   <span className="font-semibold">
-                    {panelInfo.panelsWide} × {panelInfo.panelsHigh} = {panelInfo.totalPanels} panel
-                    {panelInfo.totalPanels !== 1 ? "s" : ""}
+                    {splitCount} × 48&quot; {splitDirection}
                   </span>
                 </span>
               </>
@@ -407,7 +445,7 @@ export default function FootprintsBuilder({ productId = 0 }: FootprintsBuilderPr
                 <div className="text-xs font-medium text-zinc-500">
                   {contourCut ? "Contour cut · " : ""}
                   {rush ? "Rush · " : ""}
-                  Split: {splitDirection.replace(/-/g, " ")}
+                  Split: {splitDirection} · {splitCount} cut{splitCount !== 1 ? "s" : ""}
                 </div>
               </div>
               {(widthError || heightError) && (
@@ -473,18 +511,22 @@ export default function FootprintsBuilder({ productId = 0 }: FootprintsBuilderPr
                         }}
                       />
 
-                      {/* Panel split lines (visual only) */}
-                      {panelLines.verticals.map((x) => (
+                      {/* Panel split lines (visual/production only — no pricing impact) */}
+                      {panelLines.verticals.map((x, i) => (
                         <div
-                          key={`v-${x}`}
-                          className="absolute top-0 h-full border-l-2 border-dashed border-blue-400/60"
+                          key={`v-${i}`}
+                          className={`absolute top-0 h-full border-l-2 border-dashed ${
+                            selectedSplit === i + 1 ? "border-red-500" : "border-red-400/55"
+                          }`}
                           style={{ left: x }}
                         />
                       ))}
-                      {panelLines.horizontals.map((y) => (
+                      {panelLines.horizontals.map((y, j) => (
                         <div
-                          key={`h-${y}`}
-                          className="absolute left-0 w-full border-t-2 border-dashed border-blue-400/60"
+                          key={`h-${j}`}
+                          className={`absolute left-0 w-full border-t-2 border-dashed ${
+                            selectedSplit === j + 1 ? "border-red-500" : "border-red-400/55"
+                          }`}
                           style={{ top: y }}
                         />
                       ))}
@@ -496,9 +538,6 @@ export default function FootprintsBuilder({ productId = 0 }: FootprintsBuilderPr
                           fill
                           unoptimized
                           className="object-contain"
-                          style={{
-                            transform: `translate(${offsetX}px, ${offsetY}px)`,
-                          }}
                         />
                       ) : (
                         <div className="absolute inset-0 flex items-center justify-center text-center text-zinc-400">
@@ -514,10 +553,10 @@ export default function FootprintsBuilder({ productId = 0 }: FootprintsBuilderPr
                       )}
                     </div>
 
-                    {/* Panel count badge */}
-                    {panelInfo && panelInfo.totalPanels > 1 && (
-                      <div className="absolute right-4 top-4 rounded-md border border-blue-200 bg-blue-50 px-2.5 py-1 text-[11px] font-semibold text-blue-600">
-                        {panelInfo.totalPanels} panel{panelInfo.totalPanels !== 1 ? "s" : ""}
+                    {/* Split count badge */}
+                    {splitCount > 0 && (
+                      <div className="absolute right-4 top-4 rounded-md border border-zinc-200 bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-zinc-600 shadow-sm">
+                        {splitCount} cut{splitCount !== 1 ? "s" : ""} @ 48&quot; ea
                       </div>
                     )}
                   </>
@@ -671,48 +710,71 @@ export default function FootprintsBuilder({ productId = 0 }: FootprintsBuilderPr
               {/* Split Direction */}
               <ControlBox
                 title="Split Direction"
-                className="md:col-span-3 xl:col-span-3"
-                helper="Production / print file guidance only. No pricing impact."
+                className="md:col-span-2 xl:col-span-2"
+                helper="Visual / production only."
               >
                 <select
                   value={splitDirection}
-                  onChange={(e) => setSplitDirection(e.target.value as SplitDirection)}
+                  onChange={(e) => {
+                    setSplitDirection(e.target.value as SplitDirection);
+                    setSelectedSplit("all");
+                    setSplitOffsets({});
+                  }}
                   className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"
                 >
-                  <option value="horizontal">Horizontal</option>
                   <option value="vertical">Vertical</option>
-                  <option value="split-selected">Split Selected</option>
-                  <option value="all-splits">All Splits</option>
+                  <option value="horizontal">Horizontal</option>
                 </select>
               </ControlBox>
 
-              {/* Position Offset */}
+              {/* Split Selected */}
               <ControlBox
-                title="Position Offset (in)"
-                className="md:col-span-3 xl:col-span-3"
-                helper="Shift artwork preview. Visual / production use only."
+                title="Split Selected"
+                className="md:col-span-2 xl:col-span-2"
+                helper="Pick a split to adjust."
               >
-                <div className="grid grid-cols-2 gap-1">
-                  <div>
-                    <div className="mb-0.5 text-[10px] text-zinc-400">X</div>
-                    <input
-                      type="number"
-                      step={0.5}
-                      value={offsetX}
-                      onChange={(e) => setOffsetX(Number(e.target.value))}
-                      className="h-9 w-full rounded border border-zinc-300 px-2 text-sm"
-                    />
+                <select
+                  value={selectedSplit === "all" ? "all" : String(selectedSplit)}
+                  onChange={(e) =>
+                    setSelectedSplit(e.target.value === "all" ? "all" : Number(e.target.value))
+                  }
+                  className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"
+                >
+                  <option value="all">All Splits</option>
+                  {Array.from({ length: splitCount }, (_, i) => i + 1).map((n) => (
+                    <option key={n} value={n}>
+                      Split {n}
+                    </option>
+                  ))}
+                </select>
+              </ControlBox>
+
+              {/* Position */}
+              <ControlBox
+                title="Position"
+                className="md:col-span-2 xl:col-span-3"
+                helper="± 0.25in fine-tune. No pricing impact."
+              >
+                <div className="flex h-9 items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => adjustSplitPosition(-0.25)}
+                    disabled={splitCount === 0}
+                    className="flex h-9 w-[52px] shrink-0 items-center justify-center rounded border border-zinc-300 bg-white text-[11px] font-semibold text-zinc-700 hover:border-zinc-400 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    − 0.25&quot;
+                  </button>
+                  <div className="flex h-9 flex-1 items-center justify-center rounded border border-zinc-200 bg-zinc-100 px-1 text-xs font-semibold tabular-nums text-zinc-700">
+                    {splitCount > 0 ? positionDisplay : "—"}
                   </div>
-                  <div>
-                    <div className="mb-0.5 text-[10px] text-zinc-400">Y</div>
-                    <input
-                      type="number"
-                      step={0.5}
-                      value={offsetY}
-                      onChange={(e) => setOffsetY(Number(e.target.value))}
-                      className="h-9 w-full rounded border border-zinc-300 px-2 text-sm"
-                    />
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => adjustSplitPosition(0.25)}
+                    disabled={splitCount === 0}
+                    className="flex h-9 w-[52px] shrink-0 items-center justify-center rounded border border-zinc-300 bg-white text-[11px] font-semibold text-zinc-700 hover:border-zinc-400 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    + 0.25&quot;
+                  </button>
                 </div>
               </ControlBox>
 
@@ -822,11 +884,11 @@ export default function FootprintsBuilder({ productId = 0 }: FootprintsBuilderPr
                 <SummaryItem label="Rush" value={rush ? "Enabled (+100%)" : "Standard"} />
                 <SummaryItem
                   label="Split Direction"
-                  value={splitDirection.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                  value={splitDirection.charAt(0).toUpperCase() + splitDirection.slice(1)}
                 />
                 <SummaryItem
-                  label="Total Panels"
-                  value={panelInfo ? `${panelInfo.totalPanels}` : "--"}
+                  label="Split Count"
+                  value={splitCount > 0 ? `${splitCount} cut${splitCount !== 1 ? "s" : ""}` : "None"}
                 />
               </div>
             </PanelCard>
