@@ -235,12 +235,16 @@ export default function BootprintsBuilder({ productId = 0 }: BootprintsBuilderPr
     : 0;
 
   const positionDisplay = useMemo(() => {
-    const BASE = 48;
-    if (selectedSplit === "all") return `${BASE}.00in`;
-    const base = (selectedSplit as number) * BASE;
-    const offset = splitOffsets[selectedSplit as number] ?? 0;
-    return `${(base + offset).toFixed(2)}in`;
-  }, [selectedSplit, splitOffsets]);
+    if (!panelInfo) return "—";
+    const panelDimIn =
+      splitDirection === "vertical"
+        ? widthIn / panelInfo.panelsWide
+        : heightIn / panelInfo.panelsHigh;
+    if (selectedSplit === "all") return `${panelDimIn.toFixed(2)}in`;
+    const idx = selectedSplit as number;
+    const offset = splitOffsets[idx] ?? 0;
+    return `${(idx * panelDimIn + offset).toFixed(2)}in`;
+  }, [selectedSplit, splitOffsets, panelInfo, splitDirection, widthIn, heightIn]);
 
   function adjustSplitPosition(delta: number) {
     if (splitCount === 0) return;
@@ -323,27 +327,24 @@ export default function BootprintsBuilder({ productId = 0 }: BootprintsBuilderPr
   }, [isValid, widthIn, heightIn]);
 
   // Panel lines (visual only, respect per-split offsets)
+  // Panel lines — percentage-based like GF2030 so lines always divide equally
   const panelLines = useMemo(() => {
     if (!isValid || !panelInfo) return { verticals: [] as number[], horizontals: [] as number[] };
-    const scaleX = preview.width / widthIn;
-    const scaleY = preview.height / heightIn;
-    const panelWidthIn = widthIn / panelInfo.panelsWide;
-    const panelHeightIn = heightIn / panelInfo.panelsHigh;
     const verticals: number[] = [];
     const horizontals: number[] = [];
     if (splitDirection === "vertical") {
       for (let i = 1; i < panelInfo.panelsWide; i++) {
-        const off = splitOffsets[i] ?? 0;
-        verticals.push((i * panelWidthIn + off) * scaleX);
+        const offPct = ((splitOffsets[i] ?? 0) / widthIn) * 100;
+        verticals.push((i / panelInfo.panelsWide) * 100 + offPct);
       }
     } else {
       for (let j = 1; j < panelInfo.panelsHigh; j++) {
-        const off = splitOffsets[j] ?? 0;
-        horizontals.push((j * panelHeightIn + off) * scaleY);
+        const offPct = ((splitOffsets[j] ?? 0) / heightIn) * 100;
+        horizontals.push((j / panelInfo.panelsHigh) * 100 + offPct);
       }
     }
     return { verticals, horizontals };
-  }, [isValid, panelInfo, preview, widthIn, heightIn, splitOffsets, splitDirection]);
+  }, [isValid, panelInfo, widthIn, heightIn, splitOffsets, splitDirection]);
 
   return (
     <div className="min-h-[calc(100vh-96px)] bg-[linear-gradient(145deg,#f4f4f5_0%,#ececef_55%,#e4e4e7_100%)] text-zinc-800">
@@ -517,7 +518,7 @@ export default function BootprintsBuilder({ productId = 0 }: BootprintsBuilderPr
                             className={`absolute top-0 h-full border-l-2 border-dashed ${
                               isSel ? "border-red-500" : "border-red-400/55"
                             }`}
-                            style={{ left: x }}
+                            style={{ left: `${x}%` }}
                           >
                             <div
                               className={`absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2 flex h-5 w-5 items-center justify-center rounded-full shadow ${
@@ -537,7 +538,7 @@ export default function BootprintsBuilder({ productId = 0 }: BootprintsBuilderPr
                             className={`absolute left-0 w-full border-t-2 border-dashed ${
                               isSel ? "border-red-500" : "border-red-400/55"
                             }`}
-                            style={{ top: y }}
+                            style={{ top: `${y}%` }}
                           >
                             <div
                               className={`absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 flex h-5 w-5 items-center justify-center rounded-full shadow ${
