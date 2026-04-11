@@ -2,7 +2,7 @@ export const LOW_TAC_WALL_RATE = 4.25; // $ per sq ft
 export const LOW_TAC_WALL_MIN = 25;
 export const LOW_TAC_WALL_CONTOUR_MULTIPLIER = 0.15; // +15%
 export const LOW_TAC_WALL_RUSH_MULTIPLIER = 1.0; // +100%
-export const LOW_TAC_WALL_PANEL_MAX_IN = 48; // max panel width/height in inches
+export const LOW_TAC_WALL_PANEL_MAX_IN = 54; // max panel width/height in inches
 
 export interface LowTacWallPricingOptions {
   contourCut?: boolean;

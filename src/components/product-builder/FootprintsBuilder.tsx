@@ -512,24 +512,46 @@ export default function FootprintsBuilder({ productId = 0 }: FootprintsBuilderPr
                       />
 
                       {/* Panel split lines (visual/production only — no pricing impact) */}
-                      {panelLines.verticals.map((x, i) => (
-                        <div
-                          key={`v-${i}`}
-                          className={`absolute top-0 h-full border-l-2 border-dashed ${
-                            selectedSplit === i + 1 ? "border-red-500" : "border-red-400/55"
-                          }`}
-                          style={{ left: x }}
-                        />
-                      ))}
-                      {panelLines.horizontals.map((y, j) => (
-                        <div
-                          key={`h-${j}`}
-                          className={`absolute left-0 w-full border-t-2 border-dashed ${
-                            selectedSplit === j + 1 ? "border-red-500" : "border-red-400/55"
-                          }`}
-                          style={{ top: y }}
-                        />
-                      ))}
+                      {panelLines.verticals.map((x, i) => {
+                        const isSel = selectedSplit === i + 1;
+                        return (
+                          <div
+                            key={`v-${i}`}
+                            className={`absolute top-0 h-full border-l-2 border-dashed ${
+                              isSel ? "border-red-500" : "border-red-400/55"
+                            }`}
+                            style={{ left: x }}
+                          >
+                            <div
+                              className={`absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2 flex h-5 w-5 items-center justify-center rounded-full shadow ${
+                                isSel ? "bg-red-500" : "bg-red-400/80"
+                              }`}
+                            >
+                              <div className="h-0.5 w-3 rounded-full bg-white" />
+                            </div>
+                          </div>
+                        );
+                      })}
+                      {panelLines.horizontals.map((y, j) => {
+                        const isSel = selectedSplit === j + 1;
+                        return (
+                          <div
+                            key={`h-${j}`}
+                            className={`absolute left-0 w-full border-t-2 border-dashed ${
+                              isSel ? "border-red-500" : "border-red-400/55"
+                            }`}
+                            style={{ top: y }}
+                          >
+                            <div
+                              className={`absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 flex h-5 w-5 items-center justify-center rounded-full shadow ${
+                                isSel ? "bg-red-500" : "bg-red-400/80"
+                              }`}
+                            >
+                              <div className="h-0.5 w-3 rounded-full bg-white" />
+                            </div>
+                          </div>
+                        );
+                      })}
 
                       {uploadedImage ? (
                         <Image
