@@ -21,7 +21,8 @@ export type ManualBannerThemeKey =
   | "manual-gf830"
   | "manual-orajet-clear"
   | "manual-one-way-window"
-  | "manual-dual-view";
+  | "manual-dual-view"
+  | "manual-footprints";
 
 export interface ManualBannerProductCard {
   id: string;
@@ -152,6 +153,11 @@ const MANUAL_CARD_THEME: Record<ManualBannerThemeKey, { texture: string; ghost: 
     texture: "from-[#ffffff]/95 via-[#f5f3ff]/80 to-[#e9e4ff]/88",
     ghost: "DUAL",
     eyebrow: "Window Graphic",
+  },
+  "manual-footprints": {
+    texture: "from-[#ffffff]/95 via-[#f0fdf4]/80 to-[#dcfce7]/88",
+    ghost: "FLOOR",
+    eyebrow: "Floor Graphics",
   },
 };
 

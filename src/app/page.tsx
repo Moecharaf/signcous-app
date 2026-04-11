@@ -225,6 +225,18 @@ const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
     theme: "manual-print-wrap-film",
   },
   {
+    id: "manual-footprints",
+    productId: 0,
+    name: "Footprints",
+    displayName: "FOOTPRINTS",
+    href: "/adhesive/footprints",
+    description: "Floor graphic adhesive panels priced at $3.10/sq ft. Dimensions billed to the nearest whole foot. Contour cut and rush available.",
+    label: "Builder",
+    image: null,
+    imageAlt: "Footprints Floor Graphics",
+    theme: "manual-footprints",
+  },
+  {
     id: "manual-ij35c",
     productId: 135,
     name: "3M IJ-35C",
