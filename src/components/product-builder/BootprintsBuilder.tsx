@@ -325,20 +325,21 @@ export default function BootprintsBuilder({ productId = 0 }: BootprintsBuilderPr
   // Panel lines (visual only, respect per-split offsets)
   const panelLines = useMemo(() => {
     if (!isValid || !panelInfo) return { verticals: [] as number[], horizontals: [] as number[] };
-    const PANEL_MAX_IN = 48;
     const scaleX = preview.width / widthIn;
     const scaleY = preview.height / heightIn;
+    const panelWidthIn = widthIn / panelInfo.panelsWide;
+    const panelHeightIn = heightIn / panelInfo.panelsHigh;
     const verticals: number[] = [];
     const horizontals: number[] = [];
     if (splitDirection === "vertical") {
       for (let i = 1; i < panelInfo.panelsWide; i++) {
         const off = splitOffsets[i] ?? 0;
-        verticals.push((i * PANEL_MAX_IN + off) * scaleX);
+        verticals.push((i * panelWidthIn + off) * scaleX);
       }
     } else {
       for (let j = 1; j < panelInfo.panelsHigh; j++) {
         const off = splitOffsets[j] ?? 0;
-        horizontals.push((j * PANEL_MAX_IN + off) * scaleY);
+        horizontals.push((j * panelHeightIn + off) * scaleY);
       }
     }
     return { verticals, horizontals };
