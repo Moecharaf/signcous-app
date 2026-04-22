@@ -136,6 +136,18 @@ const MANUAL_RIGID_PRODUCTS: ManualBannerProductCard[] = [
     theme: "manual-foamcore",
   },
   {
+    id: "manual-aluminum",
+    productId: 0,
+    name: "Aluminum",
+    displayName: "ALUMINUM",
+    href: "/rigid/aluminum",
+    description: "Premium 0.040\" & 0.080\" aluminum signs — sheet or custom sq.in pricing with live builder.",
+    label: "Builder",
+    image: null,
+    imageAlt: "Aluminum rigid sign panel",
+    theme: "manual-aluminum",
+  },
+  {
     id: "manual-pvc",
     productId: 0,
     name: "PVC",
@@ -388,6 +400,11 @@ function buildProductHref(product: WooProduct, fallbackCategorySlug?: string): s
     return "/rigid/pvc";
   }
 
+  // Route Aluminum products to the custom rigid builder.
+  if (normalizedName.includes("aluminum")) {
+    return "/rigid/aluminum";
+  }
+
   // Route Polystyrene products to the custom rigid builder.
   if (normalizedName.includes("polystyrene") || normalizedName.includes("styrene")) {
     return "/rigid/polystyrene";
@@ -541,6 +558,12 @@ export default async function HomePage() {
           product.name.toLowerCase().includes("foam core")
       );
 
+      const alreadyHasAluminum = section.products.some(
+        (product) =>
+          product.href === "/rigid/aluminum" ||
+          product.name.toLowerCase().includes("aluminum")
+      );
+
       const alreadyHasPvc = section.products.some(
         (product) =>
           product.href === "/rigid/pvc" ||
@@ -558,6 +581,7 @@ export default async function HomePage() {
       const missingManualCount = MANUAL_RIGID_PRODUCTS.filter((manualProduct) => {
         if (manualProduct.id === "manual-coro") return !alreadyHasCoro;
         if (manualProduct.id === "manual-foamcore") return !alreadyHasFoamcore;
+        if (manualProduct.id === "manual-aluminum") return !alreadyHasAluminum;
         if (manualProduct.id === "manual-pvc") return !alreadyHasPvc;
         if (manualProduct.id === "manual-polystyrene") return !alreadyHasPolystyrene;
         return true;

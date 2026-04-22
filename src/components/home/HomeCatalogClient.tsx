@@ -14,6 +14,7 @@ export type ManualBannerThemeKey =
   | "manual-poster"
   | "manual-coro"
   | "manual-foamcore"
+  | "manual-aluminum"
   | "manual-pvc"
   | "manual-polystyrene"
   | "manual-acrylic"
@@ -120,6 +121,11 @@ const MANUAL_CARD_THEME: Record<ManualBannerThemeKey, { texture: string; ghost: 
     texture: "from-[#ffffff]/95 via-[#f4f6f8]/80 to-[#e7ecef]/88",
     ghost: "FOAM",
     eyebrow: "Lightweight Board",
+  },
+  "manual-aluminum": {
+    texture: "from-[#ffffff]/95 via-[#f2f3f4]/80 to-[#dde0e4]/88",
+    ghost: "ALU",
+    eyebrow: "Premium Metal",
   },
   "manual-pvc": {
     texture: "from-[#ffffff]/95 via-[#f0f4f8]/80 to-[#dde7f0]/88",
@@ -614,7 +620,9 @@ export default function HomeCatalogClient({
         !normalizedName.includes("sintra") &&
         product.href !== "/rigid/polystyrene" &&
         !normalizedName.includes("polystyrene") &&
-        !normalizedName.includes("styrene")
+        !normalizedName.includes("styrene") &&
+        product.href !== "/rigid/aluminum" &&
+        !normalizedName.includes("aluminum")
       );
     }
 
