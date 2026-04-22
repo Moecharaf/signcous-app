@@ -14,6 +14,7 @@ export type ManualBannerThemeKey =
   | "manual-poster"
   | "manual-coro"
   | "manual-foamcore"
+  | "manual-pvc"
   | "manual-acrylic"
   | "manual-ij35c"
   | "manual-print-wrap-film"
@@ -118,6 +119,11 @@ const MANUAL_CARD_THEME: Record<ManualBannerThemeKey, { texture: string; ghost: 
     texture: "from-[#ffffff]/95 via-[#f4f6f8]/80 to-[#e7ecef]/88",
     ghost: "FOAM",
     eyebrow: "Lightweight Board",
+  },
+  "manual-pvc": {
+    texture: "from-[#ffffff]/95 via-[#f0f4f8]/80 to-[#dde7f0]/88",
+    ghost: "PVC",
+    eyebrow: "Durable Sheet",
   },
   "manual-acrylic": {
     texture: "from-[#ffffff]/95 via-[#eef8ff]/80 to-[#d8eeff]/88",
@@ -596,7 +602,10 @@ export default function HomeCatalogClient({
         !normalizedName.includes("coroplast") &&
         product.href !== "/rigid/foamcore" &&
         !normalizedName.includes("foamcore") &&
-        !normalizedName.includes("foam core")
+        !normalizedName.includes("foam core") &&
+        product.href !== "/rigid/pvc" &&
+        !normalizedName.includes("pvc") &&
+        !normalizedName.includes("sintra")
       );
     }
 

@@ -136,6 +136,18 @@ const MANUAL_RIGID_PRODUCTS: ManualBannerProductCard[] = [
     theme: "manual-foamcore",
   },
   {
+    id: "manual-pvc",
+    productId: 0,
+    name: "PVC",
+    displayName: "PVC",
+    href: "/rigid/pvc",
+    description: "Durable PVC signs available in 3mm and 6mm with live sheet-layout pricing.",
+    label: "Builder",
+    image: null,
+    imageAlt: "PVC rigid sign board",
+    theme: "manual-pvc",
+  },
+  {
     id: "manual-acrylic",
     productId: 0,
     name: "Acrylic Signs",
@@ -359,6 +371,11 @@ function buildProductHref(product: WooProduct, fallbackCategorySlug?: string): s
     return "/rigid/foamcore";
   }
 
+  // Route PVC products to the custom rigid builder.
+  if (normalizedName.includes("pvc") || normalizedName.includes("sintra")) {
+    return "/rigid/pvc";
+  }
+
   if (normalizedName.includes("ij-35c") || normalizedName.includes("ij35c")) {
     return "/adhesive/3m-ij-35c";
   }
@@ -507,9 +524,17 @@ export default async function HomePage() {
           product.name.toLowerCase().includes("foam core")
       );
 
+      const alreadyHasPvc = section.products.some(
+        (product) =>
+          product.href === "/rigid/pvc" ||
+          product.name.toLowerCase().includes("pvc") ||
+          product.name.toLowerCase().includes("sintra")
+      );
+
       const missingManualCount = MANUAL_RIGID_PRODUCTS.filter((manualProduct) => {
         if (manualProduct.id === "manual-coro") return !alreadyHasCoro;
         if (manualProduct.id === "manual-foamcore") return !alreadyHasFoamcore;
+        if (manualProduct.id === "manual-pvc") return !alreadyHasPvc;
         return true;
       }).length;
 
