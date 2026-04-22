@@ -124,6 +124,18 @@ const MANUAL_RIGID_PRODUCTS: ManualBannerProductCard[] = [
     theme: "manual-coro",
   },
   {
+    id: "manual-foamcore",
+    productId: 0,
+    name: "Foamcore",
+    displayName: "FOAMCORE",
+    href: "/rigid/foamcore",
+    description: "Lightweight foamcore signs with live sheet-layout pricing and builder ordering.",
+    label: "Builder",
+    image: null,
+    imageAlt: "Foamcore rigid sign board",
+    theme: "manual-foamcore",
+  },
+  {
     id: "manual-acrylic",
     productId: 0,
     name: "Acrylic Signs",
@@ -342,6 +354,11 @@ function buildProductHref(product: WooProduct, fallbackCategorySlug?: string): s
     return "/rigid/coro";
   }
 
+  // Route Foamcore products to the custom rigid builder.
+  if (normalizedName.includes("foamcore") || normalizedName.includes("foam core")) {
+    return "/rigid/foamcore";
+  }
+
   if (normalizedName.includes("ij-35c") || normalizedName.includes("ij35c")) {
     return "/adhesive/3m-ij-35c";
   }
@@ -483,11 +500,24 @@ export default async function HomePage() {
           product.name.toLowerCase().includes("coroplast")
       );
 
-      if (alreadyHasCoro) return section;
+      const alreadyHasFoamcore = section.products.some(
+        (product) =>
+          product.href === "/rigid/foamcore" ||
+          product.name.toLowerCase().includes("foamcore") ||
+          product.name.toLowerCase().includes("foam core")
+      );
+
+      const missingManualCount = MANUAL_RIGID_PRODUCTS.filter((manualProduct) => {
+        if (manualProduct.id === "manual-coro") return !alreadyHasCoro;
+        if (manualProduct.id === "manual-foamcore") return !alreadyHasFoamcore;
+        return true;
+      }).length;
+
+      if (missingManualCount === 0) return section;
 
       return {
         ...section,
-        productCount: section.productCount + MANUAL_RIGID_PRODUCTS.length,
+        productCount: section.productCount + missingManualCount,
       };
     }
 

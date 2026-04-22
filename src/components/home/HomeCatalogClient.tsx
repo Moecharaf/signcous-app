@@ -13,6 +13,7 @@ export type ManualBannerThemeKey =
   | "manual-no-curl"
   | "manual-poster"
   | "manual-coro"
+  | "manual-foamcore"
   | "manual-acrylic"
   | "manual-ij35c"
   | "manual-print-wrap-film"
@@ -112,6 +113,11 @@ const MANUAL_CARD_THEME: Record<ManualBannerThemeKey, { texture: string; ghost: 
     texture: "from-[#ffffff]/95 via-[#edf4fb]/80 to-[#deebf9]/88",
     ghost: "CORO",
     eyebrow: "Yard Signs",
+  },
+  "manual-foamcore": {
+    texture: "from-[#ffffff]/95 via-[#f4f6f8]/80 to-[#e7ecef]/88",
+    ghost: "FOAM",
+    eyebrow: "Lightweight Board",
   },
   "manual-acrylic": {
     texture: "from-[#ffffff]/95 via-[#eef8ff]/80 to-[#d8eeff]/88",
@@ -584,7 +590,14 @@ export default function HomeCatalogClient({
     const normalizedName = product.name.toLowerCase();
 
     if (activeSection.key === "rigid") {
-      return product.href !== "/rigid/coro" && !normalizedName.includes("coro") && !normalizedName.includes("coroplast");
+      return (
+        product.href !== "/rigid/coro" &&
+        !normalizedName.includes("coro") &&
+        !normalizedName.includes("coroplast") &&
+        product.href !== "/rigid/foamcore" &&
+        !normalizedName.includes("foamcore") &&
+        !normalizedName.includes("foam core")
+      );
     }
 
     if (activeSection.key === "adhesive") {
