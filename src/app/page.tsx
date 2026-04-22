@@ -148,6 +148,18 @@ const MANUAL_RIGID_PRODUCTS: ManualBannerProductCard[] = [
     theme: "manual-pvc",
   },
   {
+    id: "manual-polystyrene",
+    productId: 0,
+    name: "Polystyrene",
+    displayName: "POLYSTYRENE",
+    href: "/rigid/polystyrene",
+    description: ".03\" polystyrene signs with live sheet-layout pricing and builder ordering.",
+    label: "Builder",
+    image: null,
+    imageAlt: "Polystyrene rigid sign board",
+    theme: "manual-polystyrene",
+  },
+  {
     id: "manual-acrylic",
     productId: 0,
     name: "Acrylic Signs",
@@ -376,6 +388,11 @@ function buildProductHref(product: WooProduct, fallbackCategorySlug?: string): s
     return "/rigid/pvc";
   }
 
+  // Route Polystyrene products to the custom rigid builder.
+  if (normalizedName.includes("polystyrene") || normalizedName.includes("styrene")) {
+    return "/rigid/polystyrene";
+  }
+
   if (normalizedName.includes("ij-35c") || normalizedName.includes("ij35c")) {
     return "/adhesive/3m-ij-35c";
   }
@@ -531,10 +548,18 @@ export default async function HomePage() {
           product.name.toLowerCase().includes("sintra")
       );
 
+      const alreadyHasPolystyrene = section.products.some(
+        (product) =>
+          product.href === "/rigid/polystyrene" ||
+          product.name.toLowerCase().includes("polystyrene") ||
+          product.name.toLowerCase().includes("styrene")
+      );
+
       const missingManualCount = MANUAL_RIGID_PRODUCTS.filter((manualProduct) => {
         if (manualProduct.id === "manual-coro") return !alreadyHasCoro;
         if (manualProduct.id === "manual-foamcore") return !alreadyHasFoamcore;
         if (manualProduct.id === "manual-pvc") return !alreadyHasPvc;
+        if (manualProduct.id === "manual-polystyrene") return !alreadyHasPolystyrene;
         return true;
       }).length;
 
