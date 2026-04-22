@@ -233,6 +233,7 @@ const CATEGORY_ICON: Record<HomeCatalogSection["key"], string> = {
 const HERO_IMAGE_OVERRIDE: Partial<Record<HomeCatalogSection["key"], string>> = {
   banner: "/card-images/HDbanner-Banner.png",
   adhesive: "/card-images/Magnets_Banner.jpeg",
+  magnet: "/card-images/Magnets_Banner.jpeg",
 };
 
 const CATEGORY_THEME: Record<HomeCatalogSection["key"], { hero: string; chip: string }> = {
@@ -664,7 +665,11 @@ export default function HomeCatalogClient({
           >
             {activeHeroImage && (
               <div
-                className="absolute inset-y-0 right-0 hidden w-[42%] bg-cover bg-center opacity-35 md:block"
+                className={`absolute hidden bg-cover bg-center md:block ${
+                  activeSection.key === "magnet" || activeSection.key === "adhesive"
+                    ? "inset-0 w-full opacity-55"
+                    : "inset-y-0 right-0 w-[42%] opacity-35"
+                }`}
                 style={{ backgroundImage: `url(${activeHeroImage})` }}
                 aria-hidden="true"
               />
