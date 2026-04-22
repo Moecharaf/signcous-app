@@ -664,12 +664,12 @@ export default function HomeCatalogClient({
           >
             {activeHeroImage && (
               <div
-                className={`absolute hidden bg-cover bg-center md:block ${
+                className={`absolute hidden md:block ${
                   activeSection.key === "banner"
-                    ? "inset-0 w-full bg-contain bg-center bg-no-repeat opacity-70"
+                    ? "inset-0 w-full bg-contain bg-center bg-no-repeat opacity-90"
                     : activeSection.key === "magnet" || activeSection.key === "adhesive"
-                    ? "inset-0 w-full opacity-55"
-                    : "inset-y-0 right-0 w-[42%] opacity-35"
+                    ? "inset-0 w-full bg-cover bg-center opacity-55"
+                    : "inset-y-0 right-0 w-[42%] bg-cover bg-center opacity-35"
                 }`}
                 style={{ backgroundImage: `url(${activeHeroImage})` }}
                 aria-hidden="true"
