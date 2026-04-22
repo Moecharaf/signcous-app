@@ -232,6 +232,7 @@ const CATEGORY_ICON: Record<HomeCatalogSection["key"], string> = {
 
 const HERO_IMAGE_OVERRIDE: Partial<Record<HomeCatalogSection["key"], string>> = {
   banner: "/card-images/HDbanner-Banner.png",
+  adhesive: "/card-images/Magnets_Banner.jpeg",
 };
 
 const CATEGORY_THEME: Record<HomeCatalogSection["key"], { hero: string; chip: string }> = {
