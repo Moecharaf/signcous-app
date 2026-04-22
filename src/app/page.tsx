@@ -148,6 +148,18 @@ const MANUAL_RIGID_PRODUCTS: ManualBannerProductCard[] = [
     theme: "manual-aluminum",
   },
   {
+    id: "manual-jbond",
+    productId: 0,
+    name: "JBond",
+    displayName: "JBOND",
+    href: "/rigid/jbond",
+    description: "Aluminum composite panel signs in 3mm & 6mm — sheet or custom sq.in pricing.",
+    label: "Builder",
+    image: null,
+    imageAlt: "JBond composite panel sign",
+    theme: "manual-jbond",
+  },
+  {
     id: "manual-pvc",
     productId: 0,
     name: "PVC",
@@ -405,6 +417,11 @@ function buildProductHref(product: WooProduct, fallbackCategorySlug?: string): s
     return "/rigid/aluminum";
   }
 
+  // Route JBond products to the custom rigid builder.
+  if (normalizedName.includes("jbond") || normalizedName.includes("j-bond") || normalizedName.includes("dibond")) {
+    return "/rigid/jbond";
+  }
+
   // Route Polystyrene products to the custom rigid builder.
   if (normalizedName.includes("polystyrene") || normalizedName.includes("styrene")) {
     return "/rigid/polystyrene";
@@ -564,6 +581,13 @@ export default async function HomePage() {
           product.name.toLowerCase().includes("aluminum")
       );
 
+      const alreadyHasJBond = section.products.some(
+        (product) =>
+          product.href === "/rigid/jbond" ||
+          product.name.toLowerCase().includes("jbond") ||
+          product.name.toLowerCase().includes("j-bond")
+      );
+
       const alreadyHasPvc = section.products.some(
         (product) =>
           product.href === "/rigid/pvc" ||
@@ -582,6 +606,7 @@ export default async function HomePage() {
         if (manualProduct.id === "manual-coro") return !alreadyHasCoro;
         if (manualProduct.id === "manual-foamcore") return !alreadyHasFoamcore;
         if (manualProduct.id === "manual-aluminum") return !alreadyHasAluminum;
+        if (manualProduct.id === "manual-jbond") return !alreadyHasJBond;
         if (manualProduct.id === "manual-pvc") return !alreadyHasPvc;
         if (manualProduct.id === "manual-polystyrene") return !alreadyHasPolystyrene;
         return true;

@@ -15,6 +15,7 @@ export type ManualBannerThemeKey =
   | "manual-coro"
   | "manual-foamcore"
   | "manual-aluminum"
+  | "manual-jbond"
   | "manual-pvc"
   | "manual-polystyrene"
   | "manual-acrylic"
@@ -126,6 +127,11 @@ const MANUAL_CARD_THEME: Record<ManualBannerThemeKey, { texture: string; ghost: 
     texture: "from-[#ffffff]/95 via-[#f2f3f4]/80 to-[#dde0e4]/88",
     ghost: "ALU",
     eyebrow: "Premium Metal",
+  },
+  "manual-jbond": {
+    texture: "from-[#ffffff]/95 via-[#edf3fb]/80 to-[#d6e8f7]/88",
+    ghost: "ACM",
+    eyebrow: "Composite Panel",
   },
   "manual-pvc": {
     texture: "from-[#ffffff]/95 via-[#f0f4f8]/80 to-[#dde7f0]/88",
@@ -622,7 +628,10 @@ export default function HomeCatalogClient({
         !normalizedName.includes("polystyrene") &&
         !normalizedName.includes("styrene") &&
         product.href !== "/rigid/aluminum" &&
-        !normalizedName.includes("aluminum")
+        !normalizedName.includes("aluminum") &&
+        product.href !== "/rigid/jbond" &&
+        !normalizedName.includes("jbond") &&
+        !normalizedName.includes("j-bond")
       );
     }
 
