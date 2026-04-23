@@ -232,6 +232,7 @@ const CATEGORY_ICON: Record<HomeCatalogSection["key"], string> = {
 
 const HERO_IMAGE_OVERRIDE: Partial<Record<HomeCatalogSection["key"], string>> = {
   banner: "/card-images/HD_Banner2.jpeg",
+  rigid: "/card-images/Acrlyic_Banner.jpeg",
   adhesive: "/card-images/CLING_Banner.jpeg",
   magnet: "/card-images/Magnets_Banner.jpeg",
 };
@@ -602,7 +603,10 @@ export default function HomeCatalogClient({
 
   const theme = CATEGORY_THEME[activeSection.key];
   const isImageOnlyHero =
-    activeSection.key === "magnet" || activeSection.key === "banner" || activeSection.key === "adhesive";
+    activeSection.key === "magnet" ||
+    activeSection.key === "banner" ||
+    activeSection.key === "adhesive" ||
+    activeSection.key === "rigid";
   const heroOverride = HERO_IMAGE_OVERRIDE[activeSection.key] ?? null;
   const activeHeroImage = heroOverride ??
     activeSection.heroImages[heroFrame % Math.max(activeSection.heroImages.length, 1)] ?? null;
@@ -676,6 +680,8 @@ export default function HomeCatalogClient({
                     ? "inset-0 w-full bg-cover bg-center opacity-100"
                     : activeSection.key === "magnet"
                     ? "inset-0 w-full bg-contain bg-center bg-no-repeat opacity-100"
+                    : activeSection.key === "rigid"
+                    ? "inset-0 w-full bg-cover bg-center opacity-100"
                     : activeSection.key === "adhesive"
                     ? "inset-0 w-full bg-cover bg-center opacity-100"
                     : "inset-y-0 right-0 w-[42%] bg-cover bg-center opacity-35"
