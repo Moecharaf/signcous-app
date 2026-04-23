@@ -601,6 +601,8 @@ export default function HomeCatalogClient({
   }
 
   const theme = CATEGORY_THEME[activeSection.key];
+  const isImageOnlyHero =
+    activeSection.key === "magnet" || activeSection.key === "banner" || activeSection.key === "adhesive";
   const heroOverride = HERO_IMAGE_OVERRIDE[activeSection.key] ?? null;
   const activeHeroImage = heroOverride ??
     activeSection.heroImages[heroFrame % Math.max(activeSection.heroImages.length, 1)] ?? null;
@@ -662,7 +664,7 @@ export default function HomeCatalogClient({
         <div className="px-4 py-7 md:px-6 md:py-8">
           <div
             className={`relative overflow-hidden rounded-lg border border-[#cfcfcf] ${
-              activeSection.key === "magnet" || activeSection.key === "banner"
+              isImageOnlyHero
                 ? "bg-black aspect-[16/3] h-auto"
                 : `bg-gradient-to-r ${theme.hero} p-5 md:p-7`
             }`}
@@ -675,14 +677,14 @@ export default function HomeCatalogClient({
                     : activeSection.key === "magnet"
                     ? "inset-0 w-full bg-contain bg-center bg-no-repeat opacity-100"
                     : activeSection.key === "adhesive"
-                    ? "inset-0 w-full bg-cover bg-center opacity-55"
+                    ? "inset-0 w-full bg-cover bg-center opacity-100"
                     : "inset-y-0 right-0 w-[42%] bg-cover bg-center opacity-35"
                 }`}
                 style={{ backgroundImage: `url(${activeHeroImage})` }}
                 aria-hidden="true"
               />
             )}
-            {activeSection.key !== "magnet" && activeSection.key !== "banner" && (
+            {!isImageOnlyHero && (
               <div className="relative max-w-3xl">
                 <div className="text-xs font-semibold uppercase tracking-[0.2em] text-black/70">
                   <span className="mr-2 text-sm leading-none">{CATEGORY_ICON[activeSection.key]}</span>
