@@ -231,7 +231,7 @@ const CATEGORY_ICON: Record<HomeCatalogSection["key"], string> = {
 };
 
 const HERO_IMAGE_OVERRIDE: Partial<Record<HomeCatalogSection["key"], string>> = {
-  banner: "/card-images/HD_Banner.jpeg",
+  banner: "/card-images/HD_Banner2 .jpeg",
   magnet: "/card-images/Magnets_Banner.jpeg",
 };
 
@@ -661,7 +661,7 @@ export default function HomeCatalogClient({
         <div className="px-4 py-7 md:px-6 md:py-8">
           <div
             className={`relative overflow-hidden rounded-lg border border-[#cfcfcf] ${
-              activeSection.key === "magnet"
+              activeSection.key === "magnet" || activeSection.key === "banner"
                 ? "bg-black aspect-[16/3] h-auto"
                 : `bg-gradient-to-r ${theme.hero} p-5 md:p-7`
             }`}
@@ -670,7 +670,7 @@ export default function HomeCatalogClient({
               <div
                 className={`absolute hidden md:block ${
                   activeSection.key === "banner"
-                    ? "inset-0 w-full bg-cover bg-center opacity-90"
+                    ? "inset-0 w-full bg-contain bg-center bg-no-repeat opacity-100"
                     : activeSection.key === "magnet"
                     ? "inset-0 w-full bg-contain bg-center bg-no-repeat opacity-100"
                     : activeSection.key === "adhesive"
@@ -681,7 +681,7 @@ export default function HomeCatalogClient({
                 aria-hidden="true"
               />
             )}
-            {activeSection.key !== "magnet" && (
+            {activeSection.key !== "magnet" && activeSection.key !== "banner" && (
               <div className="relative max-w-3xl">
                 <div className="text-xs font-semibold uppercase tracking-[0.2em] text-black/70">
                   <span className="mr-2 text-sm leading-none">{CATEGORY_ICON[activeSection.key]}</span>
