@@ -679,58 +679,60 @@ export default function HomeCatalogClient({
                 aria-hidden="true"
               />
             )}
-            <div className="relative max-w-3xl">
-              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-black/70">
-                <span className="mr-2 text-sm leading-none">{CATEGORY_ICON[activeSection.key]}</span>
-                Signcous {activeSection.supplierFamily} Collection
-              </div>
-              <h1 className="mt-2 text-3xl font-black uppercase tracking-[0.04em] text-[#242424] md:text-4xl">
-                {activeSection.name}
-              </h1>
-              <p className="mt-2 text-sm leading-6 text-[#2f2f2f] md:text-base">{activeSection.description}</p>
-              <div className="mt-3 inline-flex rounded-full bg-white/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.13em] text-[#2f2f2f]">
-                {activeSection.highlight}
-              </div>
-              <div className="mt-4 flex flex-wrap items-center gap-2">
-                <div className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] ${theme.chip}`}>
-                  {activeSection.productCount} Live Products
+            {activeSection.key !== "magnet" && (
+              <div className="relative max-w-3xl">
+                <div className="text-xs font-semibold uppercase tracking-[0.2em] text-black/70">
+                  <span className="mr-2 text-sm leading-none">{CATEGORY_ICON[activeSection.key]}</span>
+                  Signcous {activeSection.supplierFamily} Collection
+                </div>
+                <h1 className="mt-2 text-3xl font-black uppercase tracking-[0.04em] text-[#242424] md:text-4xl">
+                  {activeSection.name}
+                </h1>
+                <p className="mt-2 text-sm leading-6 text-[#2f2f2f] md:text-base">{activeSection.description}</p>
+                <div className="mt-3 inline-flex rounded-full bg-white/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.13em] text-[#2f2f2f]">
+                  {activeSection.highlight}
+                </div>
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  <div className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] ${theme.chip}`}>
+                    {activeSection.productCount} Live Products
+                  </div>
+                  {activeSection.heroImages.length > 1 && (
+                    <div className="rounded-full bg-white/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-[#3b3b3b]">
+                      Rotating Preview
+                    </div>
+                  )}
+                  {activeSection.categorySlug && (
+                    <Link
+                      href={`/shop/${activeSection.categorySlug}`}
+                      className="rounded-sm border border-[#cfcfcf] bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-[#2f2f2f] hover:bg-[#fff7d6]"
+                    >
+                      Open Category
+                    </Link>
+                  )}
                 </div>
                 {activeSection.heroImages.length > 1 && (
-                  <div className="rounded-full bg-white/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-[#3b3b3b]">
-                    Rotating Preview
+                  <div className="mt-4 flex items-center gap-2">
+                    {activeSection.heroImages.map((_, index) => {
+                      const isActiveDot = index === (heroFrame % activeSection.heroImages.length);
+
+                      return (
+                        <button
+                          key={`dot-${activeSection.key}-${index}`}
+                          type="button"
+                          onClick={() => setHeroFrame(index)}
+                          className={`h-2.5 w-2.5 rounded-full border transition ${
+                            isActiveDot
+                              ? "border-[#2f2f2f] bg-[#2f2f2f]"
+                              : "border-[#2f2f2f]/45 bg-white/65 hover:bg-white"
+                          }`}
+                          aria-label={`Show slide ${index + 1}`}
+                        />
+                      );
+                    })}
                   </div>
                 )}
-                {activeSection.categorySlug && (
-                  <Link
-                    href={`/shop/${activeSection.categorySlug}`}
-                    className="rounded-sm border border-[#cfcfcf] bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-[#2f2f2f] hover:bg-[#fff7d6]"
-                  >
-                    Open Category
-                  </Link>
-                )}
               </div>
-              {activeSection.heroImages.length > 1 && (
-                <div className="mt-4 flex items-center gap-2">
-                  {activeSection.heroImages.map((_, index) => {
-                    const isActiveDot = index === (heroFrame % activeSection.heroImages.length);
-
-                    return (
-                      <button
-                        key={`dot-${activeSection.key}-${index}`}
-                        type="button"
-                        onClick={() => setHeroFrame(index)}
-                        className={`h-2.5 w-2.5 rounded-full border transition ${
-                          isActiveDot
-                            ? "border-[#2f2f2f] bg-[#2f2f2f]"
-                            : "border-[#2f2f2f]/45 bg-white/65 hover:bg-white"
-                        }`}
-                        aria-label={`Show slide ${index + 1}`}
-                      />
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+            )}
           </div>
         </div>
       </section>
