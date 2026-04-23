@@ -140,6 +140,8 @@ const MANUAL_RIGID_PRODUCTS: ManualBannerProductCard[] = [
     productId: 0,
     name: "Aluminum",
     displayName: "ALUMINUM",
+    titleImage: "/card-images/Aluminum-Logo.png",
+    titleImageAlt: "Aluminum heavy duty signage",
     href: "/rigid/aluminum",
     description: "Premium 0.040\" & 0.080\" aluminum signs — sheet or custom sq.in pricing with live builder.",
     label: "Builder",
