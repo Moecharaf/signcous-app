@@ -662,7 +662,7 @@ export default function HomeCatalogClient({
           <div
             className={`relative overflow-hidden rounded-lg border border-[#cfcfcf] ${
               activeSection.key === "magnet"
-                ? "bg-transparent h-[130px] md:h-[180px]"
+                ? "bg-black aspect-[16/3] h-auto"
                 : `bg-gradient-to-r ${theme.hero} p-5 md:p-7`
             }`}
           >
@@ -672,7 +672,7 @@ export default function HomeCatalogClient({
                   activeSection.key === "banner"
                     ? "inset-0 w-full bg-cover bg-center opacity-90"
                     : activeSection.key === "magnet"
-                    ? "inset-0 w-full bg-cover bg-center opacity-100"
+                    ? "inset-0 w-full bg-contain bg-center bg-no-repeat opacity-100"
                     : activeSection.key === "adhesive"
                     ? "inset-0 w-full bg-cover bg-center opacity-55"
                     : "inset-y-0 right-0 w-[42%] bg-cover bg-center opacity-35"
