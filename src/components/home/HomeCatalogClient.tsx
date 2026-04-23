@@ -675,7 +675,7 @@ export default function HomeCatalogClient({
           >
             {activeHeroImage && (
               <div
-                className={`absolute hidden md:block ${
+                className={`${isImageOnlyHero ? "absolute block" : "absolute hidden md:block"} ${
                   activeSection.key === "banner"
                     ? "inset-0 w-full bg-cover bg-center opacity-100"
                     : activeSection.key === "magnet"
