@@ -670,7 +670,7 @@ export default function HomeCatalogClient({
               <div
                 className={`absolute hidden md:block ${
                   activeSection.key === "banner"
-                    ? "inset-0 w-full bg-contain bg-center bg-no-repeat opacity-100"
+                    ? "inset-0 w-full bg-cover bg-center opacity-100"
                     : activeSection.key === "magnet"
                     ? "inset-0 w-full bg-contain bg-center bg-no-repeat opacity-100"
                     : activeSection.key === "adhesive"
