@@ -458,12 +458,12 @@ function ShowcaseCard({
       )}
 
       <div
-        className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${card.texture} transition duration-300 group-hover:opacity-0 group-focus:opacity-0 group-focus-within:opacity-0 ${isExpanded ? "opacity-0" : "opacity-100"}`}
+        className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${card.texture} opacity-70 transition duration-300 group-hover:opacity-0 group-focus:opacity-0 group-focus-within:opacity-0 ${isExpanded ? "opacity-0" : ""}`}
         aria-hidden="true"
       />
 
       <div
-        className={`pointer-events-none absolute inset-0 bg-white/68 backdrop-blur-[1px] transition duration-300 group-hover:opacity-0 group-focus:opacity-0 group-focus-within:opacity-0 ${isExpanded ? "opacity-0" : ""}`}
+        className={`pointer-events-none absolute inset-0 bg-white/38 backdrop-blur-[1px] transition duration-300 group-hover:opacity-0 group-focus:opacity-0 group-focus-within:opacity-0 ${isExpanded ? "opacity-0" : ""}`}
         aria-hidden="true"
       />
 
