@@ -660,8 +660,10 @@ export default function HomeCatalogClient({
       <section className="bg-[#f3f3f3]">
         <div className="px-4 py-7 md:px-6 md:py-8">
           <div
-            className={`relative overflow-hidden rounded-lg border border-[#cfcfcf] p-5 md:p-7 ${
-              activeSection.key === "magnet" ? "bg-transparent" : `bg-gradient-to-r ${theme.hero}`
+            className={`relative overflow-hidden rounded-lg border border-[#cfcfcf] ${
+              activeSection.key === "magnet"
+                ? "bg-transparent h-[130px] md:h-[180px]"
+                : `bg-gradient-to-r ${theme.hero} p-5 md:p-7`
             }`}
           >
             {activeHeroImage && (
