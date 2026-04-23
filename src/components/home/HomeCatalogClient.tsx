@@ -660,14 +660,18 @@ export default function HomeCatalogClient({
       <section className="bg-[#f3f3f3]">
         <div className="px-4 py-7 md:px-6 md:py-8">
           <div
-            className={`relative overflow-hidden rounded-lg border border-[#cfcfcf] bg-gradient-to-r ${theme.hero} p-5 md:p-7`}
+            className={`relative overflow-hidden rounded-lg border border-[#cfcfcf] p-5 md:p-7 ${
+              activeSection.key === "magnet" ? "bg-transparent" : `bg-gradient-to-r ${theme.hero}`
+            }`}
           >
             {activeHeroImage && (
               <div
                 className={`absolute hidden md:block ${
                   activeSection.key === "banner"
                     ? "inset-0 w-full bg-cover bg-center opacity-90"
-                    : activeSection.key === "magnet" || activeSection.key === "adhesive"
+                    : activeSection.key === "magnet"
+                    ? "inset-0 w-full bg-cover bg-center opacity-100"
+                    : activeSection.key === "adhesive"
                     ? "inset-0 w-full bg-cover bg-center opacity-55"
                     : "inset-y-0 right-0 w-[42%] bg-cover bg-center opacity-35"
                 }`}
