@@ -182,6 +182,8 @@ const MANUAL_RIGID_PRODUCTS: ManualBannerProductCard[] = [
     productId: 0,
     name: "Polystyrene",
     displayName: "POLYSTYRENE",
+    titleImage: "/card-images/Polystyrene-Logo.png",
+    titleImageAlt: "Polystyrene logo",
     href: "/rigid/polystyrene",
     description: ".03\" polystyrene signs with live sheet-layout pricing and builder ordering.",
     label: "Builder",
