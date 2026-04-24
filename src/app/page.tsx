@@ -360,6 +360,8 @@ const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
     label: "Builder",
     image: "/card-images/Boot-Print-Image.png",
     imageAlt: "Outdoor Boot Prints Heavy-Duty Floor Graphics",
+    titleImage: "/card-images/Boot-Prints-Logo.png",
+    titleImageAlt: "Boot Prints logo",
     theme: "manual-bootprints",
   },
   {
