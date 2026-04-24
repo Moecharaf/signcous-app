@@ -128,6 +128,8 @@ const MANUAL_RIGID_PRODUCTS: ManualBannerProductCard[] = [
     productId: 0,
     name: "Foamcore",
     displayName: "FOAMCORE",
+    titleImage: "/card-images/FoamBoard-Logo.png",
+    titleImageAlt: "Foamcore logo",
     href: "/rigid/foamcore",
     description: "Lightweight foamcore signs with live sheet-layout pricing and builder ordering.",
     label: "Builder",
