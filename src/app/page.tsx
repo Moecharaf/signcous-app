@@ -338,7 +338,7 @@ const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
     href: "/adhesive/low-tac-wall",
     description: "Repositionable low-tac wall graphics at $4.25/sq ft. Easy to apply and remove without residue. Contour cut and rush available.",
     label: "Builder",
-    image: null,
+    image: "/card-images/Low-Tac-Image.png",
     imageAlt: "Removable Wall Decals Low-Tac Wall Graphics",
     theme: "manual-low-tac-wall",
   },
