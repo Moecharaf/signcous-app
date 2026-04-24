@@ -648,12 +648,14 @@ export default function HomeCatalogClient({
         product.href !== "/adhesive/3m-ij-35c" &&
         product.href !== "/adhesive/3m-print-wrap-film" &&
         product.href !== "/adhesive/window-cling" &&
+        product.href !== "/adhesive/orajet-clear" &&
         product.href !== "/adhesive/gf-2030apae" &&
         !normalizedName.includes("ij-35c") &&
         !normalizedName.includes("ij35c") &&
         !normalizedName.includes("print wrap") &&
         !normalizedName.includes("wrap film") &&
         !normalizedName.includes("window cling") &&
+        !normalizedName.includes("orajet") &&
         !normalizedName.includes("2030") &&
         !normalizedName.includes("gf 2030")
       );
