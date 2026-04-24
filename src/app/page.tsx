@@ -346,7 +346,7 @@ const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
     label: "Builder",
     image: "/card-images/Low-Tac-Image.png",
     imageAlt: "Removable Wall Decals Low-Tac Wall Graphics",
-    titleImage: "/card-images/Low-Tac-Wall-Logo.png?v=20260425-0032",
+    titleImage: "/card-images/Low-Tac-Wall-Logo-v2.png",
     titleImageAlt: "Low Tac Wall logo",
     theme: "manual-low-tac-wall",
   },
