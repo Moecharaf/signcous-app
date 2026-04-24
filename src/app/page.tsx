@@ -230,7 +230,7 @@ const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
     href: "/adhesive/one-way-window",
     description: "Perforated vinyl with 50/50 & 70/30 options, 50in strict panel logic, optional laminate, contour cut, and tiered pricing.",
     label: "Builder",
-    image: "/card-images/OneWayWindow-Image.png",
+    image: "/card-images/OneWayWindow-Image-v2.png",
     imageAlt: "One Way Window Perforated Vinyl",
     theme: "manual-one-way-window",
   },
