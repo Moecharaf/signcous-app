@@ -168,6 +168,8 @@ const MANUAL_RIGID_PRODUCTS: ManualBannerProductCard[] = [
     productId: 0,
     name: "PVC",
     displayName: "PVC",
+    titleImage: "/card-images/PVC-Logo.png",
+    titleImageAlt: "PVC logo",
     href: "/rigid/pvc",
     description: "Durable PVC signs available in 3mm and 6mm with live sheet-layout pricing.",
     label: "Builder",
