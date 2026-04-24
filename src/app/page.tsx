@@ -169,7 +169,7 @@ const MANUAL_RIGID_PRODUCTS: ManualBannerProductCard[] = [
     href: "/rigid/pvc",
     description: "Durable PVC signs available in 3mm and 6mm with live sheet-layout pricing.",
     label: "Builder",
-    image: null,
+    image: "/card-images/PVC-Signs-Image.png",
     imageAlt: "PVC rigid sign board",
     theme: "manual-pvc",
   },
