@@ -332,7 +332,7 @@ const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
     label: "Builder",
     image: "/card-images/DRY-ERASE-Image.png",
     imageAlt: "Dry Erase Wall Graphics",
-    titleImage: "/card-images/Dry-Erase-LOGO.png",
+    titleImage: "/card-images/Dry-Erase-LOGO-v2.png",
     titleImageAlt: "Dry Erase logo",
     theme: "manual-dry-erase",
   },
