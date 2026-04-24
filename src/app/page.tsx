@@ -243,6 +243,8 @@ const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
     productId: 0,
     name: "Orajet Clear",
     displayName: "ORAJET CLEAR",
+    titleImage: "/card-images/Orajet-Clear-Logo.png",
+    titleImageAlt: "Orajet Clear logo",
     href: "/adhesive/orajet-clear",
     description: "Translucent clear vinyl with tiered pricing, 54in panel splitting, contour cut, and rush production.",
     label: "Builder",
