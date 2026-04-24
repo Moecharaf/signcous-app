@@ -215,7 +215,7 @@ const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
     productId: 0,
     name: "Dual View",
     displayName: "DUAL VIEW",
-    titleImage: "/card-images/DUAL-View-logo.png",
+    titleImage: "/card-images/DUAL-View-logo-v2.png",
     titleImageAlt: "Dual View logo",
     href: "/adhesive/dual-view",
     description: "Single or double-sided window graphic with 52in panel logic, tiered pricing, and contour cut option.",
