@@ -318,7 +318,7 @@ const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
     label: "Builder",
     image: "/card-images/Reflective-Image.png",
     imageAlt: "Reflective Vinyl High-Visibility Graphics",
-    titleImage: "/card-images/Reflective-Logo.png",
+    titleImage: "/card-images/REFLECTIVE-LOGO-v2.png",
     titleImageAlt: "Reflective Vinyl logo",
     theme: "manual-reflective-vinyl",
   },
