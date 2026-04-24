@@ -296,7 +296,7 @@ const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
     href: "/adhesive/3m-print-wrap-film",
     description: "Premium wrap film builder with custom size, contour cut, laminate options, rush pricing, and panel splitting.",
     label: "Builder",
-    image: null,
+    image: "/card-images/3M-Print-Wrap-Image.png",
     imageAlt: "3M Print Wrap Film",
     theme: "manual-print-wrap-film",
   },
