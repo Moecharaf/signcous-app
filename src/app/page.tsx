@@ -280,7 +280,7 @@ const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
     href: "/adhesive/window-cling",
     description: "Square-inch priced static cling builder with inside/outside application and viewable controls.",
     label: "Builder",
-    image: null,
+    image: "/card-images/Window-Cling-Image.png",
     imageAlt: "Window Cling",
     theme: "manual-window-cling",
   },
