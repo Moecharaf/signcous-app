@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { CartProvider } from "@/context/CartContext";
+import { ThemeProvider } from "@/components/layout/ThemeProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,13 +23,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} h-full antialiased`}>
-      <body className="flex min-h-full flex-col bg-black text-white">
-        <CartProvider>
-          <Header />
-          <main className="flex-1">{children}</main>
-          <Footer />
-        </CartProvider>
+    <html lang="en" className={`${geistSans.variable} h-full antialiased`} suppressHydrationWarning>
+      <body className="flex min-h-full flex-col bg-[--background] text-[--foreground] transition-colors duration-200">
+        <ThemeProvider>
+          <CartProvider>
+            <Header />
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </CartProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -24,9 +24,9 @@ const supportLinks = [
 
 export default function Footer() {
   return (
-    <footer className="border-t border-[#d4d4d4] bg-[#f1f1f1] text-[#4b4b4b]">
-      <div className="border-b border-[#dadada] bg-[#ececec] px-6 py-2">
-        <div className="mx-auto flex max-w-[1500px] flex-wrap items-center justify-center gap-6 text-[11px] font-medium uppercase tracking-[0.14em] text-[#666] sm:justify-between">
+    <footer className="border-t border-[#d4d4d4] bg-[#f1f1f1] text-[#4b4b4b] dark:border-[#222] dark:bg-[#0d0d0d] dark:text-[#999]">
+      <div className="border-b border-[#dadada] bg-[#ececec] px-6 py-2 dark:border-[#1e1e1e] dark:bg-[#111]">
+        <div className="mx-auto flex max-w-[1500px] flex-wrap items-center justify-center gap-6 text-[11px] font-medium uppercase tracking-[0.14em] text-[#666] dark:text-[#666] sm:justify-between">
           <span>Trade Pricing</span>
           <span>Fast Reorder Workflow</span>
           <span>Proof Approval Ready</span>
@@ -41,25 +41,25 @@ export default function Footer() {
             <span className="rounded bg-[#ffd100] px-2 py-1 text-xs font-black tracking-widest text-[#262626] ring-1 ring-[#c3ab31]">
               SC
             </span>
-            <div className="text-xl font-black text-[#2c2c2c]">
+            <div className="text-xl font-black text-[#2c2c2c] dark:text-[#e8e8e8]">
               SIGNCO<span className="text-[#c87500]">US</span>
             </div>
           </div>
-          <p className="mt-3 text-sm leading-7 text-[#5f5f5f]">
+          <p className="mt-3 text-sm leading-7 text-[#5f5f5f] dark:text-[#888]">
             Custom print ordering for businesses, events, and individuals. Fast turnaround, premium quality, nationwide delivery.
           </p>
-          <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-[#d8b72d] bg-[#fff4bf] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#7a5100]">
+          <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-[#d8b72d] bg-[#fff4bf] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#7a5100] dark:border-[#5a4400] dark:bg-[#1a1200] dark:text-[#d4960a]">
             Web-to-Print Platform
           </div>
         </div>
 
         {/* Shop */}
         <div>
-          <div className="text-sm font-semibold uppercase tracking-[0.25em] text-[#666]">Shop</div>
-          <ul className="mt-4 space-y-3 text-sm text-[#555]">
+          <div className="text-sm font-semibold uppercase tracking-[0.25em] text-[#666] dark:text-[#777]">Shop</div>
+          <ul className="mt-4 space-y-3 text-sm text-[#555] dark:text-[#888]">
             {shopLinks.map((link) => (
               <li key={link.href}>
-                <Link href={link.href} className="transition-colors hover:text-[#1f1f1f]">
+                <Link href={link.href} className="transition-colors hover:text-[#1f1f1f] dark:hover:text-[#ddd]">
                   {link.label}
                 </Link>
               </li>
@@ -69,11 +69,11 @@ export default function Footer() {
 
         {/* Company */}
         <div>
-          <div className="text-sm font-semibold uppercase tracking-[0.25em] text-[#666]">Company</div>
-          <ul className="mt-4 space-y-3 text-sm text-[#555]">
+          <div className="text-sm font-semibold uppercase tracking-[0.25em] text-[#666] dark:text-[#777]">Company</div>
+          <ul className="mt-4 space-y-3 text-sm text-[#555] dark:text-[#888]">
             {companyLinks.map((link) => (
               <li key={link.href}>
-                <Link href={link.href} className="transition-colors hover:text-[#1f1f1f]">
+                <Link href={link.href} className="transition-colors hover:text-[#1f1f1f] dark:hover:text-[#ddd]">
                   {link.label}
                 </Link>
               </li>
@@ -83,11 +83,11 @@ export default function Footer() {
 
         {/* Support */}
         <div>
-          <div className="text-sm font-semibold uppercase tracking-[0.25em] text-[#666]">Support</div>
-          <ul className="mt-4 space-y-3 text-sm text-[#555]">
+          <div className="text-sm font-semibold uppercase tracking-[0.25em] text-[#666] dark:text-[#777]">Support</div>
+          <ul className="mt-4 space-y-3 text-sm text-[#555] dark:text-[#888]">
             {supportLinks.map((link) => (
               <li key={link.href}>
-                <Link href={link.href} className="transition-colors hover:text-[#1f1f1f]">
+                <Link href={link.href} className="transition-colors hover:text-[#1f1f1f] dark:hover:text-[#ddd]">
                   {link.label}
                 </Link>
               </li>
@@ -96,13 +96,13 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="border-t border-[#d8d8d8] px-6 py-5">
-        <div className="mx-auto flex max-w-[1500px] flex-col items-center justify-between gap-3 text-xs text-[#777] sm:flex-row">
+      <div className="border-t border-[#d8d8d8] px-6 py-5 dark:border-[#1e1e1e]">
+        <div className="mx-auto flex max-w-[1500px] flex-col items-center justify-between gap-3 text-xs text-[#777] dark:text-[#555] sm:flex-row">
           <span>© {new Date().getFullYear()} Signcous. All rights reserved.</span>
           <div className="flex gap-6">
-            <Link href="/terms" className="transition-colors hover:text-[#333]">Terms</Link>
-            <Link href="/privacy" className="transition-colors hover:text-[#333]">Privacy</Link>
-            <Link href="/refund-policy" className="transition-colors hover:text-[#333]">Refund Policy</Link>
+            <Link href="/terms" className="transition-colors hover:text-[#333] dark:hover:text-[#ccc]">Terms</Link>
+            <Link href="/privacy" className="transition-colors hover:text-[#333] dark:hover:text-[#ccc]">Privacy</Link>
+            <Link href="/refund-policy" className="transition-colors hover:text-[#333] dark:hover:text-[#ccc]">Refund Policy</Link>
           </div>
         </div>
       </div>
