@@ -181,7 +181,7 @@ const MANUAL_RIGID_PRODUCTS: ManualBannerProductCard[] = [
     href: "/rigid/polystyrene",
     description: ".03\" polystyrene signs with live sheet-layout pricing and builder ordering.",
     label: "Builder",
-    image: null,
+    image: "/card-images/Polystyrene-Image.png",
     imageAlt: "Polystyrene rigid sign board",
     theme: "manual-polystyrene",
   },
