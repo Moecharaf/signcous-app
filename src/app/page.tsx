@@ -157,7 +157,7 @@ const MANUAL_RIGID_PRODUCTS: ManualBannerProductCard[] = [
     href: "/rigid/jbond",
     description: "Aluminum composite panel signs in 3mm & 6mm — sheet or custom sq.in pricing.",
     label: "Builder",
-    image: null,
+    image: "/card-images/Jbond-Image.jpeg",
     imageAlt: "JBond composite panel sign",
     theme: "manual-jbond",
   },
