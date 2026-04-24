@@ -304,7 +304,7 @@ const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
     label: "Builder",
     image: "/card-images/3M-Print-Wrap-Image.png",
     imageAlt: "3M Print Wrap Film",
-    titleImage: "/card-images/3m-Print-Wrap-Logo-v2.png",
+    titleImage: "/card-images/3m-Print-Wrap-Logo-v3.png",
     titleImageAlt: "3M Print Wrap Film logo",
     theme: "manual-print-wrap-film",
   },
