@@ -276,7 +276,7 @@ const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
     href: "/adhesive/gf-2030apae",
     description: "Air-egress polymeric vinyl builder with 52in panel splitting, laminate options, contour cut, and rush pricing.",
     label: "Builder",
-    image: null,
+    image: "/card-images/GF-2030APAE-Image.png",
     imageAlt: "GF 2030APAE Polymeric Vinyl",
     theme: "manual-gf2030",
   },
