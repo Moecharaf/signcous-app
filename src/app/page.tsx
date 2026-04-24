@@ -229,7 +229,7 @@ const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
     productId: 0,
     name: "One Way Window",
     displayName: "ONE WAY WINDOW",
-    titleImage: "/card-images/One-Way-Window-LOGO.png",
+    titleImage: "/card-images/One-Way-Window-LOGO-v2.png",
     titleImageAlt: "One Way Window logo",
     href: "/adhesive/one-way-window",
     description: "Perforated vinyl with 50/50 & 70/30 options, 50in strict panel logic, optional laminate, contour cut, and tiered pricing.",
