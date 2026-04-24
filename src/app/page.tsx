@@ -131,7 +131,7 @@ const MANUAL_RIGID_PRODUCTS: ManualBannerProductCard[] = [
     href: "/rigid/foamcore",
     description: "Lightweight foamcore signs with live sheet-layout pricing and builder ordering.",
     label: "Builder",
-    image: null,
+    image: "/card-images/FoamCoar-Image.png",
     imageAlt: "Foamcore rigid sign board",
     theme: "manual-foamcore",
   },
