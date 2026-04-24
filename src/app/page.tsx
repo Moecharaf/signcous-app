@@ -254,7 +254,7 @@ const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
     href: "/adhesive/gf-830-autowrap",
     description: "Wrap vinyl with tiered area-based pricing, 60in panel splitting, contour cut, and rush production.",
     label: "Builder",
-    image: null,
+    image: "/card-images/GF830-AutoWrap-Image.png",
     imageAlt: "GF830 AutoMark Wrap Vinyl",
     theme: "manual-gf830",
   },
