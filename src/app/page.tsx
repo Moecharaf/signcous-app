@@ -145,7 +145,7 @@ const MANUAL_RIGID_PRODUCTS: ManualBannerProductCard[] = [
     href: "/rigid/aluminum",
     description: "Premium 0.040\" & 0.080\" aluminum signs — sheet or custom sq.in pricing with live builder.",
     label: "Builder",
-    image: null,
+    image: "/card-images/Aluminum-Image.png",
     imageAlt: "Aluminum rigid sign panel",
     theme: "manual-aluminum",
   },
