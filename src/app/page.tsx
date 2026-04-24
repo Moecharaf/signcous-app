@@ -350,7 +350,7 @@ const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
     href: "/adhesive/bootprints",
     description: "Heavy-duty outdoor floor graphic panels at $14.95/sq ft. Built for high-traffic exterior environments. Contour cut and rush available.",
     label: "Builder",
-    image: null,
+    image: "/card-images/Boot-Print-Image.png",
     imageAlt: "Outdoor Boot Prints Heavy-Duty Floor Graphics",
     theme: "manual-bootprints",
   },
