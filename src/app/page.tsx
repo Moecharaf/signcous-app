@@ -374,6 +374,8 @@ const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
     label: "Builder",
     image: "/card-images/FootPrint-Image.png",
     imageAlt: "Footprints Floor Graphics",
+    titleImage: "/card-images/Foot-Print-Logo.png",
+    titleImageAlt: "Footprints logo",
     theme: "manual-footprints",
   },
   {
