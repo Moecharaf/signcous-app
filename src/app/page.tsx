@@ -285,7 +285,7 @@ const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
     productId: 137,
     name: "Window Cling",
     displayName: "WINDOW CLING",
-    titleImage: "/card-images/Window-Cling-Logo.png",
+    titleImage: "/card-images/Window-Cling-Logo-v2.png",
     titleImageAlt: "Window Cling logo",
     href: "/adhesive/window-cling",
     description: "Square-inch priced static cling builder with inside/outside application and viewable controls.",
