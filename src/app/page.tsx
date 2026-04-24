@@ -383,7 +383,7 @@ const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
     productId: 135,
     name: "3M IJ-35C",
     displayName: "3M IJ-35C",
-    titleImage: "/card-images/3M IJ-35C.png",
+    titleImage: "/card-images/3m-IJ-35C-logo.png",
     titleImageAlt: "3M IJ-35C Adhesive Vinyl",
     href: "/adhesive/3m-ij-35c",
     description: "Adhesive vinyl builder with panel splitting, laminate options, contour cut, and rush pricing.",
