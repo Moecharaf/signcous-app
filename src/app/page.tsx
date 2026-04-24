@@ -326,7 +326,7 @@ const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
     href: "/adhesive/dry-erase",
     description: "Writable dry erase wall graphics at $4.35/sq ft. Perfect for offices, classrooms, and collaborative spaces. Contour cut and rush available.",
     label: "Builder",
-    image: null,
+    image: "/card-images/DRY-ERASE-Image.png",
     imageAlt: "Dry Erase Wall Graphics",
     theme: "manual-dry-erase",
   },
