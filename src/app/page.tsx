@@ -156,7 +156,7 @@ const MANUAL_RIGID_PRODUCTS: ManualBannerProductCard[] = [
     productId: 0,
     name: "JBond",
     displayName: "JBOND",
-    titleImage: "/card-images/JBond-Logo.png",
+    titleImage: "/card-images/Jbond-Logo.png",
     titleImageAlt: "JBond logo",
     href: "/rigid/jbond",
     description: "Aluminum composite panel signs in 3mm & 6mm — sheet or custom sq.in pricing.",
