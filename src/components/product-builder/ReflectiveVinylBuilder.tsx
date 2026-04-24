@@ -278,7 +278,7 @@ export default function ReflectiveVinylBuilder({ productId = 0 }: ReflectiveViny
                 <span className="font-semibold text-zinc-900">Reflective Vinyl</span>
               </nav>
               <div className="mt-2 flex flex-wrap gap-2">
-                {["$5.95 / sq ft", "High-Visibility", "Ceil-to-Foot Rounding", "Contour Cut Optional", "Rush Available", "$30 Minimum"].map((item) => (
+                {["$9.95 / sq ft", "High-Visibility", "Ceil-to-Foot Rounding", "Contour Cut Optional", "Rush Available", "$30 Minimum"].map((item) => (
                   <span key={item} className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-[11px] font-semibold text-zinc-600">
                     {item}
                   </span>
@@ -288,7 +288,7 @@ export default function ReflectiveVinylBuilder({ productId = 0 }: ReflectiveViny
                 Reflective Vinyl Builder
               </h1>
               <p className="mt-1 text-sm text-zinc-600">
-                High-visibility reflective vinyl graphics at $5.95/sq ft. Ideal for safety signage,
+                High-visibility reflective vinyl graphics at $9.95/sq ft. Ideal for safety signage,
                 vehicle markings, and outdoor installations. Dimensions billed in whole feet, rounded up.
               </p>
             </div>

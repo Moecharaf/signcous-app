@@ -314,7 +314,7 @@ const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
     name: "Reflective Vinyl",
     displayName: "REFLECTIVE",
     href: "/adhesive/reflective-vinyl",
-    description: "High-visibility reflective vinyl graphics at $5.95/sq ft. Ideal for safety signage, vehicle markings, and outdoor installations. Contour cut and rush available.",
+    description: "High-visibility reflective vinyl graphics at $9.95/sq ft. Ideal for safety signage, vehicle markings, and outdoor installations. Contour cut and rush available.",
     label: "Builder",
     image: "/card-images/Reflective-Image.png",
     imageAlt: "Reflective Vinyl High-Visibility Graphics",

@@ -1,4 +1,4 @@
-export const REFLECTIVE_VINYL_RATE = 5.95; // $ per sq ft
+export const REFLECTIVE_VINYL_RATE = 9.95; // $ per sq ft
 export const REFLECTIVE_VINYL_MIN = 30;
 export const REFLECTIVE_VINYL_CONTOUR_MULTIPLIER = 0.15; // +15%
 export const REFLECTIVE_VINYL_RUSH_MULTIPLIER = 1.0; // +100%
