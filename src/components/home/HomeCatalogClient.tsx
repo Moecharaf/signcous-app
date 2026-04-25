@@ -680,7 +680,7 @@ export default function HomeCatalogClient({
             } ${
               isImageOnlyHero
                 ? activeSection.key === "rigid"
-                  ? "aspect-[16/5] h-auto"
+                  ? "aspect-[1958/503] h-auto"
                   : "bg-black aspect-[16/3] h-auto"
                 : `bg-gradient-to-r ${theme.hero} p-5 md:p-7`
             }`}
