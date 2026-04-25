@@ -46,7 +46,7 @@ const MANUAL_BANNER_PRODUCTS: ManualBannerProductCard[] = [
     productId: 56,
     name: "HDPE",
     displayName: "HDPE",
-    titleImage: "/card-images/HDPE Logo_.png",
+    titleImage: "/card-images/HDPE-Logo-V2.png",
     titleImageAlt: "HDPE Water and Tear Resistant Paper",
     href: "/banners/hdpe",
     description: "Water & Tear Resistant Paper",
