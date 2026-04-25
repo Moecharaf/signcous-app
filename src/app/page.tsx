@@ -33,7 +33,7 @@ const MANUAL_BANNER_PRODUCTS: ManualBannerProductCard[] = [
     productId: 70,
     name: "Economical Banner Stand",
     displayName: "ECONO STAND",
-    titleImage: "/card-images/ECONOSTAND.png",
+    titleImage: "/card-images/EcoNoStand-Logo-V2.png",
     titleImageAlt: "Economical Banner Stand Solution",
     href: "/banners/economical-banner-stand",
     description: "Standard 33.5 x 80 single-sided banner stand at a fixed $130 per banner.",
