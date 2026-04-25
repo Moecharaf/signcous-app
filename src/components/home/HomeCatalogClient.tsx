@@ -667,21 +667,13 @@ export default function HomeCatalogClient({
   return (
     <div className="min-h-screen bg-[#f3f3f3] text-[#2f2f2f]">
       <section className="bg-[#f3f3f3]">
-        <div className={`px-4 md:px-6 ${
-          activeSection.key === "rigid"
-            ? "pb-4 pt-0 md:pb-5 md:pt-1"
-            : "py-7 md:py-8"
-        }`}>
+        <div className="px-4 py-7 md:px-6 md:py-8">
           <div
             className={`relative overflow-hidden rounded-lg ${
-              isImageOnlyHero && activeSection.key === "rigid"
-                ? ""
-                : "border border-[#cfcfcf]"
+              isImageOnlyHero ? "border border-[#cfcfcf]" : "border border-[#cfcfcf]"
             } ${
               isImageOnlyHero
-                ? activeSection.key === "rigid"
-                  ? "aspect-[1958/503] h-auto"
-                  : "bg-black aspect-[16/3] h-auto"
+                ? "bg-black aspect-[16/3] h-auto"
                 : `bg-gradient-to-r ${theme.hero} p-5 md:p-7`
             }`}
           >
