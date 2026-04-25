@@ -693,7 +693,7 @@ export default function HomeCatalogClient({
                     : activeSection.key === "magnet"
                     ? "inset-0 w-full bg-contain bg-center bg-no-repeat opacity-100"
                     : activeSection.key === "rigid"
-                    ? "inset-0 w-full bg-contain bg-center bg-no-repeat opacity-100"
+                    ? "inset-0 w-full bg-cover bg-center opacity-100"
                     : activeSection.key === "adhesive"
                     ? "inset-0 w-full bg-cover bg-center opacity-100"
                     : "inset-y-0 right-0 w-[42%] bg-cover bg-center opacity-35"
