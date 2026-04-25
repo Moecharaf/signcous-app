@@ -198,7 +198,7 @@ const MANUAL_RIGID_PRODUCTS: ManualBannerProductCard[] = [
     productId: 0,
     name: "Acrylic Signs",
     displayName: "ACRYLIC",
-    titleImage: "/card-images/Acrylic-Logo.png",
+    titleImage: "/card-images/Acylic-Logo-V2.png",
     titleImageAlt: "Acrylic Signs — Premium Look, Crystal Clear Finish",
     href: "/rigid/acrylic-signs",
     description: "Premium clear rigid signs for offices, lobbies, and wall-mounted displays.",
