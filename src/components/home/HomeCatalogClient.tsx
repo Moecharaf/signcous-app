@@ -669,7 +669,11 @@ export default function HomeCatalogClient({
       <section className="bg-[#f3f3f3]">
         <div className="px-4 py-7 md:px-6 md:py-8">
           <div
-            className={`relative overflow-hidden rounded-lg border border-[#cfcfcf] ${
+            className={`relative overflow-hidden rounded-lg ${
+              isImageOnlyHero && activeSection.key === "rigid"
+                ? ""
+                : "border border-[#cfcfcf]"
+            } ${
               isImageOnlyHero
                 ? activeSection.key === "rigid"
                   ? "aspect-[16/5] h-auto"
