@@ -672,7 +672,7 @@ export default function HomeCatalogClient({
             className={`relative overflow-hidden rounded-lg border border-[#cfcfcf] ${
               isImageOnlyHero
                 ? activeSection.key === "rigid"
-                  ? "bg-black aspect-[16/5] h-auto"
+                  ? "aspect-[16/5] h-auto"
                   : "bg-black aspect-[16/3] h-auto"
                 : `bg-gradient-to-r ${theme.hero} p-5 md:p-7`
             }`}
