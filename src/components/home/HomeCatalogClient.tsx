@@ -667,7 +667,11 @@ export default function HomeCatalogClient({
   return (
     <div className="min-h-screen bg-[#f3f3f3] text-[#2f2f2f]">
       <section className="bg-[#f3f3f3]">
-        <div className="px-4 py-7 md:px-6 md:py-8">
+        <div className={`px-4 md:px-6 ${
+          activeSection.key === "rigid"
+            ? "py-4 md:py-5"
+            : "py-7 md:py-8"
+        }`}>
           <div
             className={`relative overflow-hidden rounded-lg ${
               isImageOnlyHero && activeSection.key === "rigid"
