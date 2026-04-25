@@ -114,7 +114,7 @@ const MANUAL_RIGID_PRODUCTS: ManualBannerProductCard[] = [
     productId: 13,
     name: "CORO",
     displayName: "CORO",
-    titleImage: "/card-images/Coro-Logo.png",
+    titleImage: "/card-images/Coro-Logo-V2.png",
     titleImageAlt: "CORO high definition yard signs",
     href: "/rigid/coro",
     description: "High definition yard signs with live sheet-layout pricing and builder ordering.",
