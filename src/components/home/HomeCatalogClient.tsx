@@ -671,7 +671,9 @@ export default function HomeCatalogClient({
           <div
             className={`relative overflow-hidden rounded-lg border border-[#cfcfcf] ${
               isImageOnlyHero
-                ? "bg-black aspect-[16/3] h-auto"
+                ? activeSection.key === "rigid"
+                  ? "bg-black aspect-[16/5] h-auto"
+                  : "bg-black aspect-[16/3] h-auto"
                 : `bg-gradient-to-r ${theme.hero} p-5 md:p-7`
             }`}
           >
@@ -683,7 +685,7 @@ export default function HomeCatalogClient({
                     : activeSection.key === "magnet"
                     ? "inset-0 w-full bg-contain bg-center bg-no-repeat opacity-100"
                     : activeSection.key === "rigid"
-                    ? "inset-0 w-full bg-cover bg-center opacity-100"
+                    ? "inset-0 w-full bg-contain bg-center bg-no-repeat opacity-100"
                     : activeSection.key === "adhesive"
                     ? "inset-0 w-full bg-cover bg-center opacity-100"
                     : "inset-y-0 right-0 w-[42%] bg-cover bg-center opacity-35"
