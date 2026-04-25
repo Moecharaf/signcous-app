@@ -669,7 +669,7 @@ export default function HomeCatalogClient({
       <section className="bg-[#f3f3f3]">
         <div className={`px-4 md:px-6 ${
           activeSection.key === "rigid"
-            ? "py-4 md:py-5"
+            ? "pb-4 pt-0 md:pb-5 md:pt-1"
             : "py-7 md:py-8"
         }`}>
           <div
