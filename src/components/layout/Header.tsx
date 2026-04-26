@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
@@ -61,18 +62,15 @@ export default function Header() {
 
       <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-4 px-4 py-3 md:px-6">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-sm bg-[#ffd100] ring-1 ring-[#c3ab31]">
-            <span className="text-sm font-black tracking-widest text-[#262626]">SC</span>
-          </div>
-          <div>
-            <div className="text-xl font-black tracking-wide text-[#2d2d2d] dark:text-[#e8e8e8]">
-              SIGNCO<span className="text-[#d37800]">US</span>
-            </div>
-            <div className="text-[10px] uppercase tracking-[0.28em] text-[#707070] dark:text-[#666]">
-              Print Portal
-            </div>
-          </div>
+        <Link href="/" className="flex items-center" aria-label="Signcous home">
+          <Image
+            src="/card-images/Signcous-Logo-HD.png"
+            alt="Signcous logo"
+            width={335}
+            height={120}
+            priority
+            className="h-10 w-auto md:h-11"
+          />
         </Link>
 
         {/* Desktop nav */}
