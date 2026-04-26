@@ -28,6 +28,8 @@ const ROUNDED_CORNER_OPTIONS: Array<{ value: RoundedCornerOption; label: string;
 ];
 
 const DEFAULT_SIZE_KEY = "72x24";
+const PREVIEW_MAX_WIDTH = 720;
+const PREVIEW_MAX_HEIGHT = 420;
 
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat("en-US", {
@@ -100,11 +102,14 @@ export default function VehicleMagnetBuilder() {
     return `Estimated shipping tier: ${formatCurrency(shippingEstimate)} (${packsOfTen} x $10 per 10 magnets).`;
   }, [quantity]);
 
-  const maxWidth = Math.max(...SIZE_OPTIONS.map((option) => option.width));
-  const maxHeight = Math.max(...SIZE_OPTIONS.map((option) => option.height));
-  const previewScale = Math.min(520 / maxWidth, 280 / maxHeight);
-  const previewWidth = Math.max(140, selectedSize.width * previewScale);
-  const previewHeight = Math.max(90, selectedSize.height * previewScale);
+  const previewScale = Math.min(
+    PREVIEW_MAX_WIDTH / selectedSize.width,
+    PREVIEW_MAX_HEIGHT / selectedSize.height
+  );
+  const previewWidth = selectedSize.width * previewScale;
+  const previewHeight = selectedSize.height * previewScale;
+  const topGuideLineWidth = Math.max(24, previewWidth / 2 - 32);
+  const sideGuideLineHeight = Math.max(24, previewHeight / 2 - 20);
 
   function validateQuantity(): boolean {
     if (!Number.isInteger(quantity) || quantity < 1) {
@@ -272,16 +277,16 @@ export default function VehicleMagnetBuilder() {
                 <div className="pointer-events-none absolute -top-12 left-1/2 flex -translate-x-1/2 flex-col items-center text-[11px] font-semibold text-zinc-700">
                   <span className="text-[10px] uppercase tracking-[0.2em] text-zinc-500">Top Of Image</span>
                   <div className="mt-1 flex items-center gap-2">
-                    <span className="h-px w-12 bg-zinc-400" />
+                    <span className="h-px bg-zinc-400" style={{ width: topGuideLineWidth }} />
                     <span>{getDimensionLabel(selectedSize.width)}</span>
-                    <span className="h-px w-12 bg-zinc-400" />
+                    <span className="h-px bg-zinc-400" style={{ width: topGuideLineWidth }} />
                   </div>
                 </div>
 
                 <div className="pointer-events-none absolute -left-14 top-1/2 flex -translate-y-1/2 flex-col items-center text-[11px] font-semibold text-zinc-700">
-                  <span className="h-14 w-px bg-zinc-400" />
+                  <span className="w-px bg-zinc-400" style={{ height: sideGuideLineHeight }} />
                   <span className="my-2 -rotate-90">{getDimensionLabel(selectedSize.height)}</span>
-                  <span className="h-14 w-px bg-zinc-400" />
+                  <span className="w-px bg-zinc-400" style={{ height: sideGuideLineHeight }} />
                 </div>
 
                 <div className="pointer-events-none absolute -bottom-7 left-1/2 -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
