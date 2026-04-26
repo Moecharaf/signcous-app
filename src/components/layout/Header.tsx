@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
 import { useCart } from "@/context/CartContext";
 
@@ -15,9 +15,12 @@ const categoryNavLinks = [
 
 function ThemeToggle() {
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
 
-  useEffect(() => setMounted(true), []);
   if (!mounted) return <div className="h-8 w-8" />;
 
   const isDark = theme === "dark";
@@ -93,7 +96,13 @@ export default function Header() {
         <div className="hidden items-center gap-2 md:flex">
           <ThemeToggle />
           <Link
-            href="/account"
+            href="/signup"
+            className="rounded-sm border border-[#d0d0d0] bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-[#4b4b4b] transition-colors hover:bg-[#f4f4f4] dark:border-[#333] dark:bg-[#1a1a1a] dark:text-[#bbb] dark:hover:bg-[#252525]"
+          >
+            Sign Up
+          </Link>
+          <Link
+            href="/login"
             className="rounded-sm border border-[#d0d0d0] bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-[#4b4b4b] transition-colors hover:bg-[#f4f4f4] dark:border-[#333] dark:bg-[#1a1a1a] dark:text-[#bbb] dark:hover:bg-[#252525]"
           >
             Sign In
@@ -140,6 +149,20 @@ export default function Header() {
                 {link.label}
               </a>
             ))}
+            <Link
+              href="/signup"
+              className="rounded-sm border border-[#d3d3d3] bg-white px-3 py-2 hover:bg-[#f4f4f4] dark:border-[#2e2e2e] dark:bg-[#1a1a1a] dark:hover:bg-[#252525]"
+              onClick={() => setMenuOpen(false)}
+            >
+              Sign Up
+            </Link>
+            <Link
+              href="/login"
+              className="rounded-sm border border-[#d3d3d3] bg-white px-3 py-2 hover:bg-[#f4f4f4] dark:border-[#2e2e2e] dark:bg-[#1a1a1a] dark:hover:bg-[#252525]"
+              onClick={() => setMenuOpen(false)}
+            >
+              Sign In
+            </Link>
             <Link href="/cart" className="flex items-center gap-2 rounded-sm border border-[#d3d3d3] bg-white px-3 py-2 hover:bg-[#f4f4f4] dark:border-[#2e2e2e] dark:bg-[#1a1a1a] dark:hover:bg-[#252525]" onClick={() => setMenuOpen(false)}>
               Cart
               {itemCount > 0 && (
