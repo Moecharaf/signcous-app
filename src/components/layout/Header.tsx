@@ -87,12 +87,6 @@ export default function Header() {
               {link.label}
             </a>
           ))}
-          <Link
-            href="/quote"
-            className="group inline-flex min-w-[94px] flex-col items-center rounded-sm border border-[#d2d2d2] bg-white px-3 py-2.5 transition hover:border-[#d8b72d] hover:bg-[#fff8d7] dark:border-[#2e2e2e] dark:bg-[#1a1a1a] dark:hover:border-[#d8b72d] dark:hover:bg-[#1f1a00]"
-          >
-            Custom Quote
-          </Link>
         </nav>
 
         {/* Desktop actions */}
@@ -114,12 +108,6 @@ export default function Header() {
                 {itemCount > 99 ? "99+" : itemCount}
               </span>
             )}
-          </Link>
-          <Link
-            href="/quote"
-            className="rounded-sm border border-[#d8b72d] bg-[#ffd100] px-3 py-2 text-xs font-bold uppercase tracking-[0.12em] text-[#2f2f2f] transition-colors hover:bg-[#ffdb3d]"
-          >
-            Quote
           </Link>
         </div>
 
@@ -152,13 +140,6 @@ export default function Header() {
                 {link.label}
               </a>
             ))}
-            <Link
-              href="/quote"
-              className="rounded-sm border border-[#d3d3d3] bg-white px-3 py-2 hover:bg-[#fff8d7] dark:border-[#2e2e2e] dark:bg-[#1a1a1a] dark:hover:bg-[#1f1a00]"
-              onClick={() => setMenuOpen(false)}
-            >
-              Custom Quote
-            </Link>
             <Link href="/cart" className="flex items-center gap-2 rounded-sm border border-[#d3d3d3] bg-white px-3 py-2 hover:bg-[#f4f4f4] dark:border-[#2e2e2e] dark:bg-[#1a1a1a] dark:hover:bg-[#252525]" onClick={() => setMenuOpen(false)}>
               Cart
               {itemCount > 0 && (
@@ -166,13 +147,6 @@ export default function Header() {
                   {itemCount}
                 </span>
               )}
-            </Link>
-            <Link
-              href="/quote"
-              className="mt-1 rounded-sm border border-[#d8b72d] bg-[#ffd100] px-4 py-2 text-center text-xs font-bold uppercase tracking-[0.12em] text-[#2f2f2f]"
-              onClick={() => setMenuOpen(false)}
-            >
-              Request Quote
             </Link>
           </nav>
         </div>
