@@ -31,7 +31,8 @@ export type ManualBannerThemeKey =
   | "manual-bootprints"
   | "manual-low-tac-wall"
   | "manual-dry-erase"
-  | "manual-reflective-vinyl";
+  | "manual-reflective-vinyl"
+  | "manual-vehicle-magnet";
 
 export interface ManualBannerProductCard {
   id: string;
@@ -75,6 +76,7 @@ interface HomeCatalogClientProps {
   manualBannerProducts: ManualBannerProductCard[];
   manualRigidProducts: ManualBannerProductCard[];
   manualAdhesiveProducts: ManualBannerProductCard[];
+  manualMagnetProducts: ManualBannerProductCard[];
 }
 
 const MANUAL_CARD_THEME: Record<ManualBannerThemeKey, { texture: string; ghost: string; eyebrow: string }> = {
@@ -212,6 +214,11 @@ const MANUAL_CARD_THEME: Record<ManualBannerThemeKey, { texture: string; ghost: 
     texture: "from-[#ffffff]/95 via-[#fffbeb]/80 to-[#fef3c7]/88",
     ghost: "REFLECT",
     eyebrow: "High-Visibility",
+  },
+  "manual-vehicle-magnet": {
+    texture: "from-[#ffffff]/95 via-[#f2f4f7]/80 to-[#e3e8ee]/88",
+    ghost: "MAGNET",
+    eyebrow: "Vehicle Branding",
   },
 };
 
@@ -559,6 +566,7 @@ export default function HomeCatalogClient({
   manualBannerProducts,
   manualRigidProducts,
   manualAdhesiveProducts,
+  manualMagnetProducts,
 }: HomeCatalogClientProps) {
   const currentHash = useSyncExternalStore(subscribeToHashChange, getHashSnapshot, getServerSnapshot);
   const activeKeyFromHash = getCategoryFromHash(currentHash);
@@ -617,7 +625,9 @@ export default function HomeCatalogClient({
         ? manualRigidProducts
         : activeSection.key === "adhesive"
           ? manualAdhesiveProducts
-        : [];
+          : activeSection.key === "magnet"
+            ? manualMagnetProducts
+            : [];
   const visibleProducts = activeSection.products.filter((product) => {
     const normalizedName = product.name.toLowerCase();
 

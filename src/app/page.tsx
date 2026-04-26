@@ -394,6 +394,21 @@ const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
   },
 ];
 
+const MANUAL_MAGNET_PRODUCTS: ManualBannerProductCard[] = [
+  {
+    id: "manual-vehicle-magnet",
+    productId: 48,
+    name: "Vehicle Magnet",
+    displayName: "VEHICLE MAGNET",
+    href: "/magnet/vehicle-magnet",
+    description: "Fixed-size single-sided vehicle magnets with rounded corners, rush production, and artwork upload.",
+    label: "Builder",
+    image: null,
+    imageAlt: "Vehicle magnet",
+    theme: "manual-vehicle-magnet",
+  },
+];
+
 function stripHtml(input: string): string {
   return input.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
 }
@@ -475,6 +490,10 @@ function buildProductHref(product: WooProduct, fallbackCategorySlug?: string): s
 
   if (normalizedName.includes("2030") || normalizedName.includes("gf 2030")) {
     return "/adhesive/gf-2030apae";
+  }
+
+  if (normalizedName.includes("vehicle magnet") || normalizedName.includes("magnet")) {
+    return "/magnet/vehicle-magnet";
   }
 
   const matched = product.categories.find(
@@ -593,6 +612,16 @@ export default async function HomePage() {
     };
   });
 
+  const manualMagnetProducts = MANUAL_MAGNET_PRODUCTS.map((product) => {
+    const visual = imageByProductId.get(product.productId);
+
+    return {
+      ...product,
+      image: product.image ?? visual?.image ?? null,
+      imageAlt: product.imageAlt || visual?.imageAlt || product.name,
+    };
+  });
+
   const sectionsWithManualBuilders = sections.map((section) => {
     if (section.key === "rigid") {
       const alreadyHasCoro = section.products.some(
@@ -678,6 +707,24 @@ export default async function HomePage() {
       };
     }
 
+    if (section.key === "magnet") {
+      const missingManualCount = MANUAL_MAGNET_PRODUCTS.filter((manualProduct) => {
+        const normalizedTarget = manualProduct.name.toLowerCase();
+
+        return !section.products.some((product) => {
+          const normalizedName = product.name.toLowerCase();
+          return product.href === manualProduct.href || normalizedName.includes(normalizedTarget);
+        });
+      }).length;
+
+      if (missingManualCount === 0) return section;
+
+      return {
+        ...section,
+        productCount: section.productCount + missingManualCount,
+      };
+    }
+
     return section;
   });
 
@@ -687,6 +734,7 @@ export default async function HomePage() {
       manualBannerProducts={manualBannerProducts}
       manualRigidProducts={MANUAL_RIGID_PRODUCTS}
       manualAdhesiveProducts={manualAdhesiveProducts}
+      manualMagnetProducts={manualMagnetProducts}
     />
   );
 }
