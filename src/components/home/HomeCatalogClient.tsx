@@ -32,7 +32,8 @@ export type ManualBannerThemeKey =
   | "manual-low-tac-wall"
   | "manual-dry-erase"
   | "manual-reflective-vinyl"
-  | "manual-vehicle-magnet";
+  | "manual-vehicle-magnet"
+  | "manual-custom-magnet";
 
 export interface ManualBannerProductCard {
   id: string;
@@ -219,6 +220,11 @@ const MANUAL_CARD_THEME: Record<ManualBannerThemeKey, { texture: string; ghost: 
     texture: "from-[#ffffff]/95 via-[#f2f4f7]/80 to-[#e3e8ee]/88",
     ghost: "MAGNET",
     eyebrow: "Vehicle Branding",
+  },
+  "manual-custom-magnet": {
+    texture: "from-[#ffffff]/95 via-[#f4f6f8]/80 to-[#e2e6ea]/88",
+    ghost: "CUSTOM",
+    eyebrow: "Flexible Sizing",
   },
 };
 

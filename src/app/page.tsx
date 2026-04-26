@@ -396,6 +396,18 @@ const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
 
 const MANUAL_MAGNET_PRODUCTS: ManualBannerProductCard[] = [
   {
+    id: "manual-custom-magnet",
+    productId: 164,
+    name: "Custom Magnets",
+    displayName: "CUSTOM MAGNETS",
+    href: "/magnet",
+    description: "Custom-size single-sided magnets with contour cut, rounded corners, rush production, and artwork upload.",
+    label: "Builder",
+    image: null,
+    imageAlt: "Custom magnets",
+    theme: "manual-custom-magnet",
+  },
+  {
     id: "manual-vehicle-magnet",
     productId: 48,
     name: "Vehicle Magnet",
@@ -492,8 +504,12 @@ function buildProductHref(product: WooProduct, fallbackCategorySlug?: string): s
     return "/adhesive/gf-2030apae";
   }
 
-  if (normalizedName.includes("vehicle magnet") || normalizedName.includes("magnet")) {
+  if (normalizedName.includes("vehicle magnet")) {
     return "/magnet/vehicle-magnet";
+  }
+
+  if (normalizedName.includes("custom magnet") || normalizedName.includes("magnet")) {
+    return "/magnet";
   }
 
   const matched = product.categories.find(
