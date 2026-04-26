@@ -414,6 +414,8 @@ const MANUAL_MAGNET_PRODUCTS: ManualBannerProductCard[] = [
     productId: 48,
     name: "Vehicle Magnet",
     displayName: "VEHICLE MAGNET",
+    titleImage: "/card-images/Vehicle-Magnet-Logo.png",
+    titleImageAlt: "Vehicle Magnet logo",
     href: "/magnet/vehicle-magnet",
     description: "Fixed-size single-sided vehicle magnets with rounded corners, rush production, and artwork upload.",
     label: "Builder",
