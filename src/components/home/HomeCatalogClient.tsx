@@ -820,11 +820,7 @@ export default function HomeCatalogClient({
           </div>
         )}
 
-        {visibleProducts.length === 0 ? (
-          <div className="rounded-lg border border-[#d4d4d4] bg-white p-6 text-sm text-[#666]">
-            No products are currently available in this category.
-          </div>
-        ) : activeSection.key === "rigid" || activeSection.key === "adhesive" || activeSection.key === "magnet" ? (
+        {activeSection.key === "rigid" || activeSection.key === "adhesive" || activeSection.key === "magnet" ? (
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
             {visibleProducts.map((product) => {
               const cardId = `${activeSection.key}-${product.id}`;
