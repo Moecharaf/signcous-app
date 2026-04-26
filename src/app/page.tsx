@@ -419,8 +419,8 @@ const MANUAL_MAGNET_PRODUCTS: ManualBannerProductCard[] = [
     href: "/magnet/vehicle-magnet",
     description: "Fixed-size single-sided vehicle magnets with rounded corners, rush production, and artwork upload.",
     label: "Builder",
-    image: null,
-    imageAlt: "Vehicle magnet",
+    image: "/card-images/Vehicle-Magnet-IMG.png",
+    imageAlt: "Vehicle magnet on truck door",
     theme: "manual-vehicle-magnet",
   },
 ];
