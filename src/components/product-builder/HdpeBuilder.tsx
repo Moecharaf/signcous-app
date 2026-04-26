@@ -11,11 +11,12 @@ type Unit = (typeof unitOptions)[number];
 type DragState =
   | { mode: "none" }
   | { mode: "move"; startX: number; startY: number; originX: number; originY: number }
-  | { mode: "resize"; startX: number; startY: number; startW: number; startH: number };
+  | { mode: "resize"; startX: number; startY: number; startW: number; startH: number; startPxPerIn: number };
 
 const MIN_IN = 6;
 const MAX_IN = 240;
-const BASE_PX_PER_IN = 2.4;
+const PREVIEW_MAX_WIDTH = 720;
+const PREVIEW_MAX_HEIGHT = 420;
 
 function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
@@ -53,9 +54,13 @@ export default function HdpeBuilder() {
   const widthIn = toInches(widthNum, unit);
   const heightIn = toInches(heightNum, unit);
 
-  const pxPerIn = BASE_PX_PER_IN * zoom;
-  const artWidth = clamp(widthIn * pxPerIn, 90, 760);
-  const artHeight = clamp(heightIn * pxPerIn, 70, 460);
+  const fitScale = Math.min(
+    PREVIEW_MAX_WIDTH / Math.max(widthIn, 1),
+    PREVIEW_MAX_HEIGHT / Math.max(heightIn, 1)
+  );
+  const pxPerIn = fitScale * zoom;
+  const artWidth = widthIn * pxPerIn;
+  const artHeight = heightIn * pxPerIn;
 
   const pricing = useMemo(
     () => calculateHdpePrice(widthIn, heightIn, qtyNum),
@@ -167,7 +172,14 @@ export default function HdpeBuilder() {
   function startResize(event: React.PointerEvent<HTMLButtonElement>) {
     event.stopPropagation();
     event.currentTarget.setPointerCapture(event.pointerId);
-    setDrag({ mode: "resize", startX: event.clientX, startY: event.clientY, startW: widthIn, startH: heightIn });
+    setDrag({
+      mode: "resize",
+      startX: event.clientX,
+      startY: event.clientY,
+      startW: widthIn,
+      startH: heightIn,
+      startPxPerIn: pxPerIn || 1,
+    });
   }
 
   useEffect(() => {
@@ -177,8 +189,8 @@ export default function HdpeBuilder() {
         setArtPos({ x: drag.originX + event.clientX - drag.startX, y: drag.originY + event.clientY - drag.startY });
         return;
       }
-      const nextWIn = clamp(drag.startW + (event.clientX - drag.startX) / pxPerIn, MIN_IN, MAX_IN);
-      const nextHIn = clamp(drag.startH + (event.clientY - drag.startY) / pxPerIn, MIN_IN, MAX_IN);
+      const nextWIn = clamp(drag.startW + (event.clientX - drag.startX) / drag.startPxPerIn, MIN_IN, MAX_IN);
+      const nextHIn = clamp(drag.startH + (event.clientY - drag.startY) / drag.startPxPerIn, MIN_IN, MAX_IN);
       set("width", fromInches(nextWIn, unit));
       set("height", fromInches(nextHIn, unit));
     }

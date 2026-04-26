@@ -54,7 +54,7 @@ interface FormErrors {
 type DragState =
   | { mode: "none" }
   | { mode: "move"; startX: number; startY: number; originX: number; originY: number }
-  | { mode: "resize"; startX: number; startY: number; startW: number; startH: number };
+  | { mode: "resize"; startX: number; startY: number; startW: number; startH: number; startPxPerIn: number };
 
 const DEFAULTS: FormState = {
   width: "48",
@@ -85,7 +85,8 @@ interface VinylBannerBuilderProps {
 
 const MIN_IN = 6;
 const MAX_IN = 240;
-const BASE_PX_PER_IN = 2.4;
+const PREVIEW_MAX_WIDTH = 720;
+const PREVIEW_MAX_HEIGHT = 420;
 const ECONOMICAL_STAND_WIDTH_IN = 33.5;
 const ECONOMICAL_STAND_HEIGHT_IN = 80;
 const ECONOMICAL_STAND_UNIT_PRICE = 130;
@@ -187,11 +188,15 @@ export default function VinylBannerBuilder({
   const meshWebbingCost = form.meshWebbing ? perimeterFt * 1.75 : 0;
   const meshRopeCost = form.meshRope ? perimeterFt * 1.75 : 0;
 
+  const fitScale = Math.min(
+    PREVIEW_MAX_WIDTH / Math.max(widthIn, 1),
+    PREVIEW_MAX_HEIGHT / Math.max(heightIn, 1)
+  );
   const pxPerIn = isEconomicalStandProduct
     ? ECONOMICAL_STAND_PREVIEW_HEIGHT / ECONOMICAL_STAND_HEIGHT_IN
-    : BASE_PX_PER_IN * zoom;
-  const artWidth = isEconomicalStandProduct ? widthIn * pxPerIn : clamp(widthIn * pxPerIn, 90, 760);
-  const artHeight = isEconomicalStandProduct ? heightIn * pxPerIn : clamp(heightIn * pxPerIn, 70, 460);
+    : fitScale * zoom;
+  const artWidth = widthIn * pxPerIn;
+  const artHeight = heightIn * pxPerIn;
   const widthLabelInches = formatInchLabel(widthIn);
   const heightLabelInches = formatInchLabel(heightIn);
 
@@ -522,6 +527,7 @@ export default function VinylBannerBuilder({
       startY: event.clientY,
       startW: widthIn,
       startH: heightIn,
+      startPxPerIn: pxPerIn || 1,
     });
   }
 
@@ -537,8 +543,8 @@ export default function VinylBannerBuilder({
         return;
       }
 
-      const dxIn = (event.clientX - drag.startX) / pxPerIn;
-      const dyIn = (event.clientY - drag.startY) / pxPerIn;
+      const dxIn = (event.clientX - drag.startX) / drag.startPxPerIn;
+      const dyIn = (event.clientY - drag.startY) / drag.startPxPerIn;
 
       const nextWIn = clamp(drag.startW + dxIn, MIN_IN, MAX_IN);
       const nextHIn = clamp(drag.startH + dyIn, MIN_IN, MAX_IN);
