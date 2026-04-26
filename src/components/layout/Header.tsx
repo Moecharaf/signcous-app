@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
 import { useCart } from "@/context/CartContext";
 
@@ -46,7 +46,43 @@ function ThemeToggle() {
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const { itemCount } = useCart();
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadAuthState() {
+      try {
+        const response = await fetch("/api/auth/me", { cache: "no-store" });
+        const data = (await response.json()) as { authenticated?: boolean };
+
+        if (!mounted) return;
+        setIsAuthenticated(Boolean(data.authenticated));
+      } catch {
+        if (!mounted) return;
+        setIsAuthenticated(false);
+      }
+    }
+
+    loadAuthState();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  async function handleSignOut() {
+    if (isSigningOut) return;
+
+    setIsSigningOut(true);
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } finally {
+      window.location.href = "/login";
+    }
+  }
 
   return (
     <header className="sticky top-0 z-50 border-b border-[#cfcfcf] bg-[#f5f5f5]/95 backdrop-blur dark:border-[#2a2a2a] dark:bg-[#111111]/95">
@@ -95,18 +131,38 @@ export default function Header() {
         {/* Desktop actions */}
         <div className="hidden items-center gap-2 md:flex">
           <ThemeToggle />
-          <Link
-            href="/signup"
-            className="rounded-sm border border-[#d0d0d0] bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-[#4b4b4b] transition-colors hover:bg-[#f4f4f4] dark:border-[#333] dark:bg-[#1a1a1a] dark:text-[#bbb] dark:hover:bg-[#252525]"
-          >
-            Sign Up
-          </Link>
-          <Link
-            href="/login"
-            className="rounded-sm border border-[#d0d0d0] bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-[#4b4b4b] transition-colors hover:bg-[#f4f4f4] dark:border-[#333] dark:bg-[#1a1a1a] dark:text-[#bbb] dark:hover:bg-[#252525]"
-          >
-            Sign In
-          </Link>
+          {isAuthenticated ? (
+            <>
+              <Link
+                href="/account"
+                className="rounded-sm border border-[#d0d0d0] bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-[#4b4b4b] transition-colors hover:bg-[#f4f4f4] dark:border-[#333] dark:bg-[#1a1a1a] dark:text-[#bbb] dark:hover:bg-[#252525]"
+              >
+                Account
+              </Link>
+              <button
+                onClick={handleSignOut}
+                disabled={isSigningOut}
+                className="rounded-sm border border-[#d0d0d0] bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-[#4b4b4b] transition-colors hover:bg-[#f4f4f4] disabled:cursor-not-allowed disabled:opacity-60 dark:border-[#333] dark:bg-[#1a1a1a] dark:text-[#bbb] dark:hover:bg-[#252525]"
+              >
+                {isSigningOut ? "Signing Out" : "Sign Out"}
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/signup"
+                className="rounded-sm border border-[#d0d0d0] bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-[#4b4b4b] transition-colors hover:bg-[#f4f4f4] dark:border-[#333] dark:bg-[#1a1a1a] dark:text-[#bbb] dark:hover:bg-[#252525]"
+              >
+                Sign Up
+              </Link>
+              <Link
+                href="/login"
+                className="rounded-sm border border-[#d0d0d0] bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-[#4b4b4b] transition-colors hover:bg-[#f4f4f4] dark:border-[#333] dark:bg-[#1a1a1a] dark:text-[#bbb] dark:hover:bg-[#252525]"
+              >
+                Sign In
+              </Link>
+            </>
+          )}
           <Link
             href="/cart"
             className="relative rounded-sm border border-[#d0d0d0] bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-[#4b4b4b] transition-colors hover:bg-[#f4f4f4] dark:border-[#333] dark:bg-[#1a1a1a] dark:text-[#bbb] dark:hover:bg-[#252525]"
@@ -149,20 +205,44 @@ export default function Header() {
                 {link.label}
               </a>
             ))}
-            <Link
-              href="/signup"
-              className="rounded-sm border border-[#d3d3d3] bg-white px-3 py-2 hover:bg-[#f4f4f4] dark:border-[#2e2e2e] dark:bg-[#1a1a1a] dark:hover:bg-[#252525]"
-              onClick={() => setMenuOpen(false)}
-            >
-              Sign Up
-            </Link>
-            <Link
-              href="/login"
-              className="rounded-sm border border-[#d3d3d3] bg-white px-3 py-2 hover:bg-[#f4f4f4] dark:border-[#2e2e2e] dark:bg-[#1a1a1a] dark:hover:bg-[#252525]"
-              onClick={() => setMenuOpen(false)}
-            >
-              Sign In
-            </Link>
+            {isAuthenticated ? (
+              <>
+                <Link
+                  href="/account"
+                  className="rounded-sm border border-[#d3d3d3] bg-white px-3 py-2 hover:bg-[#f4f4f4] dark:border-[#2e2e2e] dark:bg-[#1a1a1a] dark:hover:bg-[#252525]"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Account
+                </Link>
+                <button
+                  onClick={() => {
+                    setMenuOpen(false);
+                    void handleSignOut();
+                  }}
+                  disabled={isSigningOut}
+                  className="rounded-sm border border-[#d3d3d3] bg-white px-3 py-2 text-left hover:bg-[#f4f4f4] disabled:cursor-not-allowed disabled:opacity-60 dark:border-[#2e2e2e] dark:bg-[#1a1a1a] dark:hover:bg-[#252525]"
+                >
+                  {isSigningOut ? "Signing Out" : "Sign Out"}
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/signup"
+                  className="rounded-sm border border-[#d3d3d3] bg-white px-3 py-2 hover:bg-[#f4f4f4] dark:border-[#2e2e2e] dark:bg-[#1a1a1a] dark:hover:bg-[#252525]"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Sign Up
+                </Link>
+                <Link
+                  href="/login"
+                  className="rounded-sm border border-[#d3d3d3] bg-white px-3 py-2 hover:bg-[#f4f4f4] dark:border-[#2e2e2e] dark:bg-[#1a1a1a] dark:hover:bg-[#252525]"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Sign In
+                </Link>
+              </>
+            )}
             <Link href="/cart" className="flex items-center gap-2 rounded-sm border border-[#d3d3d3] bg-white px-3 py-2 hover:bg-[#f4f4f4] dark:border-[#2e2e2e] dark:bg-[#1a1a1a] dark:hover:bg-[#252525]" onClick={() => setMenuOpen(false)}>
               Cart
               {itemCount > 0 && (
