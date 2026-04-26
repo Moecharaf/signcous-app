@@ -403,8 +403,8 @@ const MANUAL_MAGNET_PRODUCTS: ManualBannerProductCard[] = [
     href: "/magnet",
     description: "Custom-size single-sided magnets with contour cut, rounded corners, rush production, and artwork upload.",
     label: "Builder",
-    image: null,
-    imageAlt: "Custom magnets",
+    image: "/card-images/Custom_Magnet_Image.png",
+    imageAlt: "Custom magnet on vehicle door",
     theme: "manual-custom-magnet",
   },
   {
