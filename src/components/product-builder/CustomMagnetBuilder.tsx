@@ -9,6 +9,9 @@ type RoundedCornerOption = "none" | "half-inch" | "one-inch";
 const RATE_PER_SQ_IN = 0.1;
 const PREVIEW_MAX_WIDTH = 720;
 const PREVIEW_MAX_HEIGHT = 420;
+const PREVIEW_SIDE_GUTTER = 96;
+const PREVIEW_TOP_GUTTER = 72;
+const PREVIEW_BOTTOM_GUTTER = 44;
 const MAX_SIZE_ERROR =
   'Maximum size is 24" x 96". One side must be 24" or less, and the other side must be 96" or less.';
 
@@ -63,9 +66,11 @@ export default function CustomMagnetBuilder() {
     Math.max(width, height) <= 96;
   const isQuantityValid = Number.isInteger(quantity) && quantity >= 1;
 
+  const previewUsableWidth = PREVIEW_MAX_WIDTH - PREVIEW_SIDE_GUTTER;
+  const previewUsableHeight = PREVIEW_MAX_HEIGHT - PREVIEW_TOP_GUTTER - PREVIEW_BOTTOM_GUTTER;
   const previewScale = Math.min(
-    PREVIEW_MAX_WIDTH / Math.max(width, 1),
-    PREVIEW_MAX_HEIGHT / Math.max(height, 1)
+    previewUsableWidth / Math.max(width, 1),
+    previewUsableHeight / Math.max(height, 1)
   );
   const previewWidth = Math.max(120, width > 0 ? width * previewScale : 180);
   const previewHeight = Math.max(90, height > 0 ? height * previewScale : 140);
