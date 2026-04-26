@@ -400,6 +400,8 @@ const MANUAL_MAGNET_PRODUCTS: ManualBannerProductCard[] = [
     productId: 164,
     name: "Custom Magnets",
     displayName: "CUSTOM MAGNETS",
+    titleImage: "/card-images/Custom-Magnet-Logo.png",
+    titleImageAlt: "Custom Magnet logo",
     href: "/magnet",
     description: "Custom-size single-sided magnets with contour cut, rounded corners, rush production, and artwork upload.",
     label: "Builder",
