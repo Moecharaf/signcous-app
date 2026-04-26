@@ -62,14 +62,14 @@ export default function Header() {
 
       <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-4 px-4 py-3 md:px-6">
         {/* Logo */}
-        <Link href="/" className="flex items-center" aria-label="Signcous home">
+        <Link href="/" className="flex shrink-0 items-center" aria-label="Signcous home">
           <Image
             src="/card-images/Signcous-Logo-HD.png"
             alt="Signcous logo"
             width={335}
             height={120}
             priority
-            className="h-10 w-auto md:h-11"
+            className="h-14 w-auto md:h-16 lg:h-20"
           />
         </Link>
 
