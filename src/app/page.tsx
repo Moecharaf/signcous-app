@@ -59,7 +59,7 @@ const MANUAL_BANNER_PRODUCTS: ManualBannerProductCard[] = [
     productId: 60,
     name: "Canvas",
     displayName: "CANVAS",
-    titleImage: "/card-images/Canvas-Logo-V2.png",
+    titleImage: "/card-images/Canvas v3.png",
     titleImageAlt: "Canvas Poly-Cotton Blend Stretch and Frame",
     href: "/banners/canvas",
     description: "Poly-Cotton Blend, Stretch & Frame",
