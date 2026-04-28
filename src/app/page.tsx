@@ -72,7 +72,7 @@ const MANUAL_BANNER_PRODUCTS: ManualBannerProductCard[] = [
     productId: 27,
     name: "Mesh Banner",
     displayName: "MESH",
-    titleImage: "/card-images/Mesh-Logo-V2.png",
+    titleImage: "/card-images/Mesh V3.png",
     titleImageAlt: "Mesh Polyester with Air-Flow Perforation",
     href: "/banners/mesh-banner",
     description: "Durable 8oz Coated Polyester Mesh with 37% Air-Flow Perforation",
