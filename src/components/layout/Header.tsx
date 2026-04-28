@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
 import { useCart } from "@/context/CartContext";
 
@@ -48,6 +48,8 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [showHeader, setShowHeader] = useState(true);
+  const lastScrollYRef = useRef(0);
   const { itemCount } = useCart();
 
   useEffect(() => {
@@ -73,6 +75,40 @@ export default function Header() {
     };
   }, []);
 
+  useEffect(() => {
+    lastScrollYRef.current = window.scrollY;
+
+    const handleScroll = () => {
+      const currentY = window.scrollY;
+      const delta = currentY - lastScrollYRef.current;
+
+      if (menuOpen) {
+        setShowHeader(true);
+        lastScrollYRef.current = currentY;
+        return;
+      }
+
+      if (currentY <= 8) {
+        setShowHeader(true);
+      } else if (delta > 4) {
+        setShowHeader(false);
+      } else if (delta < -4) {
+        setShowHeader(true);
+      }
+
+      lastScrollYRef.current = currentY;
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [menuOpen]);
+
+  useEffect(() => {
+    if (menuOpen) setShowHeader(true);
+  }, [menuOpen]);
+
   async function handleSignOut() {
     if (isSigningOut) return;
 
@@ -85,7 +121,9 @@ export default function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[#cfcfcf] bg-[#f5f5f5]/95 backdrop-blur dark:border-[#2a2a2a] dark:bg-[#111111]/95">
+    <header
+      className={`sticky top-0 z-50 overflow-hidden bg-[#f5f5f5]/95 backdrop-blur transition-all duration-300 dark:bg-[#111111]/95 ${showHeader ? "max-h-[100vh] border-b border-[#cfcfcf] dark:border-[#2a2a2a]" : "max-h-0 border-b-0"}`}
+    >
       <div className="border-b border-[#dadada] bg-[#efefef] px-4 py-1.5 text-[11px] text-[#555] dark:border-[#222] dark:bg-[#0d0d0d] dark:text-[#888] md:px-6">
         <div className="mx-auto flex max-w-[1500px] items-center justify-between">
           <span className="uppercase tracking-[0.18em] text-[#666] dark:text-[#777]">Signcous Trade Print Platform</span>
