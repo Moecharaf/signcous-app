@@ -85,7 +85,7 @@ const MANUAL_BANNER_PRODUCTS: ManualBannerProductCard[] = [
     productId: 67,
     name: "No-Curl Banner",
     displayName: "NOCURL BANNER",
-    titleImage: "/card-images/NoCurl-Logo-V2.png",
+    titleImage: "/card-images/No Curl Logo_.png",
     titleImageAlt: "No Curl Banner lays flat and stays flat",
     href: "/banners/no-curl-banner",
     description: "Premium 8mil No-Curl Banner for Flat, High-End Displays",
