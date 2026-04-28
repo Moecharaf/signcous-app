@@ -98,7 +98,7 @@ const MANUAL_BANNER_PRODUCTS: ManualBannerProductCard[] = [
     productId: 54,
     name: "Poster",
     displayName: "POSTER",
-    titleImage: "/card-images/Poster-Logo-V2.png",
+    titleImage: "/card-images/Poster V3.png",
     titleImageAlt: "Poster Bright White Paper for Short-Term Indoor use",
     href: "/banners/poster",
     description: "Poster Builder with Upload and Rounded-Up Area Pricing",
