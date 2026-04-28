@@ -20,7 +20,7 @@ const MANUAL_BANNER_PRODUCTS: ManualBannerProductCard[] = [
     productId: 26,
     name: "HD Banner",
     displayName: "HD BANNER",
-    titleImage: "/card-images/HDBanner-Logo-V2.png",
+    titleImage: "/card-images/HD-Banner-Logo-V3.png",
     titleImageAlt: "HD Banner high-definition vinyl banner",
     href: "/banners/vinyl-banner",
     description: "Custom HD vinyl banner with live sizing, finishing options, and rush production.",
