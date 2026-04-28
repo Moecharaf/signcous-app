@@ -50,6 +50,7 @@ export default function Header() {
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [showHeader, setShowHeader] = useState(true);
   const lastScrollYRef = useRef(0);
+  const showHeaderRef = useRef(true);
   const { itemCount } = useCart();
 
   useEffect(() => {
@@ -77,23 +78,34 @@ export default function Header() {
 
   useEffect(() => {
     lastScrollYRef.current = window.scrollY;
+    showHeaderRef.current = true;
 
     const handleScroll = () => {
       const currentY = window.scrollY;
       const delta = currentY - lastScrollYRef.current;
 
       if (menuOpen) {
-        setShowHeader(true);
+        if (!showHeaderRef.current) {
+          showHeaderRef.current = true;
+          setShowHeader(true);
+        }
         lastScrollYRef.current = currentY;
         return;
       }
 
-      if (currentY <= 8) {
-        setShowHeader(true);
-      } else if (delta > 4) {
-        setShowHeader(false);
-      } else if (delta < -4) {
-        setShowHeader(true);
+      let nextShowHeader = showHeaderRef.current;
+
+      if (currentY <= 12) {
+        nextShowHeader = true;
+      } else if (delta > 10 && currentY > 120) {
+        nextShowHeader = false;
+      } else if (delta < -10) {
+        nextShowHeader = true;
+      }
+
+      if (nextShowHeader !== showHeaderRef.current) {
+        showHeaderRef.current = nextShowHeader;
+        setShowHeader(nextShowHeader);
       }
 
       lastScrollYRef.current = currentY;
@@ -106,7 +118,10 @@ export default function Header() {
   }, [menuOpen]);
 
   useEffect(() => {
-    if (menuOpen) setShowHeader(true);
+    if (menuOpen) {
+      showHeaderRef.current = true;
+      setShowHeader(true);
+    }
   }, [menuOpen]);
 
   async function handleSignOut() {
@@ -122,7 +137,7 @@ export default function Header() {
 
   return (
     <header
-      className={`sticky top-0 z-50 overflow-hidden bg-[#f5f5f5]/95 backdrop-blur transition-all duration-300 dark:bg-[#111111]/95 ${showHeader ? "max-h-[100vh] border-b border-[#cfcfcf] dark:border-[#2a2a2a]" : "max-h-0 border-b-0"}`}
+      className={`sticky top-0 z-50 border-b border-[#cfcfcf] bg-[#f5f5f5]/95 backdrop-blur transition-transform duration-300 will-change-transform dark:border-[#2a2a2a] dark:bg-[#111111]/95 ${showHeader ? "translate-y-0" : "-translate-y-full"}`}
     >
       <div className="border-b border-[#dadada] bg-[#efefef] px-4 py-1.5 text-[11px] text-[#555] dark:border-[#222] dark:bg-[#0d0d0d] dark:text-[#888] md:px-6">
         <div className="mx-auto flex max-w-[1500px] items-center justify-between">
