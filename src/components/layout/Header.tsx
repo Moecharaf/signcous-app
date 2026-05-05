@@ -158,10 +158,10 @@ export default function Header() {
           <Image
             src="/card-images/Signcous-Logo-v2.png.png"
             alt="Signcous logo"
-            width={400}
-            height={145}
+            width={480}
+            height={175}
             priority
-            className="h-24 w-auto md:h-28 lg:h-32"
+            className="h-28 w-auto md:h-32 lg:h-36"
           />
         </Link>
 
