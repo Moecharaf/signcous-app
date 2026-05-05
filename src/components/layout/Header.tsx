@@ -1,16 +1,23 @@
 "use client";
 
+import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
 import { useCart } from "@/context/CartContext";
 
-const categoryNavLinks = [
+const MagnetIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
+    <path d="M18.15 5.43c-1.83-1.72-4.23-2.57-6.75-2.41C6.69 3.33 3 7.39 3 12.27v6.23A2.5 2.5 0 0 0 5.5 21h2a2.5 2.5 0 0 0 2.5-2.5v-6.33c0-1.14.85-2.11 1.89-2.17.56-0 1.08.17 1.49.55.4.38.62.9.62 1.45v6.5a2.5 2.5 0 0 0 2.5 2.5h2a2.5 2.5 0 0 0 2.5-2.5V12c0-2.48-1.04-4.87-2.85-6.57ZM7.5 19h-2c-.28 0-.5-.22-.5-.5V17h3v1.5c0 .28-.22.5-.5.5Zm11 0h-2c-.28 0-.5-.22-.5-.5V17h3v1.5c0 .28-.22.5-.5.5Z" />
+  </svg>
+);
+
+const categoryNavLinks: { hash: string; label: string; icon: React.ReactNode }[] = [
   { hash: "banner", label: "Banner", icon: "▦" },
   { hash: "rigid", label: "Rigid", icon: "▣" },
   { hash: "adhesive", label: "Adhesive", icon: "◫" },
-  { hash: "magnet", label: "Magnet", icon: "∪" },
+  { hash: "magnet", label: "Magnet", icon: <MagnetIcon /> },
 ];
 
 function ThemeToggle() {
