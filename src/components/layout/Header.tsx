@@ -152,16 +152,16 @@ export default function Header() {
         </div>
       </div>
 
-      <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-4 px-4 py-3 md:px-6">
+      <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-4 px-4 py-1 md:px-6">
         {/* Logo */}
         <Link href="/" className="flex shrink-0 items-center" aria-label="Signcous home">
           <Image
             src="/card-images/Signcous-Logo-v2.png.png"
             alt="Signcous logo"
-            width={335}
-            height={120}
+            width={400}
+            height={145}
             priority
-            className="h-20 w-auto md:h-24 lg:h-28"
+            className="h-24 w-auto md:h-28 lg:h-32"
           />
         </Link>
 
