@@ -183,6 +183,12 @@ export default function Header() {
 
         {/* Desktop actions */}
         <div className="hidden items-center gap-2 md:flex">
+          <Link
+            href="/contact"
+            className="rounded-sm border border-[#d0d0d0] bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-[#4b4b4b] transition-colors hover:bg-[#f4f4f4] dark:border-[#333] dark:bg-[#1a1a1a] dark:text-[#bbb] dark:hover:bg-[#252525]"
+          >
+            Contact
+          </Link>
           <ThemeToggle />
           {isAuthenticated ? (
             <>
@@ -258,6 +264,13 @@ export default function Header() {
                 {link.label}
               </a>
             ))}
+            <Link
+              href="/contact"
+              className="rounded-sm border border-[#d3d3d3] bg-white px-3 py-2 hover:bg-[#f4f4f4] dark:border-[#2e2e2e] dark:bg-[#1a1a1a] dark:hover:bg-[#252525]"
+              onClick={() => setMenuOpen(false)}
+            >
+              Contact Us
+            </Link>
             {isAuthenticated ? (
               <>
                 <Link
