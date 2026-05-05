@@ -30,7 +30,7 @@ const RigidIcon = () => (
 );
 
 const BannerIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 317.113 317.113" width="30" height="30" fill="currentColor" aria-hidden="true">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 317.113 317.113" width="38" height="38" fill="currentColor" aria-hidden="true">
     <g>
       <polygon points="291.927,136.019 291.927,181.092 317.113,181.092 306.509,157.293 317.113,136.019" />
       <polygon points="262.484,187.999 286.624,187.999 286.624,181.092 286.624,136.019 286.624,129.111 262.484,129.111" />
