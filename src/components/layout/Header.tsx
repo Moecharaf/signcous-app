@@ -8,19 +8,19 @@ import { useTheme } from "next-themes";
 import { useCart } from "@/context/CartContext";
 
 const MagnetIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="30" height="30" fill="currentColor" aria-hidden="true">
     <path d="M18.15 5.43c-1.83-1.72-4.23-2.57-6.75-2.41C6.69 3.33 3 7.39 3 12.27v6.23A2.5 2.5 0 0 0 5.5 21h2a2.5 2.5 0 0 0 2.5-2.5v-6.33c0-1.14.85-2.11 1.89-2.17.56-0 1.08.17 1.49.55.4.38.62.9.62 1.45v6.5a2.5 2.5 0 0 0 2.5 2.5h2a2.5 2.5 0 0 0 2.5-2.5V12c0-2.48-1.04-4.87-2.85-6.57ZM7.5 19h-2c-.28 0-.5-.22-.5-.5V17h3v1.5c0 .28-.22.5-.5.5Zm11 0h-2c-.28 0-.5-.22-.5-.5V17h3v1.5c0 .28-.22.5-.5.5Z" />
   </svg>
 );
 
 const AdhesiveIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="22" height="22" fill="currentColor" aria-hidden="true">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="30" height="30" fill="currentColor" aria-hidden="true">
     <path d="M2.5 1A1.5 1.5 0 0 0 1 2.5v11A1.5 1.5 0 0 0 2.5 15h6.086a1.5 1.5 0 0 0 1.06-.44l4.915-4.914A1.5 1.5 0 0 0 15 8.586V2.5A1.5 1.5 0 0 0 13.5 1h-11zM2 2.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 .5.5V8H9.5A1.5 1.5 0 0 0 8 9.5V14H2.5a.5.5 0 0 1-.5-.5v-11zm7 11.293V9.5a.5.5 0 0 1 .5-.5h4.293L9 13.793z"/>
   </svg>
 );
 
 const RigidIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="-3.59 0 68.16 68.16" width="22" height="22" fill="currentColor" aria-hidden="true">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="-3.59 0 68.16 68.16" width="30" height="30" fill="currentColor" aria-hidden="true">
     <g transform="translate(-594.805 -384.47)">
       <path d="M645.015 412.48a2.016 2.016 0 0 0 1.41-.58l8.77-8.77a1.966 1.966 0 0 0 .59-1.41 2.006 2.006 0 0 0-.59-1.42l-8.77-8.76a2.016 2.016 0 0 0-1.41-.58h-13.34v-4.49a1.993 1.993 0 0 0-2-2h-9.77a1.993 1.993 0 0 0-2 2v4.49h-12.68a1.993 1.993 0 0 0-2 2v17.52a1.993 1.993 0 0 0 2 2h12.68v4.11h-12.33a2.016 2.016 0 0 0-1.41.58l-8.77 8.76a2.006 2.006 0 0 0-.59 1.42 1.966 1.966 0 0 0 .59 1.41l8.77 8.77a2.016 2.016 0 0 0 1.41.58h12.33v10.52a2 2 0 0 0 .07 4h13.65a2 2 0 0 0 .05-4V438.11h13.69a1.993 1.993 0 0 0 2-2V418.59a1.993 1.993 0 0 0-2-2h-13.69v-4.11Zm-23.11-24.01h5.77v2.49h-5.77Zm5.77 60.16h-5.77V438.11h5.77Zm15.69-28.04v13.52h-36.96l-6.77-6.76 6.77-6.76Zm-21.46-4v-4.11h5.77v4.11Zm-14.68-8.11V394.96h36.96l6.77 6.76-6.77 6.76Z" />
       <path d="M632.722 403.719h-14.854a2 2 0 0 1 0-4h14.854a2 2 0 0 1 0 4Z" />
@@ -29,8 +29,20 @@ const RigidIcon = () => (
   </svg>
 );
 
+const BannerIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 317.113 317.113" width="30" height="30" fill="currentColor" aria-hidden="true">
+    <g>
+      <polygon points="291.927,136.019 291.927,181.092 317.113,181.092 306.509,157.293 317.113,136.019" />
+      <polygon points="262.484,187.999 286.624,187.999 286.624,181.092 286.624,136.019 286.624,129.111 262.484,129.111" />
+      <polygon points="25.187,181.092 25.187,136.019 0,136.019 10.604,157.956 0,181.092" />
+      <polygon points="30.489,181.092 30.489,187.999 54.629,187.999 54.629,129.111 30.489,129.111 30.489,136.019" />
+      <polygon points="59.932,123.809 59.932,126.46 59.932,129.111 59.932,187.999 59.932,190.65 59.932,193.302 59.932,199.826 257.182,199.826 257.182,193.302 257.182,190.65 257.182,187.999 257.182,129.111 257.182,126.46 257.182,123.809 257.182,117.287 59.932,117.287" />
+    </g>
+  </svg>
+);
+
 const categoryNavLinks: { hash: string; label: string; icon: React.ReactNode }[] = [
-  { hash: "banner", label: "Banner", icon: "▦" },
+  { hash: "banner", label: "Banner", icon: <BannerIcon /> },
   { hash: "rigid", label: "Rigid", icon: <RigidIcon /> },
   { hash: "adhesive", label: "Adhesive", icon: <AdhesiveIcon /> },
   { hash: "magnet", label: "Magnet", icon: <MagnetIcon /> },
