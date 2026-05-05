@@ -19,9 +19,19 @@ const AdhesiveIcon = () => (
   </svg>
 );
 
+const RigidIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="-3.59 0 68.16 68.16" width="16" height="16" fill="currentColor" aria-hidden="true">
+    <g transform="translate(-594.805 -384.47)">
+      <path d="M645.015 412.48a2.016 2.016 0 0 0 1.41-.58l8.77-8.77a1.966 1.966 0 0 0 .59-1.41 2.006 2.006 0 0 0-.59-1.42l-8.77-8.76a2.016 2.016 0 0 0-1.41-.58h-13.34v-4.49a1.993 1.993 0 0 0-2-2h-9.77a1.993 1.993 0 0 0-2 2v4.49h-12.68a1.993 1.993 0 0 0-2 2v17.52a1.993 1.993 0 0 0 2 2h12.68v4.11h-12.33a2.016 2.016 0 0 0-1.41.58l-8.77 8.76a2.006 2.006 0 0 0-.59 1.42 1.966 1.966 0 0 0 .59 1.41l8.77 8.77a2.016 2.016 0 0 0 1.41.58h12.33v10.52a2 2 0 0 0 .07 4h13.65a2 2 0 0 0 .05-4V438.11h13.69a1.993 1.993 0 0 0 2-2V418.59a1.993 1.993 0 0 0-2-2h-13.69v-4.11Zm-23.11-24.01h5.77v2.49h-5.77Zm5.77 60.16h-5.77V438.11h5.77Zm15.69-28.04v13.52h-36.96l-6.77-6.76 6.77-6.76Zm-21.46-4v-4.11h5.77v4.11Zm-14.68-8.11V394.96h36.96l6.77 6.76-6.77 6.76Z" />
+      <path d="M632.722 403.719h-14.854a2 2 0 0 1 0-4h14.854a2 2 0 0 1 0 4Z" />
+      <path d="M632.618 429.35h-14.646a2 2 0 0 1 0-4h14.646a2 2 0 0 1 0 4Z" />
+    </g>
+  </svg>
+);
+
 const categoryNavLinks: { hash: string; label: string; icon: React.ReactNode }[] = [
   { hash: "banner", label: "Banner", icon: "▦" },
-  { hash: "rigid", label: "Rigid", icon: "▣" },
+  { hash: "rigid", label: "Rigid", icon: <RigidIcon /> },
   { hash: "adhesive", label: "Adhesive", icon: <AdhesiveIcon /> },
   { hash: "magnet", label: "Magnet", icon: <MagnetIcon /> },
 ];
