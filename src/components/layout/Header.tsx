@@ -13,10 +13,14 @@ const MagnetIcon = () => (
   </svg>
 );
 
+const AdhesiveIcon = () => (
+  <Image src="/card-images/Adhesive.svg" alt="Adhesive" width={18} height={18} aria-hidden="true" />
+);
+
 const categoryNavLinks: { hash: string; label: string; icon: React.ReactNode }[] = [
   { hash: "banner", label: "Banner", icon: "▦" },
   { hash: "rigid", label: "Rigid", icon: "▣" },
-  { hash: "adhesive", label: "Adhesive", icon: "◫" },
+  { hash: "adhesive", label: "Adhesive", icon: <AdhesiveIcon /> },
   { hash: "magnet", label: "Magnet", icon: <MagnetIcon /> },
 ];
 
