@@ -137,7 +137,7 @@ export default function Header() {
 
   return (
     <header
-      className={`sticky top-0 z-50 border-b border-[#cfcfcf] bg-[#f5f5f5]/95 backdrop-blur transition-transform duration-300 will-change-transform dark:border-[#2a2a2a] dark:bg-[#111111]/95 ${showHeader ? "translate-y-0" : "-translate-y-full"}`}
+      className={`sticky top-0 z-50 overflow-visible border-b border-[#cfcfcf] bg-[#f5f5f5]/95 backdrop-blur transition-transform duration-300 will-change-transform dark:border-[#2a2a2a] dark:bg-[#111111]/95 ${showHeader ? "translate-y-0" : "-translate-y-full"}`}
     >
       <div className="border-b border-[#dadada] bg-[#efefef] px-4 py-1.5 text-[11px] text-[#555] dark:border-[#222] dark:bg-[#0d0d0d] dark:text-[#888] md:px-6">
         <div className="mx-auto flex max-w-[1500px] items-center justify-between">
@@ -152,16 +152,16 @@ export default function Header() {
         </div>
       </div>
 
-      <div className="mx-auto flex h-24 max-w-[1500px] items-center justify-between gap-4 px-4 py-0 md:px-6">
+      <div className="mx-auto flex h-24 max-w-[1500px] items-center justify-between gap-4 overflow-visible px-4 py-0 md:px-6">
         {/* Logo */}
-        <Link href="/" className="flex h-full shrink-0 items-center" aria-label="Signcous home">
+        <Link href="/" className="flex shrink-0 items-center overflow-visible" aria-label="Signcous home">
           <Image
             src="/card-images/Signcous-Logo-v2.png.png"
             alt="Signcous logo"
             width={480}
             height={175}
             priority
-            className="h-full w-auto"
+            className="h-36 w-auto"
           />
         </Link>
 
