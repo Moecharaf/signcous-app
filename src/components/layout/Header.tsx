@@ -8,19 +8,19 @@ import { useTheme } from "next-themes";
 import { useCart } from "@/context/CartContext";
 
 const MagnetIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
     <path d="M18.15 5.43c-1.83-1.72-4.23-2.57-6.75-2.41C6.69 3.33 3 7.39 3 12.27v6.23A2.5 2.5 0 0 0 5.5 21h2a2.5 2.5 0 0 0 2.5-2.5v-6.33c0-1.14.85-2.11 1.89-2.17.56-0 1.08.17 1.49.55.4.38.62.9.62 1.45v6.5a2.5 2.5 0 0 0 2.5 2.5h2a2.5 2.5 0 0 0 2.5-2.5V12c0-2.48-1.04-4.87-2.85-6.57ZM7.5 19h-2c-.28 0-.5-.22-.5-.5V17h3v1.5c0 .28-.22.5-.5.5Zm11 0h-2c-.28 0-.5-.22-.5-.5V17h3v1.5c0 .28-.22.5-.5.5Z" />
   </svg>
 );
 
 const AdhesiveIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="22" height="22" fill="currentColor" aria-hidden="true">
     <path d="M2.5 1A1.5 1.5 0 0 0 1 2.5v11A1.5 1.5 0 0 0 2.5 15h6.086a1.5 1.5 0 0 0 1.06-.44l4.915-4.914A1.5 1.5 0 0 0 15 8.586V2.5A1.5 1.5 0 0 0 13.5 1h-11zM2 2.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 .5.5V8H9.5A1.5 1.5 0 0 0 8 9.5V14H2.5a.5.5 0 0 1-.5-.5v-11zm7 11.293V9.5a.5.5 0 0 1 .5-.5h4.293L9 13.793z"/>
   </svg>
 );
 
 const RigidIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="-3.59 0 68.16 68.16" width="16" height="16" fill="currentColor" aria-hidden="true">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="-3.59 0 68.16 68.16" width="22" height="22" fill="currentColor" aria-hidden="true">
     <g transform="translate(-594.805 -384.47)">
       <path d="M645.015 412.48a2.016 2.016 0 0 0 1.41-.58l8.77-8.77a1.966 1.966 0 0 0 .59-1.41 2.006 2.006 0 0 0-.59-1.42l-8.77-8.76a2.016 2.016 0 0 0-1.41-.58h-13.34v-4.49a1.993 1.993 0 0 0-2-2h-9.77a1.993 1.993 0 0 0-2 2v4.49h-12.68a1.993 1.993 0 0 0-2 2v17.52a1.993 1.993 0 0 0 2 2h12.68v4.11h-12.33a2.016 2.016 0 0 0-1.41.58l-8.77 8.76a2.006 2.006 0 0 0-.59 1.42 1.966 1.966 0 0 0 .59 1.41l8.77 8.77a2.016 2.016 0 0 0 1.41.58h12.33v10.52a2 2 0 0 0 .07 4h13.65a2 2 0 0 0 .05-4V438.11h13.69a1.993 1.993 0 0 0 2-2V418.59a1.993 1.993 0 0 0-2-2h-13.69v-4.11Zm-23.11-24.01h5.77v2.49h-5.77Zm5.77 60.16h-5.77V438.11h5.77Zm15.69-28.04v13.52h-36.96l-6.77-6.76 6.77-6.76Zm-21.46-4v-4.11h5.77v4.11Zm-14.68-8.11V394.96h36.96l6.77 6.76-6.77 6.76Z" />
       <path d="M632.722 403.719h-14.854a2 2 0 0 1 0-4h14.854a2 2 0 0 1 0 4Z" />
@@ -189,17 +189,17 @@ export default function Header() {
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#4a4a4a] dark:text-[#aaa] lg:flex">
+        <nav className="hidden items-end gap-6 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#666] dark:text-[#9a9a9a] lg:flex">
           {categoryNavLinks.map((link) => (
             <a
               key={`${link.hash}-${link.label}`}
               href={`/#${link.hash}`}
-              className="group inline-flex min-w-[94px] flex-col items-center rounded-sm border border-[#d2d2d2] bg-white px-3 py-2.5 transition hover:border-[#d8b72d] hover:bg-[#fff8d7] dark:border-[#2e2e2e] dark:bg-[#1a1a1a] dark:hover:border-[#d8b72d] dark:hover:bg-[#1f1a00]"
+              className="group inline-flex min-w-[72px] flex-col items-center gap-2 px-1 py-1 transition-colors hover:text-[#3a3a3a] dark:hover:text-[#d0d0d0]"
             >
-              <span className="text-base leading-none text-[#808080] transition group-hover:text-[#3b3b3b] dark:text-[#666] dark:group-hover:text-[#ccc]">
+              <span className="leading-none text-[#7c7c7c] transition group-hover:text-[#3b3b3b] dark:text-[#767676] dark:group-hover:text-[#d3d3d3]">
                 {link.icon}
               </span>
-              {link.label}
+              <span>{link.label}</span>
             </a>
           ))}
         </nav>
@@ -281,10 +281,11 @@ export default function Header() {
               <a
                 key={`${link.hash}-${link.label}`}
                 href={`/#${link.hash}`}
-                className="rounded-sm border border-[#d3d3d3] bg-white px-3 py-2 hover:bg-[#fff8d7] dark:border-[#2e2e2e] dark:bg-[#1a1a1a] dark:hover:bg-[#1f1a00]"
+                className="inline-flex items-center gap-3 px-1 py-2 text-sm font-semibold uppercase tracking-[0.08em] text-[#646464] transition-colors hover:text-[#2f2f2f] dark:text-[#9d9d9d] dark:hover:text-[#dedede]"
                 onClick={() => setMenuOpen(false)}
               >
-                {link.label}
+                <span className="text-[#7b7b7b] dark:text-[#7d7d7d]">{link.icon}</span>
+                <span>{link.label}</span>
               </a>
             ))}
             <Link
