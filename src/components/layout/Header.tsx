@@ -156,7 +156,7 @@ export default function Header() {
         {/* Logo */}
         <Link href="/" className="flex shrink-0 items-center" aria-label="Signcous home">
           <Image
-            src="/card-images/Signcous-Logo-HD.png"
+            src="/card-images/Signcous-Logo-v2.png.png"
             alt="Signcous logo"
             width={335}
             height={120}
