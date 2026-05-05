@@ -37,10 +37,7 @@ export default function Footer() {
       <div className="mx-auto grid max-w-[1500px] gap-10 px-6 py-12 md:grid-cols-4">
         {/* Brand */}
         <div>
-          <div className="inline-flex items-center gap-2">
-            <span className="rounded bg-[#ffd100] px-2 py-1 text-xs font-black tracking-widest text-[#262626] ring-1 ring-[#c3ab31]">
-              SC
-            </span>
+          <div className="inline-flex items-center">
             <div className="text-xl font-black text-[#2c2c2c] dark:text-[#e8e8e8]">
               SIGNCO<span className="text-[#c87500]">US</span>
             </div>
