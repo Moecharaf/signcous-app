@@ -355,7 +355,7 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
             </div>
             <div className="rounded-xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-green-50 px-4 py-2 text-right">
               <div className="text-xs uppercase tracking-[0.14em] text-emerald-700">Live Total</div>
-              <div className="text-3xl font-semibold text-zinc-900">
+              <div className="text-3xl font-semibold text-white">
                 {pricing ? formatCurrency(pricing.grandTotal) : formatCurrency(0)}
               </div>
               <div className="text-xs text-emerald-700/80">

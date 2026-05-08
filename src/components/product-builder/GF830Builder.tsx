@@ -366,10 +366,10 @@ export default function GF830Builder({ productId = 0 }: GF830BuilderProps) {
                 Wrap vinyl with 60in panel split logic, tiered area-based pricing, laminate options, contour cut, and rush production.
               </p>
             </div>
-            <div className="rounded-xl border border-[var(--brand-primary)] bg-gradient-to-r from-[var(--brand-primary-soft)] to-[#f3f8ff] px-4 py-2 text-right">
+            <div className="rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2 text-right shadow-[0_8px_20px_rgba(0,0,0,0.18)]">
               <div className="text-xs uppercase tracking-[0.14em] text-[var(--brand-primary)]">Live Total</div>
-              <div className="text-3xl font-semibold text-zinc-900">{pricing ? formatCurrency(pricing.grandTotal) : formatCurrency(0)}</div>
-              <div className="text-xs text-[var(--brand-primary)]/80">
+              <div className="text-3xl font-semibold text-white">{pricing ? formatCurrency(pricing.grandTotal) : formatCurrency(0)}</div>
+              <div className="text-xs text-zinc-300">
                 {pricing
                   ? `${pricing.areaSqFt.toFixed(2)} sq ft · ${safeQuantity} unit${safeQuantity !== 1 ? "s" : ""}`
                   : "Set dimensions to calculate"}

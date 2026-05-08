@@ -249,10 +249,10 @@ export default function VehicleMagnetBuilder() {
                 Fixed-size, single-sided vehicle magnets with rush pricing and artwork upload.
               </p>
             </div>
-            <div className="rounded-xl border border-[var(--brand-primary)] bg-gradient-to-r from-[var(--brand-primary-soft)] to-[#f3f8ff] px-4 py-2 text-right">
+            <div className="rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2 text-right shadow-[0_8px_20px_rgba(0,0,0,0.18)]">
               <div className="text-xs uppercase tracking-[0.14em] text-[var(--brand-primary)]">Live Total</div>
-              <div className="text-3xl font-semibold text-zinc-900">{formatCurrency(pricing.total)}</div>
-              <div className="text-xs text-[var(--brand-primary)]/80">
+              <div className="text-3xl font-semibold text-white">{formatCurrency(pricing.total)}</div>
+              <div className="text-xs text-zinc-300">
                 {quantity > 0 ? `${quantity} magnet${quantity !== 1 ? "s" : ""} · ${selectedSize.label}` : "Set quantity to calculate"}
               </div>
             </div>

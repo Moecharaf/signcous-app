@@ -263,7 +263,7 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
           </div>
           <div className="rounded-xl border border-sky-200 bg-gradient-to-r from-sky-50 to-blue-50 px-4 py-2 text-right">
             <div className="text-xs uppercase tracking-[0.14em] text-sky-700">Live Total</div>
-            <div className="text-3xl font-semibold text-zinc-900">{formatPrice(pricing.totalPrice)}</div>
+            <div className="text-3xl font-semibold text-white">{formatPrice(pricing.totalPrice)}</div>
             <div className="text-xs text-sky-700/80">
               {quantity} sign{quantity !== 1 ? "s" : ""}
               {pricingMode === "sheet" ? ` · ${pricing.sheetsRequired} sheet${pricing.sheetsRequired !== 1 ? "s" : ""}` : ` · ${pricing.sqInches} sq.in`}

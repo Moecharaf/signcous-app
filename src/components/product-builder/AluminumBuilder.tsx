@@ -261,10 +261,10 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
             <h1 className="mt-1 text-3xl font-semibold tracking-tight text-zinc-900">Aluminum Configurator</h1>
             <p className="mt-1 text-sm text-zinc-600">Standard sizes (sheet pricing) or custom dimensions (sq.in pricing).</p>
           </div>
-          <div className="rounded-xl border border-[var(--brand-primary)] bg-gradient-to-r from-[var(--brand-primary-soft)] to-[#f3f8ff] px-4 py-2 text-right">
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2 text-right shadow-[0_8px_20px_rgba(0,0,0,0.18)]">
             <div className="text-xs uppercase tracking-[0.14em] text-[var(--brand-primary)]">Live Total</div>
-            <div className="text-3xl font-semibold text-zinc-900">{formatPrice(pricing.totalPrice)}</div>
-            <div className="text-xs text-[var(--brand-primary)]/80">
+            <div className="text-3xl font-semibold text-white">{formatPrice(pricing.totalPrice)}</div>
+            <div className="text-xs text-zinc-300">
               {quantity} sign{quantity !== 1 ? "s" : ""}
               {pricingMode === "sheet" ? ` · ${pricing.sheetsRequired} sheet${pricing.sheetsRequired !== 1 ? "s" : ""}` : ` · ${pricing.sqInches} sq.in`}
             </div>

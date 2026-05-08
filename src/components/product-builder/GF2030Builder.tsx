@@ -358,7 +358,7 @@ export default function GF2030Builder({ productId = 138 }: GF2030BuilderProps) {
             </div>
             <div className="rounded-xl border border-blue-200 bg-gradient-to-r from-blue-50 to-cyan-50 px-4 py-2 text-right">
               <div className="text-xs uppercase tracking-[0.14em] text-blue-700">Live Total</div>
-              <div className="text-3xl font-semibold text-zinc-900">{pricing ? formatCurrency(pricing.grandTotal) : formatCurrency(0)}</div>
+              <div className="text-3xl font-semibold text-white">{pricing ? formatCurrency(pricing.grandTotal) : formatCurrency(0)}</div>
               <div className="text-xs text-blue-700/80">
                 {pricing
                   ? `${pricing.areaSqFt.toFixed(2)} sq ft · ${safeQuantity} unit${safeQuantity !== 1 ? "s" : ""}`

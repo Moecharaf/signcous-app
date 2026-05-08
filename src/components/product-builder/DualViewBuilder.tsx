@@ -378,7 +378,7 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
             </div>
             <div className="rounded-xl border border-violet-200 bg-gradient-to-r from-violet-50 to-purple-50 px-4 py-2 text-right">
               <div className="text-xs uppercase tracking-[0.14em] text-violet-700">Live Total</div>
-              <div className="text-3xl font-semibold text-zinc-900">
+              <div className="text-3xl font-semibold text-white">
                 {pricing ? formatCurrency(pricing.grandTotal) : formatCurrency(0)}
               </div>
               <div className="text-xs text-violet-700/80">
