@@ -172,26 +172,22 @@ export default function Header() {
 
   return (
     <header
-      className={`sticky top-0 z-50 overflow-visible transition-transform duration-300 will-change-transform ${showHeader ? "translate-y-0" : "-translate-y-full"}`}
+      className={`sticky top-0 z-50 overflow-visible border-b border-[#cfcfcf] bg-[#f5f5f5]/95 backdrop-blur transition-transform duration-300 will-change-transform dark:border-[#2a2a2a] dark:bg-[#111111]/95 ${showHeader ? "translate-y-0" : "-translate-y-full"}`}
     >
-      {/* MICRO BAR – 28px */}
-      <div className="flex h-7 items-center justify-between bg-[#0a0a0a] px-4 md:px-6">
-        <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500">Signcous Trade Print Platform</span>
-        <div className="hidden items-center gap-4 text-[10px] font-medium text-zinc-500 sm:flex">
-          <span className="flex items-center gap-1">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-            Fast Turnaround
-          </span>
-          <span className="text-zinc-700">|</span>
-          <span>Nationwide Delivery</span>
-          <span className="text-zinc-700">|</span>
-          <span className="font-semibold text-[#ff7f00]">Live Pricing</span>
+      <div className="border-b border-[#dadada] bg-[#efefef] px-4 py-1.5 text-[11px] text-[#555] dark:border-[#222] dark:bg-[#0d0d0d] dark:text-[#888] md:px-6">
+        <div className="mx-auto flex max-w-[1500px] items-center justify-between">
+          <span className="uppercase tracking-[0.18em] text-[#666] dark:text-[#777]">Signcous Trade Print Platform</span>
+          <div className="hidden items-center gap-4 sm:flex">
+            <span>Fast Turnaround</span>
+            <span className="text-[#a0a0a0] dark:text-[#555]">|</span>
+            <span>Nationwide Delivery</span>
+            <span className="text-[#a0a0a0] dark:text-[#555]">|</span>
+            <span className="font-semibold text-[var(--brand-accent)]">Live Category Pricing</span>
+          </div>
         </div>
       </div>
 
-      {/* MAIN HEADER – 60px */}
-      <div className="border-b border-white/5 bg-[#111111]">
-      <div className="mx-auto flex h-[60px] max-w-[1500px] items-center justify-between gap-4 overflow-visible px-4 py-0 md:px-6">
+      <div className="mx-auto flex h-20 max-w-[1500px] items-center justify-between gap-4 overflow-visible px-4 py-0 md:h-24 md:px-6">
         {/* Logo */}
         <Link href="/" className="flex shrink-0 items-center overflow-visible" aria-label="Signcous home">
           <Image
@@ -200,19 +196,19 @@ export default function Header() {
             width={480}
             height={175}
             priority
-            className="h-10 w-auto object-contain object-center brightness-0 invert"
+            className="h-32 w-auto object-contain object-center"
           />
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400 lg:flex">
+        <nav className="hidden items-end gap-6 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#666] dark:text-[#9a9a9a] lg:flex">
           {categoryNavLinks.map((link) => (
             <a
               key={`${link.hash}-${link.label}`}
               href={`/#${link.hash}`}
-              className="group inline-flex items-center gap-2 rounded-lg px-3 py-2 transition-colors hover:bg-white/8 hover:text-white"
+              className="group inline-flex min-w-[72px] flex-col items-center gap-2 px-1 py-1 transition-colors hover:text-[#3a3a3a] dark:hover:text-[#d0d0d0]"
             >
-              <span className="leading-none opacity-70 transition group-hover:opacity-100">
+              <span className="leading-none text-[#7c7c7c] transition group-hover:text-[#3b3b3b] dark:text-[#767676] dark:group-hover:text-[#d3d3d3]">
                 {link.icon}
               </span>
               <span>{link.label}</span>
@@ -221,25 +217,26 @@ export default function Header() {
         </nav>
 
         {/* Desktop actions */}
-        <div className="hidden items-center gap-1.5 md:flex">
+        <div className="hidden items-center gap-2 md:flex">
           <Link
             href="/contact"
-            className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
+            className="rounded-sm border border-[#d0d0d0] bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-[#4b4b4b] transition-colors hover:bg-[#f4f4f4] dark:border-[#333] dark:bg-[#1a1a1a] dark:text-[#bbb] dark:hover:bg-[#252525]"
           >
             Contact
           </Link>
+          <ThemeToggle />
           {isAuthenticated ? (
             <>
               <Link
                 href="/account"
-                className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
+                className="rounded-sm border border-[#d0d0d0] bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-[#4b4b4b] transition-colors hover:bg-[#f4f4f4] dark:border-[#333] dark:bg-[#1a1a1a] dark:text-[#bbb] dark:hover:bg-[#252525]"
               >
                 Account
               </Link>
               <button
                 onClick={handleSignOut}
                 disabled={isSigningOut}
-                className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-zinc-300 transition-colors hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-sm border border-[#d0d0d0] bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-[#4b4b4b] transition-colors hover:bg-[#f4f4f4] disabled:cursor-not-allowed disabled:opacity-60 dark:border-[#333] dark:bg-[#1a1a1a] dark:text-[#bbb] dark:hover:bg-[#252525]"
               >
                 {isSigningOut ? "Signing Out" : "Sign Out"}
               </button>
@@ -248,13 +245,13 @@ export default function Header() {
             <>
               <Link
                 href="/signup"
-                className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
+                className="rounded-sm border border-[#d0d0d0] bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-[#4b4b4b] transition-colors hover:bg-[#f4f4f4] dark:border-[#333] dark:bg-[#1a1a1a] dark:text-[#bbb] dark:hover:bg-[#252525]"
               >
                 Sign Up
               </Link>
               <Link
                 href="/login"
-                className="rounded-lg bg-[#007fff] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-white transition-colors hover:bg-[#0066cc]"
+                className="rounded-sm border border-[#d0d0d0] bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-[#4b4b4b] transition-colors hover:bg-[#f4f4f4] dark:border-[#333] dark:bg-[#1a1a1a] dark:text-[#bbb] dark:hover:bg-[#252525]"
               >
                 Sign In
               </Link>
@@ -262,50 +259,50 @@ export default function Header() {
           )}
           <Link
             href="/cart"
-            className="relative rounded-lg border border-[#ff7f00]/30 bg-[#ff7f00]/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-[#ff7f00] transition-colors hover:bg-[#ff7f00]/20"
+            className="relative rounded-sm border border-[#d0d0d0] bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-[#4b4b4b] transition-colors hover:bg-[#f4f4f4] dark:border-[#333] dark:bg-[#1a1a1a] dark:text-[#bbb] dark:hover:bg-[#252525]"
           >
             Cart
             {itemCount > 0 && (
-              <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#ff7f00] text-[10px] font-bold text-white">
+              <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#4fae2c] text-[10px] font-bold text-white">
                 {itemCount > 99 ? "99+" : itemCount}
               </span>
             )}
           </Link>
         </div>
 
-        {/* Mobile: hamburger */}
+        {/* Mobile: theme toggle + hamburger */}
         <div className="flex items-center gap-2 md:hidden">
+          <ThemeToggle />
           <button
             className="flex flex-col gap-1.5"
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Toggle menu"
           >
-            <span className={`block h-0.5 w-6 bg-zinc-300 transition-transform ${menuOpen ? "translate-y-2 rotate-45" : ""}`} />
-            <span className={`block h-0.5 w-6 bg-zinc-300 transition-opacity ${menuOpen ? "opacity-0" : ""}`} />
-            <span className={`block h-0.5 w-6 bg-zinc-300 transition-transform ${menuOpen ? "-translate-y-2 -rotate-45" : ""}`} />
+            <span className={`block h-0.5 w-6 bg-[#3a3a3a] transition-transform dark:bg-[#ccc] ${menuOpen ? "translate-y-2 rotate-45" : ""}`} />
+            <span className={`block h-0.5 w-6 bg-[#3a3a3a] transition-opacity dark:bg-[#ccc] ${menuOpen ? "opacity-0" : ""}`} />
+            <span className={`block h-0.5 w-6 bg-[#3a3a3a] transition-transform dark:bg-[#ccc] ${menuOpen ? "-translate-y-2 -rotate-45" : ""}`} />
           </button>
         </div>
-      </div>
       </div>
 
       {/* Mobile menu */}
       {menuOpen && (
-        <div className="border-t border-white/10 bg-[#111111] px-4 pb-5 md:hidden">
-          <nav className="flex flex-col gap-2 pt-4 text-sm text-zinc-300">
+        <div className="border-t border-[#d6d6d6] bg-[#f5f5f5] px-4 pb-5 dark:border-[#222] dark:bg-[#111] md:hidden">
+          <nav className="flex flex-col gap-3 pt-4 text-sm text-[#4c4c4c] dark:text-[#bbb]">
             {categoryNavLinks.map((link) => (
               <a
                 key={`${link.hash}-${link.label}`}
                 href={`/#${link.hash}`}
-                className="inline-flex items-center gap-3 rounded-lg px-3 py-2.5 font-semibold uppercase tracking-[0.08em] text-zinc-400 transition-colors hover:bg-white/8 hover:text-white"
+                className="inline-flex items-center gap-3 px-1 py-2 text-sm font-semibold uppercase tracking-[0.08em] text-[#646464] transition-colors hover:text-[#2f2f2f] dark:text-[#9d9d9d] dark:hover:text-[#dedede]"
                 onClick={() => setMenuOpen(false)}
               >
-                <span className="opacity-70">{link.icon}</span>
+                <span className="text-[#7b7b7b] dark:text-[#7d7d7d]">{link.icon}</span>
                 <span>{link.label}</span>
               </a>
             ))}
             <Link
               href="/contact"
-              className="rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-zinc-300 transition hover:bg-white/10 hover:text-white"
+              className="rounded-sm border border-[#d3d3d3] bg-white px-3 py-2 hover:bg-[#f4f4f4] dark:border-[#2e2e2e] dark:bg-[#1a1a1a] dark:hover:bg-[#252525]"
               onClick={() => setMenuOpen(false)}
             >
               Contact Us
@@ -314,15 +311,18 @@ export default function Header() {
               <>
                 <Link
                   href="/account"
-                  className="rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-zinc-300 transition hover:bg-white/10 hover:text-white"
+                  className="rounded-sm border border-[#d3d3d3] bg-white px-3 py-2 hover:bg-[#f4f4f4] dark:border-[#2e2e2e] dark:bg-[#1a1a1a] dark:hover:bg-[#252525]"
                   onClick={() => setMenuOpen(false)}
                 >
                   Account
                 </Link>
                 <button
-                  onClick={() => { setMenuOpen(false); void handleSignOut(); }}
+                  onClick={() => {
+                    setMenuOpen(false);
+                    void handleSignOut();
+                  }}
                   disabled={isSigningOut}
-                  className="rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-left text-zinc-300 transition hover:bg-white/10 hover:text-white disabled:opacity-60"
+                  className="rounded-sm border border-[#d3d3d3] bg-white px-3 py-2 text-left hover:bg-[#f4f4f4] disabled:cursor-not-allowed disabled:opacity-60 dark:border-[#2e2e2e] dark:bg-[#1a1a1a] dark:hover:bg-[#252525]"
                 >
                   {isSigningOut ? "Signing Out" : "Sign Out"}
                 </button>
@@ -331,28 +331,24 @@ export default function Header() {
               <>
                 <Link
                   href="/signup"
-                  className="rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-zinc-300 transition hover:bg-white/10 hover:text-white"
+                  className="rounded-sm border border-[#d3d3d3] bg-white px-3 py-2 hover:bg-[#f4f4f4] dark:border-[#2e2e2e] dark:bg-[#1a1a1a] dark:hover:bg-[#252525]"
                   onClick={() => setMenuOpen(false)}
                 >
                   Sign Up
                 </Link>
                 <Link
                   href="/login"
-                  className="rounded-lg bg-[#007fff] px-3 py-2.5 font-semibold text-white transition hover:bg-[#0066cc]"
+                  className="rounded-sm border border-[#d3d3d3] bg-white px-3 py-2 hover:bg-[#f4f4f4] dark:border-[#2e2e2e] dark:bg-[#1a1a1a] dark:hover:bg-[#252525]"
                   onClick={() => setMenuOpen(false)}
                 >
                   Sign In
                 </Link>
               </>
             )}
-            <Link
-              href="/cart"
-              className="flex items-center gap-2 rounded-lg border border-[#ff7f00]/30 bg-[#ff7f00]/10 px-3 py-2.5 font-semibold text-[#ff7f00] transition hover:bg-[#ff7f00]/20"
-              onClick={() => setMenuOpen(false)}
-            >
+            <Link href="/cart" className="flex items-center gap-2 rounded-sm border border-[#d3d3d3] bg-white px-3 py-2 hover:bg-[#f4f4f4] dark:border-[#2e2e2e] dark:bg-[#1a1a1a] dark:hover:bg-[#252525]" onClick={() => setMenuOpen(false)}>
               Cart
               {itemCount > 0 && (
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#ff7f00] text-[10px] font-bold text-white">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#4fae2c] text-[10px] font-bold text-white">
                   {itemCount}
                 </span>
               )}
