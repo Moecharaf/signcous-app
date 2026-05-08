@@ -55,12 +55,22 @@ function BannerPreview({
         style={{
           width: widthPx,
           height: heightPx,
-          boxShadow: "0 4px 12px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.4)",
-          backgroundColor: "#f8f8f8",
-          border: "1px solid #e8e8e8",
+          boxShadow: "0 8px 20px rgba(0,0,0,0.16), inset 0 1px 0 rgba(255,255,255,0.3), 0 1px 2px rgba(0,0,0,0.08)",
+          backgroundColor: "#f5f5f5",
+          border: "1px solid #d4d4d4",
+          position: "relative",
         }}
       >
-        {/* Vinyl texture overlay */}
+        {/* Subtle top-to-bottom gradient for lighting */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: "linear-gradient(to bottom, rgba(255,255,255,0.15) 0%, transparent 30%, rgba(0,0,0,0.05) 100%)",
+            zIndex: 0.5,
+          }}
+        />
+
+        {/* Fine vinyl texture overlay */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
@@ -68,16 +78,16 @@ function BannerPreview({
               repeating-linear-gradient(
                 90deg,
                 transparent,
-                transparent 2px,
-                rgba(255, 255, 255, 0.05) 2px,
-                rgba(255, 255, 255, 0.05) 4px
+                transparent 1px,
+                rgba(255, 255, 255, 0.08) 1px,
+                rgba(255, 255, 255, 0.08) 2px
               ),
               repeating-linear-gradient(
                 0deg,
                 transparent,
                 transparent 2px,
-                rgba(200, 200, 200, 0.02) 2px,
-                rgba(200, 200, 200, 0.02) 4px
+                rgba(150, 150, 150, 0.03) 2px,
+                rgba(150, 150, 150, 0.03) 3px
               )
             `,
             zIndex: 1,
@@ -88,16 +98,16 @@ function BannerPreview({
         <div
           className="absolute top-0 left-0 right-0 pointer-events-none"
           style={{
-            height: "6px",
-            background: "linear-gradient(to bottom, #e8e8e8, #f0f0f0)",
+            height: "8px",
+            background: "linear-gradient(to bottom, #d8d8d8, #e8e8e8)",
             backgroundImage: `repeating-linear-gradient(
               90deg,
-              #d0d0d0 0px,
-              #d0d0d0 2px,
-              transparent 2px,
-              transparent 4px
+              #b0b0b0 0px,
+              #b0b0b0 1px,
+              #e0e0e0 1px,
+              #e0e0e0 3px
             )`,
-            boxShadow: "inset 0 1px 1px rgba(0,0,0,0.08)",
+            boxShadow: "inset 0 1px 1px rgba(0,0,0,0.1), 0 1px 1px rgba(255,255,255,0.3)",
             zIndex: 2,
           }}
         />
@@ -106,16 +116,16 @@ function BannerPreview({
         <div
           className="absolute bottom-0 left-0 right-0 pointer-events-none"
           style={{
-            height: "6px",
-            background: "linear-gradient(to top, #e8e8e8, #f0f0f0)",
+            height: "8px",
+            background: "linear-gradient(to top, #d8d8d8, #e8e8e8)",
             backgroundImage: `repeating-linear-gradient(
               90deg,
-              #d0d0d0 0px,
-              #d0d0d0 2px,
-              transparent 2px,
-              transparent 4px
+              #b0b0b0 0px,
+              #b0b0b0 1px,
+              #e0e0e0 1px,
+              #e0e0e0 3px
             )`,
-            boxShadow: "inset 0 -1px 1px rgba(0,0,0,0.08)",
+            boxShadow: "inset 0 -1px 1px rgba(0,0,0,0.1), 0 -1px 1px rgba(255,255,255,0.3)",
             zIndex: 2,
           }}
         />
@@ -124,16 +134,16 @@ function BannerPreview({
         <div
           className="absolute left-0 top-0 bottom-0 pointer-events-none"
           style={{
-            width: "5px",
-            background: "linear-gradient(to right, #e8e8e8, #f0f0f0)",
+            width: "7px",
+            background: "linear-gradient(to right, #d8d8d8, #e8e8e8)",
             backgroundImage: `repeating-linear-gradient(
               0deg,
-              #d0d0d0 0px,
-              #d0d0d0 2px,
-              transparent 2px,
-              transparent 4px
+              #b0b0b0 0px,
+              #b0b0b0 1px,
+              #e0e0e0 1px,
+              #e0e0e0 3px
             )`,
-            boxShadow: "inset 1px 0 1px rgba(0,0,0,0.08)",
+            boxShadow: "inset 1px 0 1px rgba(0,0,0,0.1), 1px 0 1px rgba(255,255,255,0.3)",
             zIndex: 2,
           }}
         />
@@ -142,16 +152,16 @@ function BannerPreview({
         <div
           className="absolute right-0 top-0 bottom-0 pointer-events-none"
           style={{
-            width: "5px",
-            background: "linear-gradient(to left, #e8e8e8, #f0f0f0)",
+            width: "7px",
+            background: "linear-gradient(to left, #d8d8d8, #e8e8e8)",
             backgroundImage: `repeating-linear-gradient(
               0deg,
-              #d0d0d0 0px,
-              #d0d0d0 2px,
-              transparent 2px,
-              transparent 4px
+              #b0b0b0 0px,
+              #b0b0b0 1px,
+              #e0e0e0 1px,
+              #e0e0e0 3px
             )`,
-            boxShadow: "inset -1px 0 1px rgba(0,0,0,0.08)",
+            boxShadow: "inset -1px 0 1px rgba(0,0,0,0.1), -1px 0 1px rgba(255,255,255,0.3)",
             zIndex: 2,
           }}
         />
@@ -176,7 +186,7 @@ function BannerPreview({
           )}
         </div>
 
-        {/* Grommets rendering */}
+        {/* Grommets rendering - PROMINENT METALLIC */}
         {meshGrommetPoints.map((point, index) => (
           <div
             key={`grommet-${index}`}
@@ -184,33 +194,37 @@ function BannerPreview({
             style={{
               left: `${point.xPct}%`,
               top: `${point.yPct}%`,
-              width: "8px",
-              height: "8px",
+              width: "14px",
+              height: "14px",
               transform: "translate(-50%, -50%)",
-              backgroundColor: "#a8a8a8",
-              border: "2px solid #666",
-              boxShadow: "inset 0 -1px 2px rgba(0,0,0,0.3), 0 1px 1px rgba(255,255,255,0.4)",
-              zIndex: 3,
+              // Metallic outer ring
+              background: "radial-gradient(circle at 35% 35%, #e8e8e8, #a0a0a0, #707070)",
+              border: "2px solid #505050",
+              boxShadow: "inset -1px -1px 2px rgba(0,0,0,0.5), inset 1px 1px 1px rgba(255,255,255,0.6), 0 2px 4px rgba(0,0,0,0.4)",
+              zIndex: 5,
             }}
           >
+            {/* Inner hole */}
             <div
               style={{
                 position: "absolute",
-                inset: "2px",
+                inset: "3px",
                 borderRadius: "50%",
-                background: "radial-gradient(circle at 30% 30%, #d0d0d0, #808080)",
+                background: "radial-gradient(circle at 30% 30%, #3a3a3a, #1a1a1a)",
+                boxShadow: "inset 0 1px 2px rgba(0,0,0,0.8), 0 0 1px rgba(255,255,255,0.2)",
               }}
             />
           </div>
         ))}
 
-        {/* Subtle wrinkle effect overlay */}
+        {/* Subtle wrinkle effect overlay for depth */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
             backgroundImage: `
-              radial-gradient(ellipse 800px 120px at 20% 50%, rgba(0,0,0,0.02) 0%, transparent 50%),
-              radial-gradient(ellipse 400px 180px at 80% 80%, rgba(0,0,0,0.01) 0%, transparent 60%)
+              radial-gradient(ellipse 900px 140px at 20% 45%, rgba(0,0,0,0.04) 0%, transparent 50%),
+              radial-gradient(ellipse 500px 200px at 85% 75%, rgba(0,0,0,0.025) 0%, transparent 60%),
+              radial-gradient(ellipse 700px 160px at 50% 20%, rgba(255,255,255,0.08) 0%, transparent 55%)
             `,
             zIndex: 4,
           }}
