@@ -21,10 +21,321 @@ import {
 } from "@/lib/pricing";
 import { useCart } from "@/context/CartContext";
 
+// Banner preview component with realistic vinyl rendering
+function BannerPreview({
+  uploadedImage,
+  widthPx,
+  heightPx,
+  meshGrommetPoints,
+  widthIn,
+  heightIn,
+  widthNum,
+  heightNum,
+  form,
+  isMeshProduct,
+  isEconomicalStandProduct,
+}: {
+  uploadedImage: string | null;
+  widthPx: number;
+  heightPx: number;
+  meshGrommetPoints: Array<{ xPct: number; yPct: number }>;
+  widthIn: number;
+  heightIn: number;
+  widthNum: number;
+  heightNum: number;
+  form: FormState;
+  isMeshProduct: boolean;
+  isEconomicalStandProduct: boolean;
+}) {
+  return (
+    <>
+      {/* Vinyl banner with realistic styling */}
+      <div
+        className="relative select-none"
+        style={{
+          width: widthPx,
+          height: heightPx,
+          boxShadow: "0 4px 12px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.4)",
+          backgroundColor: "#f8f8f8",
+          border: "1px solid #e8e8e8",
+        }}
+      >
+        {/* Vinyl texture overlay */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: `
+              repeating-linear-gradient(
+                90deg,
+                transparent,
+                transparent 2px,
+                rgba(255, 255, 255, 0.05) 2px,
+                rgba(255, 255, 255, 0.05) 4px
+              ),
+              repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(200, 200, 200, 0.02) 2px,
+                rgba(200, 200, 200, 0.02) 4px
+              )
+            `,
+            zIndex: 1,
+          }}
+        />
+
+        {/* Stitched hem top */}
+        <div
+          className="absolute top-0 left-0 right-0 pointer-events-none"
+          style={{
+            height: "6px",
+            background: "linear-gradient(to bottom, #e8e8e8, #f0f0f0)",
+            backgroundImage: `repeating-linear-gradient(
+              90deg,
+              #d0d0d0 0px,
+              #d0d0d0 2px,
+              transparent 2px,
+              transparent 4px
+            )`,
+            boxShadow: "inset 0 1px 1px rgba(0,0,0,0.08)",
+            zIndex: 2,
+          }}
+        />
+
+        {/* Stitched hem bottom */}
+        <div
+          className="absolute bottom-0 left-0 right-0 pointer-events-none"
+          style={{
+            height: "6px",
+            background: "linear-gradient(to top, #e8e8e8, #f0f0f0)",
+            backgroundImage: `repeating-linear-gradient(
+              90deg,
+              #d0d0d0 0px,
+              #d0d0d0 2px,
+              transparent 2px,
+              transparent 4px
+            )`,
+            boxShadow: "inset 0 -1px 1px rgba(0,0,0,0.08)",
+            zIndex: 2,
+          }}
+        />
+
+        {/* Stitched hem left */}
+        <div
+          className="absolute left-0 top-0 bottom-0 pointer-events-none"
+          style={{
+            width: "5px",
+            background: "linear-gradient(to right, #e8e8e8, #f0f0f0)",
+            backgroundImage: `repeating-linear-gradient(
+              0deg,
+              #d0d0d0 0px,
+              #d0d0d0 2px,
+              transparent 2px,
+              transparent 4px
+            )`,
+            boxShadow: "inset 1px 0 1px rgba(0,0,0,0.08)",
+            zIndex: 2,
+          }}
+        />
+
+        {/* Stitched hem right */}
+        <div
+          className="absolute right-0 top-0 bottom-0 pointer-events-none"
+          style={{
+            width: "5px",
+            background: "linear-gradient(to left, #e8e8e8, #f0f0f0)",
+            backgroundImage: `repeating-linear-gradient(
+              0deg,
+              #d0d0d0 0px,
+              #d0d0d0 2px,
+              transparent 2px,
+              transparent 4px
+            )`,
+            boxShadow: "inset -1px 0 1px rgba(0,0,0,0.08)",
+            zIndex: 2,
+          }}
+        />
+
+        {/* Content area */}
+        <div className="relative h-full w-full overflow-hidden" style={{ zIndex: 0 }}>
+          {uploadedImage ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={uploadedImage}
+              alt="Artwork preview"
+              className="h-full w-full object-cover"
+              draggable={false}
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center px-6 text-center text-zinc-400">
+              <div>
+                <div className="text-sm font-medium">Drop Artwork Here</div>
+                <div className="mt-1 text-xs">or use Upload Artwork</div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Grommets rendering */}
+        {meshGrommetPoints.map((point, index) => (
+          <div
+            key={`grommet-${index}`}
+            className="pointer-events-none absolute rounded-full"
+            style={{
+              left: `${point.xPct}%`,
+              top: `${point.yPct}%`,
+              width: "8px",
+              height: "8px",
+              transform: "translate(-50%, -50%)",
+              backgroundColor: "#a8a8a8",
+              border: "2px solid #666",
+              boxShadow: "inset 0 -1px 2px rgba(0,0,0,0.3), 0 1px 1px rgba(255,255,255,0.4)",
+              zIndex: 3,
+            }}
+          >
+            <div
+              style={{
+                position: "absolute",
+                inset: "2px",
+                borderRadius: "50%",
+                background: "radial-gradient(circle at 30% 30%, #d0d0d0, #808080)",
+              }}
+            />
+          </div>
+        ))}
+
+        {/* Subtle wrinkle effect overlay */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: `
+              radial-gradient(ellipse 800px 120px at 20% 50%, rgba(0,0,0,0.02) 0%, transparent 50%),
+              radial-gradient(ellipse 400px 180px at 80% 80%, rgba(0,0,0,0.01) 0%, transparent 60%)
+            `,
+            zIndex: 4,
+          }}
+        />
+      </div>
+
+      {/* Dimension labels for mesh and stand products */}
+      {isMeshProduct && (
+        <>
+          <div className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-600">
+            TOP OF IMAGE
+          </div>
+          <div className="pointer-events-none absolute -top-4 left-1/2 -translate-x-1/2 text-[11px] font-medium text-zinc-500">
+            {widthNum.toFixed(2)} {form.unit === "feet" ? "ft" : "in"}
+          </div>
+          <div className="pointer-events-none absolute -right-7 top-1/2 -translate-y-1/2 rotate-90 text-[11px] font-medium text-zinc-500">
+            {heightNum.toFixed(2)} {form.unit === "feet" ? "ft" : "in"}
+          </div>
+        </>
+      )}
+
+      {isEconomicalStandProduct && (
+        <>
+          <div className="pointer-events-none absolute -top-11 left-1/2 flex -translate-x-1/2 flex-col items-center text-[11px] font-semibold text-zinc-700">
+            <span className="text-[10px] uppercase tracking-[0.25em] text-zinc-500">TOP OF IMAGE</span>
+            <div className="mt-1 flex items-center gap-2 text-zinc-700">
+              <span className="h-px w-12 bg-zinc-400" />
+              <span>{formatInchLabel(widthIn)}</span>
+              <span className="h-px w-12 bg-zinc-400" />
+            </div>
+          </div>
+          <div className="pointer-events-none absolute -right-14 top-1/2 flex -translate-y-1/2 flex-col items-center text-[11px] font-semibold text-zinc-700">
+            <span className="h-16 w-px bg-zinc-400" />
+            <span className="my-2 -rotate-90">{formatInchLabel(heightIn)}</span>
+            <span className="h-16 w-px bg-zinc-400" />
+          </div>
+        </>
+      )}
+    </>
+  );
+}
+
 const materialOptions = ["13oz Vinyl", "15oz Vinyl", "Mesh Banner", "Fabric Banner"] as const;
 const unitOptions = ["inches", "feet"] as const;
 
 type Unit = (typeof unitOptions)[number];
+
+// Format dimension label with proper inch notation
+function formatInchLabel(value: number): string {
+  const rounded = parseFloat(value.toFixed(2));
+  const text = Number.isInteger(rounded) ? rounded.toFixed(0) : rounded.toString();
+  return `${text.replace(/\.0+$/, "")}\"`;
+}
+
+// Rulers component for workspace
+function Rulers({
+  workspaceWidth,
+  workspaceHeight,
+  pxPerIn,
+}: {
+  workspaceWidth: number;
+  workspaceHeight: number;
+  pxPerIn: number;
+}) {
+  const topRulerMarks = [];
+  const leftRulerMarks = [];
+
+  const inchesVisible = workspaceWidth / pxPerIn;
+  const heightInchesVisible = workspaceHeight / pxPerIn;
+
+  for (let i = 0; i <= inchesVisible; i++) {
+    topRulerMarks.push(i);
+  }
+  for (let i = 0; i <= heightInchesVisible; i++) {
+    leftRulerMarks.push(i);
+  }
+
+  return (
+    <>
+      {/* Top ruler */}
+      <div
+        className="absolute top-0 left-20 right-0 h-6 border-b border-zinc-300 bg-zinc-100 pointer-events-none"
+        style={{ zIndex: 10 }}
+      >
+        {topRulerMarks.map((inch) => (
+          <div
+            key={`top-${inch}`}
+            className="absolute text-[9px] font-semibold text-zinc-600"
+            style={{
+              left: `${inch * pxPerIn}px`,
+              width: "1px",
+              top: 0,
+              height: "100%",
+              borderLeft: "1px solid #999",
+            }}
+          >
+            <span className="absolute left-0.5 top-1 whitespace-nowrap">{inch}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Left ruler */}
+      <div
+        className="absolute left-0 top-6 bottom-0 w-20 border-r border-zinc-300 bg-zinc-100 pointer-events-none"
+        style={{ zIndex: 10 }}
+      >
+        {leftRulerMarks.map((inch) => (
+          <div
+            key={`left-${inch}`}
+            className="absolute text-[9px] font-semibold text-zinc-600"
+            style={{
+              top: `${inch * pxPerIn + 24}px`,
+              height: "1px",
+              left: 0,
+              width: "100%",
+              borderTop: "1px solid #999",
+            }}
+          >
+            <span className="absolute left-1 -top-3 whitespace-nowrap">{inch}</span>
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
 
 interface FormState {
   width: string;
@@ -85,8 +396,9 @@ interface VinylBannerBuilderProps {
 
 const MIN_IN = 6;
 const MAX_IN = 240;
-const PREVIEW_MAX_WIDTH = 720;
-const PREVIEW_MAX_HEIGHT = 420;
+// Increased preview dimensions to enlarge banner by ~40%
+const PREVIEW_MAX_WIDTH = 1000;
+const PREVIEW_MAX_HEIGHT = 590;
 const ECONOMICAL_STAND_WIDTH_IN = 33.5;
 const ECONOMICAL_STAND_HEIGHT_IN = 80;
 const ECONOMICAL_STAND_UNIT_PRICE = 130;
@@ -103,12 +415,6 @@ function toInches(value: number, unit: Unit): number {
 function fromInches(value: number, unit: Unit): string {
   if (unit === "feet") return (value / 12).toFixed(2);
   return value.toFixed(1);
-}
-
-function formatInchLabel(value: number): string {
-  const rounded = parseFloat(value.toFixed(2));
-  const text = Number.isInteger(rounded) ? rounded.toFixed(0) : rounded.toString();
-  return `${text.replace(/\.0+$/, "")}\"`;
 }
 
 function getGrommetPoints(
@@ -641,174 +947,176 @@ export default function VinylBannerBuilder({
   }, [isEconomicalStandProduct]);
 
   return (
-    <div className="flex h-[calc(100vh-88px)] flex-col bg-[#f4f4f4] text-zinc-800">
-      <div className="border-b border-zinc-200 bg-white px-3 py-2">
-        <div className="grid items-start gap-3 lg:grid-cols-[1.1fr_1fr_auto]">
-          <div>
-            <h2 className="text-xl font-semibold tracking-tight text-zinc-900">Vinyl Banner Configurator</h2>
-            <p className="mt-1 text-xs text-zinc-600">
-              {isNoCurlProduct ? "No-Curl Banner" : isPosterProduct ? "Poster" : isHdpeProduct ? "HDPE" : isCanvasProduct ? "Canvas" : isMeshProduct ? "Mesh Banner" : form.material}
-              {" · "}
-              {!isCanvasProduct && !isMeshProduct && !isHdpeProduct && !isPosterProduct && !isNoCurlProduct && !isEconomicalStandProduct && (form.doubleSided ? "Double-Sided" : "Single-Sided")}
-              {(isCanvasProduct || isMeshProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct || isEconomicalStandProduct) && "Single-Sided"}
-              {" · "}
-              {formatInchLabel(widthIn)} x {formatInchLabel(heightIn)}
-            </p>
-            <p className="mt-1 text-[11px] text-zinc-500">Artboard Size: {(widthIn / 12).toFixed(2)} ft x {(heightIn / 12).toFixed(2)} ft</p>
+    <div className="flex h-[calc(100vh-88px)] flex-col bg-[#f2f2f2] text-zinc-800">
+      {/* TOP INFO BAR - Industrial compact layout */}
+      <div className="border-b border-zinc-300 bg-white px-4 py-2">
+        <div className="grid items-center gap-4 lg:grid-cols-[auto_1fr_auto]">
+          {/* LEFT: Product & dimensions */}
+          <div className="min-w-0">
+            <h2 className="text-sm font-bold uppercase tracking-[0.08em] text-zinc-900">
+              {isNoCurlProduct ? "NO-CURL BANNER" : isPosterProduct ? "POSTER" : isHdpeProduct ? "HDPE" : isCanvasProduct ? "CANVAS" : isMeshProduct ? "MESH BANNER" : "VINYL BANNER"} CONFIGURATOR
+            </h2>
+            <div className="mt-1 flex items-center gap-2 text-[11px] font-semibold text-zinc-600">
+              <span>
+                {isNoCurlProduct ? "No-Curl" : isPosterProduct ? "Poster" : isHdpeProduct ? "HDPE" : isCanvasProduct ? "Canvas" : isMeshProduct ? "Mesh" : form.material}
+              </span>
+              <span className="text-zinc-400">·</span>
+              <span>
+                {!isCanvasProduct && !isMeshProduct && !isHdpeProduct && !isPosterProduct && !isNoCurlProduct && !isEconomicalStandProduct
+                  ? (form.doubleSided ? "Double-Sided" : "Single-Sided")
+                  : "Single-Sided"}
+              </span>
+              <span className="text-zinc-400">·</span>
+              <span>{formatInchLabel(widthIn)} × {formatInchLabel(heightIn)}</span>
+            </div>
+            <div className="mt-0.5 text-[10px] text-zinc-500">ARTBOARD: {(widthIn / 12).toFixed(2)} FT × {(heightIn / 12).toFixed(2)} FT</div>
           </div>
 
-          <div className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2">
-            <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">Quick Rate Reference ($/sqft)</div>
-            <div className="grid grid-cols-3 gap-x-3 text-[11px]">
-              <span className="font-semibold text-zinc-600">13oz</span>
-              <span className="text-zinc-600">Single: $0.75</span>
-              <span className="text-zinc-600">Double: $1.20</span>
-              <span className="font-semibold text-zinc-600">15oz</span>
-              <span className="text-zinc-600">Single: $1.15</span>
-              <span className="text-zinc-600">Double: $1.84</span>
-              <span className="font-semibold text-zinc-400">18oz</span>
-              <span className="text-zinc-400">Single: --</span>
-              <span className="text-zinc-400">Double: --</span>
+          {/* CENTER: Quick pricing table */}
+          <div className="hidden rounded border border-zinc-300 bg-zinc-50 px-3 py-1.5 lg:block">
+            <div className="mb-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-zinc-500">RATE REFERENCE ($/SQFT)</div>
+            <div className="grid grid-cols-3 gap-x-2 gap-y-0.5 text-[10px]">
+              <span className="font-semibold text-zinc-700">13oz</span>
+              <span className="text-zinc-600">$0.75–$1.20</span>
+              <span className="text-zinc-500">(S/D)</span>
+              <span className="font-semibold text-zinc-700">15oz</span>
+              <span className="text-zinc-600">$1.15–$1.84</span>
+              <span className="text-zinc-500">(S/D)</span>
             </div>
           </div>
 
-          <div className="rounded-lg border border-[#111111] bg-[#111111] px-4 py-2 text-right">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#007fff]">Live Total</div>
-            <div className="text-2xl font-semibold text-white">{formatPrice(pricing.totalPrice)}</div>
-            <div className="text-[11px] text-zinc-300">{pricing.sqFt} sqft / 24 Hours Production</div>
+          {/* RIGHT: Live total */}
+          <div className="rounded border border-[#111111] bg-[#111111] px-4 py-1.5 text-right">
+            <div className="text-[9px] font-bold uppercase tracking-[0.12em] text-[#007fff]">LIVE TOTAL</div>
+            <div className="mt-0.5 text-2xl font-black text-white">{formatPrice(pricing.totalPrice)}</div>
+            <div className="text-[10px] text-zinc-300">{pricing.sqFt} SQFT · 24H PRODUCTION</div>
           </div>
         </div>
       </div>
 
-      <div className="mx-3 mt-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
-        <div className="flex items-center justify-between border-b border-zinc-200 px-4 py-2">
-          <span className="text-xs font-semibold uppercase tracking-[0.12em] text-zinc-500">Canvas Workspace</span>
-          {!isEconomicalStandProduct && (
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] font-semibold text-zinc-500">Zoom</span>
-              <input
-                type="range"
-                min={0.6}
-                max={1.8}
-                step={0.05}
-                value={zoom}
-                onChange={(e) => setZoom(parseFloat(e.target.value) || 1)}
-                className="accent-[#007fff]"
-              />
-              <span className="w-10 text-right text-xs font-semibold text-zinc-600">{Math.round(zoom * 100)}%</span>
-            </div>
-          )}
-        </div>
-
-        <div
-          ref={workspaceRef}
-          className={`relative min-h-0 flex-1 overflow-hidden ${isMeshProduct ? "bg-[#f6f6f4]" : "bg-[#f9f9f9]"}`}
-          style={{
-            backgroundImage:
-              "linear-gradient(to right, rgba(148,163,184,0.22) 1px, transparent 1px), linear-gradient(to bottom, rgba(148,163,184,0.22) 1px, transparent 1px)",
-            backgroundSize: isMeshProduct ? "18px 18px" : "24px 24px",
-          }}
-        >
-          <div className="absolute left-4 top-4 rounded border border-zinc-200 bg-white/95 px-3 py-1 text-xs text-zinc-600 shadow-sm">
-            Click and drag banner to move
-          </div>
-
-          <div
-            className={`absolute left-1/2 top-1/2 cursor-move select-none rounded-md ${
-              isMeshProduct || isEconomicalStandProduct
-                ? "border border-zinc-500 bg-white shadow"
-                : "border-2 border-dashed border-[#007fff] bg-[#007fff]/8 shadow"
-            }`}
-            onPointerDown={startMove}
-            style={{
-              width: artWidth,
-              height: artHeight,
-              transform: `translate(calc(-50% + ${artPos.x}px), calc(-50% + ${artPos.y}px))`,
-            }}
-          >
-            {isMeshProduct && (
-              <>
-                <div className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-600">
-                  Top Of Image
-                </div>
-                <div className="pointer-events-none absolute -top-4 left-1/2 -translate-x-1/2 text-[11px] text-zinc-500">
-                  {widthNum.toFixed(2)} {form.unit === "feet" ? "ft" : "in"}
-                </div>
-                <div className="pointer-events-none absolute -right-7 top-1/2 -translate-y-1/2 rotate-90 text-[11px] text-zinc-500">
-                  {heightNum.toFixed(2)} {form.unit === "feet" ? "ft" : "in"}
-                </div>
-              </>
-            )}
-
-            {isEconomicalStandProduct && (
-              <>
-                <div className="pointer-events-none absolute -top-11 left-1/2 flex -translate-x-1/2 flex-col items-center text-[11px] font-semibold text-zinc-700">
-                  <span className="text-[10px] uppercase tracking-[0.25em] text-zinc-500">Top Of Image</span>
-                  <div className="mt-1 flex items-center gap-2 text-zinc-700">
-                    <span className="h-px w-12 bg-zinc-400" />
-                    <span>{widthLabelInches}</span>
-                    <span className="h-px w-12 bg-zinc-400" />
-                  </div>
-                </div>
-                <div className="pointer-events-none absolute -right-14 top-1/2 flex -translate-y-1/2 flex-col items-center text-[11px] font-semibold text-zinc-700">
-                  <span className="h-16 w-px bg-zinc-400" />
-                  <span className="my-2 -rotate-90">{heightLabelInches}</span>
-                  <span className="h-16 w-px bg-zinc-400" />
-                </div>
-              </>
-            )}
-
-            {uploadedImage ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={uploadedImage}
-                alt="Artwork preview"
-                className="h-full w-full rounded object-cover"
-                draggable={false}
-              />
-            ) : (
-              <div className="flex h-full items-center justify-center px-6 text-center text-zinc-400">
-                <div>
-                  <div className="text-base font-medium">Drop Artwork Here</div>
-                  <div className="mt-1 text-xs">or use Upload Artwork from controls</div>
-                </div>
+      {/* WORKSPACE WITH CANVAS */}
+      <div className="flex min-h-0 flex-1 overflow-hidden">
+        {/* Main canvas area */}
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          {/* Canvas toolbar */}
+          <div className="flex items-center justify-between border-b border-zinc-300 bg-white px-3 py-1.5">
+            <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-zinc-500">PRODUCTION WORKSPACE</span>
+            {!isEconomicalStandProduct && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setZoom(Math.max(0.6, zoom - 0.1))}
+                  className="flex h-7 w-7 items-center justify-center rounded border border-zinc-300 bg-white text-sm font-bold text-zinc-700 hover:border-[#007fff] hover:text-[#007fff]"
+                  title="Zoom out"
+                >
+                  −
+                </button>
+                <span className="w-12 text-center text-xs font-bold text-zinc-600">{Math.round(zoom * 100)}%</span>
+                <button
+                  onClick={() => setZoom(Math.min(1.8, zoom + 0.1))}
+                  className="flex h-7 w-7 items-center justify-center rounded border border-zinc-300 bg-white text-sm font-bold text-zinc-700 hover:border-[#007fff] hover:text-[#007fff]"
+                  title="Zoom in"
+                >
+                  +
+                </button>
+                <button
+                  onClick={() => setZoom(1)}
+                  className="ml-2 rounded border border-zinc-300 bg-white px-2 py-1 text-[10px] font-bold uppercase tracking-[0.08em] text-zinc-700 hover:border-[#007fff] hover:text-[#007fff]"
+                  title="Fit to workspace"
+                >
+                  FIT
+                </button>
               </div>
             )}
+          </div>
 
-            {meshGrommetPoints.map((point, index) => (
-              <span
-                key={`grommet-${index}`}
-                className="pointer-events-none absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-zinc-500 bg-zinc-100 shadow"
-                style={{ left: `${point.xPct}%`, top: `${point.yPct}%` }}
-              >
-                <span className="absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-zinc-400" />
-              </span>
-            ))}
+          {/* Canvas workspace with improved grid and rulers */}
+          <div
+            ref={workspaceRef}
+            className="relative min-h-0 flex-1 overflow-hidden bg-[#f2f2f2]"
+            style={{
+              backgroundImage: `
+                /* Subtle micro grid */
+                linear-gradient(to right, rgba(100,116,139,0.08) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(100,116,139,0.08) 1px, transparent 1px),
+                /* Every 5th line darker */
+                linear-gradient(to right, rgba(100,116,139,0.16) 5px, transparent 5px),
+                linear-gradient(to bottom, rgba(100,116,139,0.16) 5px, transparent 5px)
+              `,
+              backgroundSize: "24px 24px, 24px 24px, 120px 120px, 120px 120px",
+              backgroundPosition: "0 0, 0 0, 0 0, 0 0",
+            }}
+          >
+            {/* Rulers */}
+            <Rulers workspaceWidth={workspaceRef.current?.offsetWidth || 800} workspaceHeight={workspaceRef.current?.offsetHeight || 600} pxPerIn={pxPerIn} />
 
-            {!isEconomicalStandProduct && (
-              <>
-                {["-top-2 -left-2", "-top-2 left-1/2 -translate-x-1/2", "-top-2 -right-2", "top-1/2 -right-2 -translate-y-1/2", "-bottom-2 -right-2", "-bottom-2 left-1/2 -translate-x-1/2", "-bottom-2 -left-2", "top-1/2 -left-2 -translate-y-1/2"].map((pos) => (
-                  <button
-                    key={pos}
-                    type="button"
-                    data-role="resize-handle"
-                    onPointerDown={startResize}
-                    className={`absolute ${pos} h-4 w-4 rounded-full border border-white bg-[#ff7f00] shadow`}
-                    aria-label="Resize banner"
-                    title="Drag to resize"
+            {/* Canvas with padding for rulers */}
+            <div
+              className="absolute inset-0 overflow-auto"
+              style={{ paddingTop: "24px", paddingLeft: "80px" }}
+            >
+              <div className="relative inline-flex h-full w-full items-center justify-center p-8">
+                {/* Main preview with drag capability */}
+                <div
+                  className="cursor-move relative"
+                  onPointerDown={startMove}
+                  style={{
+                    transform: `translate(${artPos.x}px, ${artPos.y}px)`,
+                  }}
+                >
+                  <BannerPreview
+                    uploadedImage={uploadedImage}
+                    widthPx={artWidth}
+                    heightPx={artHeight}
+                    meshGrommetPoints={meshGrommetPoints}
+                    widthIn={widthIn}
+                    heightIn={heightIn}
+                    widthNum={widthNum}
+                    heightNum={heightNum}
+                    form={form}
+                    isMeshProduct={isMeshProduct}
+                    isEconomicalStandProduct={isEconomicalStandProduct}
                   />
-                ))}
-              </>
-            )}
+
+                  {/* Resize handles - sharp, small, orange */}
+                  {!isEconomicalStandProduct &&
+                    [
+                      { pos: "-top-1.5 -left-1.5", cursor: "nw-resize" },
+                      { pos: "-top-1.5 left-1/2 -translate-x-1/2", cursor: "n-resize" },
+                      { pos: "-top-1.5 -right-1.5", cursor: "ne-resize" },
+                      { pos: "top-1/2 -right-1.5 -translate-y-1/2", cursor: "e-resize" },
+                      { pos: "-bottom-1.5 -right-1.5", cursor: "se-resize" },
+                      { pos: "-bottom-1.5 left-1/2 -translate-x-1/2", cursor: "s-resize" },
+                      { pos: "-bottom-1.5 -left-1.5", cursor: "sw-resize" },
+                      { pos: "top-1/2 -left-1.5 -translate-y-1/2", cursor: "w-resize" },
+                    ].map((item, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        data-role="resize-handle"
+                        onPointerDown={startResize}
+                        className={`absolute ${item.pos} h-3 w-3 border border-white bg-[#ff7f00] shadow-md`}
+                        style={{
+                          cursor: item.cursor,
+                          boxShadow: "0 1px 3px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.8)",
+                        }}
+                        aria-label="Resize banner"
+                        title="Drag to resize"
+                      />
+                    ))}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="mt-2 border-t border-zinc-200 bg-white px-3 py-2">
-        <div className="flex gap-2 overflow-x-auto pb-1">
-          <ControlModule title="Images / Upload Artwork" value={uploadedFileName ? "Uploaded" : "No file"} active={Boolean(uploadedFileName)}>
-            <label className="inline-flex h-9 w-full cursor-pointer items-center justify-center rounded border border-zinc-300 bg-white px-3 text-xs font-semibold text-zinc-700 hover:border-[#007fff]">
-              {uploadingArtwork ? "Uploading..." : uploadedFileName ? "Replace Artwork" : "Upload Artwork"}
+      {/* COMPACT BOTTOM CONTROLS */}
+      <div className="border-t border-zinc-300 bg-white px-3 py-1.5">
+        <div className="flex gap-1.5 overflow-x-auto pb-0.5">
+          {/* Images / Upload */}
+          <ControlModule title="IMAGES / UPLOAD ARTWORK" value={uploadedFileName ? "UPLOADED" : "NO FILE"} active={Boolean(uploadedFileName)} compact>
+            <label className="flex h-8 w-full cursor-pointer items-center justify-center rounded border border-zinc-300 bg-white px-2 text-[10px] font-bold uppercase tracking-[0.08em] text-zinc-700 hover:border-[#007fff] hover:text-[#007fff]">
+              {uploadingArtwork ? "Uploading..." : uploadedFileName ? "Replace" : "Upload"}
               <input
                 type="file"
                 accept=".pdf,.ai,.eps,.png,.jpg,.jpeg,.tif,.tiff"
@@ -817,25 +1125,27 @@ export default function VinylBannerBuilder({
                 className="hidden"
               />
             </label>
-            {uploadError && <div className="mt-1 text-[10px] font-semibold text-rose-600">{uploadError}</div>}
+            {uploadError && <div className="mt-0.5 text-[9px] font-bold text-rose-600">{uploadError}</div>}
           </ControlModule>
 
-          <ControlModule title="Size" value={`${form.width} x ${form.height} ${form.unit === "inches" ? "in" : "ft"}`} active={!errors.width && !errors.height}>
-            <div className="grid grid-cols-[1fr_1fr_62px] gap-1">
-              <input type="number" value={form.width} onChange={(e) => set("width", e.target.value)} className="h-9 rounded border border-zinc-300 px-2 text-sm" placeholder="W" />
-              <input type="number" value={form.height} onChange={(e) => set("height", e.target.value)} className="h-9 rounded border border-zinc-300 px-2 text-sm" placeholder="H" />
-              <select value={form.unit} onChange={(e) => set("unit", e.target.value as Unit)} className="h-9 rounded border border-zinc-300 bg-white px-1 text-sm">
-                <option value="inches">in</option>
-                <option value="feet">ft</option>
+          {/* Size */}
+          <ControlModule title="SIZE" value={`${form.width}×${form.height}${form.unit === "inches" ? "\"" : "'"}`} active={!errors.width && !errors.height} compact>
+            <div className="grid grid-cols-[1fr_1fr_50px] gap-0.5">
+              <input type="number" value={form.width} onChange={(e) => set("width", e.target.value)} className="h-8 rounded border border-zinc-300 px-1.5 text-xs" placeholder="W" />
+              <input type="number" value={form.height} onChange={(e) => set("height", e.target.value)} className="h-8 rounded border border-zinc-300 px-1.5 text-xs" placeholder="H" />
+              <select value={form.unit} onChange={(e) => set("unit", e.target.value as Unit)} className="h-8 rounded border border-zinc-300 bg-white px-1 text-xs">
+                <option value="inches">"</option>
+                <option value="feet">'</option>
               </select>
             </div>
           </ControlModule>
 
+          {/* Material */}
           {!isPosterProduct && (
-            <ControlModule title="Material" value={isCanvasProduct ? "Canvas" : isNoCurlProduct ? "No-Curl Banner" : isMeshProduct ? "Mesh Banner" : isHdpeProduct ? "HDPE" : form.material} active>
+            <ControlModule title="MATERIAL" value={isCanvasProduct ? "CANVAS" : isNoCurlProduct ? "NO-CURL" : isMeshProduct ? "MESH" : isHdpeProduct ? "HDPE" : form.material} active compact>
               {isCanvasProduct || isNoCurlProduct || isMeshProduct || isHdpeProduct ? (
-                <div className="flex h-9 items-center rounded border border-zinc-200 bg-zinc-100 px-2 text-sm text-zinc-700">
-                  {isCanvasProduct ? "Canvas" : isNoCurlProduct ? "No-Curl Banner" : isMeshProduct ? "Mesh Banner" : "HDPE"}
+                <div className="flex h-8 items-center rounded border border-zinc-300 bg-zinc-100 px-1.5 text-xs font-semibold text-zinc-700">
+                  {isCanvasProduct ? "CANVAS" : isNoCurlProduct ? "NO-CURL" : isMeshProduct ? "MESH" : "HDPE"}
                 </div>
               ) : (
                 <select
@@ -845,7 +1155,7 @@ export default function VinylBannerBuilder({
                     if (next === "18oz Vinyl" || next === "18oz Double Sided") return;
                     set("material", next as Material);
                   }}
-                  className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"
+                  className="h-8 w-full rounded border border-zinc-300 bg-white px-1.5 text-xs"
                 >
                   <option value="13oz Vinyl">13oz Vinyl</option>
                   <option value="15oz Vinyl">15oz Vinyl</option>
@@ -856,79 +1166,123 @@ export default function VinylBannerBuilder({
             </ControlModule>
           )}
 
+          {/* Print Sides */}
           {!(isCanvasProduct || isMeshProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct || isEconomicalStandProduct) && (
-            <ControlModule title="Print Sides" value={form.doubleSided ? "Double" : "Single"} active={form.doubleSided}>
-              <div className="grid grid-cols-2 gap-1">
-                <SegButton active={!form.doubleSided} onClick={() => set("doubleSided", false)}>Single</SegButton>
-                <SegButton active={form.doubleSided} onClick={() => set("doubleSided", true)} disabled={isMeshMaterial}>Double</SegButton>
+            <ControlModule title="PRINT SIDES" value={form.doubleSided ? "DOUBLE" : "SINGLE"} active={form.doubleSided} compact>
+              <div className="grid grid-cols-2 gap-0.5">
+                <SegButton active={!form.doubleSided} onClick={() => set("doubleSided", false)}>
+                  SINGLE
+                </SegButton>
+                <SegButton active={form.doubleSided} onClick={() => set("doubleSided", true)} disabled={isMeshMaterial}>
+                  DOUBLE
+                </SegButton>
               </div>
             </ControlModule>
           )}
 
+          {/* Hemming / Welding */}
           {!(isCanvasProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct || isEconomicalStandProduct) && (
             <ControlModule
-              title={isMeshProduct ? "Welding" : "Hemming"}
-              value={isMeshProduct ? (form.meshWelding ? "Yes" : "No") : (form.hemming ? "Yes" : "No")}
+              title={isMeshProduct ? "WELDING" : "HEMMING"}
+              value={isMeshProduct ? (form.meshWelding ? "YES" : "NO") : (form.hemming ? "YES" : "NO")}
               active={isMeshProduct ? form.meshWelding : form.hemming}
+              compact
             >
-              <div className="grid grid-cols-2 gap-1">
-                <SegButton active={!(isMeshProduct ? form.meshWelding : form.hemming)} onClick={() => isMeshProduct ? set("meshWelding", false) : set("hemming", false)}>No</SegButton>
-                <SegButton active={isMeshProduct ? form.meshWelding : form.hemming} onClick={() => isMeshProduct ? set("meshWelding", true) : set("hemming", true)}>Yes</SegButton>
+              <div className="grid grid-cols-2 gap-0.5">
+                <SegButton active={!(isMeshProduct ? form.meshWelding : form.hemming)} onClick={() => (isMeshProduct ? set("meshWelding", false) : set("hemming", false))}>
+                  NO
+                </SegButton>
+                <SegButton active={isMeshProduct ? form.meshWelding : form.hemming} onClick={() => (isMeshProduct ? set("meshWelding", true) : set("hemming", true))}>
+                  YES
+                </SegButton>
               </div>
             </ControlModule>
           )}
 
+          {/* Rope */}
           {!(isCanvasProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct || isEconomicalStandProduct) && (
-            <ControlModule title="Rope" value={isMeshProduct && form.meshRope ? "Top & Bottom" : "None"} active={isMeshProduct && form.meshRope}>
-              <div className="grid grid-cols-4 gap-1">
-                <SegButton active={!(isMeshProduct && form.meshRope)} onClick={() => set("meshRope", false)}>None</SegButton>
-                <SegButton active={false} disabled onClick={() => {}}>Top</SegButton>
-                <SegButton active={false} disabled onClick={() => {}}>Bottom</SegButton>
-                <SegButton active={isMeshProduct && form.meshRope} onClick={() => set("meshRope", true)}>Top & Bottom</SegButton>
+            <ControlModule title="ROPE" value={isMeshProduct && form.meshRope ? "TOP & BTM" : "NONE"} active={isMeshProduct && form.meshRope} compact>
+              <div className="grid grid-cols-4 gap-0.5">
+                <SegButton active={!(isMeshProduct && form.meshRope)} onClick={() => set("meshRope", false)}>
+                  NONE
+                </SegButton>
+                <SegButton active={false} disabled onClick={() => {}}>
+                  TOP
+                </SegButton>
+                <SegButton active={false} disabled onClick={() => {}}>
+                  BTM
+                </SegButton>
+                <SegButton active={isMeshProduct && form.meshRope} onClick={() => set("meshRope", true)}>
+                  BOTH
+                </SegButton>
               </div>
             </ControlModule>
           )}
 
+          {/* Grommets */}
           {!(isCanvasProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct || isEconomicalStandProduct) && (
-            <ControlModule title="Grommets" value={form.grommets ? "Yes" : "No"} active={form.grommets}>
-              <div className="grid grid-cols-2 gap-1">
-                <SegButton active={!form.grommets} onClick={() => set("grommets", false)}>No</SegButton>
-                <SegButton active={form.grommets} onClick={() => set("grommets", true)}>Yes</SegButton>
+            <ControlModule title="GROMMETS" value={form.grommets ? "YES" : "NO"} active={form.grommets} compact>
+              <div className="grid grid-cols-2 gap-0.5">
+                <SegButton active={!form.grommets} onClick={() => set("grommets", false)}>
+                  NO
+                </SegButton>
+                <SegButton active={form.grommets} onClick={() => set("grommets", true)}>
+                  YES
+                </SegButton>
               </div>
             </ControlModule>
           )}
 
+          {/* Pole Pockets */}
           {!(isCanvasProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct || isEconomicalStandProduct) && (
-            <ControlModule title="Pole Pockets" value={form.polePockets ? "Top & Bottom" : "None"} active={form.polePockets}>
-              <div className="grid grid-cols-4 gap-1">
-                <SegButton active={!form.polePockets} onClick={() => set("polePockets", false)}>None</SegButton>
-                <SegButton active={false} disabled onClick={() => {}}>Top</SegButton>
-                <SegButton active={false} disabled onClick={() => {}}>Bottom</SegButton>
-                <SegButton active={form.polePockets} onClick={() => set("polePockets", true)}>Top & Bottom</SegButton>
+            <ControlModule title="POLE POCKETS" value={form.polePockets ? "TOP & BTM" : "NONE"} active={form.polePockets} compact>
+              <div className="grid grid-cols-4 gap-0.5">
+                <SegButton active={!form.polePockets} onClick={() => set("polePockets", false)}>
+                  NONE
+                </SegButton>
+                <SegButton active={false} disabled onClick={() => {}}>
+                  TOP
+                </SegButton>
+                <SegButton active={false} disabled onClick={() => {}}>
+                  BTM
+                </SegButton>
+                <SegButton active={form.polePockets} onClick={() => set("polePockets", true)}>
+                  BOTH
+                </SegButton>
               </div>
             </ControlModule>
           )}
 
+          {/* Wind Slits */}
           {!(isCanvasProduct || isMeshProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct || isEconomicalStandProduct) && (
-            <ControlModule title="Wind Slits" value={form.windSlits ? "Yes" : "No"} active={form.windSlits}>
-              <div className="grid grid-cols-2 gap-1">
-                <SegButton active={!form.windSlits} onClick={() => set("windSlits", false)}>No</SegButton>
-                <SegButton active={form.windSlits} onClick={() => set("windSlits", true)} disabled={isMeshMaterial}>Yes</SegButton>
+            <ControlModule title="WIND SLITS" value={form.windSlits ? "YES" : "NO"} active={form.windSlits} compact>
+              <div className="grid grid-cols-2 gap-0.5">
+                <SegButton active={!form.windSlits} onClick={() => set("windSlits", false)}>
+                  NO
+                </SegButton>
+                <SegButton active={form.windSlits} onClick={() => set("windSlits", true)} disabled={isMeshMaterial}>
+                  YES
+                </SegButton>
               </div>
             </ControlModule>
           )}
 
-          <ControlModule title="Quantity" value={form.quantity} active>
-            <input type="number" min={1} value={form.quantity} onChange={(e) => set("quantity", e.target.value)} className="h-9 w-full rounded border border-zinc-300 px-2 text-sm" />
+          {/* Quantity */}
+          <ControlModule title="QUANTITY" value={form.quantity} active compact>
+            <input type="number" min={1} value={form.quantity} onChange={(e) => set("quantity", e.target.value)} className="h-8 w-full rounded border border-zinc-300 px-1.5 text-xs" />
           </ControlModule>
 
-          <ControlModule title="Price / Add to Cart" value={formatPrice(pricing.totalPrice)} active className="min-w-[280px]">
-            <div className="grid grid-cols-[70px_1fr] items-center gap-2 text-xs text-zinc-600">
-              <div className="font-semibold">{pricing.sqFt} sqft</div>
-              <div>{effectiveQtyNum} unit{effectiveQtyNum !== 1 ? "s" : ""}</div>
+          {/* Add to Cart */}
+          <ControlModule title="TOTAL / ADD TO CART" value={formatPrice(pricing.totalPrice)} active className="min-w-[220px]" compact>
+            <div className="mb-1 flex items-center justify-between gap-1 text-[9px] text-zinc-600">
+              <span className="font-bold">{pricing.sqFt} SQFT</span>
+              <span>{effectiveQtyNum} UNIT{effectiveQtyNum !== 1 ? "S" : ""}</span>
             </div>
-            <Button className="mt-1 h-9 w-full rounded bg-[#ff7f00] text-xs font-semibold text-white hover:bg-[#e67200]" onClick={handleAddToCart}>
-              {addedToCart ? "Added" : "Add to Cart"}
+            <Button
+              className="h-8 w-full rounded bg-[#ff7f00] text-[10px] font-bold uppercase tracking-[0.08em] text-white hover:bg-[#e67200]"
+              onClick={handleAddToCart}
+            >
+              {addedToCart ? "✓ ADDED" : "ADD TO CART"}
             </Button>
           </ControlModule>
         </div>
@@ -942,19 +1296,25 @@ function ControlModule({
   value,
   active,
   className,
+  compact,
   children,
 }: {
   title: string;
   value: string;
   active?: boolean;
   className?: string;
+  compact?: boolean;
   children: React.ReactNode;
 }) {
   return (
-    <div className={`min-w-[220px] rounded border bg-white p-2 ${active ? "border-[#007fff]" : "border-zinc-200"} ${className ?? ""}`}>
-      <div className="mb-1 flex items-center justify-between gap-2 text-[10px] font-semibold uppercase tracking-[0.12em]">
-        <span className="text-zinc-500">{title}</span>
-        <span className="truncate text-zinc-700">{value}</span>
+    <div
+      className={`rounded border bg-white px-2 py-1 ${active ? "border-[#ff7f00] bg-[#ff7f00]/5" : "border-[#d8d8d8]"} ${className ?? ""} ${
+        compact ? "min-w-[180px]" : "min-w-[220px]"
+      }`}
+    >
+      <div className={`flex items-center justify-between gap-1 ${compact ? "mb-0.5" : "mb-1"} text-[9px] font-bold uppercase tracking-[0.1em]`}>
+        <span className="text-zinc-600">{title}</span>
+        <span className="truncate text-zinc-900">{value}</span>
       </div>
       {children}
     </div>
@@ -977,12 +1337,12 @@ function SegButton({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`h-8 rounded border text-[11px] font-semibold transition ${
+      className={`h-7 rounded border text-[9px] font-bold uppercase tracking-[0.08em] transition ${
         disabled
-          ? "cursor-not-allowed border-zinc-200 bg-zinc-100 text-zinc-400"
+          ? "cursor-not-allowed border-[#d8d8d8] bg-zinc-100 text-zinc-400"
           : active
-            ? "border-[#ff7f00] bg-[#ff7f00]/10 text-[#ff7f00]"
-            : "border-zinc-300 bg-white text-zinc-600 hover:border-[#007fff] hover:text-[#007fff]"
+            ? "border-[#ff7f00] bg-[#ff7f00]/15 text-[#ff7f00]"
+            : "border-[#d8d8d8] bg-white text-zinc-700 hover:border-[#007fff] hover:text-[#007fff]"
       }`}
     >
       {children}
@@ -1002,10 +1362,10 @@ function ControlBox({
   children: React.ReactNode;
 }) {
   return (
-    <div className={`rounded-lg border border-zinc-200 bg-white p-2 ${className ?? ""}`}>
-      <div className="sc-label-fx mb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">{title}</div>
+    <div className={`rounded border border-[#d8d8d8] bg-white p-1.5 ${className ?? ""}`}>
+      <div className="mb-0.5 text-[9px] font-bold uppercase tracking-[0.08em] text-zinc-600">{title}</div>
       {children}
-      {error && <div className="mt-1 text-[10px] font-semibold text-rose-600">{error}</div>}
+      {error && <div className="mt-0.5 text-[9px] font-bold text-rose-600">{error}</div>}
     </div>
   );
 }
@@ -1025,10 +1385,10 @@ function TogglePair({
     <button
       type="button"
       onClick={onToggle}
-      className="grid h-9 w-full grid-cols-2 overflow-hidden rounded border border-zinc-300 text-xs font-semibold"
+      className="grid h-7 w-full grid-cols-2 overflow-hidden rounded border border-[#d8d8d8] text-[9px] font-bold uppercase tracking-[0.08em]"
     >
-      <span className={`flex items-center justify-center ${isRightActive ? "bg-zinc-200 text-zinc-500" : "bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]"}`}>{leftLabel}</span>
-      <span className={`flex items-center justify-center ${isRightActive ? "bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]" : "bg-zinc-200 text-zinc-500"}`}>{rightLabel}</span>
+      <span className={`flex items-center justify-center ${isRightActive ? "bg-zinc-200 text-zinc-500" : "bg-[#007fff]/15 text-[#007fff]"}`}>{leftLabel}</span>
+      <span className={`flex items-center justify-center ${isRightActive ? "bg-[#007fff]/15 text-[#007fff]" : "bg-zinc-200 text-zinc-500"}`}>{rightLabel}</span>
     </button>
   );
 }
@@ -1045,7 +1405,7 @@ function Row({
   className?: string;
 }) {
   return (
-    <div className={`flex items-center justify-between ${strong ? "font-semibold text-zinc-900" : "text-zinc-700"} ${className ?? ""}`}>
+    <div className={`flex items-center justify-between text-xs ${strong ? "font-bold text-zinc-900" : "text-zinc-700"} ${className ?? ""}`}>
       <span>{label}</span>
       <span>{value}</span>
     </div>
