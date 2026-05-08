@@ -107,7 +107,7 @@ export default function AccountPage() {
         <p className="mt-4 text-zinc-400">You are not signed in.</p>
         <Link
           href="/login"
-          className="mt-6 inline-block rounded-2xl bg-orange-500 px-6 py-3 text-sm font-semibold hover:bg-orange-400"
+          className="mt-6 inline-block rounded-2xl bg-[var(--brand-primary)] px-6 py-3 text-sm font-semibold hover:bg-[var(--brand-primary-hover)]"
         >
           Sign In
         </Link>

@@ -94,7 +94,7 @@ function BreakdownRow({
       <span className={muted ? "text-zinc-400" : strong ? "font-semibold text-zinc-900" : "text-zinc-600"}>{label}</span>
       <span
         className={`tabular-nums ${
-          muted ? "text-zinc-400" : accent ? "font-semibold text-orange-600" : strong ? "font-semibold text-zinc-900" : "text-zinc-700"
+          muted ? "text-zinc-400" : accent ? "font-semibold text-[var(--brand-primary)]" : strong ? "font-semibold text-zinc-900" : "text-zinc-700"
         }`}
       >
         {value}
@@ -364,10 +364,10 @@ export default function PrintWrapFilmBuilder({ productId = 136 }: PrintWrapFilmB
                 Premium wrap vinyl with 52in panel split logic, laminate options, contour cut, and rush production pricing.
               </p>
             </div>
-            <div className="rounded-xl border border-orange-200 bg-gradient-to-r from-orange-50 to-amber-50 px-4 py-2 text-right">
-              <div className="text-xs uppercase tracking-[0.14em] text-orange-700">Live Total</div>
+            <div className="rounded-xl border border-[var(--brand-primary)] bg-gradient-to-r from-[var(--brand-primary-soft)] to-[#f3f8ff] px-4 py-2 text-right">
+              <div className="text-xs uppercase tracking-[0.14em] text-[var(--brand-primary)]">Live Total</div>
               <div className="text-3xl font-semibold text-zinc-900">{pricing ? formatCurrency(pricing.grandTotal) : formatCurrency(0)}</div>
-              <div className="text-xs text-orange-700/80">
+              <div className="text-xs text-[var(--brand-primary)]/80">
                 {pricing
                   ? `${pricing.areaSqFt.toFixed(2)} sq ft · ${safeQuantity} unit${safeQuantity !== 1 ? "s" : ""}`
                   : "Set dimensions to calculate"}
@@ -556,7 +556,7 @@ export default function PrintWrapFilmBuilder({ productId = 136 }: PrintWrapFilmB
                     onClick={() => setContourCut((value) => !value)}
                     className={`h-9 rounded border px-3 text-xs font-semibold transition ${
                       contourCut
-                        ? "border-orange-300 bg-orange-50 text-orange-700"
+                        ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]"
                         : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"
                     }`}
                   >
@@ -567,7 +567,7 @@ export default function PrintWrapFilmBuilder({ productId = 136 }: PrintWrapFilmB
                     onClick={() => setRush((value) => !value)}
                     className={`h-9 rounded border px-3 text-xs font-semibold transition ${
                       rush
-                        ? "border-orange-300 bg-orange-50 text-orange-700"
+                        ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]"
                         : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"
                     }`}
                   >
@@ -586,7 +586,7 @@ export default function PrintWrapFilmBuilder({ productId = 136 }: PrintWrapFilmB
                     className="h-9 rounded border border-zinc-300 px-2 text-sm"
                   />
                   <Button
-                    className="h-9 rounded bg-orange-500 text-xs font-semibold text-white hover:bg-orange-400"
+                    className="h-9 rounded bg-[var(--brand-primary)] text-xs font-semibold text-white hover:bg-[var(--brand-primary-hover)]"
                     disabled={!isValid}
                     onClick={addToCart}
                   >

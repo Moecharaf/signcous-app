@@ -45,7 +45,7 @@ export default function Footer() {
           <p className="mt-3 text-sm leading-7 text-[#5f5f5f] dark:text-[#888]">
             Custom print ordering for businesses, events, and individuals. Fast turnaround, premium quality, nationwide delivery.
           </p>
-          <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-[#d8b72d] bg-[#fff4bf] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#7a5100] dark:border-[#5a4400] dark:bg-[#1a1200] dark:text-[#d4960a]">
+          <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--brand-primary)] dark:border-[#5a4400] dark:bg-[#1a1200] dark:text-[var(--brand-primary)]">
             Web-to-Print Platform
           </div>
         </div>

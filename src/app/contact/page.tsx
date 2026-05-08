@@ -11,7 +11,7 @@ export default function ContactPage() {
     <section className="mx-auto max-w-5xl px-6 py-14 md:py-20">
       <div className="overflow-hidden rounded-3xl border border-[#d8d8d8] bg-gradient-to-br from-[#fdf7ea] via-[#f5f5f5] to-[#ececec] shadow-[0_20px_50px_rgba(0,0,0,0.08)] dark:border-[#2a2a2a] dark:from-[#1a1408] dark:via-[#111111] dark:to-[#161616]">
         <div className="border-b border-[#d9d1bd] px-7 py-7 dark:border-[#302819] md:px-10">
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#9b6a0c] dark:text-[#d79a2e]">Contact Signcous</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#9b6a0c] dark:text-[var(--brand-primary)]">Contact Signcous</p>
           <h1 className="mt-2 text-3xl font-black tracking-tight text-[#202020] dark:text-[#f1f1f1] md:text-4xl">
             We are ready to help with your next print order
           </h1>
@@ -23,10 +23,10 @@ export default function ContactPage() {
 
         <div className="grid gap-6 px-7 py-7 md:grid-cols-2 md:px-10 md:py-10">
           <article className="rounded-2xl border border-[#ddd4be] bg-[#fff8e6] p-6 dark:border-[#453716] dark:bg-[#1f1707]">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#8b5f0a] dark:text-[#d79a2e]">Email</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#8b5f0a] dark:text-[var(--brand-primary)]">Email</p>
             <a
               href="mailto:info@signcous.com"
-              className="mt-3 inline-block text-2xl font-extrabold tracking-tight text-[#1f1f1f] underline decoration-[#d79a2e] decoration-2 underline-offset-4 hover:text-[#000] dark:text-[#fff1d6] dark:hover:text-white"
+              className="mt-3 inline-block text-2xl font-extrabold tracking-tight text-[#1f1f1f] underline decoration-[var(--brand-primary)] decoration-2 underline-offset-4 hover:text-[#000] dark:text-[#fff1d6] dark:hover:text-white"
             >
               info@signcous.com
             </a>

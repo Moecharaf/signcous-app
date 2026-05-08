@@ -29,7 +29,7 @@ export default function OrderConfirmationPage({
           <p className="text-xs uppercase tracking-widest text-zinc-500">
             Order Number
           </p>
-          <p className="mt-2 text-3xl font-black text-orange-400">
+          <p className="mt-2 text-3xl font-black text-[var(--brand-primary)]">
             #{searchParams.orderId}
           </p>
           {searchParams.total && (
@@ -46,7 +46,7 @@ export default function OrderConfirmationPage({
       <div className="mt-8 flex flex-col items-center gap-3">
         <Link
           href="/banners/vinyl-banner"
-          className="rounded-2xl bg-orange-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-orange-500/20 hover:bg-orange-400 transition-colors"
+          className="rounded-2xl bg-[var(--brand-primary)] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[var(--brand-primary)]/20 hover:bg-[var(--brand-primary-hover)] transition-colors"
         >
           Order Another Banner
         </Link>

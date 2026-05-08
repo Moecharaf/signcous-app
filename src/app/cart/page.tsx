@@ -42,7 +42,7 @@ function LineItemCard({ item }: { item: CartItem }) {
             {item.polePockets && <span>Pole pockets</span>}
             {item.windSlits && <span>Wind slits</span>}
             {item.hemming && <span>Hemming</span>}
-            {item.rush && <span className="text-orange-400">Rush</span>}
+            {item.rush && <span className="text-[var(--brand-primary)]">Rush</span>}
             {customOptionEntries.map(([key, value]) => (
               <span key={key}>{labelMap[key] ?? key.replace(/^custom_/, "").replace(/_/g, " ")}: {value}</span>
             ))}
@@ -102,7 +102,7 @@ export default function CartPage() {
           <p className="mt-3 text-zinc-400">Add a product to get started.</p>
           <Link
             href="/"
-            className="mt-8 rounded-2xl bg-orange-500 px-6 py-3 text-sm font-semibold hover:bg-orange-400 transition-colors"
+            className="mt-8 rounded-2xl bg-[var(--brand-primary)] px-6 py-3 text-sm font-semibold hover:bg-[var(--brand-primary-hover)] transition-colors"
           >
             Shop Products
           </Link>
@@ -149,7 +149,7 @@ export default function CartPage() {
           </div>
           <Link
             href="/checkout"
-            className="mt-6 block w-full rounded-2xl bg-orange-500 px-4 py-3 text-center text-sm font-semibold text-white shadow-lg shadow-orange-500/20 hover:bg-orange-400 transition-colors"
+            className="mt-6 block w-full rounded-2xl bg-[var(--brand-primary)] px-4 py-3 text-center text-sm font-semibold text-white shadow-lg shadow-[var(--brand-primary)]/20 hover:bg-[var(--brand-primary-hover)] transition-colors"
           >
             Proceed to Checkout →
           </Link>

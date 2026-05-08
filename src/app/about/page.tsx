@@ -12,7 +12,7 @@ export default function AboutPage() {
     <section className="mx-auto max-w-6xl px-6 py-14 md:py-20">
       <div className="overflow-hidden rounded-3xl border border-[#d8d8d8] bg-gradient-to-br from-[#f5f5f5] via-[#faf6ee] to-[#ececec] shadow-[0_18px_45px_rgba(0,0,0,0.08)] dark:border-[#2a2a2a] dark:from-[#111111] dark:via-[#1a1408] dark:to-[#151515]">
         <div className="border-b border-[#ddd2b8] px-7 py-8 dark:border-[#332a18] md:px-10">
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#9d6d11] dark:text-[#d89c32]">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--brand-primary)] dark:text-[var(--brand-primary)]">
             About Signcous
           </p>
           <h1 className="mt-2 text-3xl font-black tracking-tight text-[#1f1f1f] dark:text-[#f1f1f1] md:text-5xl">
@@ -43,7 +43,7 @@ export default function AboutPage() {
             <h2 className="text-lg font-extrabold tracking-tight text-[#2b2b2b] dark:text-[#f0f0f0]">Need Help?</h2>
             <p className="mt-3 text-sm leading-7 text-[#595959] dark:text-[#aeaeae]">
               Reach us at
-              <a href="mailto:info@signcous.com" className="ml-1 font-semibold text-[#a56400] underline decoration-[#d79a2e] underline-offset-4 dark:text-[#e1a230]">
+              <a href="mailto:info@signcous.com" className="ml-1 font-semibold text-[var(--brand-primary)] underline decoration-[var(--brand-primary)] underline-offset-4 dark:text-[var(--brand-primary)]">
                 info@signcous.com
               </a>
               for quotes, product guidance, and order support.
@@ -54,7 +54,7 @@ export default function AboutPage() {
         <div className="flex flex-wrap gap-3 border-t border-[#ddd2b8] px-7 py-6 dark:border-[#332a18] md:px-10">
           <Link
             href="/contact"
-            className="rounded-xl bg-[#d88700] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#bc7600]"
+            className="rounded-xl bg-[var(--brand-primary)] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--brand-primary-hover)]"
           >
             Contact Us
           </Link>

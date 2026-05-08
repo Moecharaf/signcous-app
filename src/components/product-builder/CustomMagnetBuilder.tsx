@@ -256,8 +256,8 @@ export default function CustomMagnetBuilder() {
         <div className="mb-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
           <div className="grid items-end gap-4 lg:grid-cols-[1fr_auto]">
             <div>
-              <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-orange-700">
-                <span className="rounded bg-zinc-900 px-1.5 py-0.5 text-[10px] tracking-normal text-orange-400">SC</span>
+              <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--brand-primary)]">
+                <span className="rounded bg-zinc-900 px-1.5 py-0.5 text-[10px] tracking-normal text-[var(--brand-primary)]">SC</span>
                 Signcous Studio
               </div>
               <h1 className="mt-1 text-3xl font-semibold tracking-tight text-zinc-900">Custom Magnets Builder</h1>
@@ -265,10 +265,10 @@ export default function CustomMagnetBuilder() {
                 Custom-size single-sided magnets with contour cut, rush production, and artwork upload.
               </p>
             </div>
-            <div className="rounded-xl border border-orange-200 bg-gradient-to-r from-orange-50 to-amber-50 px-4 py-2 text-right">
-              <div className="text-xs uppercase tracking-[0.14em] text-orange-700">Live Total</div>
+            <div className="rounded-xl border border-[var(--brand-primary)] bg-gradient-to-r from-[var(--brand-primary-soft)] to-[#f3f8ff] px-4 py-2 text-right">
+              <div className="text-xs uppercase tracking-[0.14em] text-[var(--brand-primary)]">Live Total</div>
               <div className="text-3xl font-semibold text-zinc-900">{formatCurrency(pricing.total)}</div>
-              <div className="text-xs text-orange-700/80">
+              <div className="text-xs text-[var(--brand-primary)]/80">
                 {isQuantityValid ? `${quantity} magnet${quantity !== 1 ? "s" : ""} · ${dimensionLabel(width)} x ${dimensionLabel(height)}` : "Set quantity to calculate"}
               </div>
             </div>
@@ -312,7 +312,7 @@ export default function CustomMagnetBuilder() {
                 <div
                   className={`relative overflow-hidden border-2 bg-white/80 shadow-lg ${
                     isSizeValid
-                      ? "border-dashed border-orange-500"
+                      ? "border-dashed border-[var(--brand-primary)]"
                       : "border-solid border-red-500"
                   }`}
                   style={{
@@ -409,7 +409,7 @@ export default function CustomMagnetBuilder() {
                     onClick={() => setContourCut((value) => !value)}
                     className={`h-9 w-full rounded border px-2 text-sm font-semibold transition ${
                       contourCut
-                        ? "border-orange-500 bg-orange-500 text-white"
+                        ? "border-[var(--brand-primary)] bg-[var(--brand-primary)] text-white"
                         : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"
                     }`}
                   >
@@ -423,7 +423,7 @@ export default function CustomMagnetBuilder() {
                     onClick={() => setRush((value) => !value)}
                     className={`h-9 w-full rounded border px-2 text-sm font-semibold transition ${
                       rush
-                        ? "border-orange-500 bg-orange-500 text-white"
+                        ? "border-[var(--brand-primary)] bg-[var(--brand-primary)] text-white"
                         : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"
                     }`}
                   >
@@ -450,7 +450,7 @@ export default function CustomMagnetBuilder() {
                   {uploadedFileName ? `Uploaded artwork: ${uploadedFileName}` : "No artwork uploaded yet."}
                   {uploadError && <div className="mt-1 text-rose-600">{uploadError}</div>}
                 </div>
-                <Button onClick={addToCart} className="h-10 rounded bg-orange-500 px-6 text-sm hover:bg-orange-400" disabled={uploadingArtwork}>
+                <Button onClick={addToCart} className="h-10 rounded bg-[var(--brand-primary)] px-6 text-sm hover:bg-[var(--brand-primary-hover)]" disabled={uploadingArtwork}>
                   {addedToCart ? "Added to Cart" : "Add to Cart"}
                 </Button>
               </div>
@@ -475,7 +475,7 @@ export default function CustomMagnetBuilder() {
                 <PriceRow label="Unit Price" value={formatCurrency(pricing.unitPrice)} />
                 <PriceRow label="Subtotal" value={formatCurrency(pricing.subtotal)} />
                 <PriceRow label="Rush Fee" value={formatCurrency(pricing.rushFee)} muted={!rush} />
-                <PriceRow label="Total" value={formatCurrency(pricing.total)} strong className="text-orange-600" />
+                <PriceRow label="Total" value={formatCurrency(pricing.total)} strong className="text-[var(--brand-primary)]" />
               </div>
             </div>
 

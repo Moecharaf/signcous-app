@@ -215,8 +215,8 @@ export default function HdpeBuilder() {
         <div className="mb-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
           <div className="grid items-end gap-4 lg:grid-cols-[1fr_auto]">
             <div>
-              <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-orange-700">
-                <span className="rounded bg-zinc-900 px-1.5 py-0.5 text-[10px] tracking-normal text-orange-400">SC</span>
+              <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--brand-primary)]">
+                <span className="rounded bg-zinc-900 px-1.5 py-0.5 text-[10px] tracking-normal text-[var(--brand-primary)]">SC</span>
                 Signcous Studio
               </div>
               <h2 className="mt-1 text-3xl font-semibold tracking-tight text-zinc-900">HDPE Sign Configurator</h2>
@@ -224,10 +224,10 @@ export default function HdpeBuilder() {
                 Drag to reposition artwork. Use the corner handle to resize and auto-update dimensions.
               </p>
             </div>
-            <div className="rounded-xl border border-orange-200 bg-gradient-to-r from-orange-50 to-amber-50 px-4 py-2 text-right">
-              <div className="text-xs uppercase tracking-[0.14em] text-orange-700">Live Total</div>
+            <div className="rounded-xl border border-[var(--brand-primary)] bg-gradient-to-r from-[var(--brand-primary-soft)] to-[#f3f8ff] px-4 py-2 text-right">
+              <div className="text-xs uppercase tracking-[0.14em] text-[var(--brand-primary)]">Live Total</div>
               <div className="text-3xl font-semibold text-zinc-900">{formatPrice(pricing.totalPrice)}</div>
-              <div className="text-xs text-orange-700/80">{pricing.sqFt} sqft · {qtyNum} unit{qtyNum !== 1 ? "s" : ""}</div>
+              <div className="text-xs text-[var(--brand-primary)]/80">{pricing.sqFt} sqft · {qtyNum} unit{qtyNum !== 1 ? "s" : ""}</div>
             </div>
           </div>
         </div>
@@ -246,7 +246,7 @@ export default function HdpeBuilder() {
                   <input
                     type="range" min={0.6} max={1.8} step={0.05} value={zoom}
                     onChange={(e) => setZoom(parseFloat(e.target.value) || 1)}
-                    className="accent-orange-500"
+                    className="accent-[var(--brand-primary)]"
                   />
                   <span className="w-10 text-right text-xs font-semibold text-zinc-600">{Math.round(zoom * 100)}%</span>
                 </div>
@@ -268,7 +268,7 @@ export default function HdpeBuilder() {
               </div>
 
               <div
-                className="absolute left-1/2 top-1/2 cursor-move select-none rounded-md border-2 border-dashed border-orange-500 bg-orange-50/55 shadow-lg"
+                className="absolute left-1/2 top-1/2 cursor-move select-none rounded-md border-2 border-dashed border-[var(--brand-primary)] bg-[var(--brand-primary-soft)]/55 shadow-lg"
                 onPointerDown={startMove}
                 style={{
                   width: artWidth,
@@ -297,7 +297,7 @@ export default function HdpeBuilder() {
                   type="button"
                   data-role="resize-handle"
                   onPointerDown={startResize}
-                  className="absolute -bottom-3 -right-3 h-6 w-6 rounded-full border-2 border-white bg-orange-500 shadow"
+                  className="absolute -bottom-3 -right-3 h-6 w-6 rounded-full border-2 border-white bg-[var(--brand-primary)] shadow"
                   aria-label="Resize sign"
                   title="Drag to resize"
                 />
@@ -345,7 +345,7 @@ export default function HdpeBuilder() {
                       className="h-9 rounded border border-zinc-300 px-2 text-sm"
                     />
                     <Button
-                      className="h-9 rounded bg-orange-500 text-xs font-semibold text-white hover:bg-orange-400"
+                      className="h-9 rounded bg-[var(--brand-primary)] text-xs font-semibold text-white hover:bg-[var(--brand-primary-hover)]"
                       onClick={handleAddToCart}
                     >
                       {addedToCart ? "Added" : "Add"}
@@ -365,14 +365,14 @@ export default function HdpeBuilder() {
                 <Row label="Square Feet" value={String(pricing.sqFt)} />
                 <div className="my-2 border-t border-zinc-200" />
                 <Row label="Unit Price" value={formatPrice(pricing.unitPrice)} strong />
-                <Row label={`Order Total (${qtyNum})`} value={formatPrice(pricing.totalPrice)} strong className="text-orange-600" />
+                <Row label={`Order Total (${qtyNum})`} value={formatPrice(pricing.totalPrice)} strong className="text-[var(--brand-primary)]" />
                 <Row label="Minimum Order" value="$20.00" />
               </div>
             </div>
 
             <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
               <div className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">Artwork</div>
-              <label className="mt-3 block cursor-pointer rounded-xl border border-dashed border-zinc-300 bg-zinc-50 px-3 py-6 text-center text-sm text-zinc-600 hover:border-orange-400 hover:bg-orange-50">
+              <label className="mt-3 block cursor-pointer rounded-xl border border-dashed border-zinc-300 bg-zinc-50 px-3 py-6 text-center text-sm text-zinc-600 hover:border-[var(--brand-primary)] hover:bg-[var(--brand-primary-soft)]">
                 {uploadingArtwork ? "Uploading..." : "Upload Artwork"}
                 <input
                   type="file"

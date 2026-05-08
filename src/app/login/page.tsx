@@ -53,7 +53,7 @@ export default function LoginPage() {
         <input
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          className="w-full rounded-xl border border-white/10 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 focus:border-orange-500 focus:outline-none"
+          className="w-full rounded-xl border border-white/10 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 focus:border-[var(--brand-primary)] focus:outline-none"
           placeholder="you@example.com"
           required
         />
@@ -65,7 +65,7 @@ export default function LoginPage() {
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full rounded-xl border border-white/10 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 focus:border-orange-500 focus:outline-none"
+          className="w-full rounded-xl border border-white/10 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 focus:border-[var(--brand-primary)] focus:outline-none"
           required
         />
 
@@ -78,14 +78,14 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={loading}
-          className="mt-6 w-full rounded-2xl bg-orange-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-orange-500/20 transition-colors hover:bg-orange-400 disabled:opacity-50"
+          className="mt-6 w-full rounded-2xl bg-[var(--brand-primary)] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-[var(--brand-primary)]/20 transition-colors hover:bg-[var(--brand-primary-hover)] disabled:opacity-50"
         >
           {loading ? "Signing in..." : "Sign In"}
         </button>
 
         <p className="mt-4 text-center text-sm text-zinc-400">
           New here?{" "}
-          <Link href="/signup" className="text-orange-400 hover:text-orange-300">
+            <Link href="/signup" className="text-[var(--brand-primary)] hover:text-[var(--brand-primary-hover)]">
             Create an account
           </Link>
         </p>

@@ -38,7 +38,7 @@ export default async function CategoryPage({
               <Link
                 key={child.id}
                 href={`/shop/${child.slug}`}
-                className="rounded-full border border-white/20 px-3 py-1 text-sm text-zinc-300 hover:border-orange-500/40 hover:text-orange-300"
+                className="rounded-full border border-white/20 px-3 py-1 text-sm text-zinc-300 hover:border-[var(--brand-primary)]/40 hover:text-[var(--brand-primary-hover)]"
               >
                 {child.name}
               </Link>
@@ -72,7 +72,7 @@ export default async function CategoryPage({
                   <p className="mt-2 line-clamp-2 text-sm text-zinc-400">{summary || "Custom print product"}</p>
 
                   <div className="mt-4 flex items-center justify-between">
-                    <span className="text-sm font-semibold text-orange-400">
+                    <span className="text-sm font-semibold text-[var(--brand-primary)]">
                       {product.price ? `$${product.price}` : "Request quote"}
                     </span>
                     <a

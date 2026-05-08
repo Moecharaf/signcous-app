@@ -62,14 +62,14 @@ function Field({
     <div>
       <label className="sc-label-fx mb-1.5 block text-xs font-medium uppercase tracking-wider text-zinc-400">
         {label}
-        {required && <span className="ml-0.5 text-orange-400">*</span>}
+        {required && <span className="ml-0.5 text-[var(--brand-primary)]">*</span>}
       </label>
       <input
         type={type}
         required={required}
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="w-full rounded-xl border border-white/10 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 focus:border-orange-500 focus:outline-none"
+        className="w-full rounded-xl border border-white/10 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 focus:border-[var(--brand-primary)] focus:outline-none"
       />
     </div>
   );
@@ -132,7 +132,7 @@ function PaymentForm({
       <button
         type="submit"
         disabled={!stripe || submitting}
-        className="w-full rounded-2xl bg-orange-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-orange-500/20 transition-colors hover:bg-orange-400 disabled:cursor-not-allowed disabled:opacity-50"
+        className="w-full rounded-2xl bg-[var(--brand-primary)] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-[var(--brand-primary)]/20 transition-colors hover:bg-[var(--brand-primary-hover)] disabled:cursor-not-allowed disabled:opacity-50"
       >
         {submitting ? "Processing..." : `Pay ${formatPrice(subtotal)}`}
       </button>
@@ -233,7 +233,7 @@ export default function CheckoutPage() {
         <p className="text-zinc-400">Your cart is empty.</p>
         <Link
           href="/"
-          className="mt-6 inline-block rounded-2xl bg-orange-500 px-6 py-3 text-sm font-semibold transition-colors hover:bg-orange-400"
+          className="mt-6 inline-block rounded-2xl bg-[var(--brand-primary)] px-6 py-3 text-sm font-semibold transition-colors hover:bg-[var(--brand-primary-hover)]"
         >
           Shop Products
         </Link>
@@ -248,7 +248,7 @@ export default function CheckoutPage() {
       <div className="mt-5 flex items-center gap-3 text-sm">
         <span
           className={`font-semibold ${
-            step === "info" ? "text-orange-400" : "text-zinc-500"
+            step === "info" ? "text-[var(--brand-primary)]" : "text-zinc-500"
           }`}
         >
           1. Contact and Shipping
@@ -256,7 +256,7 @@ export default function CheckoutPage() {
         <span className="text-zinc-700">-&gt;</span>
         <span
           className={`font-semibold ${
-            step === "payment" ? "text-orange-400" : "text-zinc-500"
+            step === "payment" ? "text-[var(--brand-primary)]" : "text-zinc-500"
           }`}
         >
           2. Payment
@@ -339,7 +339,7 @@ export default function CheckoutPage() {
                     <select
                       value={billing.country}
                       onChange={(event) => setField("country", event.target.value)}
-                      className="w-full rounded-xl border border-white/10 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 focus:border-orange-500 focus:outline-none"
+                      className="w-full rounded-xl border border-white/10 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 focus:border-[var(--brand-primary)] focus:outline-none"
                     >
                       <option value="US">United States</option>
                       <option value="CA">Canada</option>
@@ -359,7 +359,7 @@ export default function CheckoutPage() {
               <button
                 type="submit"
                 disabled={loadingPayment}
-                className="w-full rounded-2xl bg-orange-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-orange-500/20 transition-colors hover:bg-orange-400 disabled:opacity-50"
+                className="w-full rounded-2xl bg-[var(--brand-primary)] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-[var(--brand-primary)]/20 transition-colors hover:bg-[var(--brand-primary-hover)] disabled:opacity-50"
               >
                 {loadingPayment ? "Loading..." : "Continue to Payment"}
               </button>
@@ -382,7 +382,7 @@ export default function CheckoutPage() {
                   <button
                     type="button"
                     onClick={() => setStep("info")}
-                    className="text-xs text-orange-400 transition-colors hover:text-orange-300"
+                    className="text-xs text-[var(--brand-primary)] transition-colors hover:text-[var(--brand-primary-hover)]"
                   >
                     Edit
                   </button>

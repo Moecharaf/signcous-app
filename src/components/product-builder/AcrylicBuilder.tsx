@@ -122,7 +122,7 @@ function ChoiceChip({
       onClick={onClick}
       className={`rounded-md border px-2 py-1 text-xs font-semibold transition ${
         active
-          ? "border-orange-300 bg-orange-50 text-orange-700"
+          ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]"
           : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"
       }`}
     >
@@ -146,7 +146,7 @@ function ToggleChip({
       onClick={onClick}
       className={`h-9 rounded border px-3 text-xs font-semibold transition ${
         active
-          ? "border-orange-300 bg-orange-50 text-orange-700"
+          ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]"
           : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"
       }`}
     >
@@ -191,7 +191,7 @@ function BreakdownRow({
       <span className={muted ? "text-zinc-400" : strong ? "font-semibold text-zinc-900" : "text-zinc-600"}>{label}</span>
       <span
         className={`tabular-nums ${
-          muted ? "text-zinc-400" : accent ? "font-semibold text-orange-600" : strong ? "font-semibold text-zinc-900" : "text-zinc-700"
+          muted ? "text-zinc-400" : accent ? "font-semibold text-[var(--brand-primary)]" : strong ? "font-semibold text-zinc-900" : "text-zinc-700"
         }`}
       >
         {value}
@@ -317,7 +317,7 @@ function AcrylicCanvas({
                 ))}
 
               {contourCut && (
-                <div className="absolute right-4 top-4 rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-orange-700">
+                <div className="absolute right-4 top-4 rounded-full border border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--brand-primary)]">
                   Contour Cut
                 </div>
               )}
@@ -547,10 +547,10 @@ export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
                 Premium clear and rigid signage for offices, lobbies, branding, and wall-mounted displays.
               </p>
             </div>
-            <div className="rounded-xl border border-orange-200 bg-gradient-to-r from-orange-50 to-amber-50 px-4 py-2 text-right">
-              <div className="text-xs uppercase tracking-[0.14em] text-orange-700">Live Total</div>
+            <div className="rounded-xl border border-[var(--brand-primary)] bg-gradient-to-r from-[var(--brand-primary-soft)] to-[#f3f8ff] px-4 py-2 text-right">
+              <div className="text-xs uppercase tracking-[0.14em] text-[var(--brand-primary)]">Live Total</div>
               <div className="text-3xl font-semibold text-zinc-900">{pricing ? formatCurrency(pricing.grandTotal) : formatCurrency(0)}</div>
-              <div className="text-xs text-orange-700/80">
+              <div className="text-xs text-[var(--brand-primary)]/80">
                 {pricing ? `${pricing.area.toFixed(1)} sq in · ${safeQuantity} unit${safeQuantity !== 1 ? "s" : ""}` : "Set dimensions to calculate"}
               </div>
             </div>
@@ -687,7 +687,7 @@ export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
                     className="h-9 rounded border border-zinc-300 px-2 text-sm"
                   />
                   <Button
-                    className="h-9 rounded bg-orange-500 text-xs font-semibold text-white hover:bg-orange-400"
+                    className="h-9 rounded bg-[var(--brand-primary)] text-xs font-semibold text-white hover:bg-[var(--brand-primary-hover)]"
                     disabled={!isValid}
                     onClick={addToCart}
                   >

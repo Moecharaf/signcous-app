@@ -217,10 +217,10 @@ export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE
             <h1 className="mt-1 text-3xl font-semibold tracking-tight text-zinc-900">Foamcore Configurator</h1>
             <p className="mt-1 text-sm text-zinc-600">Signs365-style sheet layout with per-block artwork upload.</p>
           </div>
-          <div className="rounded-xl border border-orange-200 bg-gradient-to-r from-orange-50 to-amber-50 px-4 py-2 text-right">
-            <div className="text-xs uppercase tracking-[0.14em] text-orange-700">Live Total</div>
+          <div className="rounded-xl border border-[var(--brand-primary)] bg-gradient-to-r from-[var(--brand-primary-soft)] to-[#f3f8ff] px-4 py-2 text-right">
+            <div className="text-xs uppercase tracking-[0.14em] text-[var(--brand-primary)]">Live Total</div>
             <div className="text-3xl font-semibold text-zinc-900">{formatPrice(pricing.totalPrice)}</div>
-            <div className="text-xs text-orange-700/80">{quantity} sign{quantity !== 1 ? "s" : ""} · {pricing.sheetsRequired} sheet{pricing.sheetsRequired !== 1 ? "s" : ""}</div>
+            <div className="text-xs text-[var(--brand-primary)]/80">{quantity} sign{quantity !== 1 ? "s" : ""} · {pricing.sheetsRequired} sheet{pricing.sheetsRequired !== 1 ? "s" : ""}</div>
           </div>
         </div>
 
@@ -352,7 +352,7 @@ export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE
                     onChange={(event) => setQuantity(Math.max(1, Number(event.target.value) || 1))}
                     className="h-9 rounded border border-zinc-300 px-2 text-sm"
                   />
-                  <Button className="h-9 rounded bg-orange-500 text-xs font-semibold text-white hover:bg-orange-400" onClick={addToCart}>
+                  <Button className="h-9 rounded bg-[var(--brand-primary)] text-xs font-semibold text-white hover:bg-[var(--brand-primary-hover)]" onClick={addToCart}>
                     {added ? "Added" : "Add"}
                   </Button>
                 </div>
@@ -376,7 +376,7 @@ export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE
                 <Row label="Rush (+120%)" value={formatPrice(pricing.rushFee)} />
                 <div className="my-2 border-t border-zinc-200" />
                 <Row label="Unit Price" value={formatPrice(pricing.unitPrice)} strong />
-                <Row label="Order Total" value={formatPrice(pricing.totalPrice)} strong className="text-orange-600" />
+                <Row label="Order Total" value={formatPrice(pricing.totalPrice)} strong className="text-[var(--brand-primary)]" />
               </div>
             </div>
 
@@ -467,7 +467,7 @@ export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE
                               type="button"
                               onClick={() => fileInputRefs.current[i]?.click()}
                               disabled={isUploading}
-                              className="shrink-0 rounded border border-dashed border-zinc-300 px-2 py-1 text-[10px] text-zinc-500 hover:border-orange-400 hover:text-orange-500 disabled:opacity-50"
+                              className="shrink-0 rounded border border-dashed border-zinc-300 px-2 py-1 text-[10px] text-zinc-500 hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)] disabled:opacity-50"
                             >
                               {isUploading ? "Uploading…" : "+ Upload"}
                             </button>

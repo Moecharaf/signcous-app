@@ -54,7 +54,7 @@ export default async function ShopPage() {
     <div className="min-h-screen bg-black text-white">
       <section className="mx-auto max-w-7xl px-6 py-16">
         <div className="mb-10">
-          <div className="text-xs font-semibold uppercase tracking-[0.2em] text-orange-400">Catalog</div>
+          <div className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--brand-primary)]">Catalog</div>
           <h1 className="mt-3 text-4xl font-black tracking-tight md:text-5xl">Core Signcous collections</h1>
           <p className="mt-3 max-w-2xl text-zinc-400">
             The storefront is limited to Banner, Rigid, Adhesive, and Magnet collections.
@@ -68,7 +68,7 @@ export default async function ShopPage() {
 
             return (
               <div key={parent.id} className="rounded-3xl border border-white/10 bg-zinc-950 p-6">
-                <Link href={`/shop/${parent.slug}`} className="text-2xl font-bold text-white hover:text-orange-400">
+                <Link href={`/shop/${parent.slug}`} className="text-2xl font-bold text-white hover:text-[var(--brand-primary)]">
                   {parent.name}
                 </Link>
                 <p className="mt-2 text-sm text-zinc-400">{collection?.description ?? `${parent.count} products`}</p>
@@ -84,7 +84,7 @@ export default async function ShopPage() {
                       <Link
                         key={child.id}
                         href={`/shop/${child.slug}`}
-                        className="rounded-full border border-white/15 px-3 py-1 text-xs text-zinc-300 hover:border-orange-500/40 hover:text-orange-300"
+                          className="rounded-full border border-white/15 px-3 py-1 text-xs text-zinc-300 hover:border-[var(--brand-primary)]/40 hover:text-[var(--brand-primary-hover)]"
                       >
                         {child.name}
                       </Link>
@@ -101,7 +101,7 @@ export default async function ShopPage() {
         <div className="mx-auto max-w-7xl px-6 py-14">
           <div className="mb-8 flex items-end justify-between gap-4">
             <div>
-              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-orange-400">New arrivals</div>
+              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--brand-primary)]">New arrivals</div>
               <h2 className="mt-2 text-3xl font-black tracking-tight">Recently added products</h2>
             </div>
           </div>
@@ -127,7 +127,7 @@ export default async function ShopPage() {
                     <h3 className="line-clamp-2 text-base font-semibold text-white">{product.name}</h3>
                     <p className="mt-2 line-clamp-2 text-sm text-zinc-400">{summary || "Custom print product"}</p>
                     <div className="mt-4 flex items-center justify-between">
-                      <span className="text-sm font-semibold text-orange-400">
+                      <span className="text-sm font-semibold text-[var(--brand-primary)]">
                         {product.price ? `$${product.price}` : "Request quote"}
                       </span>
                       <Link
