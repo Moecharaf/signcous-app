@@ -4,13 +4,20 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #1a1a1a;
+  --foreground: #111111;
   --muted-bg: #f5f5f5;
   --muted-fg: #6b6b6b;
   --border-color: #e0e0e0;
-  --brand-primary: #007fff;
+  --brand-orange: #ff7f00;
+  --brand-blue: #007fff;
+  --brand-black: #111111;
+  --brand-white: #ffffff;
+  --brand-primary: var(--brand-blue);
   --brand-primary-hover: #0066cc;
   --brand-primary-soft: #e6f2ff;
+  --brand-accent: var(--brand-orange);
+  --brand-accent-hover: #e67300;
+  --brand-accent-soft: #fff0df;
 }
 
 .dark {
@@ -19,9 +26,16 @@
   --muted-bg: #141414;
   --muted-fg: #9a9a9a;
   --border-color: #2a2a2a;
-  --brand-primary: #007fff;
+  --brand-orange: #ff7f00;
+  --brand-blue: #007fff;
+  --brand-black: #111111;
+  --brand-white: #ffffff;
+  --brand-primary: var(--brand-blue);
   --brand-primary-hover: #3399ff;
   --brand-primary-soft: #0d2238;
+  --brand-accent: var(--brand-orange);
+  --brand-accent-hover: #ff9a33;
+  --brand-accent-soft: #2b1a0a;
 }
 
 @theme inline {
@@ -54,7 +68,7 @@ body {
   right: 0;
   bottom: -0.2rem;
   height: 1px;
-  background: linear-gradient(90deg, transparent 0%, var(--brand-primary) 50%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, var(--brand-accent) 35%, var(--brand-primary) 65%, transparent 100%);
   background-size: 220% 100%;
   opacity: 0.75;
   animation: sc-label-shimmer 2.8s linear infinite;
