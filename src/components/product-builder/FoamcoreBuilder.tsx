@@ -1,5 +1,7 @@
 "use client";
 
+import BuilderLeftSidebar from "@/components/product-builder/BuilderLeftSidebar";
+
 import { useMemo, useRef, useState } from "react";
 import Button from "@/components/ui/Button";
 import { useCart } from "@/context/CartContext";
@@ -37,6 +39,7 @@ function formatPrice(value: number): string {
 
 export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE" }: FoamcoreBuilderProps) {
   const cart = useCart();
+  const [activeTool, setActiveTool] = useState("design");
 
   const [sizeId, setSizeId] = useState(FOAMCORE_SIZE_OPTIONS[0].id);
   const [printMode, setPrintMode] = useState<FoamcorePrintMode>("single");
@@ -209,9 +212,14 @@ export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE
     const uploadedCount = Object.keys(blockUploads).filter((k) => Number(k) < safeImageCount).length;
 
   return (
-    <div className="min-h-[calc(100vh-96px)] bg-[linear-gradient(145deg,#f4f4f5_0%,#ececef_55%,#e4e4e7_100%)] text-zinc-800">
-      <div className="w-full px-3 py-3 md:px-4">
-        <div className="mb-3 grid gap-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm md:grid-cols-[1fr_auto] md:items-end">
+    <div className="flex h-[calc(100vh-88px)] overflow-hidden">
+      <BuilderLeftSidebar activeTool={activeTool} onToolChange={setActiveTool} />
+      <div
+        className="flex flex-1 flex-col overflow-hidden"
+        style={{ background: "radial-gradient(circle at top, rgba(0,127,255,.05), transparent 35%), #f0f0f0" }}
+      >
+      <div className="flex-1 overflow-y-auto p-3 md:p-4">
+        <div className="mb-3 rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm">
           <div>
             <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500">Rigid Product</div>
             <h1 className="mt-1 text-3xl font-semibold tracking-tight text-zinc-900">Foamcore Configurator</h1>
@@ -224,7 +232,7 @@ export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE
           </div>
         </div>
 
-        <div className="grid gap-3">
+        <div className="flex gap-3">
           <section className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
             <div className="border-b border-zinc-200 px-4 py-3">
               <div className="text-sm font-medium text-zinc-700">
@@ -233,11 +241,11 @@ export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE
             </div>
 
             <div
-              className="relative h-[calc(100vh-290px)] min-h-[560px] overflow-hidden rounded-b-2xl bg-[#fafaf9]"
+              className="relative h-[calc(100vh-200px)] min-h-[560px] overflow-hidden rounded-b-2xl bg-[#fafaf9]"
               style={{
                 backgroundImage:
-                  "linear-gradient(to right, rgba(63,63,70,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(63,63,70,0.08) 1px, transparent 1px)",
-                backgroundSize: "26px 26px",
+                  "linear-gradient(to right, rgba(100,100,120,0.10) 1px, transparent 1px), linear-gradient(to bottom, rgba(100,100,120,0.10) 1px, transparent 1px)",
+                backgroundSize: "40px 40px",
               }}
             >
               <div
@@ -360,7 +368,18 @@ export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE
             </div>
           </section>
 
-          <aside className="space-y-3">
+      </div>
+      </div>
+      {/* RIGHT PANEL */}
+      <div className="flex w-[400px] flex-shrink-0 flex-col border-l border-zinc-200 bg-white">
+        <div className="border-b border-zinc-100 px-5 py-4">
+          <div className="mb-1 inline-flex items-center gap-1.5 rounded-full bg-[#007fff]/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-[#007fff]">
+            Signcous Studio
+          </div>
+          <div className="mt-1 text-lg font-bold tracking-tight text-zinc-900">Foamcore</div>
+        </div>
+        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
+          <aside className="space-y-4">
             <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
               <div className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">Pricing Breakdown</div>
               <div className="mt-3 space-y-2 text-sm">
@@ -477,7 +496,7 @@ export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE
                           <img src={upload.blobUrl} alt={upload.fileName} className="mt-2 h-16 w-full rounded object-contain" />
                         )}
                         {upload && !upload.blobUrl && (
-                          <div className="mt-1 rounded bg-emerald-50 px-2 py-1 text-[10px] text-emerald-700">✓ {upload.fileName}</div>
+                          <div className="mt-1 rounded bg-emerald-50 px-2 py-1 text-[10px] text-emerald-700">{upload.fileName}</div>
                         )}
                         {error && (
                           <div className="mt-1 rounded bg-rose-50 px-2 py-1 text-[10px] text-rose-700">{error}</div>
@@ -490,8 +509,38 @@ export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE
             </div>
           </aside>
         </div>
+        {/* STICKY CTA */}
+        <div className="flex-shrink-0 border-t border-zinc-200 bg-white p-4">
+          <div className="rounded-2xl bg-zinc-900 px-4 py-3 shadow-[0_8px_24px_rgba(0,0,0,0.20)]">
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#007fff]">Live Total</div>
+                <div className="mt-0.5 text-3xl font-bold leading-none text-white">
+                  {formatPrice(pricing.totalPrice)}
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                  Ships Tomorrow
+                </div>
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={addToCart}
+            className="mt-3 w-full rounded-2xl bg-[#ff7f00] py-4 text-base font-bold text-white shadow-[0_4px_16px_rgba(255,127,0,0.35)] transition-all duration-200 hover:bg-[#e67200] hover:shadow-[0_6px_20px_rgba(255,127,0,0.45)] hover:scale-[1.01] active:scale-[0.99]"
+          >
+            {added ? "Added to Cart" : "ADD TO CART"}
+          </button>
+          <p className="mt-2 text-center text-[10px] text-zinc-400">
+            Free proofing &middot; Secure checkout &middot; No setup fees
+          </p>
+        </div>
       </div>
-    </div>
+        </div>
+      </div>
   );
 }
 

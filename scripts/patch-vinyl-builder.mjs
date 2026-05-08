@@ -1,647 +1,16 @@
-"use client";
+import { readFileSync, writeFileSync } from "fs";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import BuilderLeftSidebar from "@/components/product-builder/BuilderLeftSidebar";
-import Button from "@/components/ui/Button";
-import {
-  calculateBannerPrice,
-  calculateCanvasPrice,
-  calculateHdpePrice,
-  calculateMeshPrice,
-  calculateNoCurlPrice,
-  calculatePosterPrice,
-  type EdgeFinish,
-  formatPrice,
-  getCanvasSqFtRate,
-  getHdpeSqFtRate,
-  getMeshSqFtRate,
-  getNoCurlSqFtRate,
-  getPosterSqFtRate,
-  type GrommetMode,
-  type Material,
-} from "@/lib/pricing";
-import { useCart } from "@/context/CartContext";
+const filePath = new URL(
+  "../src/components/product-builder/VinylBannerBuilder.tsx",
+  import.meta.url
+).pathname.replace(/^\/([A-Z]:)/, "$1");
 
-const materialOptions = ["13oz Vinyl", "15oz Vinyl", "Mesh Banner", "Fabric Banner"] as const;
-const unitOptions = ["inches", "feet"] as const;
+const lines = readFileSync(filePath, "utf8").split("\n");
 
-type Unit = (typeof unitOptions)[number];
+// Keep everything up to (but not including) the `return (` at line 645 (index 644)
+const keepLines = lines.slice(0, 644);
 
-interface FormState {
-  width: string;
-  height: string;
-  unit: Unit;
-  quantity: string;
-  material: Material;
-  doubleSided: boolean;
-  grommets: boolean;
-  grommetMode: GrommetMode;
-  edgeFinish: EdgeFinish;
-  polePockets: boolean;
-  windSlits: boolean;
-  hemming: boolean;
-  rush: boolean;
-  meshWelding: boolean;
-  meshWebbing: boolean;
-  meshRope: boolean;
-}
-
-interface FormErrors {
-  width?: string;
-  height?: string;
-  quantity?: string;
-}
-
-type DragState =
-  | { mode: "none" }
-  | { mode: "move"; startX: number; startY: number; originX: number; originY: number }
-  | { mode: "resize"; startX: number; startY: number; startW: number; startH: number; startPxPerIn: number };
-
-const DEFAULTS: FormState = {
-  width: "48",
-  height: "24",
-  unit: "inches",
-  quantity: "1",
-  material: "13oz Vinyl",
-  doubleSided: false,
-  grommets: true,
-  grommetMode: "every-2ft",
-  edgeFinish: "none",
-  polePockets: false,
-  windSlits: false,
-  hemming: false,
-  rush: false,
-  meshWelding: true,
-  meshWebbing: false,
-  meshRope: false,
-};
-
-interface VinylBannerBuilderProps {
-  initialMaterial?: Material;
-  productName?: string;
-  productDescription?: string;
-  productId?: number;
-  pricingMode?: "banner" | "canvas" | "mesh" | "hdpe" | "poster" | "nocurl" | "economical-stand";
-}
-
-const MIN_IN = 6;
-const MAX_IN = 240;
-const PREVIEW_MAX_WIDTH = 720;
-const PREVIEW_MAX_HEIGHT = 420;
-const ECONOMICAL_STAND_WIDTH_IN = 33.5;
-const ECONOMICAL_STAND_HEIGHT_IN = 80;
-const ECONOMICAL_STAND_UNIT_PRICE = 130;
-const ECONOMICAL_STAND_PREVIEW_HEIGHT = 520;
-
-function clamp(n: number, min: number, max: number): number {
-  return Math.max(min, Math.min(max, n));
-}
-
-function toInches(value: number, unit: Unit): number {
-  return unit === "feet" ? value * 12 : value;
-}
-
-function fromInches(value: number, unit: Unit): string {
-  if (unit === "feet") return (value / 12).toFixed(2);
-  return value.toFixed(1);
-}
-
-function formatInchLabel(value: number): string {
-  const rounded = parseFloat(value.toFixed(2));
-  const text = Number.isInteger(rounded) ? rounded.toFixed(0) : rounded.toString();
-  return `${text.replace(/\.0+$/, "")}\"`;
-}
-
-function getGrommetPoints(
-  widthIn: number,
-  heightIn: number,
-  enabled: boolean,
-  mode: GrommetMode
-): Array<{ xPct: number; yPct: number }> {
-  if (!enabled || widthIn <= 0 || heightIn <= 0) return [];
-
-  if (mode === "per-corner") {
-    return [
-      { xPct: 0, yPct: 0 },
-      { xPct: 100, yPct: 0 },
-      { xPct: 100, yPct: 100 },
-      { xPct: 0, yPct: 100 },
-    ];
-  }
-
-  const points: Array<{ xPct: number; yPct: number }> = [];
-  const xSegments = Math.max(1, Math.ceil(widthIn / 24));
-  const ySegments = Math.max(1, Math.ceil(heightIn / 24));
-
-  for (let i = 0; i <= xSegments; i += 1) {
-    const xPct = (i / xSegments) * 100;
-    points.push({ xPct, yPct: 0 });
-    points.push({ xPct, yPct: 100 });
-  }
-
-  for (let i = 1; i < ySegments; i += 1) {
-    const yPct = (i / ySegments) * 100;
-    points.push({ xPct: 0, yPct });
-    points.push({ xPct: 100, yPct });
-  }
-
-  return points;
-}
-
-export default function VinylBannerBuilder({
-  initialMaterial = "13oz Vinyl",
-  productName = "Vinyl Banner",
-  productDescription,
-  productId = 12,
-  pricingMode = "banner",
-}: VinylBannerBuilderProps) {
-  const cart = useCart();
-  const [activeTool, setActiveTool] = useState("design");
-  const [form, setForm] = useState<FormState>({ ...DEFAULTS, material: initialMaterial });
-  const [errors, setErrors] = useState<FormErrors>({});
-  const [addedToCart, setAddedToCart] = useState(false);
-  const [zoom, setZoom] = useState(1);
-  const [artPos, setArtPos] = useState({ x: 0, y: 0 });
-  const [drag, setDrag] = useState<DragState>({ mode: "none" });
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-  const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null);
-  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
-  const [uploadingArtwork, setUploadingArtwork] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-  const workspaceRef = useRef<HTMLDivElement | null>(null);
-
-  const widthNum = parseFloat(form.width) || 0;
-  const heightNum = parseFloat(form.height) || 0;
-  const qtyNum = parseInt(form.quantity, 10) || 1;
-
-  const widthIn = toInches(widthNum, form.unit);
-  const heightIn = toInches(heightNum, form.unit);
-  const isCanvasProduct = pricingMode === "canvas";
-  const isMeshProduct   = pricingMode === "mesh";
-  const isHdpeProduct   = pricingMode === "hdpe";
-  const isPosterProduct = pricingMode === "poster";
-  const isNoCurlProduct = pricingMode === "nocurl";
-  const isEconomicalStandProduct = pricingMode === "economical-stand";
-  const effectiveQtyNum = isPosterProduct ? 1 : qtyNum;
-  const isMeshMaterial  = isMeshProduct || form.material === "Mesh Banner";
-  const posterBillableSqFt = Math.max(1, Math.ceil((widthIn / 12) * (heightIn / 12)));
-  const meshBillableSqFt = Math.max(1, Math.ceil((widthIn / 12) * (heightIn / 12)));
-  const perimeterFt = 2 * ((widthIn / 12) + (heightIn / 12));
-  const meshWebbingCost = form.meshWebbing ? perimeterFt * 1.75 : 0;
-  const meshRopeCost = form.meshRope ? perimeterFt * 1.75 : 0;
-
-  const fitScale = Math.min(
-    PREVIEW_MAX_WIDTH / Math.max(widthIn, 1),
-    PREVIEW_MAX_HEIGHT / Math.max(heightIn, 1)
-  );
-  const pxPerIn = isEconomicalStandProduct
-    ? ECONOMICAL_STAND_PREVIEW_HEIGHT / ECONOMICAL_STAND_HEIGHT_IN
-    : fitScale * zoom;
-  const artWidth = widthIn * pxPerIn;
-  const artHeight = heightIn * pxPerIn;
-  const widthLabelInches = formatInchLabel(widthIn);
-  const heightLabelInches = formatInchLabel(heightIn);
-
-  const canvasRate = useMemo(() => getCanvasSqFtRate(qtyNum), [qtyNum]);
-  const hdpeRate = useMemo(() => getHdpeSqFtRate(qtyNum), [qtyNum]);
-  const noCurlRate = useMemo(() => getNoCurlSqFtRate(Math.max(1, Math.ceil((widthIn / 12) * (heightIn / 12)))), [widthIn, heightIn]);
-  const posterRate = useMemo(() => getPosterSqFtRate(posterBillableSqFt), [posterBillableSqFt]);
-  const meshRate   = useMemo(() => getMeshSqFtRate(meshBillableSqFt), [meshBillableSqFt]);
-  const meshGrommetPoints = useMemo(
-    () => getGrommetPoints(widthIn, heightIn, !isCanvasProduct && !isHdpeProduct && !isPosterProduct && !isNoCurlProduct && form.grommets, form.grommetMode),
-    [widthIn, heightIn, isCanvasProduct, isHdpeProduct, isPosterProduct, isNoCurlProduct, form.grommets, form.grommetMode]
-  );
-
-  const pricing = useMemo(
-    () => {
-      if (isMeshProduct) {
-        const m = calculateMeshPrice(
-          widthNum, heightNum, form.unit, effectiveQtyNum,
-          form.grommets,
-          form.meshWelding,
-          form.meshWebbing,
-          form.meshRope,
-          form.polePockets,
-          form.rush
-        );
-        return {
-          sqFt:                 m.sqFt,
-          basePricePerUnit:     m.basePricePerUnit,
-          grommetCostPerUnit:   m.grommetCostPerUnit,
-          edgeFinishCostPerUnit: m.edgeFinishCostPerUnit,
-          polePocketCostPerUnit: m.polePocketCostPerUnit,
-          windSlitsCostPerUnit: 0,
-          hemmingCostPerUnit:   0,
-          addOnCostPerUnit:     m.polePocketCostPerUnit + m.edgeFinishCostPerUnit,
-          rushSurchargePerUnit: m.rushSurchargePerUnit,
-          unitPrice:            m.unitPrice,
-          totalPrice:           m.totalPrice,
-        };
-      }
-
-      if (isCanvasProduct) {
-        const canvasPricing = calculateCanvasPrice(widthNum, heightNum, form.unit, effectiveQtyNum);
-
-        return {
-          sqFt: canvasPricing.sqFt,
-          basePricePerUnit: canvasPricing.baseTotalPrice / effectiveQtyNum,
-          grommetCostPerUnit: 0,
-          edgeFinishCostPerUnit: 0,
-          polePocketCostPerUnit: 0,
-          windSlitsCostPerUnit: 0,
-          hemmingCostPerUnit: 0,
-          addOnCostPerUnit: 0,
-          rushSurchargePerUnit: 0,
-          unitPrice: canvasPricing.unitPrice,
-          totalPrice: canvasPricing.totalPrice,
-        };
-      }
-
-      if (isHdpeProduct) {
-        const hdpePricing = calculateHdpePrice(widthIn, heightIn, effectiveQtyNum);
-
-        return {
-          sqFt: hdpePricing.sqFt,
-          basePricePerUnit: hdpePricing.unitPrice,
-          grommetCostPerUnit: 0,
-          edgeFinishCostPerUnit: 0,
-          polePocketCostPerUnit: 0,
-          windSlitsCostPerUnit: 0,
-          hemmingCostPerUnit: 0,
-          addOnCostPerUnit: 0,
-          rushSurchargePerUnit: 0,
-          unitPrice: hdpePricing.unitPrice,
-          totalPrice: hdpePricing.totalPrice,
-        };
-      }
-
-      if (isPosterProduct) {
-        const posterPricing = calculatePosterPrice(widthNum, heightNum, form.unit, effectiveQtyNum, false);
-
-        return {
-          sqFt: posterPricing.sqFt,
-          basePricePerUnit: posterPricing.basePricePerUnit,
-          grommetCostPerUnit: 0,
-          edgeFinishCostPerUnit: 0,
-          polePocketCostPerUnit: 0,
-          windSlitsCostPerUnit: 0,
-          hemmingCostPerUnit: 0,
-          addOnCostPerUnit: 0,
-          rushSurchargePerUnit: posterPricing.rushSurchargePerUnit,
-          unitPrice: posterPricing.unitPrice,
-          totalPrice: posterPricing.totalPrice,
-        };
-      }
-
-      if (isNoCurlProduct) {
-        const noCurlPricing = calculateNoCurlPrice(widthNum, heightNum, form.unit, effectiveQtyNum, form.rush);
-
-        return {
-          sqFt: noCurlPricing.sqFt,
-          basePricePerUnit: noCurlPricing.basePricePerUnit,
-          grommetCostPerUnit: 0,
-          edgeFinishCostPerUnit: 0,
-          polePocketCostPerUnit: 0,
-          windSlitsCostPerUnit: 0,
-          hemmingCostPerUnit: 0,
-          addOnCostPerUnit: 0,
-          rushSurchargePerUnit: noCurlPricing.rushSurchargePerUnit,
-          unitPrice: noCurlPricing.unitPrice,
-          totalPrice: noCurlPricing.totalPrice,
-        };
-      }
-
-      if (isEconomicalStandProduct) {
-        return {
-          sqFt: Number(((ECONOMICAL_STAND_WIDTH_IN / 12) * (ECONOMICAL_STAND_HEIGHT_IN / 12)).toFixed(2)),
-          basePricePerUnit: ECONOMICAL_STAND_UNIT_PRICE,
-          grommetCostPerUnit: 0,
-          edgeFinishCostPerUnit: 0,
-          polePocketCostPerUnit: 0,
-          windSlitsCostPerUnit: 0,
-          hemmingCostPerUnit: 0,
-          addOnCostPerUnit: 0,
-          rushSurchargePerUnit: 0,
-          unitPrice: ECONOMICAL_STAND_UNIT_PRICE,
-          totalPrice: ECONOMICAL_STAND_UNIT_PRICE * effectiveQtyNum,
-        };
-      }
-
-      return calculateBannerPrice({
-        widthIn,
-        heightIn,
-        quantity: effectiveQtyNum,
-        material: form.material,
-        doubleSided: form.doubleSided,
-        grommets: form.grommets,
-        grommetMode: form.grommetMode,
-        edgeFinish: form.edgeFinish,
-        polePockets: form.polePockets,
-        windSlits: form.windSlits,
-        hemming: form.hemming,
-        rush: form.rush,
-      });
-    },
-    [
-      isMeshProduct,
-      isCanvasProduct,
-      isHdpeProduct,
-      isPosterProduct,
-      isNoCurlProduct,
-      isEconomicalStandProduct,
-      widthNum,
-      heightNum,
-      form.unit,
-      widthIn,
-      heightIn,
-      qtyNum,
-      form.material,
-      form.doubleSided,
-      form.grommets,
-      form.grommetMode,
-      form.edgeFinish,
-      form.polePockets,
-      form.windSlits,
-      form.hemming,
-      form.rush,
-      form.meshWelding,
-      form.meshWebbing,
-      form.meshRope,
-    ]
-  );
-
-  const set = useCallback(
-    <K extends keyof FormState>(key: K, value: FormState[K]) => {
-      setForm((prev) => ({ ...prev, [key]: value }));
-    },
-    []
-  );
-
-  function validate(): boolean {
-    const nextErrors: FormErrors = {};
-
-    if (!widthNum || widthIn < MIN_IN || widthIn > MAX_IN) {
-      nextErrors.width = form.unit === "inches" ? "Use 6-240 in" : "Use 0.5-20 ft";
-    }
-    if (!heightNum || heightIn < MIN_IN || heightIn > MAX_IN) {
-      nextErrors.height = form.unit === "inches" ? "Use 6-240 in" : "Use 0.5-20 ft";
-    }
-    if (!qtyNum || qtyNum < 1 || qtyNum > 10000) {
-      nextErrors.quantity = "Use 1-10000";
-    }
-
-    setErrors(nextErrors);
-    return Object.keys(nextErrors).length === 0;
-  }
-
-  function handleAddToCart() {
-    if (!validate()) return;
-
-    if (uploadingArtwork) {
-      setUploadError("Please wait for your artwork to finish uploading.");
-      return;
-    }
-
-    const meshEdgeFinish: EdgeFinish = form.meshRope
-      ? "rope"
-      : form.meshWebbing
-        ? "webbing"
-        : form.meshWelding
-          ? "welding"
-          : "none";
-
-    cart.addItem({
-      productId,
-      productName,
-      width: widthNum,
-      height: heightNum,
-      unit: form.unit,
-      quantity: effectiveQtyNum,
-      material: isNoCurlProduct ? "No-Curl Banner" : isPosterProduct ? "Poster" : isHdpeProduct ? "HDPE" : isCanvasProduct ? "Canvas" : isMeshProduct ? "Mesh Banner" : form.material,
-      doubleSided: (isCanvasProduct || isMeshProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct || isEconomicalStandProduct) ? false : form.doubleSided,
-      grommets: isNoCurlProduct
-        ? true
-        : (isCanvasProduct || isHdpeProduct || isPosterProduct || isEconomicalStandProduct)
-          ? false
-          : form.grommets,
-      edgeFinish: (isCanvasProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct || isEconomicalStandProduct)
-        ? "none"
-        : isMeshProduct
-          ? meshEdgeFinish
-          : form.edgeFinish,
-      polePockets: (isCanvasProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct || isEconomicalStandProduct)
-        ? false
-        : form.polePockets,
-      windSlits: (isCanvasProduct || isMeshProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct || isEconomicalStandProduct)
-        ? false
-        : form.windSlits,
-      hemming: (isCanvasProduct || isMeshProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct || isEconomicalStandProduct)
-        ? false
-        : form.hemming,
-      rush: (isCanvasProduct || isHdpeProduct || isPosterProduct || isEconomicalStandProduct) ? false : form.rush,
-      uploadedFileUrl,
-      uploadedFileName,
-      unitPrice: pricing.unitPrice,
-      totalPrice: pricing.totalPrice,
-    });
-
-    setAddedToCart(true);
-    setTimeout(() => setAddedToCart(false), 2500);
-  }
-
-  async function onUploadArtwork(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    setUploadingArtwork(true);
-    setUploadError(null);
-
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const response = await fetch("/api/upload-artwork", {
-        method: "POST",
-        body: formData,
-      });
-      const contentType = response.headers.get("content-type") ?? "";
-      let data: { fileUrl?: string; originalName?: string; error?: string } = {};
-
-      if (contentType.includes("application/json")) {
-        data = await response.json();
-      } else {
-        const raw = await response.text();
-        data = {
-          error:
-            response.status === 413
-              ? "Upload rejected by server size limit. Ask support to increase Nginx client_max_body_size."
-              : `Upload failed with status ${response.status}. ${raw.slice(0, 180)}`,
-        };
-      }
-
-      if (!response.ok || !data.fileUrl) {
-        setUploadError(data.error ?? `Artwork upload failed (status ${response.status}).`);
-        return;
-      }
-
-      setUploadedFileUrl(data.fileUrl);
-      setUploadedFileName(data.originalName ?? file.name);
-
-      if (file.type.startsWith("image/")) {
-        const blobUrl = URL.createObjectURL(file);
-        setUploadedImage((prev) => {
-          if (prev) URL.revokeObjectURL(prev);
-          return blobUrl;
-        });
-      } else {
-        setUploadedImage((prev) => {
-          if (prev) URL.revokeObjectURL(prev);
-          return null;
-        });
-      }
-    } catch {
-      setUploadError("Artwork upload failed. Please try again.");
-    } finally {
-      setUploadingArtwork(false);
-      event.target.value = "";
-    }
-  }
-
-  function startMove(event: React.PointerEvent<HTMLDivElement>) {
-    const target = event.target as HTMLElement;
-    if (target.dataset.role === "resize-handle") return;
-    event.currentTarget.setPointerCapture(event.pointerId);
-    setDrag({
-      mode: "move",
-      startX: event.clientX,
-      startY: event.clientY,
-      originX: artPos.x,
-      originY: artPos.y,
-    });
-  }
-
-  function startResize(event: React.PointerEvent<HTMLButtonElement>) {
-    event.stopPropagation();
-    event.currentTarget.setPointerCapture(event.pointerId);
-    setDrag({
-      mode: "resize",
-      startX: event.clientX,
-      startY: event.clientY,
-      startW: widthIn,
-      startH: heightIn,
-      startPxPerIn: pxPerIn || 1,
-    });
-  }
-
-  useEffect(() => {
-    function onPointerMove(event: PointerEvent) {
-      if (!workspaceRef.current) return;
-      if (drag.mode === "none") return;
-
-      if (drag.mode === "move") {
-        const dx = event.clientX - drag.startX;
-        const dy = event.clientY - drag.startY;
-        setArtPos({ x: drag.originX + dx, y: drag.originY + dy });
-        return;
-      }
-
-      const dxIn = (event.clientX - drag.startX) / drag.startPxPerIn;
-      const dyIn = (event.clientY - drag.startY) / drag.startPxPerIn;
-
-      const nextWIn = clamp(drag.startW + dxIn, MIN_IN, MAX_IN);
-      const nextHIn = clamp(drag.startH + dyIn, MIN_IN, MAX_IN);
-
-      set("width", fromInches(nextWIn, form.unit));
-      set("height", fromInches(nextHIn, form.unit));
-    }
-
-    function onPointerUp() {
-      setDrag({ mode: "none" });
-    }
-
-    window.addEventListener("pointermove", onPointerMove);
-    window.addEventListener("pointerup", onPointerUp);
-
-    return () => {
-      window.removeEventListener("pointermove", onPointerMove);
-      window.removeEventListener("pointerup", onPointerUp);
-    };
-  }, [drag, form.unit, pxPerIn, set]);
-
-  useEffect(() => {
-    return () => {
-      if (uploadedImage) URL.revokeObjectURL(uploadedImage);
-    };
-  }, [uploadedImage]);
-
-  useEffect(() => {
-    if (!isMeshMaterial) return;
-
-    setForm((prev) => {
-      if (!prev.doubleSided && !prev.windSlits && !prev.hemming) {
-        return prev;
-      }
-
-      return {
-        ...prev,
-        doubleSided: false,
-        windSlits: false,
-        hemming: false,
-      };
-    });
-  }, [isMeshMaterial]);
-
-  useEffect(() => {
-    if (!isMeshProduct) return;
-
-    setForm((prev) => {
-      if (prev.meshWelding || prev.meshWebbing || prev.meshRope) {
-        return prev;
-      }
-
-      return {
-        ...prev,
-        meshWelding: true,
-      };
-    });
-  }, [isMeshProduct]);
-
-  useEffect(() => {
-    if (!isEconomicalStandProduct) return;
-
-    setForm((prev) => {
-      const targetWidth = ECONOMICAL_STAND_WIDTH_IN.toString();
-      const targetHeight = ECONOMICAL_STAND_HEIGHT_IN.toString();
-      const needsUpdate =
-        prev.width !== targetWidth ||
-        prev.height !== targetHeight ||
-        prev.unit !== "inches" ||
-        prev.doubleSided !== false ||
-        prev.grommets !== false ||
-        prev.polePockets !== false ||
-        prev.windSlits !== false ||
-        prev.hemming !== false ||
-        prev.rush !== false;
-
-      if (!needsUpdate) {
-        return prev;
-      }
-
-      return {
-        ...prev,
-        width: targetWidth,
-        height: targetHeight,
-        unit: "inches",
-        doubleSided: false,
-        grommets: false,
-        polePockets: false,
-        windSlits: false,
-        hemming: false,
-        rush: false,
-      };
-    });
-  }, [isEconomicalStandProduct]);
-
+const newEnding = `
   return (
     <div className="flex h-[calc(100vh-88px)] overflow-hidden">
       {/* LEFT SIDEBAR */}
@@ -705,7 +74,7 @@ export default function VinylBannerBuilder({
         {/* Canvas workspace */}
         <div
           ref={workspaceRef}
-          className={`relative flex-1 overflow-hidden ${isMeshProduct ? "bg-[#eeede9]" : ""}`}
+          className={\`relative flex-1 overflow-hidden \${isMeshProduct ? "bg-[#eeede9]" : ""}\`}
           style={{
             backgroundImage:
               "linear-gradient(to right, rgba(100,100,120,0.10) 1px, transparent 1px), linear-gradient(to bottom, rgba(100,100,120,0.10) 1px, transparent 1px)",
@@ -719,16 +88,16 @@ export default function VinylBannerBuilder({
 
           {/* Draggable banner/sign */}
           <div
-            className={`absolute left-1/2 top-1/2 cursor-move select-none transition-shadow ${
+            className={\`absolute left-1/2 top-1/2 cursor-move select-none transition-shadow \${
               isMeshProduct || isEconomicalStandProduct
                 ? "rounded-md border border-zinc-400 bg-white shadow-[0_8px_40px_rgba(0,0,0,0.18)]"
                 : "rounded-lg shadow-[0_16px_48px_rgba(0,0,0,0.22)]"
-            }`}
+            }\`}
             onPointerDown={startMove}
             style={{
               width: artWidth,
               height: artHeight,
-              transform: `translate(calc(-50% + ${artPos.x}px), calc(-50% + ${artPos.y}px))`,
+              transform: \`translate(calc(-50% + \${artPos.x}px), calc(-50% + \${artPos.y}px))\`,
               background:
                 !isMeshProduct && !isEconomicalStandProduct && !uploadedImage
                   ? "repeating-linear-gradient(45deg,rgba(0,127,255,0.04) 0px,rgba(0,127,255,0.04) 10px,transparent 10px,transparent 20px),linear-gradient(135deg,#eef6ff 0%,#f8fbff 100%)"
@@ -793,9 +162,9 @@ export default function VinylBannerBuilder({
 
             {meshGrommetPoints.map((point, index) => (
               <span
-                key={`grommet-${index}`}
+                key={\`grommet-\${index}\`}
                 className="pointer-events-none absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-zinc-500 bg-zinc-100 shadow"
-                style={{ left: `${point.xPct}%`, top: `${point.yPct}%` }}
+                style={{ left: \`\${point.xPct}%\`, top: \`\${point.yPct}%\` }}
               >
                 <span className="absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-zinc-400" />
               </span>
@@ -929,15 +298,15 @@ export default function VinylBannerBuilder({
                         key={mat}
                         type="button"
                         onClick={() => set("material", mat as Material)}
-                        className={`flex flex-col items-start overflow-hidden rounded-xl border-2 text-left transition-all duration-200 ${
+                        className={\`flex flex-col items-start overflow-hidden rounded-xl border-2 text-left transition-all duration-200 \${
                           isSelected
                             ? "border-[#ff7f00] shadow-[0_0_0_3px_rgba(255,127,0,0.15)]"
                             : "border-zinc-200 hover:border-zinc-300 hover:shadow-sm"
-                        }`}
+                        }\`}
                       >
                         <div className="h-12 w-full" style={{ background: swatches[mat] ?? "#e5e7eb" }} />
                         <div className="px-2.5 py-2">
-                          <div className={`text-[11px] font-semibold ${isSelected ? "text-[#ff7f00]" : "text-zinc-700"}`}>{mat}</div>
+                          <div className={\`text-[11px] font-semibold \${isSelected ? "text-[#ff7f00]" : "text-zinc-700"}\`}>{mat}</div>
                         </div>
                       </button>
                     );
@@ -1107,19 +476,19 @@ export default function VinylBannerBuilder({
               <Row label="Base (per unit)" value={formatPrice(pricing.basePricePerUnit)} />
               {isCanvasProduct ? (
                 <>
-                  <Row label="Canvas Rate" value={`${formatPrice(canvasRate)} / sqft`} />
+                  <Row label="Canvas Rate" value={\`\${formatPrice(canvasRate)} / sqft\`} />
                   <Row label="Formula" value="max(W × H × rate × qty, $20)" />
                 </>
               ) : isHdpeProduct ? (
                 <>
-                  <Row label="Rate" value={`${formatPrice(hdpeRate)} / sqft`} />
+                  <Row label="Rate" value={\`\${formatPrice(hdpeRate)} / sqft\`} />
                   <Row label="Sq Ft" value={String(pricing.sqFt)} />
                   <Row label="Min Order" value="$20.00" />
                 </>
               ) : isNoCurlProduct ? (
                 <>
-                  <Row label="Rate" value={`${formatPrice(noCurlRate)} / sqft`} />
-                  <Row label="Billable Area" value={`${pricing.sqFt} sqft`} />
+                  <Row label="Rate" value={\`\${formatPrice(noCurlRate)} / sqft\`} />
+                  <Row label="Billable Area" value={\`\${pricing.sqFt} sqft\`} />
                   <Row label="Grommets" value="Included" />
                   <Row label="Rush" value={formatPrice(pricing.rushSurchargePerUnit)} />
                 </>
@@ -1130,13 +499,13 @@ export default function VinylBannerBuilder({
                 </>
               ) : isPosterProduct ? (
                 <>
-                  <Row label="Poster Rate" value={`${formatPrice(posterRate)} / sqft`} />
-                  <Row label="Billable Area" value={`${pricing.sqFt} sqft`} />
+                  <Row label="Poster Rate" value={\`\${formatPrice(posterRate)} / sqft\`} />
+                  <Row label="Billable Area" value={\`\${pricing.sqFt} sqft\`} />
                 </>
               ) : isMeshProduct ? (
                 <>
-                  <Row label="Mesh Rate" value={`${formatPrice(meshRate)} / sqft`} />
-                  <Row label="Billable Area" value={`${pricing.sqFt} sqft`} />
+                  <Row label="Mesh Rate" value={\`\${formatPrice(meshRate)} / sqft\`} />
+                  <Row label="Billable Area" value={\`\${pricing.sqFt} sqft\`} />
                   <Row label="Grommets" value="Free" />
                   <Row label="Pole Pockets" value={formatPrice(pricing.polePocketCostPerUnit)} />
                   <Row label="Rush" value={formatPrice(pricing.rushSurchargePerUnit)} />
@@ -1154,7 +523,7 @@ export default function VinylBannerBuilder({
               <div className="my-2 border-t border-zinc-100" />
               <Row label="Unit Price" value={formatPrice(pricing.unitPrice)} strong />
               <Row
-                label={`Order Total (${effectiveQtyNum} unit${effectiveQtyNum !== 1 ? "s" : ""})`}
+                label={\`Order Total (\${effectiveQtyNum} unit\${effectiveQtyNum !== 1 ? "s" : ""})\`}
                 value={formatPrice(pricing.totalPrice)}
                 strong
                 className="text-[#007fff]"
@@ -1190,7 +559,7 @@ export default function VinylBannerBuilder({
             onClick={handleAddToCart}
             className="mt-3 w-full rounded-2xl bg-[#ff7f00] py-4 text-base font-bold text-white shadow-[0_4px_16px_rgba(255,127,0,0.35)] transition-all duration-200 hover:bg-[#e67200] hover:shadow-[0_6px_20px_rgba(255,127,0,0.45)] hover:scale-[1.01] active:scale-[0.99]"
           >
-            {addedToCart ? "\u2713 Added to Cart" : "ADD TO CART"}
+            {addedToCart ? "\\u2713 Added to Cart" : "ADD TO CART"}
           </button>
           <p className="mt-2 text-center text-[10px] text-zinc-400">
             Free proofing &middot; Secure checkout &middot; No setup fees
@@ -1227,23 +596,23 @@ function OptionRow({
       type="button"
       onClick={onChange}
       disabled={disabled}
-      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm transition-colors duration-150 ${
+      className={\`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm transition-colors duration-150 \${
         disabled
           ? "cursor-not-allowed opacity-50"
           : "hover:bg-zinc-50"
-      }`}
+      }\`}
     >
-      <span className={`font-medium ${checked ? "text-zinc-900" : "text-zinc-600"}`}
+      <span className={\`font-medium \${checked ? "text-zinc-900" : "text-zinc-600"}\`}
         dangerouslySetInnerHTML={{ __html: label }}
       />
       <div className="flex items-center gap-2">
         {note && <span className="text-[10px] text-zinc-400">{note}</span>}
         <div
-          className={`flex h-5 w-5 items-center justify-center rounded border-2 transition-colors ${
+          className={\`flex h-5 w-5 items-center justify-center rounded border-2 transition-colors \${
             checked
               ? "border-[#007fff] bg-[#007fff]"
               : "border-zinc-300 bg-white"
-          }`}
+          }\`}
         >
           {checked && (
             <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
@@ -1269,12 +638,17 @@ function Row({
 }) {
   return (
     <div
-      className={`flex items-center justify-between ${
+      className={\`flex items-center justify-between \${
         strong ? "font-semibold text-zinc-900" : "text-zinc-600"
-      } ${className ?? ""}`}
+      } \${className ?? ""}\`}
     >
       <span>{label}</span>
       <span>{value}</span>
     </div>
   );
 }
+`;
+
+const newContent = keepLines.join("\n") + newEnding;
+writeFileSync(filePath, newContent, "utf8");
+console.log("Done! New file has", newContent.split("\n").length, "lines");

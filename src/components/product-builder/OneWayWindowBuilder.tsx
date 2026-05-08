@@ -1,5 +1,7 @@
 "use client";
 
+import BuilderLeftSidebar from "@/components/product-builder/BuilderLeftSidebar";
+
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState, type ChangeEvent, type ReactNode } from "react";
@@ -142,6 +144,7 @@ function PanelSplitPreview({ panelCount }: { panelCount: number }) {
 
 export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuilderProps) {
   const cart = useCart();
+  const [activeTool, setActiveTool] = useState("design");
 
   const [widthStr, setWidthStr] = useState("50");
   const [heightStr, setHeightStr] = useState("36");
@@ -320,9 +323,14 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
   const previewHeight = pricing ? Math.max(180, Math.min(460, pricing.heightIn * 2.8)) : 220;
 
   return (
-    <div className="min-h-[calc(100vh-96px)] bg-[linear-gradient(145deg,#f0f7f2_0%,#e8f2ea_55%,#dceee0_100%)] text-zinc-800">
-      <div className="w-full px-3 py-3 md:px-4">
-        <div className="mb-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
+    <div className="flex h-[calc(100vh-88px)] overflow-hidden">
+      <BuilderLeftSidebar activeTool={activeTool} onToolChange={setActiveTool} />
+      <div
+        className="flex flex-1 flex-col overflow-hidden"
+        style={{ background: "radial-gradient(circle at top, rgba(0,127,255,.05), transparent 35%), #f0f0f0" }}
+      >
+      <div className="flex-1 overflow-y-auto p-3 md:p-4">
+        <div className="mb-3 rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm">
           <div className="grid items-end gap-4 lg:grid-cols-[1fr_auto]">
             <div>
               <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-xs text-zinc-500">
@@ -367,7 +375,7 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
           </div>
         </div>
 
-        <div className="grid gap-4">
+        <div className="flex gap-4">
           <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
             <div className="border-b border-zinc-200 px-4 py-3">
               <div className="flex flex-wrap items-center justify-between gap-3">
@@ -395,11 +403,11 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
             </div>
 
             <div
-              className="relative h-[calc(100vh-290px)] min-h-[560px] overflow-hidden rounded-b-2xl bg-[#f7faf8]"
+              className="relative h-[calc(100vh-200px)] min-h-[560px] overflow-hidden rounded-b-2xl bg-[#f7faf8]"
               style={{
                 backgroundImage:
                   "linear-gradient(to right, rgba(16,185,129,0.07) 1px, transparent 1px), linear-gradient(to bottom, rgba(16,185,129,0.07) 1px, transparent 1px)",
-                backgroundSize: "26px 26px",
+                backgroundSize: "40px 40px",
               }}
             >
               <div className="absolute left-5 top-5 rounded-md border border-zinc-200 bg-white px-3 py-1 text-xs font-medium text-zinc-600 shadow-sm">
@@ -625,7 +633,18 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
             </div>
           </div>
 
-          <aside className="space-y-3">
+      </div>
+      </div>
+      {/* RIGHT PANEL */}
+      <div className="flex w-[400px] flex-shrink-0 flex-col border-l border-zinc-200 bg-white">
+        <div className="border-b border-zinc-100 px-5 py-4">
+          <div className="mb-1 inline-flex items-center gap-1.5 rounded-full bg-[#007fff]/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-[#007fff]">
+            Signcous Studio
+          </div>
+          <div className="mt-1 text-lg font-bold tracking-tight text-zinc-900">One Way Window</div>
+        </div>
+        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
+          <aside className="space-y-4">
             <PanelCard eyebrow="Pricing" title="One Way Window Breakdown">
               <div className="space-y-1">
                 <BreakdownRow
@@ -757,7 +776,37 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
             </PanelCard>
           </aside>
         </div>
+        {/* STICKY CTA */}
+        <div className="flex-shrink-0 border-t border-zinc-200 bg-white p-4">
+          <div className="rounded-2xl bg-zinc-900 px-4 py-3 shadow-[0_8px_24px_rgba(0,0,0,0.20)]">
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#007fff]">Live Total</div>
+                <div className="mt-0.5 text-3xl font-bold leading-none text-white">
+                  {formatCurrency(pricing?.grandTotal ?? 0)}
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                  Ships Tomorrow
+                </div>
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={addToCart}
+            className="mt-3 w-full rounded-2xl bg-[#ff7f00] py-4 text-base font-bold text-white shadow-[0_4px_16px_rgba(255,127,0,0.35)] transition-all duration-200 hover:bg-[#e67200] hover:shadow-[0_6px_20px_rgba(255,127,0,0.45)] hover:scale-[1.01] active:scale-[0.99]"
+          >
+            {added ? "Added to Cart" : "ADD TO CART"}
+          </button>
+          <p className="mt-2 text-center text-[10px] text-zinc-400">
+            Free proofing &middot; Secure checkout &middot; No setup fees
+          </p>
+        </div>
       </div>
-    </div>
+        </div>
+      </div>
   );
 }
