@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@next/swc-win32-x64-msvc": "^16.2.6",
     "@stripe/react-stripe-js": "^5.6.1",
     "@stripe/stripe-js": "^8.11.0",
     "framer-motion": "^12.38.0",
