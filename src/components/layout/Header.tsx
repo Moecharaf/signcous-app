@@ -182,7 +182,7 @@ export default function Header() {
             <span className="text-[#a0a0a0] dark:text-[#555]">|</span>
             <span>Nationwide Delivery</span>
             <span className="text-[#a0a0a0] dark:text-[#555]">|</span>
-            <span className="font-semibold text-[#d37800]">Live Category Pricing</span>
+            <span className="font-semibold text-[var(--brand-primary)]">Live Category Pricing</span>
           </div>
         </div>
       </div>

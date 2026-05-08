@@ -30,7 +30,7 @@ export default function Footer() {
           <span>Trade Pricing</span>
           <span>Fast Reorder Workflow</span>
           <span>Proof Approval Ready</span>
-          <span className="font-semibold text-[#c87500]">Studio-Powered Ordering</span>
+          <span className="font-semibold text-[var(--brand-primary)]">Studio-Powered Ordering</span>
         </div>
       </div>
 
@@ -39,7 +39,7 @@ export default function Footer() {
         <div>
           <div className="inline-flex items-center">
             <div className="text-xl font-black text-[#2c2c2c] dark:text-[#e8e8e8]">
-              SIGNCO<span className="text-[#c87500]">US</span>
+              SIGNCO<span className="text-[var(--brand-primary)]">US</span>
             </div>
           </div>
           <p className="mt-3 text-sm leading-7 text-[#5f5f5f] dark:text-[#888]">

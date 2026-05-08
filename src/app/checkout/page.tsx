@@ -401,7 +401,7 @@ export default function CheckoutPage() {
                     appearance: {
                       theme: "night",
                       variables: {
-                        colorPrimary: "#f97316",
+                        colorPrimary: "#007fff",
                         colorBackground: "#09090b",
                         colorText: "#f4f4f5",
                         colorDanger: "#ef4444",

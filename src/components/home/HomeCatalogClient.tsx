@@ -252,8 +252,8 @@ const HERO_IMAGE_OVERRIDE: Partial<Record<HomeCatalogSection["key"], string>> = 
 
 const CATEGORY_THEME: Record<HomeCatalogSection["key"], { hero: string; chip: string }> = {
   banner: {
-    hero: "from-[#d97706] via-[#f2bd1f] to-[#ffe69e]",
-    chip: "bg-[#fff3c5] text-[#7d5200]",
+    hero: "from-[#0066cc] via-[#3f9bff] to-[#d9ecff]",
+    chip: "bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]",
   },
   rigid: {
     hero: "from-[#2f6fa8] via-[#70b6ed] to-[#cfeaff]",
@@ -532,13 +532,13 @@ function ShowcaseCard({
           <div className="relative mt-1 flex flex-col gap-1.5">
             <Link
               href={card.href}
-              className="border border-[#bbb] px-3 py-1.5 text-center text-[10px] font-bold uppercase tracking-[0.16em] text-[#333] transition hover:border-[#333] hover:bg-[#f5f5f5]"
+              className="border border-[var(--brand-primary)] px-3 py-1.5 text-center text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--brand-primary)] transition hover:bg-[var(--brand-primary-soft)]"
             >
               More Info
             </Link>
             <Link
               href={card.href}
-              className="bg-[#f5c800] px-3 py-1.5 text-center text-[10px] font-bold uppercase tracking-[0.16em] text-[#1a1a1a] transition hover:bg-[#e6b800]"
+              className="bg-[var(--brand-primary)] px-3 py-1.5 text-center text-[10px] font-bold uppercase tracking-[0.16em] text-white transition hover:bg-[var(--brand-primary-hover)]"
             >
               Order
             </Link>
@@ -735,7 +735,7 @@ export default function HomeCatalogClient({
                   {activeSection.categorySlug && (
                     <Link
                       href={`/shop/${activeSection.categorySlug}`}
-                      className="rounded-sm border border-[#cfcfcf] bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-[#2f2f2f] hover:bg-[#fff7d6]"
+                      className="rounded-sm border border-[var(--brand-primary)] bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--brand-primary)] hover:bg-[var(--brand-primary-soft)]"
                     >
                       Open Category
                     </Link>
@@ -753,8 +753,8 @@ export default function HomeCatalogClient({
                           onClick={() => setHeroFrame(index)}
                           className={`h-2.5 w-2.5 rounded-full border transition ${
                             isActiveDot
-                              ? "border-[#2f2f2f] bg-[#2f2f2f]"
-                              : "border-[#2f2f2f]/45 bg-white/65 hover:bg-white"
+                              ? "border-[var(--brand-primary)] bg-[var(--brand-primary)]"
+                              : "border-[var(--brand-primary)]/45 bg-white/65 hover:bg-[var(--brand-primary-soft)]"
                           }`}
                           aria-label={`Show slide ${index + 1}`}
                         />
@@ -883,7 +883,7 @@ export default function HomeCatalogClient({
                     <span className="text-sm font-bold text-[#2f2f2f]">{product.priceLabel}</span>
                     <Link
                       href={product.href}
-                      className="border border-[#d0d0d0] bg-[#f8f8f8] px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-[#222] hover:bg-[#fff2ae]"
+                      className="border border-[var(--brand-primary)] bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--brand-primary)] hover:bg-[var(--brand-primary-soft)]"
                     >
                       View
                     </Link>
