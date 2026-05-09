@@ -174,19 +174,6 @@ export default function Header() {
     <header
       className={`sticky top-0 z-50 overflow-visible border-b border-[#cfcfcf] bg-[#f5f5f5]/95 backdrop-blur transition-transform duration-300 will-change-transform dark:border-[#2a2a2a] dark:bg-[#111111]/95 ${showHeader ? "translate-y-0" : "-translate-y-full"}`}
     >
-      <div className="border-b border-[#dadada] bg-[#efefef] px-4 py-1 text-[11px] text-[#555] dark:border-[#222] dark:bg-[#0d0d0d] dark:text-[#888] md:px-6">
-        <div className="mx-auto flex max-w-[1500px] items-center justify-between">
-          <span className="uppercase tracking-[0.18em] text-[#666] dark:text-[#777]">Signcous Trade Print Platform</span>
-          <div className="hidden items-center gap-4 sm:flex">
-            <span>Fast Turnaround</span>
-            <span className="text-[#a0a0a0] dark:text-[#555]">|</span>
-            <span>Nationwide Delivery</span>
-            <span className="text-[#a0a0a0] dark:text-[#555]">|</span>
-            <span className="font-semibold text-[var(--brand-accent)]">Live Category Pricing</span>
-          </div>
-        </div>
-      </div>
-
       <div className="mx-auto flex h-16 max-w-[1500px] items-center justify-between gap-4 overflow-visible px-4 py-0 md:h-20 md:px-6">
         {/* Logo */}
         <Link href="/" className="flex shrink-0 items-center overflow-visible" aria-label="Signcous home">
