@@ -442,20 +442,9 @@ function ShowcaseCard({
   onExpand: () => void;
 }) {
   return (
-    <div
+    <Link
+      href={card.href}
       className="group relative aspect-[1.82/1] overflow-hidden rounded-2xl border border-[#e8e8e8] bg-[#fdfdfd] shadow-[0_1px_0_rgba(0,0,0,0.04)] focus:outline-none"
-      tabIndex={0}
-      onClick={(event) => {
-        if (!isCoarsePointer) return;
-        if ((event.target as HTMLElement).closest("a, button")) return;
-
-        if (isExpanded) {
-          window.location.href = card.href;
-          return;
-        }
-
-        onExpand();
-      }}
     >
       {card.image && (
         <Image
@@ -529,19 +518,11 @@ function ShowcaseCard({
               {card.priceLabel}
             </div>
           )}
-          <div className="relative mt-1 flex flex-col gap-1.5">
-            <Link
-              href={card.href}
-              className="border border-[var(--brand-primary)] px-3 py-1.5 text-center text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--brand-primary)] transition hover:bg-[var(--brand-primary-soft)]"
-            >
-              More Info
-            </Link>
-            <Link
-              href={card.href}
-              className="bg-[var(--brand-primary)] px-3 py-1.5 text-center text-[10px] font-bold uppercase tracking-[0.16em] text-white transition hover:bg-[var(--brand-primary-hover)]"
-            >
-              Order
-            </Link>
+          <div className="relative mt-2 pt-2">
+            <div className="border-t border-[#e0e0e0]/50" />
+            <div className="mt-2 text-center text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--brand-primary)]">
+              Click to open builder →
+            </div>
           </div>
         </div>
 
@@ -563,7 +544,7 @@ function ShowcaseCard({
           )}
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -852,44 +833,40 @@ export default function HomeCatalogClient({
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {visibleProducts.map((product) => (
-              <article
+              <Link
                 key={product.id}
-                className="overflow-hidden rounded-lg border border-[#d0d0d0] bg-white shadow-[0_1px_0_0_rgba(0,0,0,0.03)]"
+                href={product.href}
+                className="group overflow-hidden rounded-lg border border-[#d0d0d0] bg-white shadow-[0_1px_0_0_rgba(0,0,0,0.03)] transition hover:shadow-[0_8px_16px_rgba(0,0,0,0.1)]"
               >
-                <Link href={product.href} className="block">
-                  <div className="relative aspect-[16/7] w-full bg-[#efefef]">
-                    {product.image ? (
-                      <Image
-                        src={product.image}
-                        alt={product.imageAlt}
-                        fill
-                        quality={65}
-                        loading="lazy"
-                        sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 25vw"
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-full items-center justify-center px-4 text-center text-xs font-semibold uppercase tracking-[0.12em] text-[#888]">
-                        No Product Image
-                      </div>
-                    )}
-                  </div>
-                </Link>
+                <div className="relative aspect-[16/7] w-full bg-[#efefef]">
+                  {product.image ? (
+                    <Image
+                      src={product.image}
+                      alt={product.imageAlt}
+                      fill
+                      quality={65}
+                      loading="lazy"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 25vw"
+                      className="object-cover transition group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center px-4 text-center text-xs font-semibold uppercase tracking-[0.12em] text-[#888]">
+                      No Product Image
+                    </div>
+                  )}
+                </div>
 
                 <div className="p-4">
                   <h3 className="line-clamp-2 text-lg font-bold uppercase text-[#2a2a2a]">{product.name}</h3>
                   <p className="mt-2 line-clamp-2 text-sm leading-6 text-[#5a5a5a]">{product.summary}</p>
                   <div className="mt-3 flex items-center justify-between">
                     <span className="text-sm font-bold text-[#2f2f2f]">{product.priceLabel}</span>
-                    <Link
-                      href={product.href}
-                      className="border border-[var(--brand-primary)] bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--brand-primary)] hover:bg-[var(--brand-primary-soft)]"
-                    >
+                    <span className="border border-[var(--brand-primary)] bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--brand-primary)] transition group-hover:bg-[var(--brand-primary-soft)]">
                       View
-                    </Link>
+                    </span>
                   </div>
                 </div>
-              </article>
+              </Link>
             ))}
           </div>
         )}
