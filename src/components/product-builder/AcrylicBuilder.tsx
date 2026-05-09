@@ -678,7 +678,12 @@ export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
             </div>
 
             <div className="relative">
-              <div className="absolute right-4 top-4 z-20 rounded-lg border border-zinc-800 bg-zinc-900/95 px-4 py-2 text-right shadow-sm backdrop-blur">
+              <div className="absolute right-4 top-4 z-20 max-w-[220px] rounded-lg border border-zinc-200 bg-zinc-50/95 px-3 py-2 text-left shadow-sm backdrop-blur">
+                <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">Pricing Strategy</div>
+                <div className="text-[11px] leading-5 text-zinc-600">Area-based pricing uses square inches, then thickness, cut, hardware, and rush modifiers shape the final total.</div>
+              </div>
+
+              <div className="absolute right-4 top-[118px] z-20 rounded-lg border border-zinc-800 bg-zinc-900/95 px-4 py-2 text-right shadow-sm backdrop-blur">
                 <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--brand-primary)]">Live Total</div>
                 <div className="text-2xl font-semibold text-white">{pricing ? formatCurrency(pricing.grandTotal) : formatCurrency(0)}</div>
                 <div className="text-[11px] text-zinc-300">
