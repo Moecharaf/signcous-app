@@ -521,8 +521,22 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
                 }}
               >
                 <div className="absolute right-4 top-4 z-20 max-w-[230px] rounded-lg border border-zinc-200 bg-zinc-50/95 px-3 py-2 text-left shadow-sm backdrop-blur">
-                  <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">Pricing Strategy</div>
-                  <div className="text-[11px] leading-5 text-zinc-600">{pricingMode === "sheet" ? "Sheet pricing uses the selected standard size, then finish options and rush adjust the total." : "Sq.in pricing multiplies area by the rate, enforces the minimum, then adds finish modifiers and rush."}</div>
+                  <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">Quick Rate Reference</div>
+                  <div className="space-y-1 text-[11px] leading-5 text-zinc-600">
+                    {pricingMode === "sheet" ? (
+                      <>
+                        <div className="flex items-center justify-between gap-3"><span>Price / Sheet</span><span className="font-semibold text-zinc-800">{formatPrice(pricing.sheetPrice)}</span></div>
+                        <div className="flex items-center justify-between gap-3"><span>Effective / Sign</span><span className="font-semibold text-zinc-800">{formatPrice(pricing.totalPrice / Math.max(quantity, 1))}</span></div>
+                        <div className="flex items-center justify-between gap-3"><span>Sheets Needed</span><span className="font-semibold text-zinc-800">{pricing.sheetsRequired}</span></div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="flex items-center justify-between gap-3"><span>Rate / sq in</span><span className="font-semibold text-zinc-800">${pricing.ratePerSqIn}</span></div>
+                        <div className="flex items-center justify-between gap-3"><span>Price / Sign</span><span className="font-semibold text-zinc-800">{formatPrice(pricing.pricePerSign)}</span></div>
+                        <div className="flex items-center justify-between gap-3"><span>Minimum</span><span className="font-semibold text-zinc-800">{formatPrice(pricing.minPrice)}</span></div>
+                      </>
+                    )}
+                  </div>
                 </div>
 
                 <div className="absolute right-4 top-[118px] z-20 rounded-lg border border-zinc-800 bg-zinc-900/95 px-4 py-2 text-right shadow-sm backdrop-blur">

@@ -679,8 +679,12 @@ export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
 
             <div className="relative">
               <div className="absolute right-4 top-4 z-20 max-w-[220px] rounded-lg border border-zinc-200 bg-zinc-50/95 px-3 py-2 text-left shadow-sm backdrop-blur">
-                <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">Pricing Strategy</div>
-                <div className="text-[11px] leading-5 text-zinc-600">Area-based pricing uses square inches, then thickness, cut, hardware, and rush modifiers shape the final total.</div>
+                <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">Quick Rate Reference</div>
+                <div className="space-y-1 text-[11px] leading-5 text-zinc-600">
+                  <div className="flex items-center justify-between gap-3"><span>Base / sq in</span><span className="font-semibold text-zinc-800">{formatCurrency(ACRYLIC_BASE_RATE)}</span></div>
+                  <div className="flex items-center justify-between gap-3"><span>Effective / sq in</span><span className="font-semibold text-zinc-800">{pricing ? formatCurrency(pricing.grandTotal / Math.max(pricing.area, 1)) : formatCurrency(0)}</span></div>
+                  <div className="flex items-center justify-between gap-3"><span>Minimum adj.</span><span className="font-semibold text-zinc-800">{formatCharge(minimumAdjustment)}</span></div>
+                </div>
               </div>
 
               <div className="absolute right-4 top-[118px] z-20 rounded-lg border border-zinc-800 bg-zinc-900/95 px-4 py-2 text-right shadow-sm backdrop-blur">
