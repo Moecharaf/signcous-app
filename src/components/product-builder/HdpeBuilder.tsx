@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
 import Button from "@/components/ui/Button";
 import { useCart } from "@/context/CartContext";
 import { calculateHdpePrice, formatPrice, getHdpeSqFtRate } from "@/lib/pricing";
@@ -207,6 +208,79 @@ export default function HdpeBuilder() {
     return () => { if (uploadedImage) URL.revokeObjectURL(uploadedImage); };
   }, [uploadedImage]);
 
+  const toolbarPanels: BuilderBottomToolbarPanel[] = [
+    {
+      id: "artwork",
+      title: "Artwork",
+      value: uploadedFileName ? "Uploaded" : "No file",
+      width: 360,
+      status: uploadedFileName ? "ok" : "neutral",
+      content: (
+        <>
+          <label className="block cursor-pointer rounded-xl border border-dashed border-zinc-300 bg-zinc-50 px-3 py-6 text-center text-sm text-zinc-600 hover:border-[var(--brand-primary)] hover:bg-[var(--brand-primary-soft)]">
+            {uploadingArtwork ? "Uploading..." : "Upload Artwork"}
+            <input
+              type="file"
+              accept=".pdf,.ai,.eps,.png,.jpg,.jpeg,.tif,.tiff"
+              onChange={onUploadArtwork}
+              disabled={uploadingArtwork}
+              className="hidden"
+            />
+          </label>
+          <div className="text-[11px] leading-4 text-zinc-500">Accepted: PDF, AI, EPS, PNG, JPG, TIFF, PSD (up to 100MB)</div>
+          {uploadedFileName && <div className="rounded border border-emerald-200 bg-emerald-50 px-2.5 py-2 text-xs text-emerald-700">Uploaded: {uploadedFileName}</div>}
+          {uploadError && <div className="rounded border border-rose-200 bg-rose-50 px-2.5 py-2 text-xs text-rose-700">{uploadError}</div>}
+        </>
+      ),
+    },
+    {
+      id: "size",
+      title: "Size",
+      value: `${(widthIn / 12).toFixed(2)}ft x ${(heightIn / 12).toFixed(2)}ft`,
+      width: 340,
+      status: widthError || heightError ? "alert" : "ok",
+      content: (
+        <>
+          <div className="grid grid-cols-[1fr_1fr_70px] gap-1">
+            <input type="number" value={width} onChange={(e) => setWidth(e.target.value)} className="h-9 min-w-0 appearance-none rounded border border-zinc-300 px-2 text-sm text-zinc-800" placeholder="W" />
+            <input type="number" value={height} onChange={(e) => setHeight(e.target.value)} className="h-9 min-w-0 appearance-none rounded border border-zinc-300 px-2 text-sm text-zinc-800" placeholder="H" />
+            <select value={unit} onChange={(e) => setUnit(e.target.value as Unit)} className="h-9 rounded border border-zinc-300 bg-white px-1 text-sm">
+              {unitOptions.map((u) => (
+                <option key={u} value={u}>{u === "inches" ? "in" : "ft"}</option>
+              ))}
+            </select>
+          </div>
+          {(widthError || heightError) && <div className="text-xs font-medium text-rose-600">{widthError || heightError}</div>}
+        </>
+      ),
+    },
+    {
+      id: "zoom",
+      title: "Zoom",
+      value: `${Math.round(zoom * 100)}%`,
+      width: 280,
+      content: (
+        <>
+          <input type="range" min={0.6} max={1.8} step={0.05} value={zoom} onChange={(e) => setZoom(parseFloat(e.target.value) || 1)} className="w-full accent-[var(--brand-primary)]" />
+          <div className="text-[11px] leading-4 text-zinc-500">Scale the preview without changing pricing dimensions.</div>
+        </>
+      ),
+    },
+    {
+      id: "quantity",
+      title: "Quantity",
+      value: String(qtyNum),
+      width: 260,
+      status: qtyError ? "alert" : "ok",
+      content: (
+        <>
+          <input type="number" min={1} value={quantity} onChange={(e) => setQuantity(e.target.value)} className="h-9 w-full rounded border border-zinc-300 px-2 text-sm" />
+          {qtyError && <div className="text-xs font-medium text-rose-600">{qtyError}</div>}
+        </>
+      ),
+    },
+  ];
+
   return (
     <div className="min-h-[calc(100vh-96px)] bg-[linear-gradient(145deg,#f4f4f5_0%,#ececef_55%,#e4e4e7_100%)] text-zinc-800">
       <div className="w-full px-3 py-3 md:px-4">
@@ -241,15 +315,7 @@ export default function HdpeBuilder() {
                 <div className="text-sm font-medium text-zinc-700">
                   Artboard Size: {(widthIn / 12).toFixed(2)} ft x {(heightIn / 12).toFixed(2)} ft
                 </div>
-                <div className="flex items-center gap-2">
-                  <label className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-500">Zoom</label>
-                  <input
-                    type="range" min={0.6} max={1.8} step={0.05} value={zoom}
-                    onChange={(e) => setZoom(parseFloat(e.target.value) || 1)}
-                    className="accent-[var(--brand-primary)]"
-                  />
-                  <span className="w-10 text-right text-xs font-semibold text-zinc-600">{Math.round(zoom * 100)}%</span>
-                </div>
+                <div className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-500">Drag to move · Use toolbar to zoom</div>
               </div>
             </div>
 
@@ -304,56 +370,14 @@ export default function HdpeBuilder() {
               </div>
             </div>
 
-            {/* Control rail */}
-            <div className="border-t border-zinc-200 bg-zinc-50 p-3">
-              <div className="grid gap-2 md:grid-cols-3 xl:grid-cols-8">
-                <ControlBox title="Size" error={widthError || heightError} className="md:col-span-2 xl:col-span-3">
-                  <div className="grid grid-cols-[1fr_1fr_70px] gap-1">
-                    <input
-                      type="number"
-                      value={width}
-                      onChange={(e) => setWidth(e.target.value)}
-                      className="h-9 min-w-0 appearance-none rounded border border-zinc-300 px-2 text-sm text-zinc-800"
-                      placeholder="W"
-                    />
-                    <input
-                      type="number"
-                      value={height}
-                      onChange={(e) => setHeight(e.target.value)}
-                      className="h-9 min-w-0 appearance-none rounded border border-zinc-300 px-2 text-sm text-zinc-800"
-                      placeholder="H"
-                    />
-                    <select
-                      value={unit}
-                      onChange={(e) => setUnit(e.target.value as Unit)}
-                      className="h-9 rounded border border-zinc-300 bg-white px-1 text-sm"
-                    >
-                      {unitOptions.map((u) => (
-                        <option key={u} value={u}>{u === "inches" ? "in" : "ft"}</option>
-                      ))}
-                    </select>
-                  </div>
-                </ControlBox>
-
-                <ControlBox title="Qty / Add" error={qtyError} className="xl:col-span-2">
-                  <div className="grid grid-cols-[70px_1fr] gap-1">
-                    <input
-                      type="number"
-                      min={1}
-                      value={quantity}
-                      onChange={(e) => setQuantity(e.target.value)}
-                      className="h-9 rounded border border-zinc-300 px-2 text-sm"
-                    />
-                    <Button
-                      className="h-9 rounded bg-[var(--brand-primary)] text-xs font-semibold text-white hover:bg-[var(--brand-primary-hover)]"
-                      onClick={handleAddToCart}
-                    >
-                      {addedToCart ? "Added" : "Add"}
-                    </Button>
-                  </div>
-                </ControlBox>
-              </div>
-            </div>
+            <BuilderBottomToolbar
+              panels={toolbarPanels}
+              action={
+                <Button className="h-10 w-full rounded bg-[var(--brand-primary)] text-xs font-semibold text-white hover:bg-[var(--brand-primary-hover)]" onClick={handleAddToCart}>
+                  {addedToCart ? "Added" : "Add"}
+                </Button>
+              }
+            />
           </div>
 
           {/* Sidebar */}
@@ -370,51 +394,12 @@ export default function HdpeBuilder() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-              <div className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">Artwork</div>
-              <label className="mt-3 block cursor-pointer rounded-xl border border-dashed border-zinc-300 bg-zinc-50 px-3 py-6 text-center text-sm text-zinc-600 hover:border-[var(--brand-primary)] hover:bg-[var(--brand-primary-soft)]">
-                {uploadingArtwork ? "Uploading..." : "Upload Artwork"}
-                <input
-                  type="file"
-                  accept=".pdf,.ai,.eps,.png,.jpg,.jpeg,.tif,.tiff"
-                  onChange={onUploadArtwork}
-                  disabled={uploadingArtwork}
-                  className="hidden"
-                />
-              </label>
-              <div className="mt-2 text-xs text-zinc-500">Accepted: PDF, AI, EPS, PNG, JPG, TIFF, PSD (up to 100MB)</div>
-              {uploadedFileName && (
-                <div className="mt-2 rounded border border-emerald-200 bg-emerald-50 px-2.5 py-2 text-xs text-emerald-700">
-                  Uploaded: {uploadedFileName}
-                </div>
-              )}
-              {uploadError && (
-                <div className="mt-2 rounded border border-rose-200 bg-rose-50 px-2.5 py-2 text-xs text-rose-700">
-                  {uploadError}
-                </div>
-              )}
-            </div>
-
             <div className="rounded-2xl border border-zinc-200 bg-white p-4 text-xs text-zinc-600 shadow-sm">
               <div>Tip: Use drag + corner resize for quick setup, then fine-tune with exact dimensions in control rail.</div>
             </div>
           </aside>
         </div>
       </div>
-    </div>
-  );
-}
-
-function ControlBox({
-  title, error, className, children,
-}: {
-  title: string; error?: string; className?: string; children: React.ReactNode;
-}) {
-  return (
-    <div className={`rounded-lg border border-zinc-200 bg-white p-2 ${className ?? ""}`}>
-      <div className="mb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">{title}</div>
-      {children}
-      {error && <div className="mt-1 text-[10px] font-semibold text-rose-600">{error}</div>}
     </div>
   );
 }

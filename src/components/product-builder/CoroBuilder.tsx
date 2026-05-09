@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
+import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
 import Button from "@/components/ui/Button";
 import { useCart } from "@/context/CartContext";
 import {
@@ -211,20 +212,192 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
   }
 
     const uploadedCount = Object.keys(blockUploads).filter((k) => Number(k) < safeImageCount).length;
+  const toolbarPanels: BuilderBottomToolbarPanel[] = [
+    {
+      id: "artwork",
+      title: "Artwork",
+      value: `${uploadedCount}/${safeImageCount} uploaded`,
+      width: 420,
+      status: uploadedCount === safeImageCount && safeImageCount > 0 ? "ok" : "neutral",
+      content: (
+        <>
+          <div className="text-[11px] leading-4 text-zinc-500">
+            {safeImageCount === 1
+              ? "Upload 1 artwork for all signs."
+              : `Upload up to ${safeImageCount} artworks. Click a block on the sheet or use the slots below.`}
+          </div>
+          <div className="space-y-2">
+            {Array.from({ length: safeImageCount }).map((_, i) => {
+              const upload = blockUploads[i];
+              const error = blockUploadErrors[i];
+              const isUploading = uploadingBlock === i;
+              const color = SLOT_COLORS[i % SLOT_COLORS.length];
+              return (
+                <div key={`slot-${i}`} className="rounded-lg border border-zinc-200 bg-zinc-50 p-2">
+                  <div className="flex items-center gap-2">
+                    <div className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-sm ${color} text-[10px] font-bold text-white`}>
+                      {i + 1}
+                    </div>
+                    <div className="min-w-0 flex-1 text-xs font-medium text-zinc-700">Block {i + 1}</div>
+                    {upload ? (
+                      <div className="flex items-center gap-1">
+                        <span className="max-w-[100px] truncate text-[10px] text-emerald-700">{upload.fileName}</span>
+                        <button
+                          type="button"
+                          onClick={() => removeBlockUpload(i)}
+                          className="rounded px-1 text-[10px] text-zinc-400 hover:text-rose-500"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => fileInputRefs.current[i]?.click()}
+                        disabled={isUploading}
+                        className="shrink-0 rounded border border-dashed border-zinc-300 px-2 py-1 text-[10px] text-zinc-500 hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)] disabled:opacity-50"
+                      >
+                        {isUploading ? "Uploading..." : "+ Upload"}
+                      </button>
+                    )}
+                  </div>
+                  {upload?.blobUrl && <img src={upload.blobUrl} alt={upload.fileName} className="mt-2 h-16 w-full rounded object-contain" />}
+                  {upload && !upload.blobUrl && (
+                    <div className="mt-1 rounded bg-emerald-50 px-2 py-1 text-[10px] text-emerald-700">✓ {upload.fileName}</div>
+                  )}
+                  {error && <div className="mt-1 rounded bg-rose-50 px-2 py-1 text-[10px] text-rose-700">{error}</div>}
+                </div>
+              );
+            })}
+          </div>
+          <div className="text-[10px] text-zinc-400">Accepted: PDF, AI, EPS, PNG, JPG, TIFF, PSD (up to 100MB)</div>
+        </>
+      ),
+    },
+    {
+      id: "layout",
+      title: "Images",
+      value: `${safeImageCount}/${maxImages} active`,
+      width: 260,
+      content: (
+        <>
+          <input
+            type="number"
+            min={1}
+            max={maxImages}
+            value={safeImageCount}
+            onChange={(e) => setImageCount(Math.min(maxImages, Math.max(1, Number(e.target.value) || 1)))}
+            className="h-9 w-full rounded border border-zinc-300 px-2 text-sm"
+          />
+          <div className="text-[11px] leading-4 text-zinc-500">Adjust how many artwork blocks are active on the sheet.</div>
+        </>
+      ),
+    },
+    {
+      id: "size",
+      title: "Size",
+      value: formatCoroSize(activeSize),
+      width: 300,
+      content: (
+        <select
+          value={sizeId}
+          onChange={(event) => setSizeId(event.target.value)}
+          className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"
+        >
+          {CORO_SIZE_OPTIONS.map((size) => (
+            <option key={size.id} value={size.id}>{formatCoroSize(size)}</option>
+          ))}
+        </select>
+      ),
+    },
+    {
+      id: "material",
+      title: "Material / Print",
+      value: `${material} / ${printMode === "single" ? "Single" : "Double"}`,
+      width: 320,
+      content: (
+        <div className="grid grid-cols-2 gap-1">
+          <select
+            value={material}
+            onChange={(event) => setMaterial(event.target.value as CoroMaterial)}
+            className="h-9 rounded border border-zinc-300 bg-white px-2 text-sm"
+          >
+            <option value="4mm">4mm</option>
+            <option value="10mm">10mm</option>
+          </select>
+          <select
+            value={printMode}
+            onChange={(event) => setPrintMode(event.target.value as CoroPrintMode)}
+            className="h-9 rounded border border-zinc-300 bg-white px-2 text-sm"
+          >
+            <option value="single">Single</option>
+            <option value="double">Double</option>
+          </select>
+        </div>
+      ),
+    },
+    {
+      id: "addons",
+      title: "Add-ons",
+      value: [grommetsEnabled ? `Grommets ${grommetCount}` : "No grommets", gloss ? "Gloss" : "Matte", rush ? "Rush" : "Standard"].join(" / "),
+      width: 360,
+      content: (
+        <>
+          <NumberField label="Step Stakes ($2.50 ea)" value={stepStakes} onChange={setStepStakes} />
+          <NumberField label="Heavy Duty Stakes ($4.00 ea)" value={heavyDutyStakes} onChange={setHeavyDutyStakes} />
+          <div>
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">Grommets</label>
+            <button
+              type="button"
+              onClick={() => setGrommetsEnabled((prev) => !prev)}
+              className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-left text-sm"
+            >
+              {grommetsEnabled ? "Enabled" : "Disabled"}
+            </button>
+            {grommetsEnabled && (
+              <input
+                type="number"
+                min={1}
+                value={grommetCount}
+                onChange={(event) => setGrommetCount(Math.max(1, Number(event.target.value) || 1))}
+                className="mt-2 h-9 w-full rounded border border-zinc-300 px-2 text-sm"
+              />
+            )}
+          </div>
+          <ToggleField label="Gloss (+$6 / sign)" value={gloss} onChange={setGloss} />
+          <ToggleField label="Contour Cut (+20%)" value={contourCut} onChange={setContourCut} />
+          <ToggleField label="Rush (+120%)" value={rush} onChange={setRush} />
+        </>
+      ),
+    },
+    {
+      id: "quantity",
+      title: "Quantity",
+      value: String(quantity),
+      width: 260,
+      content: (
+        <>
+          <input
+            type="number"
+            min={1}
+            value={quantity}
+            onChange={(event) => setQuantity(Math.max(1, Number(event.target.value) || 1))}
+            className="h-9 w-full rounded border border-zinc-300 px-2 text-sm"
+          />
+          <div className="text-[11px] leading-4 text-zinc-500">Set the number of signs in this order.</div>
+        </>
+      ),
+    },
+  ];
 
   return (
     <div className="min-h-[calc(100vh-96px)] bg-[linear-gradient(145deg,#f4f4f5_0%,#ececef_55%,#e4e4e7_100%)] text-zinc-800">
       <div className="w-full px-3 py-3 md:px-4">
-        <div className="mb-3 grid gap-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm md:grid-cols-[1fr_auto] md:items-end">
+        <div className="mb-3 grid gap-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm md:grid-cols-1 md:items-end">
           <div>
             <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500">Rigid Product</div>
             <h1 className="mt-1 text-3xl font-semibold tracking-tight text-zinc-900">CORO Configurator</h1>
             <p className="mt-1 text-sm text-zinc-600">Signs365-style sheet layout with per-block artwork upload.</p>
-          </div>
-          <div className="rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2 text-right shadow-[0_8px_20px_rgba(0,0,0,0.18)]">
-            <div className="text-xs uppercase tracking-[0.14em] text-[var(--brand-primary)]">Live Total</div>
-            <div className="text-3xl font-semibold text-white">{formatPrice(pricing.totalPrice)}</div>
-            <div className="text-xs text-zinc-300">{quantity} sign{quantity !== 1 ? "s" : ""} · {pricing.sheetsRequired} sheet{pricing.sheetsRequired !== 1 ? "s" : ""}</div>
           </div>
         </div>
 
@@ -244,6 +417,12 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
                 backgroundSize: "26px 26px",
               }}
             >
+              <div className="absolute right-4 top-4 z-20 rounded-lg border border-zinc-800 bg-zinc-900/95 px-4 py-2 text-right shadow-sm backdrop-blur">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--brand-primary)]">Live Total</div>
+                <div className="text-2xl font-semibold text-white">{formatPrice(pricing.totalPrice)}</div>
+                <div className="text-[11px] text-zinc-300">{quantity} sign{quantity !== 1 ? "s" : ""} · {pricing.sheetsRequired} sheet{pricing.sheetsRequired !== 1 ? "s" : ""}</div>
+              </div>
+
               <div
                 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 border border-zinc-500 bg-white"
                 style={{
@@ -302,77 +481,26 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
               </div>
             </div>
 
-            <div className="grid gap-2 border-t border-zinc-200 bg-zinc-50 p-3 md:grid-cols-4 xl:grid-cols-8">
-              <ControlBox title="Images">
-                <input
-                  type="number"
-                  min={1}
-                  max={maxImages}
-                  value={safeImageCount}
-                  onChange={(e) => setImageCount(Math.min(maxImages, Math.max(1, Number(e.target.value) || 1)))}
-                  className="h-9 w-full rounded border border-zinc-300 px-2 text-sm"
-                />
-              </ControlBox>
+            {Array.from({ length: safeImageCount }).map((_, i) => (
+              <input
+                key={`file-input-${i}`}
+                ref={(el) => { fileInputRefs.current[i] = el; }}
+                type="file"
+                accept=".pdf,.ai,.eps,.png,.jpg,.jpeg,.tif,.tiff,.psd"
+                className="hidden"
+                onChange={(e) => handleFileChange(i, e)}
+                disabled={uploadingBlock !== null}
+              />
+            ))}
 
-              <ControlBox title="Size" className="md:col-span-2">
-                <select
-                  value={sizeId}
-                  onChange={(event) => setSizeId(event.target.value)}
-                  className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"
-                >
-                  {CORO_SIZE_OPTIONS.map((size) => (
-                    <option key={size.id} value={size.id}>{formatCoroSize(size)}</option>
-                  ))}
-                </select>
-              </ControlBox>
-
-              <ControlBox title="Material">
-                <select
-                  value={material}
-                  onChange={(event) => setMaterial(event.target.value as CoroMaterial)}
-                  className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"
-                >
-                  <option value="4mm">4mm</option>
-                  <option value="10mm">10mm</option>
-                </select>
-              </ControlBox>
-
-              <ControlBox title="Print Sides">
-                <select
-                  value={printMode}
-                  onChange={(event) => setPrintMode(event.target.value as CoroPrintMode)}
-                  className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"
-                >
-                  <option value="single">Single</option>
-                  <option value="double">Double</option>
-                </select>
-              </ControlBox>
-
-              <ControlBox title="Grommets">
-                <button
-                  type="button"
-                  onClick={() => setGrommetsEnabled((prev) => !prev)}
-                  className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"
-                >
-                  {grommetsEnabled ? "Yes" : "No"}
-                </button>
-              </ControlBox>
-
-              <ControlBox title="Qty / Add">
-                <div className="grid grid-cols-[68px_1fr] gap-1">
-                  <input
-                    type="number"
-                    min={1}
-                    value={quantity}
-                    onChange={(event) => setQuantity(Math.max(1, Number(event.target.value) || 1))}
-                    className="h-9 rounded border border-zinc-300 px-2 text-sm"
-                  />
-                  <Button className="h-9 rounded bg-[var(--brand-primary)] text-xs font-semibold text-white hover:bg-[var(--brand-primary-hover)]" onClick={addToCart}>
-                    {added ? "Added" : "Add"}
-                  </Button>
-                </div>
-              </ControlBox>
-            </div>
+            <BuilderBottomToolbar
+              panels={toolbarPanels}
+              action={
+                <Button className="h-10 w-full rounded bg-[var(--brand-primary)] text-xs font-semibold text-white hover:bg-[var(--brand-primary-hover)]" onClick={addToCart}>
+                  {added ? "Added" : "Add"}
+                </Button>
+              }
+            />
           </section>
 
           <aside className="space-y-3">
@@ -394,134 +522,9 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
               </div>
             </div>
 
-            <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-              <div className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">Add-ons</div>
-              <div className="mt-3 space-y-3 text-sm">
-                <NumberField label="Step Stakes ($2.50 ea)" value={stepStakes} onChange={setStepStakes} />
-                <NumberField label="Heavy Duty Stakes ($4.00 ea)" value={heavyDutyStakes} onChange={setHeavyDutyStakes} />
-                <div>
-                  <label className="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">Grommets</label>
-                  <button
-                    type="button"
-                    onClick={() => setGrommetsEnabled((prev) => !prev)}
-                    className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-left text-sm"
-                  >
-                    {grommetsEnabled ? "Enabled" : "Disabled"}
-                  </button>
-                  {grommetsEnabled && (
-                    <input
-                      type="number"
-                      min={1}
-                      value={grommetCount}
-                      onChange={(event) => setGrommetCount(Math.max(1, Number(event.target.value) || 1))}
-                      className="mt-2 h-9 w-full rounded border border-zinc-300 px-2 text-sm"
-                    />
-                  )}
-                </div>
-                <ToggleField label="Gloss (+$6 / sign)" value={gloss} onChange={setGloss} />
-                <ToggleField label="Contour Cut (+20%)" value={contourCut} onChange={setContourCut} />
-                <ToggleField label="Rush (+120%)" value={rush} onChange={setRush} />
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-              <div className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">Artwork</div>
-                <div className="flex items-center justify-between">
-                  <div className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">
-                    Artwork ({uploadedCount}/{safeImageCount} uploaded)
-                  </div>
-                  {uploadedCount > 0 && (
-                    <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
-                      {uploadedCount} ready
-                    </span>
-                  )}
-                </div>
-                <p className="mt-1 text-xs text-zinc-500">
-                  {safeImageCount === 1
-                    ? "Upload 1 artwork for all signs."
-                    : `Upload up to ${safeImageCount} artworks — one per block. Click a block on the sheet or use the slots below.`}
-                </p>
-                {/* Hidden file inputs — one per slot */}
-                {Array.from({ length: safeImageCount }).map((_, i) => (
-                  <input
-                    key={`file-input-${i}`}
-                    ref={(el) => { fileInputRefs.current[i] = el; }}
-                    type="file"
-                    accept=".pdf,.ai,.eps,.png,.jpg,.jpeg,.tif,.tiff,.psd"
-                    className="hidden"
-                    onChange={(e) => handleFileChange(i, e)}
-                    disabled={uploadingBlock !== null}
-                  />
-                ))}
-                {/* Upload slots */}
-                <div className="mt-3 space-y-2">
-                  {Array.from({ length: safeImageCount }).map((_, i) => {
-                    const upload = blockUploads[i];
-                    const error = blockUploadErrors[i];
-                    const isUploading = uploadingBlock === i;
-                    const color = SLOT_COLORS[i % SLOT_COLORS.length];
-                    return (
-                      <div key={`slot-${i}`} className="rounded-lg border border-zinc-200 bg-zinc-50 p-2">
-                        <div className="flex items-center gap-2">
-                          <div className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-sm ${color} text-[10px] font-bold text-white`}>
-                            {i + 1}
-                          </div>
-                          <div className="min-w-0 flex-1 text-xs font-medium text-zinc-700">Block {i + 1}</div>
-                          {upload ? (
-                            <div className="flex items-center gap-1">
-                              <span className="max-w-[100px] truncate text-[10px] text-emerald-700">{upload.fileName}</span>
-                              <button
-                                type="button"
-                                onClick={() => removeBlockUpload(i)}
-                                className="rounded px-1 text-[10px] text-zinc-400 hover:text-rose-500"
-                              >✕</button>
-                            </div>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={() => fileInputRefs.current[i]?.click()}
-                              disabled={isUploading}
-                              className="shrink-0 rounded border border-dashed border-zinc-300 px-2 py-1 text-[10px] text-zinc-500 hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)] disabled:opacity-50"
-                            >
-                              {isUploading ? "Uploading…" : "+ Upload"}
-                            </button>
-                          )}
-                        </div>
-                        {upload?.blobUrl && (
-                          <img src={upload.blobUrl} alt={upload.fileName} className="mt-2 h-16 w-full rounded object-contain" />
-                        )}
-                        {upload && !upload.blobUrl && (
-                          <div className="mt-1 rounded bg-emerald-50 px-2 py-1 text-[10px] text-emerald-700">✓ {upload.fileName}</div>
-                        )}
-                        {error && (
-                          <div className="mt-1 rounded bg-rose-50 px-2 py-1 text-[10px] text-rose-700">{error}</div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-                <p className="mt-2 text-[10px] text-zinc-400">Accepted: PDF, AI, EPS, PNG, JPG, TIFF, PSD (up to 100MB)</p>
-            </div>
           </aside>
         </div>
       </div>
-    </div>
-  );
-}
-
-function ControlBox({
-  title,
-  className,
-  children,
-}: {
-  title: string;
-  className?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className={`rounded-lg border border-zinc-200 bg-white p-2 ${className ?? ""}`}>
-      <div className="mb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">{title}</div>
-      {children}
     </div>
   );
 }

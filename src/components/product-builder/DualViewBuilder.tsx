@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState, type ChangeEvent, type ReactNode } from "react";
+import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
 import Button from "@/components/ui/Button";
 import { useCart } from "@/context/CartContext";
 import {
@@ -348,7 +349,7 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
     <div className="min-h-[calc(100vh-96px)] bg-[linear-gradient(145deg,#f5f3ff_0%,#ede9fe_55%,#e3dcff_100%)] text-zinc-800">
       <div className="w-full px-3 py-3 md:px-4">
         <div className="mb-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-          <div className="grid items-end gap-4 lg:grid-cols-[1fr_auto]">
+          <div className="grid items-end gap-4 lg:grid-cols-1">
             <div>
               <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-xs text-zinc-500">
                 <Link href="/" className="transition hover:text-zinc-900">
@@ -375,17 +376,6 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
               <p className="mt-1 text-sm text-zinc-600">
                 Single or double-sided window graphic with 52in panel logic, tiered pricing, and contour cut option.
               </p>
-            </div>
-            <div className="rounded-xl border border-violet-200 bg-gradient-to-r from-violet-50 to-purple-50 px-4 py-2 text-right">
-              <div className="text-xs uppercase tracking-[0.14em] text-violet-700">Live Total</div>
-              <div className="text-3xl font-semibold text-white">
-                {pricing ? formatCurrency(pricing.grandTotal) : formatCurrency(0)}
-              </div>
-              <div className="text-xs text-violet-700/80">
-                {pricing
-                  ? `${pricing.areaSqFt.toFixed(2)} sq ft · ${safeQuantity} unit${safeQuantity !== 1 ? "s" : ""}`
-                  : "Set dimensions to calculate"}
-              </div>
             </div>
           </div>
         </div>
@@ -439,6 +429,14 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
                 backgroundSize: "26px 26px",
               }}
             >
+              <div className="absolute right-4 top-4 z-20 rounded-lg border border-zinc-800 bg-zinc-900/95 px-4 py-2 text-right shadow-sm backdrop-blur">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-violet-400">Live Total</div>
+                <div className="text-2xl font-semibold text-white">{pricing ? formatCurrency(pricing.grandTotal) : formatCurrency(0)}</div>
+                <div className="text-[11px] text-zinc-300">
+                  {pricing ? `${pricing.areaSqFt.toFixed(2)} sq ft · ${safeQuantity} unit${safeQuantity !== 1 ? "s" : ""}` : "Set dimensions to calculate"}
+                </div>
+              </div>
+
               <div className="absolute left-5 top-5 rounded-md border border-zinc-200 bg-white px-3 py-1 text-xs font-medium text-zinc-600 shadow-sm">
                 Upload artwork to preview panel splits
               </div>
@@ -528,155 +526,17 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
               </div>
             </div>
 
-            <div className="grid gap-2 border-t border-zinc-200 bg-zinc-50 p-3 md:grid-cols-6 xl:grid-cols-12">
-              <ControlBox
-                title="Artwork"
-                className="md:col-span-3 xl:col-span-4"
-                helper="Upload JPG, PNG, PDF, AI, EPS, PSD, or SVG."
-              >
-                <div className="space-y-2">
-                  <label className="inline-flex h-9 w-full cursor-pointer items-center justify-center rounded border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-700 hover:border-zinc-400">
-                    <input
-                      type="file"
-                      accept="image/*,.pdf,.ai,.eps,.psd,.svg"
-                      className="hidden"
-                      onChange={onUploadArtwork}
-                    />
-                    {uploadingArtwork ? "Uploading..." : uploadedFileName ? "Replace Artwork" : "Upload Artwork"}
-                  </label>
-                  {uploadedFileName && (
-                    <div className="flex items-center justify-between gap-2 rounded border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-600">
-                      <span className="truncate">{uploadedFileName}</span>
-                      <button
-                        type="button"
-                        onClick={clearArtwork}
-                        className="font-semibold text-zinc-500 hover:text-zinc-900"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  )}
-                  {uploadError && <div className="text-xs font-medium text-red-600">{uploadError}</div>}
-                </div>
-              </ControlBox>
-
-              <ControlBox
-                title="Print Side"
-                className="md:col-span-3 xl:col-span-3"
-                helper={
-                  side === "single"
-                    ? `Max ${DUAL_VIEW_CONSTRAINTS.single.maxWidth}" × ${DUAL_VIEW_CONSTRAINTS.single.maxHeight}"`
-                    : `Max ${DUAL_VIEW_CONSTRAINTS.double.maxWidth}" × ${DUAL_VIEW_CONSTRAINTS.double.maxHeight}"`
-                }
-              >
-                <div className="grid grid-cols-2 gap-1">
-                  <button
-                    type="button"
-                    onClick={() => handleSideChange("single")}
-                    className={`h-9 rounded border px-3 text-xs font-semibold transition ${
-                      side === "single"
-                        ? "border-violet-300 bg-violet-50 text-violet-700"
-                        : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"
-                    }`}
-                  >
-                    Single
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleSideChange("double")}
-                    className={`h-9 rounded border px-3 text-xs font-semibold transition ${
-                      side === "double"
-                        ? "border-violet-300 bg-violet-50 text-violet-700"
-                        : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"
-                    }`}
-                  >
-                    Double
-                  </button>
-                </div>
-              </ControlBox>
-
-              <ControlBox
-                title="Size"
-                className="md:col-span-2 xl:col-span-3"
-                helper={`Max ${constraints.maxWidth}" W · ${constraints.maxHeight}" H`}
-              >
-                <div className="grid grid-cols-[1fr_auto_1fr] gap-1">
-                  <input
-                    type="number"
-                    min={0.1}
-                    max={maxByUnit}
-                    step={0.25}
-                    value={widthStr}
-                    onChange={(event) => setWidthStr(event.target.value)}
-                    className="h-9 rounded border border-zinc-300 px-2 text-sm"
-                  />
-                  <div className="flex items-center justify-center text-sm font-semibold text-zinc-400">x</div>
-                  <input
-                    type="number"
-                    min={0.1}
-                    max={maxByUnit}
-                    step={0.25}
-                    value={heightStr}
-                    onChange={(event) => setHeightStr(event.target.value)}
-                    className="h-9 rounded border border-zinc-300 px-2 text-sm"
-                  />
-                </div>
-              </ControlBox>
-
-              <ControlBox
-                title="Units"
-                className="md:col-span-2 xl:col-span-2"
-                helper="Switch between inches and feet."
-              >
-                <select
-                  value={unit}
-                  onChange={(event) => setUnit(event.target.value as DualViewUnit)}
-                  className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"
-                >
-                  <option value="inches">Inches</option>
-                  <option value="feet">Feet</option>
-                </select>
-              </ControlBox>
-
-              <ControlBox
-                title="Contour"
-                className="md:col-span-2 xl:col-span-2"
-                helper="Contour cut +10%."
-              >
-                <button
-                  type="button"
-                  onClick={() => setContourCut((v) => !v)}
-                  className={`h-9 w-full rounded border px-3 text-xs font-semibold transition ${
-                    contourCut
-                      ? "border-violet-300 bg-violet-50 text-violet-700"
-                      : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"
-                  }`}
-                >
-                  {contourCut ? "Contour: On" : "Contour: Off"}
-                </button>
-              </ControlBox>
-
-              <ControlBox title="Qty / Add" className="md:col-span-2 xl:col-span-4">
-                <div className="grid grid-cols-[68px_1fr] gap-1">
-                  <input
-                    type="number"
-                    min={1}
-                    value={safeQuantity}
-                    onChange={(event) =>
-                      setQuantity(Math.max(1, Math.floor(Number(event.target.value) || 1)))
-                    }
-                    className="h-9 rounded border border-zinc-300 px-2 text-sm"
-                  />
-                  <Button
-                    className="h-9 rounded bg-violet-600 text-xs font-semibold text-white hover:bg-violet-500"
-                    disabled={!isValid}
-                    onClick={addToCart}
-                  >
-                    {added ? "Added" : "Add"}
-                  </Button>
-                </div>
-              </ControlBox>
-            </div>
+            <BuilderBottomToolbar
+              panels={[
+                { id: "artwork", title: "Artwork", value: uploadedFileName ? "Uploaded" : "No file", width: 420, content: <><label className="inline-flex h-10 w-full cursor-pointer items-center justify-center rounded border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-700 hover:border-zinc-400"><input type="file" accept="image/*,.pdf,.ai,.eps,.psd,.svg" className="hidden" onChange={onUploadArtwork} />{uploadingArtwork ? "Uploading..." : uploadedFileName ? "Replace Artwork" : "Upload Artwork"}</label>{uploadedFileName && <div className="flex items-center justify-between gap-2 rounded border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-600"><span className="truncate">{uploadedFileName}</span><button type="button" onClick={clearArtwork} className="font-semibold text-zinc-500 hover:text-zinc-900">Remove</button></div>}{uploadError && <div className="text-xs font-medium text-red-600">{uploadError}</div>}</> },
+                { id: "print-side", title: "Print Side", value: side === "double" ? "Double" : "Single", width: 320, content: <div className="grid grid-cols-2 gap-1"><button type="button" onClick={() => handleSideChange("single")} className={`h-9 rounded border px-3 text-xs font-semibold transition ${side === "single" ? "border-violet-300 bg-violet-50 text-violet-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Single</button><button type="button" onClick={() => handleSideChange("double")} className={`h-9 rounded border px-3 text-xs font-semibold transition ${side === "double" ? "border-violet-300 bg-violet-50 text-violet-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Double</button></div> },
+                { id: "size", title: "Size", value: pricing ? `${formatInches(pricing.widthIn)} x ${formatInches(pricing.heightIn)}` : "Set dimensions", status: widthError || heightError ? "alert" : "ok", width: 320, content: <div className="grid grid-cols-[1fr_auto_1fr] gap-1"><input type="number" min={0.1} max={maxByUnit} step={0.25} value={widthStr} onChange={(event) => setWidthStr(event.target.value)} className="h-9 rounded border border-zinc-300 px-2 text-sm" /><div className="flex items-center justify-center text-sm font-semibold text-zinc-400">x</div><input type="number" min={0.1} max={maxByUnit} step={0.25} value={heightStr} onChange={(event) => setHeightStr(event.target.value)} className="h-9 rounded border border-zinc-300 px-2 text-sm" /></div> },
+                { id: "units", title: "Units", value: unit === "inches" ? "Inches" : "Feet", width: 260, content: <select value={unit} onChange={(event) => setUnit(event.target.value as DualViewUnit)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"><option value="inches">Inches</option><option value="feet">Feet</option></select> },
+                { id: "contour", title: "Contour", value: contourCut ? "On" : "Off", width: 260, content: <button type="button" onClick={() => setContourCut((v) => !v)} className={`h-9 w-full rounded border px-3 text-xs font-semibold transition ${contourCut ? "border-violet-300 bg-violet-50 text-violet-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>{contourCut ? "Contour: On" : "Contour: Off"}</button> },
+                { id: "quantity", title: "Quantity", value: String(safeQuantity), width: 260, content: <input type="number" min={1} value={safeQuantity} onChange={(event) => setQuantity(Math.max(1, Math.floor(Number(event.target.value) || 1)))} className="h-9 w-full rounded border border-zinc-300 px-2 text-sm" /> },
+              ] satisfies BuilderBottomToolbarPanel[]}
+              action={<Button className="h-10 w-full rounded bg-violet-600 text-xs font-semibold text-white hover:bg-violet-500" disabled={!isValid} onClick={addToCart}>{added ? "Added" : "Add"}</Button>}
+            />
           </div>
 
           <aside className="space-y-3">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, type ChangeEvent } from "react";
+import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
 import Button from "@/components/ui/Button";
 import { useCart } from "@/context/CartContext";
 
@@ -250,11 +251,122 @@ export default function CustomMagnetBuilder() {
     };
   }, [uploadedImage]);
 
+  const toolbarPanels: BuilderBottomToolbarPanel[] = [
+    {
+      id: "artwork",
+      title: "Artwork",
+      value: uploadedFileName ? "Uploaded" : "No file",
+      width: 360,
+      status: uploadedFileName ? "ok" : "neutral",
+      content: (
+        <>
+          <label className="flex h-10 cursor-pointer items-center justify-center rounded border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-700 hover:border-zinc-400">
+            {uploadingArtwork ? "Uploading..." : uploadedFileName ? "Replace Artwork" : "Upload Artwork"}
+            <input
+              type="file"
+              accept=".pdf,.ai,.eps,.png,.jpg,.jpeg,.tif,.tiff"
+              onChange={onUploadArtwork}
+              disabled={uploadingArtwork}
+              className="hidden"
+            />
+          </label>
+          <div className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs text-zinc-600">
+            {uploadedFileName ? `Uploaded artwork: ${uploadedFileName}` : "No artwork uploaded yet."}
+          </div>
+          {uploadError && <div className="text-xs font-medium text-rose-600">{uploadError}</div>}
+        </>
+      ),
+    },
+    {
+      id: "size",
+      title: "Size",
+      value: `${dimensionLabel(width)} x ${dimensionLabel(height)}`,
+      width: 320,
+      status: sizeError ? "alert" : isSizeValid ? "ok" : "neutral",
+      content: (
+        <>
+          <div className="grid grid-cols-2 gap-1">
+            <input
+              type="number"
+              min={0}
+              step={0.01}
+              value={widthInput}
+              onChange={(event) => {
+                setWidthInput(event.target.value);
+                if (sizeError) setSizeError(null);
+              }}
+              className="h-9 rounded border border-zinc-300 px-2 text-sm"
+            />
+            <input
+              type="number"
+              min={0}
+              step={0.01}
+              value={heightInput}
+              onChange={(event) => {
+                setHeightInput(event.target.value);
+                if (sizeError) setSizeError(null);
+              }}
+              className="h-9 rounded border border-zinc-300 px-2 text-sm"
+            />
+          </div>
+          {sizeError && <div className="text-xs font-medium text-rose-600">{sizeError}</div>}
+          <div className="text-[11px] leading-4 text-zinc-500">Maximum size is 24in x 96in.</div>
+        </>
+      ),
+    },
+    {
+      id: "options",
+      title: "Options",
+      value: [cornerOption.label, contourCut ? "Contour" : "Standard", rush ? "Rush" : "Standard"].join(" / "),
+      width: 340,
+      content: (
+        <>
+          <select value={roundedCorners} onChange={(event) => setRoundedCorners(event.target.value as RoundedCornerOption)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm">
+            {ROUNDED_CORNER_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </select>
+          <div className="grid grid-cols-2 gap-1">
+            <button type="button" onClick={() => setContourCut((value) => !value)} className={`h-9 rounded border px-2 text-sm font-semibold transition ${contourCut ? "border-[var(--brand-primary)] bg-[var(--brand-primary)] text-white" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>
+              {contourCut ? "Contour On" : "Standard Cut"}
+            </button>
+            <button type="button" onClick={() => setRush((value) => !value)} className={`h-9 rounded border px-2 text-sm font-semibold transition ${rush ? "border-[var(--brand-primary)] bg-[var(--brand-primary)] text-white" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>
+              {rush ? "Rush On" : "Standard"}
+            </button>
+          </div>
+        </>
+      ),
+    },
+    {
+      id: "quantity",
+      title: "Quantity",
+      value: isQuantityValid ? String(quantity) : "Set qty",
+      width: 260,
+      status: quantityError ? "alert" : isQuantityValid ? "ok" : "neutral",
+      content: (
+        <>
+          <input
+            type="number"
+            min={1}
+            value={quantityInput}
+            onChange={(event) => {
+              setQuantityInput(event.target.value);
+              if (quantityError) setQuantityError(null);
+            }}
+            onBlur={onBlurQuantity}
+            className="h-9 w-full rounded border border-zinc-300 px-2 text-sm"
+          />
+          {quantityError && <div className="text-xs font-medium text-rose-600">{quantityError}</div>}
+        </>
+      ),
+    },
+  ];
+
   return (
     <div className="min-h-[calc(100vh-96px)] bg-[linear-gradient(145deg,#f4f4f5_0%,#ececef_55%,#e4e4e7_100%)] text-zinc-800">
       <div className="w-full px-3 py-3 md:px-4">
         <div className="mb-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-          <div className="grid items-end gap-4 lg:grid-cols-[1fr_auto]">
+          <div className="grid items-end gap-4 lg:grid-cols-1">
             <div>
               <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--brand-primary)]">
                 <span className="rounded bg-zinc-900 px-1.5 py-0.5 text-[10px] tracking-normal text-[var(--brand-primary)]">SC</span>
@@ -264,13 +376,6 @@ export default function CustomMagnetBuilder() {
               <p className="mt-1 text-sm text-zinc-600">
                 Custom-size single-sided magnets with contour cut, rush production, and artwork upload.
               </p>
-            </div>
-            <div className="rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2 text-right shadow-[0_8px_20px_rgba(0,0,0,0.18)]">
-              <div className="text-xs uppercase tracking-[0.14em] text-[var(--brand-primary)]">Live Total</div>
-              <div className="text-3xl font-semibold text-white">{formatCurrency(pricing.total)}</div>
-              <div className="text-xs text-zinc-300">
-                {isQuantityValid ? `${quantity} magnet${quantity !== 1 ? "s" : ""} · ${dimensionLabel(width)} x ${dimensionLabel(height)}` : "Set quantity to calculate"}
-              </div>
             </div>
           </div>
         </div>
@@ -289,6 +394,14 @@ export default function CustomMagnetBuilder() {
                 backgroundSize: "26px 26px",
               }}
             >
+              <div className="absolute right-4 top-4 z-20 rounded-lg border border-zinc-800 bg-zinc-900/95 px-4 py-2 text-right shadow-sm backdrop-blur">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--brand-primary)]">Live Total</div>
+                <div className="text-2xl font-semibold text-white">{formatCurrency(pricing.total)}</div>
+                <div className="text-[11px] text-zinc-300">
+                  {isQuantityValid ? `${quantity} magnet${quantity !== 1 ? "s" : ""} · ${dimensionLabel(width)} x ${dimensionLabel(height)}` : "Set quantity to calculate"}
+                </div>
+              </div>
+
               <div className="absolute left-1/2 top-1/2" style={{ transform: "translate(-50%, -50%)" }}>
                 <div className="pointer-events-none absolute -top-12 left-1/2 flex -translate-x-1/2 flex-col items-center text-[11px] font-semibold text-zinc-700">
                   <span className="text-[10px] uppercase tracking-[0.2em] text-zinc-500">Top Of Image</span>
@@ -345,116 +458,14 @@ export default function CustomMagnetBuilder() {
               </div>
             </div>
 
-            <div className="border-t border-zinc-200 bg-zinc-50 p-3">
-              <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-7">
-                <ControlBox title="Width (in)" className="xl:col-span-1" error={sizeError ?? undefined}>
-                  <input
-                    type="number"
-                    min={0}
-                    step={0.01}
-                    value={widthInput}
-                    onChange={(event) => {
-                      setWidthInput(event.target.value);
-                      if (sizeError) setSizeError(null);
-                    }}
-                    className="h-9 w-full rounded border border-zinc-300 px-2 text-sm"
-                  />
-                </ControlBox>
-
-                <ControlBox title="Height (in)" className="xl:col-span-1" error={sizeError ?? undefined}>
-                  <input
-                    type="number"
-                    min={0}
-                    step={0.01}
-                    value={heightInput}
-                    onChange={(event) => {
-                      setHeightInput(event.target.value);
-                      if (sizeError) setSizeError(null);
-                    }}
-                    className="h-9 w-full rounded border border-zinc-300 px-2 text-sm"
-                  />
-                </ControlBox>
-
-                <ControlBox title="Quantity" className="xl:col-span-1" error={quantityError ?? undefined}>
-                  <input
-                    type="number"
-                    min={1}
-                    value={quantityInput}
-                    onChange={(event) => {
-                      setQuantityInput(event.target.value);
-                      if (quantityError) setQuantityError(null);
-                    }}
-                    onBlur={onBlurQuantity}
-                    className="h-9 w-full rounded border border-zinc-300 px-2 text-sm"
-                  />
-                </ControlBox>
-
-                <ControlBox title="Rounded Corners" className="xl:col-span-1">
-                  <select
-                    value={roundedCorners}
-                    onChange={(event) => setRoundedCorners(event.target.value as RoundedCornerOption)}
-                    className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"
-                  >
-                    {ROUNDED_CORNER_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </ControlBox>
-
-                <ControlBox title="Contour Cut" className="xl:col-span-1">
-                  <button
-                    type="button"
-                    onClick={() => setContourCut((value) => !value)}
-                    className={`h-9 w-full rounded border px-2 text-sm font-semibold transition ${
-                      contourCut
-                        ? "border-[var(--brand-primary)] bg-[var(--brand-primary)] text-white"
-                        : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"
-                    }`}
-                  >
-                    {contourCut ? "Enabled (+10%)" : "Standard"}
-                  </button>
-                </ControlBox>
-
-                <ControlBox title="Rush" className="xl:col-span-1">
-                  <button
-                    type="button"
-                    onClick={() => setRush((value) => !value)}
-                    className={`h-9 w-full rounded border px-2 text-sm font-semibold transition ${
-                      rush
-                        ? "border-[var(--brand-primary)] bg-[var(--brand-primary)] text-white"
-                        : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"
-                    }`}
-                  >
-                    {rush ? "Rush On (+100%)" : "Standard"}
-                  </button>
-                </ControlBox>
-
-                <ControlBox title="Upload Artwork" className="xl:col-span-1">
-                  <label className="flex h-9 cursor-pointer items-center justify-center rounded border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-700 hover:border-zinc-400">
-                    {uploadingArtwork ? "Uploading..." : uploadedFileName ? "Replace Artwork" : "Upload Artwork"}
-                    <input
-                      type="file"
-                      accept=".pdf,.ai,.eps,.png,.jpg,.jpeg,.tif,.tiff"
-                      onChange={onUploadArtwork}
-                      disabled={uploadingArtwork}
-                      className="hidden"
-                    />
-                  </label>
-                </ControlBox>
-              </div>
-
-              <div className="mt-2 grid gap-2 md:grid-cols-[1fr_auto]">
-                <div className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs text-zinc-600">
-                  {uploadedFileName ? `Uploaded artwork: ${uploadedFileName}` : "No artwork uploaded yet."}
-                  {uploadError && <div className="mt-1 text-rose-600">{uploadError}</div>}
-                </div>
-                <Button onClick={addToCart} className="h-10 rounded bg-[var(--brand-primary)] px-6 text-sm hover:bg-[var(--brand-primary-hover)]" disabled={uploadingArtwork}>
+            <BuilderBottomToolbar
+              panels={toolbarPanels}
+              action={
+                <Button onClick={addToCart} className="h-10 w-full rounded bg-[var(--brand-primary)] px-6 text-sm hover:bg-[var(--brand-primary-hover)]" disabled={uploadingArtwork}>
                   {addedToCart ? "Added to Cart" : "Add to Cart"}
                 </Button>
-              </div>
-            </div>
+              }
+            />
           </section>
 
           <aside className="space-y-3">
@@ -489,26 +500,6 @@ export default function CustomMagnetBuilder() {
           </aside>
         </div>
       </div>
-    </div>
-  );
-}
-
-function ControlBox({
-  title,
-  className,
-  children,
-  error,
-}: {
-  title: string;
-  className?: string;
-  children: React.ReactNode;
-  error?: string;
-}) {
-  return (
-    <div className={`rounded-lg border border-zinc-200 bg-white p-2 ${className ?? ""}`}>
-      <div className="mb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">{title}</div>
-      {children}
-      {error && <div className="mt-1 text-[10px] font-semibold text-rose-600">{error}</div>}
     </div>
   );
 }

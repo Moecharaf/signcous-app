@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState, type ChangeEvent, type ReactNode } from "react";
+import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
 import Button from "@/components/ui/Button";
 import { useCart } from "@/context/CartContext";
 import {
@@ -347,7 +348,7 @@ export default function DryEraseBuilder({ productId = 0 }: DryEraseBuilderProps)
       <div className="w-full px-3 py-3 md:px-4">
         {/* Header */}
         <div className="mb-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-          <div className="grid items-end gap-4 lg:grid-cols-[1fr_auto]">
+          <div className="grid items-end gap-4 lg:grid-cols-1">
             <div>
               <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-xs text-zinc-500">
                 <Link href="/" className="transition hover:text-zinc-900">Home</Link>
@@ -380,17 +381,6 @@ export default function DryEraseBuilder({ productId = 0 }: DryEraseBuilderProps)
                 Writable dry erase wall graphics at $4.35/sq ft. Perfect for offices, classrooms,
                 and collaborative spaces. Dimensions billed in whole feet, rounded up.
               </p>
-            </div>
-            <div className="rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2 text-right shadow-[0_8px_20px_rgba(0,0,0,0.18)]">
-              <div className="text-xs uppercase tracking-[0.14em] text-[var(--brand-primary)]">Live Total</div>
-              <div className="text-3xl font-semibold text-white">
-                {pricing ? formatCurrency(pricing.totalPrice) : formatCurrency(0)}
-              </div>
-              <div className="text-xs text-zinc-300">
-                {pricing
-                  ? `${pricing.sqFt} sq ft · ${safeQuantity} unit${safeQuantity !== 1 ? "s" : ""}`
-                  : "Set dimensions to calculate"}
-              </div>
             </div>
           </div>
         </div>
@@ -457,6 +447,14 @@ export default function DryEraseBuilder({ productId = 0 }: DryEraseBuilderProps)
                 backgroundSize: "26px 26px",
               }}
             >
+              <div className="absolute right-4 top-4 z-20 rounded-lg border border-zinc-800 bg-zinc-900/95 px-4 py-2 text-right shadow-sm backdrop-blur">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--brand-primary)]">Live Total</div>
+                <div className="text-2xl font-semibold text-white">{pricing ? formatCurrency(pricing.totalPrice) : formatCurrency(0)}</div>
+                <div className="text-[11px] text-zinc-300">
+                  {pricing ? `${pricing.sqFt} sq ft · ${safeQuantity} unit${safeQuantity !== 1 ? "s" : ""}` : "Set dimensions to calculate"}
+                </div>
+              </div>
+
               <div className="absolute bottom-4 left-4 z-10 rounded-md border border-zinc-200 bg-white/95 px-3 py-1 text-xs font-medium text-zinc-600 shadow-sm">
                 Dry erase wall graphic — single-sided print
               </div>
@@ -593,6 +591,21 @@ export default function DryEraseBuilder({ productId = 0 }: DryEraseBuilderProps)
             </div>
 
             {/* Controls strip */}
+            <BuilderBottomToolbar
+              panels={[
+                { id: "artwork", title: "Artwork", value: uploadedFileName ? "Uploaded" : "No file", width: 420, content: <><label className="inline-flex h-10 w-full cursor-pointer items-center justify-center rounded border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-700 hover:border-zinc-400"><input type="file" accept="image/*,.pdf,.ai,.eps,.psd,.svg" className="hidden" onChange={onUploadArtwork} />{uploadingArtwork ? "Uploading..." : uploadedFileName ? "Replace Artwork" : "Upload Artwork"}</label>{uploadedFileName && <div className="flex items-center justify-between gap-2 rounded border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-600"><span className="truncate">{uploadedFileName}</span><button type="button" onClick={clearArtwork} className="font-semibold text-zinc-500 hover:text-zinc-900">Remove</button></div>}{uploadError && <div className="text-xs font-medium text-red-600">{uploadError}</div>}</> },
+                { id: "width", title: "Width", value: `${widthIn || 0}${widthUnit === "feet" ? " ft" : " in"}`, status: widthError ? "alert" : "ok", width: 280, content: <div className="grid grid-cols-[1fr_auto] gap-1"><input type="number" min={0.1} step={0.25} value={widthStr} onChange={(e) => setWidthStr(e.target.value)} className="h-9 rounded border border-zinc-300 px-2 text-sm" /><select value={widthUnit} onChange={(e) => setWidthUnit(e.target.value as DimensionUnit)} className="h-9 rounded border border-zinc-300 bg-white px-1 text-xs"><option value="inches">in</option><option value="feet">ft</option></select></div> },
+                { id: "height", title: "Height", value: `${heightIn || 0}${heightUnit === "feet" ? " ft" : " in"}`, status: heightError ? "alert" : "ok", width: 280, content: <div className="grid grid-cols-[1fr_auto] gap-1"><input type="number" min={0.1} step={0.25} value={heightStr} onChange={(e) => setHeightStr(e.target.value)} className="h-9 rounded border border-zinc-300 px-2 text-sm" /><select value={heightUnit} onChange={(e) => setHeightUnit(e.target.value as DimensionUnit)} className="h-9 rounded border border-zinc-300 bg-white px-1 text-xs"><option value="inches">in</option><option value="feet">ft</option></select></div> },
+                { id: "contour", title: "Contour Cut", value: contourCut ? "Enabled" : "Disabled", width: 260, content: <button type="button" onClick={() => setContourCut((v) => !v)} className={`h-9 w-full rounded border px-3 text-xs font-semibold transition ${contourCut ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>{contourCut ? "Enabled" : "Disabled"}</button> },
+                { id: "rush", title: "Rush", value: rush ? "Rush" : "Standard", width: 260, content: <button type="button" onClick={() => setRush((v) => !v)} className={`h-9 w-full rounded border px-3 text-xs font-semibold transition ${rush ? "border-red-300 bg-red-50 text-red-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>{rush ? "Rush" : "Standard"}</button> },
+                { id: "split-direction", title: "Split Direction", value: splitDirection, width: 280, content: <select value={splitDirection} onChange={(e) => { setSplitDirection(e.target.value as SplitDirection); setSelectedSplit("all"); setSplitOffsets({}); }} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"><option value="vertical">Vertical</option><option value="horizontal">Horizontal</option></select> },
+                { id: "split-selected", title: "Split Selected", value: selectedSplit === "all" ? "All Splits" : `Split ${selectedSplit}`, width: 280, content: <select value={selectedSplit === "all" ? "all" : String(selectedSplit)} onChange={(e) => setSelectedSplit(e.target.value === "all" ? "all" : Number(e.target.value))} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"><option value="all">All Splits</option>{Array.from({ length: splitCount }, (_, i) => i + 1).map((n) => <option key={n} value={n}>Split {n}</option>)}</select> },
+                { id: "position", title: "Position", value: splitCount > 0 ? positionDisplay : "—", width: 340, content: <div className="flex h-9 items-center gap-1"><button type="button" onClick={() => adjustSplitPosition(-0.25)} disabled={splitCount === 0} className="flex h-9 w-[72px] shrink-0 items-center justify-center rounded border border-zinc-300 bg-white text-[11px] font-semibold text-zinc-700 hover:border-zinc-400 disabled:cursor-not-allowed disabled:opacity-40">− 0.25&quot;</button><div className="flex h-9 flex-1 items-center justify-center rounded border border-zinc-200 bg-zinc-100 px-1 text-xs font-semibold tabular-nums text-zinc-700">{splitCount > 0 ? positionDisplay : "—"}</div><button type="button" onClick={() => adjustSplitPosition(0.25)} disabled={splitCount === 0} className="flex h-9 w-[72px] shrink-0 items-center justify-center rounded border border-zinc-300 bg-white text-[11px] font-semibold text-zinc-700 hover:border-zinc-400 disabled:cursor-not-allowed disabled:opacity-40">+ 0.25&quot;</button></div> },
+                { id: "quantity", title: "Quantity", value: String(safeQuantity), width: 260, content: <input type="number" min={1} value={safeQuantity} onChange={(e) => setQuantity(Math.max(1, Math.floor(Number(e.target.value) || 1)))} className="h-9 w-full rounded border border-zinc-300 px-2 text-sm" /> },
+              ] satisfies BuilderBottomToolbarPanel[]}
+              action={<Button className="h-10 w-full rounded bg-[var(--brand-primary)] text-xs font-semibold text-white hover:bg-[var(--brand-primary-hover)]" disabled={!isValid} onClick={addToCart}>{added ? "Added" : "Add"}</Button>}
+            />
+            {false && (
             <div className="grid gap-2 border-t border-zinc-200 bg-zinc-50 p-3 md:grid-cols-6 xl:grid-cols-12">
               {/* Artwork */}
               <ControlBox title="Artwork" className="md:col-span-3 xl:col-span-3" helper="JPG, PNG, PDF, AI, EPS, PSD, or SVG.">
@@ -773,6 +786,7 @@ export default function DryEraseBuilder({ productId = 0 }: DryEraseBuilderProps)
                 </div>
               </ControlBox>
             </div>
+            )}
           </div>
 
           {/* Sidebar panels */}

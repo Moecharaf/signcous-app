@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
+import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
 import Button from "@/components/ui/Button";
 import { useCart } from "@/context/CartContext";
 import {
@@ -248,6 +249,225 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
   }
 
   const uploadedBlockCount = Object.keys(blockUploads).filter(k => Number(k) < safeImageCount).length;
+  const toolbarPanels: BuilderBottomToolbarPanel[] = pricingMode === "sheet"
+    ? [
+        {
+          id: "artwork",
+          title: "Artwork",
+          value: `${uploadedBlockCount}/${safeImageCount} uploaded`,
+          width: 420,
+          status: uploadedBlockCount === safeImageCount && safeImageCount > 0 ? "ok" : "neutral",
+          content: (
+            <>
+              <div className="text-[11px] leading-4 text-zinc-500">
+                {safeImageCount === 1
+                  ? "Upload 1 artwork for all signs."
+                  : `Upload up to ${safeImageCount} artworks. Click a block on the sheet or use the slots below.`}
+              </div>
+              <div className="space-y-2">
+                {Array.from({ length: safeImageCount }).map((_, i) => {
+                  const upload = blockUploads[i];
+                  const error = blockUploadErrors[i];
+                  const isUploading = uploadingBlock === i;
+                  const color = SLOT_COLORS[i % SLOT_COLORS.length];
+                  return (
+                    <div key={`slot-${i}`} className="rounded-lg border border-zinc-200 bg-zinc-50 p-2">
+                      <div className="flex items-center gap-2">
+                        <div className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-sm ${color} text-[10px] font-bold text-white`}>
+                          {i + 1}
+                        </div>
+                        <div className="min-w-0 flex-1 text-xs font-medium text-zinc-700">Block {i + 1}</div>
+                        {upload ? (
+                          <div className="flex items-center gap-1">
+                            <span className="max-w-[100px] truncate text-[10px] text-emerald-700">{upload.fileName}</span>
+                            <button type="button" onClick={() => removeBlock(i)} className="rounded px-1 text-[10px] text-zinc-400 hover:text-rose-500">✕</button>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => fileInputRefs.current[i]?.click()}
+                            disabled={isUploading}
+                            className="shrink-0 rounded border border-dashed border-zinc-300 px-2 py-1 text-[10px] text-zinc-500 hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)] disabled:opacity-50"
+                          >
+                            {isUploading ? "Uploading..." : "+ Upload"}
+                          </button>
+                        )}
+                      </div>
+                      {upload?.blobUrl && <img src={upload.blobUrl} alt={upload.fileName} className="mt-2 h-16 w-full rounded object-contain" />}
+                      {upload && !upload.blobUrl && <div className="mt-1 rounded bg-emerald-50 px-2 py-1 text-[10px] text-emerald-700">✓ {upload.fileName}</div>}
+                      {error && <div className="mt-1 rounded bg-rose-50 px-2 py-1 text-[10px] text-rose-700">{error}</div>}
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="text-[10px] text-zinc-400">Accepted: PDF, AI, EPS, PNG, JPG, TIFF, PSD (up to 100MB)</div>
+            </>
+          ),
+        },
+        {
+          id: "layout",
+          title: "Images",
+          value: `${safeImageCount}/${maxImages} active`,
+          width: 260,
+          content: (
+            <>
+              <input type="number" min={1} max={maxImages} value={safeImageCount} onChange={e => setImageCount(Math.min(maxImages, Math.max(1, Number(e.target.value) || 1)))} className="h-9 w-full rounded border border-zinc-300 px-2 text-sm" />
+              <div className="text-[11px] leading-4 text-zinc-500">Adjust how many artwork blocks are active on the sheet.</div>
+            </>
+          ),
+        },
+        {
+          id: "size",
+          title: "Size",
+          value: formatAluminumSize(activeSize),
+          width: 300,
+          content: (
+            <select value={sizeId} onChange={e => setSizeId(e.target.value)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm">
+              {ALUMINUM_SIZE_OPTIONS.map(s => (
+                <option key={s.id} value={s.id}>{formatAluminumSize(s)}</option>
+              ))}
+            </select>
+          ),
+        },
+        {
+          id: "material",
+          title: "Material / Print",
+          value: `${material} / ${printMode === "single" ? "Single" : "Double"}`,
+          width: 320,
+          content: (
+            <div className="grid grid-cols-2 gap-1">
+              <select value={material} onChange={e => setMaterial(e.target.value as AluminumMaterial)} className="h-9 rounded border border-zinc-300 bg-white px-2 text-sm">
+                <option value="040">0.040&quot;</option>
+                <option value="080">0.080&quot;</option>
+              </select>
+              <select value={printMode} onChange={e => setPrintMode(e.target.value as AluminumPrintMode)} className="h-9 rounded border border-zinc-300 bg-white px-2 text-sm">
+                <option value="single">Single</option>
+                <option value="double">Double</option>
+              </select>
+            </div>
+          ),
+        },
+        {
+          id: "finish",
+          title: "Finish Options",
+          value: [roundedCorners ? "Rounded" : "Square", contourCut ? "Contour" : "No contour", rush ? "Rush" : "Standard"].join(" / "),
+          width: 340,
+          content: (
+            <div className="grid grid-cols-3 gap-1">
+              <button type="button" onClick={() => setRoundedCorners(p => !p)} className={`h-9 rounded border px-2 text-xs font-semibold transition ${roundedCorners ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>
+                Rounded
+              </button>
+              <button type="button" onClick={() => setContourCut(p => !p)} className={`h-9 rounded border px-2 text-xs font-semibold transition ${contourCut ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>
+                Contour
+              </button>
+              <button type="button" onClick={() => setRush(p => !p)} className={`h-9 rounded border px-2 text-xs font-semibold transition ${rush ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>
+                Rush
+              </button>
+            </div>
+          ),
+        },
+        {
+          id: "quantity",
+          title: "Quantity",
+          value: String(quantity),
+          width: 260,
+          content: (
+            <>
+              <input type="number" min={1} value={quantity} onChange={e => setQuantity(Math.max(1, Number(e.target.value) || 1))} className="h-9 w-full rounded border border-zinc-300 px-2 text-sm" />
+              <div className="text-[11px] leading-4 text-zinc-500">Set the number of signs in this order.</div>
+            </>
+          ),
+        },
+      ]
+    : [
+        {
+          id: "artwork",
+          title: "Artwork",
+          value: sqinUpload?.fileName ? "Uploaded" : "No file",
+          width: 360,
+          status: sqinUpload ? "ok" : "neutral",
+          content: (
+            <>
+              {sqinUpload ? (
+                <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="truncate text-xs text-emerald-700">✓ {sqinUpload.fileName}</span>
+                    <button type="button" onClick={removeSqin} className="text-[10px] text-zinc-400 hover:text-rose-500">✕ Remove</button>
+                  </div>
+                  {sqinUpload.blobUrl && <img src={sqinUpload.blobUrl} alt={sqinUpload.fileName} className="mt-2 h-20 w-full rounded object-contain" />}
+                </div>
+              ) : (
+                <button type="button" onClick={() => sqinFileRef.current?.click()} disabled={sqinUploading} className="w-full rounded-lg border border-dashed border-zinc-300 py-4 text-center text-xs text-zinc-500 hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)] disabled:opacity-50">
+                  {sqinUploading ? "Uploading..." : "+ Upload Artwork"}
+                </button>
+              )}
+              {sqinUploadError && <div className="rounded bg-rose-50 px-2 py-1 text-[10px] text-rose-700">{sqinUploadError}</div>}
+              <div className="text-[10px] text-zinc-400">Accepted: PDF, AI, EPS, PNG, JPG, TIFF, PSD (up to 100MB)</div>
+            </>
+          ),
+        },
+        {
+          id: "dimensions",
+          title: "Dimensions",
+          value: `${customWidth}" x ${customHeight}"`,
+          width: 300,
+          content: (
+            <div className="grid grid-cols-2 gap-1">
+              <input type="number" min={1} step={0.5} value={customWidth} onChange={e => setCustomWidth(Math.max(0.5, Number(e.target.value) || 1))} className="h-9 rounded border border-zinc-300 px-2 text-sm" />
+              <input type="number" min={1} step={0.5} value={customHeight} onChange={e => setCustomHeight(Math.max(0.5, Number(e.target.value) || 1))} className="h-9 rounded border border-zinc-300 px-2 text-sm" />
+            </div>
+          ),
+        },
+        {
+          id: "material",
+          title: "Material / Print",
+          value: `${material} / ${printMode === "single" ? "Single" : "Double"}`,
+          width: 320,
+          content: (
+            <div className="grid grid-cols-2 gap-1">
+              <select value={material} onChange={e => setMaterial(e.target.value as AluminumMaterial)} className="h-9 rounded border border-zinc-300 bg-white px-2 text-sm">
+                <option value="040">0.040&quot;</option>
+                <option value="080">0.080&quot;</option>
+              </select>
+              <select value={printMode} onChange={e => setPrintMode(e.target.value as AluminumPrintMode)} className="h-9 rounded border border-zinc-300 bg-white px-2 text-sm">
+                <option value="single">Single</option>
+                <option value="double">Double</option>
+              </select>
+            </div>
+          ),
+        },
+        {
+          id: "finish",
+          title: "Finish Options",
+          value: [roundedCorners ? "Rounded" : "Square", contourCut ? "Contour" : "No contour", rush ? "Rush" : "Standard"].join(" / "),
+          width: 340,
+          content: (
+            <div className="grid grid-cols-3 gap-1">
+              <button type="button" onClick={() => setRoundedCorners(p => !p)} className={`h-9 rounded border px-2 text-xs font-semibold transition ${roundedCorners ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>
+                Rounded
+              </button>
+              <button type="button" onClick={() => setContourCut(p => !p)} className={`h-9 rounded border px-2 text-xs font-semibold transition ${contourCut ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>
+                Contour
+              </button>
+              <button type="button" onClick={() => setRush(p => !p)} className={`h-9 rounded border px-2 text-xs font-semibold transition ${rush ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>
+                Rush
+              </button>
+            </div>
+          ),
+        },
+        {
+          id: "quantity",
+          title: "Quantity",
+          value: String(quantity),
+          width: 260,
+          content: (
+            <>
+              <input type="number" min={1} value={quantity} onChange={e => setQuantity(Math.max(1, Number(e.target.value) || 1))} className="h-9 w-full rounded border border-zinc-300 px-2 text-sm" />
+              <div className="text-[11px] leading-4 text-zinc-500">Set the number of signs in this order.</div>
+            </>
+          ),
+        },
+      ];
 
   // ─── render ─────────────────────────────────────────────────────────────────
   return (
@@ -255,19 +475,11 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
       <div className="w-full px-3 py-3 md:px-4">
 
         {/* Header */}
-        <div className="mb-3 grid gap-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm md:grid-cols-[1fr_auto] md:items-end">
+        <div className="mb-3 grid gap-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm md:grid-cols-1 md:items-end">
           <div>
             <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500">Rigid Product — Premium</div>
             <h1 className="mt-1 text-3xl font-semibold tracking-tight text-zinc-900">Aluminum Configurator</h1>
             <p className="mt-1 text-sm text-zinc-600">Standard sizes (sheet pricing) or custom dimensions (sq.in pricing).</p>
-          </div>
-          <div className="rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2 text-right shadow-[0_8px_20px_rgba(0,0,0,0.18)]">
-            <div className="text-xs uppercase tracking-[0.14em] text-[var(--brand-primary)]">Live Total</div>
-            <div className="text-3xl font-semibold text-white">{formatPrice(pricing.totalPrice)}</div>
-            <div className="text-xs text-zinc-300">
-              {quantity} sign{quantity !== 1 ? "s" : ""}
-              {pricingMode === "sheet" ? ` · ${pricing.sheetsRequired} sheet${pricing.sheetsRequired !== 1 ? "s" : ""}` : ` · ${pricing.sqInches} sq.in`}
-            </div>
           </div>
         </div>
 
@@ -318,6 +530,12 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
                   backgroundSize: "26px 26px",
                 }}
               >
+                <div className="absolute right-4 top-4 z-20 rounded-lg border border-zinc-800 bg-zinc-900/95 px-4 py-2 text-right shadow-sm backdrop-blur">
+                  <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--brand-primary)]">Live Total</div>
+                  <div className="text-2xl font-semibold text-white">{formatPrice(pricing.totalPrice)}</div>
+                  <div className="text-[11px] text-zinc-300">{quantity} sign{quantity !== 1 ? "s" : ""} · {pricing.sheetsRequired} sheet{pricing.sheetsRequired !== 1 ? "s" : ""}</div>
+                </div>
+
                 <div
                   className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 border border-zinc-500 bg-[#f8f8f6]"
                   style={{ width: 220, height: 440 }}
@@ -363,55 +581,26 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
                 <div className="pointer-events-none absolute left-[calc(50%+128px)] top-1/2 -translate-y-1/2 rotate-90 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">Right</div>
               </div>
 
-              {/* Sheet controls bar */}
-              <div className="grid gap-2 border-t border-zinc-200 bg-zinc-50 p-3 md:grid-cols-4 xl:grid-cols-9">
-                <ControlBox title="Images">
-                  <input
-                    type="number" min={1} max={maxImages} value={safeImageCount}
-                    onChange={e => setImageCount(Math.min(maxImages, Math.max(1, Number(e.target.value) || 1)))}
-                    className="h-9 w-full rounded border border-zinc-300 px-2 text-sm"
-                  />
-                </ControlBox>
-                <ControlBox title="Size" className="md:col-span-2">
-                  <select value={sizeId} onChange={e => setSizeId(e.target.value)}
-                    className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm">
-                    {ALUMINUM_SIZE_OPTIONS.map(s => (
-                      <option key={s.id} value={s.id}>{formatAluminumSize(s)}</option>
-                    ))}
-                  </select>
-                </ControlBox>
-                <ControlBox title="Material">
-                  <select value={material} onChange={e => setMaterial(e.target.value as AluminumMaterial)}
-                    className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm">
-                    <option value="040">0.040&quot;</option>
-                    <option value="080">0.080&quot;</option>
-                  </select>
-                </ControlBox>
-                <ControlBox title="Print Sides">
-                  <select value={printMode} onChange={e => setPrintMode(e.target.value as AluminumPrintMode)}
-                    className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm">
-                    <option value="single">Single</option>
-                    <option value="double">Double</option>
-                  </select>
-                </ControlBox>
-                <ControlBox title="Rounded Corners">
-                  <button type="button" onClick={() => setRoundedCorners(p => !p)}
-                    className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm">
-                    {roundedCorners ? "Yes" : "No"}
-                  </button>
-                </ControlBox>
-                <ControlBox title="Qty / Add" className="md:col-span-2">
-                  <div className="grid grid-cols-[68px_1fr] gap-1">
-                    <input type="number" min={1} value={quantity}
-                      onChange={e => setQuantity(Math.max(1, Number(e.target.value) || 1))}
-                      className="h-9 rounded border border-zinc-300 px-2 text-sm"
-                    />
-                    <Button className="h-9 rounded bg-[var(--brand-primary)] text-xs font-semibold text-white hover:bg-[var(--brand-primary-hover)]" onClick={addToCart}>
-                      {added ? "Added" : "Add"}
-                    </Button>
-                  </div>
-                </ControlBox>
-              </div>
+              {Array.from({ length: safeImageCount }).map((_, i) => (
+                <input
+                  key={`file-input-${i}`}
+                  ref={el => { fileInputRefs.current[i] = el; }}
+                  type="file"
+                  accept=".pdf,.ai,.eps,.png,.jpg,.jpeg,.tif,.tiff,.psd"
+                  className="hidden"
+                  onChange={e => handleBlockFileChange(i, e)}
+                  disabled={uploadingBlock !== null}
+                />
+              ))}
+
+              <BuilderBottomToolbar
+                panels={toolbarPanels}
+                action={
+                  <Button className="h-10 w-full rounded bg-[var(--brand-primary)] text-xs font-semibold text-white hover:bg-[var(--brand-primary-hover)]" onClick={addToCart}>
+                    {added ? "Added" : "Add"}
+                  </Button>
+                }
+              />
             </section>
           )}
 
@@ -431,6 +620,12 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
                   backgroundSize: "26px 26px",
                 }}
               >
+                <div className="absolute right-4 top-4 z-20 rounded-lg border border-zinc-800 bg-zinc-900/95 px-4 py-2 text-right shadow-sm backdrop-blur">
+                  <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--brand-primary)]">Live Total</div>
+                  <div className="text-2xl font-semibold text-white">{formatPrice(pricing.totalPrice)}</div>
+                  <div className="text-[11px] text-zinc-300">{quantity} sign{quantity !== 1 ? "s" : ""} · {pricing.sqInches} sq.in</div>
+                </div>
+
                 {sqinUpload?.blobUrl ? (
                   <div className="relative flex h-44 w-44 items-center justify-center overflow-hidden rounded border-2 border-dashed border-zinc-400 bg-white">
                     <img src={sqinUpload.blobUrl} alt="preview" className="h-full w-full object-contain" />
@@ -474,52 +669,14 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
                 disabled={sqinUploading}
               />
 
-              {/* Sq.in controls bar */}
-              <div className="grid gap-2 border-t border-zinc-200 bg-zinc-50 p-3 md:grid-cols-4 xl:grid-cols-9">
-                <ControlBox title={`Width (in)`}>
-                  <input type="number" min={1} step={0.5} value={customWidth}
-                    onChange={e => setCustomWidth(Math.max(0.5, Number(e.target.value) || 1))}
-                    className="h-9 w-full rounded border border-zinc-300 px-2 text-sm"
-                  />
-                </ControlBox>
-                <ControlBox title={`Height (in)`}>
-                  <input type="number" min={1} step={0.5} value={customHeight}
-                    onChange={e => setCustomHeight(Math.max(0.5, Number(e.target.value) || 1))}
-                    className="h-9 w-full rounded border border-zinc-300 px-2 text-sm"
-                  />
-                </ControlBox>
-                <ControlBox title="Material">
-                  <select value={material} onChange={e => setMaterial(e.target.value as AluminumMaterial)}
-                    className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm">
-                    <option value="040">0.040&quot;</option>
-                    <option value="080">0.080&quot;</option>
-                  </select>
-                </ControlBox>
-                <ControlBox title="Print Sides">
-                  <select value={printMode} onChange={e => setPrintMode(e.target.value as AluminumPrintMode)}
-                    className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm">
-                    <option value="single">Single</option>
-                    <option value="double">Double</option>
-                  </select>
-                </ControlBox>
-                <ControlBox title="Rounded Corners">
-                  <button type="button" onClick={() => setRoundedCorners(p => !p)}
-                    className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm">
-                    {roundedCorners ? "Yes" : "No"}
-                  </button>
-                </ControlBox>
-                <ControlBox title="Qty / Add" className="md:col-span-2">
-                  <div className="grid grid-cols-[68px_1fr] gap-1">
-                    <input type="number" min={1} value={quantity}
-                      onChange={e => setQuantity(Math.max(1, Number(e.target.value) || 1))}
-                      className="h-9 rounded border border-zinc-300 px-2 text-sm"
-                    />
-                    <Button className="h-9 rounded bg-[var(--brand-primary)] text-xs font-semibold text-white hover:bg-[var(--brand-primary-hover)]" onClick={addToCart}>
-                      {added ? "Added" : "Add"}
-                    </Button>
-                  </div>
-                </ControlBox>
-              </div>
+              <BuilderBottomToolbar
+                panels={toolbarPanels}
+                action={
+                  <Button className="h-10 w-full rounded bg-[var(--brand-primary)] text-xs font-semibold text-white hover:bg-[var(--brand-primary-hover)]" onClick={addToCart}>
+                    {added ? "Added" : "Add"}
+                  </Button>
+                }
+              />
             </section>
           )}
 
@@ -553,118 +710,6 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
               </div>
             </div>
 
-            {/* Add-ons */}
-            <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-              <div className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">Add-ons</div>
-              <div className="mt-3 space-y-3 text-sm">
-                <ToggleField label="Contour Cut (+10%)" value={contourCut} onChange={setContourCut} />
-                <ToggleField label="Rounded Corners ($20 setup)" value={roundedCorners} onChange={setRoundedCorners} />
-                <ToggleField label="Rush (+100%)" value={rush} onChange={setRush} />
-              </div>
-            </div>
-
-            {/* Artwork — sheet mode (per-block) */}
-            {pricingMode === "sheet" && (
-              <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-                <div className="flex items-center justify-between">
-                  <div className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">
-                    Artwork ({uploadedBlockCount}/{safeImageCount} uploaded)
-                  </div>
-                  {uploadedBlockCount > 0 && (
-                    <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
-                      {uploadedBlockCount} ready
-                    </span>
-                  )}
-                </div>
-                <p className="mt-1 text-xs text-zinc-500">
-                  {safeImageCount === 1
-                    ? "Upload 1 artwork for all signs."
-                    : `Upload up to ${safeImageCount} artworks — one per block. Click a block on the sheet or use the slots below.`}
-                </p>
-                {Array.from({ length: safeImageCount }).map((_, i) => (
-                  <input
-                    key={`file-input-${i}`}
-                    ref={el => { fileInputRefs.current[i] = el; }}
-                    type="file"
-                    accept=".pdf,.ai,.eps,.png,.jpg,.jpeg,.tif,.tiff,.psd"
-                    className="hidden"
-                    onChange={e => handleBlockFileChange(i, e)}
-                    disabled={uploadingBlock !== null}
-                  />
-                ))}
-                <div className="mt-3 space-y-2">
-                  {Array.from({ length: safeImageCount }).map((_, i) => {
-                    const upload = blockUploads[i];
-                    const error = blockUploadErrors[i];
-                    const isUploading = uploadingBlock === i;
-                    const color = SLOT_COLORS[i % SLOT_COLORS.length];
-                    return (
-                      <div key={`slot-${i}`} className="rounded-lg border border-zinc-200 bg-zinc-50 p-2">
-                        <div className="flex items-center gap-2">
-                          <div className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-sm ${color} text-[10px] font-bold text-white`}>
-                            {i + 1}
-                          </div>
-                          <div className="min-w-0 flex-1 text-xs font-medium text-zinc-700">Block {i + 1}</div>
-                          {upload ? (
-                            <div className="flex items-center gap-1">
-                              <span className="max-w-[100px] truncate text-[10px] text-emerald-700">{upload.fileName}</span>
-                              <button type="button" onClick={() => removeBlock(i)}
-                                className="rounded px-1 text-[10px] text-zinc-400 hover:text-rose-500">✕</button>
-                            </div>
-                          ) : (
-                            <button type="button" onClick={() => fileInputRefs.current[i]?.click()} disabled={isUploading}
-                              className="shrink-0 rounded border border-dashed border-zinc-300 px-2 py-1 text-[10px] text-zinc-500 hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)] disabled:opacity-50">
-                              {isUploading ? "Uploading…" : "+ Upload"}
-                            </button>
-                          )}
-                        </div>
-                        {upload?.blobUrl && (
-                          <img src={upload.blobUrl} alt={upload.fileName} className="mt-2 h-16 w-full rounded object-contain" />
-                        )}
-                        {upload && !upload.blobUrl && (
-                          <div className="mt-1 rounded bg-emerald-50 px-2 py-1 text-[10px] text-emerald-700">✓ {upload.fileName}</div>
-                        )}
-                        {error && (
-                          <div className="mt-1 rounded bg-rose-50 px-2 py-1 text-[10px] text-rose-700">{error}</div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-                <p className="mt-2 text-[10px] text-zinc-400">Accepted: PDF, AI, EPS, PNG, JPG, TIFF, PSD (up to 100MB)</p>
-              </div>
-            )}
-
-            {/* Artwork — sqin mode (single) */}
-            {pricingMode === "sqin" && (
-              <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-                <div className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">Artwork</div>
-                <p className="mt-1 text-xs text-zinc-500">Upload your artwork file for this custom sign.</p>
-                <div className="mt-3">
-                  {sqinUpload ? (
-                    <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-emerald-700">✓ {sqinUpload.fileName}</span>
-                        <button type="button" onClick={removeSqin}
-                          className="text-[10px] text-zinc-400 hover:text-rose-500">✕ Remove</button>
-                      </div>
-                      {sqinUpload.blobUrl && (
-                        <img src={sqinUpload.blobUrl} alt={sqinUpload.fileName} className="mt-2 h-20 w-full rounded object-contain" />
-                      )}
-                    </div>
-                  ) : (
-                    <button type="button" onClick={() => sqinFileRef.current?.click()} disabled={sqinUploading}
-                      className="w-full rounded-lg border border-dashed border-zinc-300 py-4 text-center text-xs text-zinc-500 hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)] disabled:opacity-50">
-                      {sqinUploading ? "Uploading…" : "+ Upload Artwork"}
-                    </button>
-                  )}
-                  {sqinUploadError && (
-                    <div className="mt-2 rounded bg-rose-50 px-2 py-1 text-[10px] text-rose-700">{sqinUploadError}</div>
-                  )}
-                </div>
-                <p className="mt-2 text-[10px] text-zinc-400">Accepted: PDF, AI, EPS, PNG, JPG, TIFF, PSD (up to 100MB)</p>
-              </div>
-            )}
           </aside>
         </div>
       </div>
@@ -673,15 +718,6 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
 }
 
 // ── Helper components ─────────────────────────────────────────────────────────
-
-function ControlBox({ title, className, children }: { title: string; className?: string; children: React.ReactNode }) {
-  return (
-    <div className={`rounded-lg border border-zinc-200 bg-white p-2 ${className ?? ""}`}>
-      <div className="mb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">{title}</div>
-      {children}
-    </div>
-  );
-}
 
 function Row({ label, value, strong, className }: { label: string; value: string; strong?: boolean; className?: string }) {
   return (
@@ -692,12 +728,3 @@ function Row({ label, value, strong, className }: { label: string; value: string
   );
 }
 
-function ToggleField({ label, value, onChange }: { label: string; value: boolean; onChange: (v: boolean) => void }) {
-  return (
-    <button type="button" onClick={() => onChange(!value)}
-      className="flex h-9 w-full items-center justify-between rounded border border-zinc-300 bg-white px-3 text-sm">
-      <span>{label}</span>
-      <span className={value ? "text-emerald-600" : "text-zinc-500"}>{value ? "Yes" : "No"}</span>
-    </button>
-  );
-}

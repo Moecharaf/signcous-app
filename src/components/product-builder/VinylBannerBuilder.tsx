@@ -58,6 +58,15 @@ type DragState =
 
 type ControlPanel = "artwork" | "size" | "material" | "print" | "finish" | "quantity";
 
+const CONTROL_PANEL_TITLE: Record<ControlPanel, string> = {
+  artwork: "Artwork",
+  size: "Size",
+  material: "Material",
+  print: "Print Sides",
+  finish: "Finishing",
+  quantity: "Quantity",
+};
+
 const DEFAULTS: FormState = {
   width: "48",
   height: "24",
@@ -190,7 +199,8 @@ export default function VinylBannerBuilder({
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
   const [uploadingArtwork, setUploadingArtwork] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const [activePanel, setActivePanel] = useState<ControlPanel>("size");
+  const [activePanel, setActivePanel] = useState<ControlPanel | null>(null);
+  const [panelAnchor, setPanelAnchor] = useState<{ left: number; top: number; width: number } | null>(null);
   const [dimensionInputs, setDimensionInputs] = useState(() => {
     const widthParts = toFeetAndInches(parseFloat(DEFAULTS.width) || 0);
     const heightParts = toFeetAndInches(parseFloat(DEFAULTS.height) || 0);
@@ -203,6 +213,7 @@ export default function VinylBannerBuilder({
     };
   });
   const workspaceRef = useRef<HTMLDivElement | null>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
 
   const widthNum = parseFloat(form.width) || 0;
   const heightNum = parseFloat(form.height) || 0;
@@ -412,6 +423,17 @@ export default function VinylBannerBuilder({
     },
     []
   );
+
+  const openPanel = useCallback((panel: ControlPanel, event: React.MouseEvent<HTMLButtonElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    setPanelAnchor({ left: rect.left, top: rect.top, width: rect.width });
+    setActivePanel(panel);
+  }, []);
+
+  const closePanel = useCallback(() => {
+    setActivePanel(null);
+    setPanelAnchor(null);
+  }, []);
 
   const setDimension = useCallback(
     (dimension: "width" | "height", part: "feet" | "inches", value: string) => {
@@ -660,6 +682,41 @@ export default function VinylBannerBuilder({
   }, [uploadedImage]);
 
   useEffect(() => {
+    if (!activePanel) return;
+
+    function handleEsc(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        closePanel();
+      }
+    }
+
+    window.addEventListener("keydown", handleEsc);
+
+    return () => {
+      window.removeEventListener("keydown", handleEsc);
+    };
+  }, [activePanel, closePanel]);
+
+  useEffect(() => {
+    if (!activePanel) return;
+
+    function handlePointerDown(event: MouseEvent) {
+      const target = event.target as HTMLElement;
+
+      if (panelRef.current?.contains(target)) return;
+      if (target.closest('[data-role="control-toolbar-button"]')) return;
+
+      closePanel();
+    }
+
+    window.addEventListener("mousedown", handlePointerDown);
+
+    return () => {
+      window.removeEventListener("mousedown", handlePointerDown);
+    };
+  }, [activePanel, closePanel]);
+
+  useEffect(() => {
     if (!isMeshMaterial) return;
 
     setForm((prev) => {
@@ -727,46 +784,26 @@ export default function VinylBannerBuilder({
     });
   }, [isEconomicalStandProduct]);
 
+  const viewportWidth = typeof window !== "undefined" ? window.innerWidth : 1280;
+  const panelMaxWidth =
+    activePanel === "size"
+      ? 300
+      : activePanel === "finish"
+        ? 520
+        : activePanel === "artwork"
+          ? 460
+          : activePanel === "material"
+            ? 300
+            : activePanel === "quantity"
+              ? 300
+              : 340;
+  const panelWidth = Math.max(220, Math.min(panelMaxWidth, viewportWidth - 24));
+  const panelLeft = panelAnchor
+    ? clamp(panelAnchor.left + panelAnchor.width / 2 - panelWidth / 2, 12, Math.max(12, viewportWidth - panelWidth - 12))
+    : 12;
+
   return (
     <div className="flex h-[calc(100vh-88px)] flex-col bg-[#f4f4f4] text-zinc-800">
-      <div className="border-b border-zinc-200 bg-white px-3 py-2">
-        <div className="grid items-start gap-3 lg:grid-cols-[1.1fr_1fr_auto]">
-          <div>
-            <h2 className="text-xl font-semibold tracking-tight text-zinc-900">Vinyl Banner Configurator</h2>
-            <p className="mt-1 text-xs text-zinc-600">
-              {isNoCurlProduct ? "No-Curl Banner" : isPosterProduct ? "Poster" : isHdpeProduct ? "HDPE" : isCanvasProduct ? "Canvas" : isMeshProduct ? "Mesh Banner" : form.material}
-              {" · "}
-              {!isCanvasProduct && !isMeshProduct && !isHdpeProduct && !isPosterProduct && !isNoCurlProduct && !isEconomicalStandProduct && (form.doubleSided ? "Double-Sided" : "Single-Sided")}
-              {(isCanvasProduct || isMeshProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct || isEconomicalStandProduct) && "Single-Sided"}
-              {" · "}
-              {widthFeetInchesLabel} x {heightFeetInchesLabel}
-            </p>
-            <p className="mt-1 text-[11px] text-zinc-500">Artboard Size: {widthFeetInchesLabel} x {heightFeetInchesLabel}</p>
-          </div>
-
-          <div className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2">
-            <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">Quick Rate Reference ($/sqft)</div>
-            <div className="grid grid-cols-3 gap-x-3 text-[11px]">
-              <span className="font-semibold text-zinc-600">13oz</span>
-              <span className="text-zinc-600">Single: $0.75</span>
-              <span className="text-zinc-600">Double: $1.20</span>
-              <span className="font-semibold text-zinc-600">15oz</span>
-              <span className="text-zinc-600">Single: $1.15</span>
-              <span className="text-zinc-600">Double: $1.84</span>
-              <span className="font-semibold text-zinc-400">18oz</span>
-              <span className="text-zinc-400">Single: --</span>
-              <span className="text-zinc-400">Double: --</span>
-            </div>
-          </div>
-
-          <div className="rounded-lg border border-[#111111] bg-[#111111] px-4 py-2 text-right">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#007fff]">Live Total</div>
-            <div className="text-2xl font-semibold text-white">{formatPrice(pricing.totalPrice)}</div>
-            <div className="text-[11px] text-zinc-300">{pricing.sqFt} sqft / 24 Hours Production</div>
-          </div>
-        </div>
-      </div>
-
       <div className="mx-3 mt-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
         <div className="flex items-center justify-between border-b border-zinc-200 px-4 py-2">
           <span className="text-xs font-semibold uppercase tracking-[0.12em] text-zinc-500">Canvas Workspace</span>
@@ -796,7 +833,42 @@ export default function VinylBannerBuilder({
             backgroundSize: isMeshProduct ? "18px 18px" : "24px 24px",
           }}
         >
-          <div className="absolute left-4 top-4 rounded border border-zinc-200 bg-white/95 px-3 py-1 text-xs text-zinc-600 shadow-sm">
+          <div className="absolute left-4 top-4 z-20 max-w-[320px] rounded-lg border border-zinc-200 bg-white/95 px-3 py-2 shadow-sm backdrop-blur">
+            <h2 className="text-sm font-semibold tracking-tight text-zinc-900">Vinyl Banner Configurator</h2>
+            <p className="mt-1 text-[11px] text-zinc-600">
+              {isNoCurlProduct ? "No-Curl Banner" : isPosterProduct ? "Poster" : isHdpeProduct ? "HDPE" : isCanvasProduct ? "Canvas" : isMeshProduct ? "Mesh Banner" : form.material}
+              {" · "}
+              {!isCanvasProduct && !isMeshProduct && !isHdpeProduct && !isPosterProduct && !isNoCurlProduct && !isEconomicalStandProduct && (form.doubleSided ? "Double-Sided" : "Single-Sided")}
+              {(isCanvasProduct || isMeshProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct || isEconomicalStandProduct) && "Single-Sided"}
+              {" · "}
+              {widthFeetInchesLabel} x {heightFeetInchesLabel}
+            </p>
+            <p className="mt-1 text-[10px] text-zinc-500">Artboard Size: {widthFeetInchesLabel} x {heightFeetInchesLabel}</p>
+            {productDescription && <p className="mt-1 text-[10px] text-zinc-500">{productDescription}</p>}
+          </div>
+
+          <div className="absolute right-4 top-4 z-20 rounded-lg border border-zinc-200 bg-zinc-50/95 px-3 py-2 shadow-sm backdrop-blur">
+            <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">Quick Rate Reference ($/sqft)</div>
+            <div className="grid grid-cols-3 gap-x-3 text-[11px]">
+              <span className="font-semibold text-zinc-600">13oz</span>
+              <span className="text-zinc-600">Single: $0.75</span>
+              <span className="text-zinc-600">Double: $1.20</span>
+              <span className="font-semibold text-zinc-600">15oz</span>
+              <span className="text-zinc-600">Single: $1.15</span>
+              <span className="text-zinc-600">Double: $1.84</span>
+              <span className="font-semibold text-zinc-400">18oz</span>
+              <span className="text-zinc-400">Single: --</span>
+              <span className="text-zinc-400">Double: --</span>
+            </div>
+          </div>
+
+          <div className="absolute right-4 top-[132px] z-20 rounded-lg border border-[#111111] bg-[#111111]/95 px-4 py-2 text-right shadow-sm backdrop-blur">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#007fff]">Live Total</div>
+            <div className="text-2xl font-semibold text-white">{formatPrice(pricing.totalPrice)}</div>
+            <div className="text-[11px] text-zinc-300">{pricing.sqFt} sqft / 24 Hours Production</div>
+          </div>
+
+          <div className="absolute left-4 top-[122px] rounded border border-zinc-200 bg-white/95 px-3 py-1 text-xs text-zinc-600 shadow-sm">
             Click and drag banner to move
           </div>
 
@@ -899,13 +971,13 @@ export default function VinylBannerBuilder({
                 title="Artwork"
                 value={uploadedFileName ? "Uploaded" : "No file"}
                 active={activePanel === "artwork"}
-                onClick={() => setActivePanel("artwork")}
+                onClick={(event) => openPanel("artwork", event)}
               />
               <ToolbarButton
                 title="Size"
                 value={`${widthFeetInchesLabel} x ${heightFeetInchesLabel}`}
                 active={activePanel === "size"}
-                onClick={() => setActivePanel("size")}
+                onClick={(event) => openPanel("size", event)}
                 status={errors.width || errors.height ? "alert" : "ok"}
               />
               {!isPosterProduct && (
@@ -913,7 +985,7 @@ export default function VinylBannerBuilder({
                   title="Material"
                   value={isCanvasProduct ? "Canvas" : isNoCurlProduct ? "No-Curl Banner" : isMeshProduct ? "Mesh Banner" : isHdpeProduct ? "HDPE" : form.material}
                   active={activePanel === "material"}
-                  onClick={() => setActivePanel("material")}
+                  onClick={(event) => openPanel("material", event)}
                 />
               )}
               {!(isCanvasProduct || isMeshProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct || isEconomicalStandProduct) && (
@@ -921,7 +993,7 @@ export default function VinylBannerBuilder({
                   title="Print"
                   value={form.doubleSided ? "Double-sided" : "Single-sided"}
                   active={activePanel === "print"}
-                  onClick={() => setActivePanel("print")}
+                  onClick={(event) => openPanel("print", event)}
                 />
               )}
               {!(isCanvasProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct || isEconomicalStandProduct) && (
@@ -929,186 +1001,222 @@ export default function VinylBannerBuilder({
                   title="Finishing"
                   value={isMeshProduct ? [form.meshWelding ? "Welded" : null, form.meshRope ? "Rope" : null, form.grommets ? "Grommets" : null].filter(Boolean).join(" / ") || "None" : [form.hemming ? "Hemmed" : null, form.grommets ? "Grommets" : null, form.polePockets ? "Pockets" : null, form.windSlits ? "Wind slits" : null].filter(Boolean).join(" / ") || "None"}
                   active={activePanel === "finish"}
-                  onClick={() => setActivePanel("finish")}
+                  onClick={(event) => openPanel("finish", event)}
                 />
               )}
               <ToolbarButton
                 title="Quantity"
                 value={`${form.quantity} unit${effectiveQtyNum !== 1 ? "s" : ""}`}
                 active={activePanel === "quantity"}
-                onClick={() => setActivePanel("quantity")}
+                onClick={(event) => openPanel("quantity", event)}
               />
-            </div>
-
-            <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3">
-              {activePanel === "artwork" && (
-                <div>
-                  <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-500">Artwork</div>
-                  <div className="grid gap-2 md:grid-cols-[minmax(0,1fr)_220px]">
-                    <label className="inline-flex h-10 w-full cursor-pointer items-center justify-center rounded border border-zinc-300 bg-white px-3 text-sm font-semibold text-zinc-700 hover:border-[#007fff]">
-                      {uploadingArtwork ? "Uploading..." : uploadedFileName ? "Replace Artwork" : "Upload Artwork"}
-                      <input
-                        type="file"
-                        accept=".pdf,.ai,.eps,.png,.jpg,.jpeg,.tif,.tiff"
-                        onChange={onUploadArtwork}
-                        disabled={uploadingArtwork}
-                        className="hidden"
-                      />
-                    </label>
-                    <div className="flex h-10 items-center rounded border border-zinc-200 bg-white px-3 text-sm text-zinc-600">
-                      {uploadedFileName ?? "No artwork uploaded"}
-                    </div>
-                  </div>
-                  {uploadError && <div className="mt-2 text-[10px] font-semibold text-rose-600">{uploadError}</div>}
-                </div>
-              )}
-
-              {activePanel === "size" && (
-                <div>
-                  <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-500">Size</div>
-                  <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_220px]">
-                    <DimensionInput
-                      label="Width"
-                      feetValue={dimensionInputs.widthFeet}
-                      inchesValue={dimensionInputs.widthInches}
-                      onFeetChange={(value) => setDimension("width", "feet", value)}
-                      onInchesChange={(value) => setDimension("width", "inches", value)}
-                    />
-                    <DimensionInput
-                      label="Height"
-                      feetValue={dimensionInputs.heightFeet}
-                      inchesValue={dimensionInputs.heightInches}
-                      onFeetChange={(value) => setDimension("height", "feet", value)}
-                      onInchesChange={(value) => setDimension("height", "inches", value)}
-                    />
-                    <div className="rounded border border-zinc-200 bg-white p-3 text-sm text-zinc-600">
-                      <div className="font-semibold text-zinc-800">Live size</div>
-                      <div className="mt-1">{widthFeetInchesLabel} x {heightFeetInchesLabel}</div>
-                      <div className="mt-1 text-xs text-zinc-500">Allowed range: 0 ft 6 in to 20 ft 0 in</div>
-                    </div>
-                  </div>
-                  {(errors.width || errors.height) && (
-                    <div className="mt-2 text-[10px] font-semibold text-rose-600">{errors.width ?? errors.height}</div>
-                  )}
-                </div>
-              )}
-
-              {activePanel === "material" && !isPosterProduct && (
-                <div>
-                  <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-500">Material</div>
-                  {isCanvasProduct || isNoCurlProduct || isMeshProduct || isHdpeProduct ? (
-                    <div className="flex h-10 items-center rounded border border-zinc-200 bg-white px-3 text-sm text-zinc-700">
-                      {isCanvasProduct ? "Canvas" : isNoCurlProduct ? "No-Curl Banner" : isMeshProduct ? "Mesh Banner" : "HDPE"}
-                    </div>
-                  ) : (
-                    <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
-                      {(["13oz Vinyl", "15oz Vinyl"] as const).map((option) => (
-                        <SegButton key={option} active={form.material === option} onClick={() => set("material", option)}>
-                          {option}
-                        </SegButton>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {activePanel === "print" && !(isCanvasProduct || isMeshProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct || isEconomicalStandProduct) && (
-                <div>
-                  <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-500">Print Sides</div>
-                  <div className="grid gap-2 sm:grid-cols-2 xl:max-w-[320px]">
-                    <SegButton active={!form.doubleSided} onClick={() => set("doubleSided", false)}>Single-Sided</SegButton>
-                    <SegButton active={form.doubleSided} onClick={() => set("doubleSided", true)} disabled={isMeshMaterial}>Double-Sided</SegButton>
-                  </div>
-                </div>
-              )}
-
-              {activePanel === "finish" && !(isCanvasProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct || isEconomicalStandProduct) && (
-                <div className="space-y-3">
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-500">Finishing</div>
-                  {isMeshProduct ? (
-                    <div className="grid gap-2 md:grid-cols-3">
-                      <div>
-                        <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">Welding</div>
-                        <div className="grid grid-cols-2 gap-1">
-                          <SegButton active={!form.meshWelding} onClick={() => set("meshWelding", false)}>No</SegButton>
-                          <SegButton active={form.meshWelding} onClick={() => set("meshWelding", true)}>Yes</SegButton>
-                        </div>
-                      </div>
-                      <div>
-                        <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">Rope</div>
-                        <div className="grid grid-cols-2 gap-1">
-                          <SegButton active={!form.meshRope} onClick={() => set("meshRope", false)}>None</SegButton>
-                          <SegButton active={form.meshRope} onClick={() => set("meshRope", true)}>Top & Bottom</SegButton>
-                        </div>
-                      </div>
-                      <div>
-                        <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">Grommets</div>
-                        <div className="grid grid-cols-2 gap-1">
-                          <SegButton active={!form.grommets} onClick={() => set("grommets", false)}>No</SegButton>
-                          <SegButton active={form.grommets} onClick={() => set("grommets", true)}>Yes</SegButton>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-4">
-                      <SubControlGroup title="Hemming">
-                        <div className="grid grid-cols-2 gap-1">
-                          <SegButton active={!form.hemming} onClick={() => set("hemming", false)}>No</SegButton>
-                          <SegButton active={form.hemming} onClick={() => set("hemming", true)}>Yes</SegButton>
-                        </div>
-                      </SubControlGroup>
-                      <SubControlGroup title="Grommets">
-                        <div className="grid grid-cols-2 gap-1">
-                          <SegButton active={!form.grommets} onClick={() => set("grommets", false)}>No</SegButton>
-                          <SegButton active={form.grommets} onClick={() => set("grommets", true)}>Yes</SegButton>
-                        </div>
-                      </SubControlGroup>
-                      <SubControlGroup title="Pole Pockets">
-                        <div className="grid grid-cols-2 gap-1">
-                          <SegButton active={!form.polePockets} onClick={() => set("polePockets", false)}>None</SegButton>
-                          <SegButton active={form.polePockets} onClick={() => set("polePockets", true)}>Top & Bottom</SegButton>
-                        </div>
-                      </SubControlGroup>
-                      <SubControlGroup title="Wind Slits">
-                        <div className="grid grid-cols-2 gap-1">
-                          <SegButton active={!form.windSlits} onClick={() => set("windSlits", false)}>No</SegButton>
-                          <SegButton active={form.windSlits} onClick={() => set("windSlits", true)} disabled={isMeshMaterial}>Yes</SegButton>
-                        </div>
-                      </SubControlGroup>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {activePanel === "quantity" && (
-                <div>
-                  <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-500">Quantity</div>
-                  <div className="grid gap-2 md:grid-cols-[120px_1fr] xl:max-w-[420px]">
-                    <input type="number" min={1} value={form.quantity} onChange={(e) => set("quantity", e.target.value)} className="h-10 rounded border border-zinc-300 px-3 text-sm" />
-                    <div className="flex h-10 items-center rounded border border-zinc-200 bg-white px-3 text-sm text-zinc-600">
-                      {effectiveQtyNum} billable unit{effectiveQtyNum !== 1 ? "s" : ""}
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
 
-          <div className="rounded-lg border border-[#111111] bg-[#111111] p-3 text-white">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#007fff]">Price / Add to Cart</div>
-            <div className="mt-1 text-2xl font-semibold">{formatPrice(pricing.totalPrice)}</div>
-            <div className="mt-1 grid grid-cols-[88px_1fr] gap-y-1 text-xs text-zinc-300">
-              <div className="font-semibold text-white">Area</div>
-              <div>{pricing.sqFt} sqft</div>
-              <div className="font-semibold text-white">Quantity</div>
-              <div>{effectiveQtyNum} unit{effectiveQtyNum !== 1 ? "s" : ""}</div>
-            </div>
+          <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500">Cart Action</div>
             <Button className="mt-3 h-10 w-full rounded bg-[#ff7f00] text-sm font-semibold text-white hover:bg-[#e67200]" onClick={handleAddToCart}>
               {addedToCart ? "Added" : "Add to Cart"}
             </Button>
           </div>
         </div>
       </div>
+
+      {activePanel && panelAnchor && (
+        <div
+          ref={panelRef}
+          className="fixed z-50 overflow-visible rounded-lg border border-zinc-300 bg-white p-2 shadow-2xl"
+          style={{
+            width: `${panelWidth}px`,
+            left: `${panelLeft}px`,
+            top: `${Math.max(16, panelAnchor.top - 10)}px`,
+            transform: "translateY(-100%)",
+          }}
+        >
+          <div className="absolute -bottom-2 left-1/2 h-4 w-4 -translate-x-1/2 rotate-45 border-b border-r border-zinc-300 bg-white" aria-hidden="true" />
+          <div className="relative">
+            {activePanel !== "size" && (
+              <div className="mb-2 flex items-center justify-between">
+                <h3 className="text-xs font-semibold uppercase tracking-[0.08em] text-zinc-700">{CONTROL_PANEL_TITLE[activePanel]}</h3>
+                <button
+                  type="button"
+                  onClick={closePanel}
+                  className="h-6 rounded border border-zinc-300 px-2 text-[11px] font-semibold text-zinc-600 hover:border-zinc-400"
+                >
+                  Close
+                </button>
+              </div>
+            )}
+
+            {activePanel === "artwork" && (
+              <div>
+                <div className="grid gap-2 md:grid-cols-[minmax(0,1fr)_220px]">
+                  <label className="inline-flex h-10 w-full cursor-pointer items-center justify-center rounded border border-zinc-300 bg-white px-3 text-sm font-semibold text-zinc-700 hover:border-[#007fff]">
+                    {uploadingArtwork ? "Uploading..." : uploadedFileName ? "Replace Artwork" : "Upload Artwork"}
+                    <input
+                      type="file"
+                      accept=".pdf,.ai,.eps,.png,.jpg,.jpeg,.tif,.tiff"
+                      onChange={onUploadArtwork}
+                      disabled={uploadingArtwork}
+                      className="hidden"
+                    />
+                  </label>
+                  <div className="flex h-10 items-center rounded border border-zinc-200 bg-white px-3 text-sm text-zinc-600">
+                    {uploadedFileName ?? "No artwork uploaded"}
+                  </div>
+                </div>
+                {uploadError && <div className="mt-2 text-[10px] font-semibold text-rose-600">{uploadError}</div>}
+              </div>
+            )}
+
+            {activePanel === "size" && (
+              <div>
+                <div className="rounded border border-zinc-200 bg-zinc-50 p-2">
+                  <div className="mb-2 text-center text-[11px] font-semibold text-zinc-600">Sign size</div>
+                  <div className="grid grid-cols-[42px_minmax(0,1fr)_12px_minmax(0,1fr)_12px] items-center gap-1 text-[11px] text-zinc-600">
+                    <span className="font-semibold lowercase text-zinc-500">width:</span>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={dimensionInputs.widthFeet}
+                      onChange={(event) => setDimension("width", "feet", event.target.value)}
+                      className="h-6 w-full min-w-0 rounded border border-zinc-300 px-1.5 text-[12px] [appearance:textfield]"
+                    />
+                    <span className="text-[10px] font-semibold">ft</span>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={dimensionInputs.widthInches}
+                      onChange={(event) => setDimension("width", "inches", event.target.value)}
+                      className="h-6 w-full min-w-0 rounded border border-zinc-300 px-1.5 text-[12px] [appearance:textfield]"
+                    />
+                    <span className="text-[10px] font-semibold">in</span>
+                    <span className="font-semibold lowercase text-zinc-500">height:</span>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={dimensionInputs.heightFeet}
+                      onChange={(event) => setDimension("height", "feet", event.target.value)}
+                      className="h-6 w-full min-w-0 rounded border border-zinc-300 px-1.5 text-[12px] [appearance:textfield]"
+                    />
+                    <span className="text-[10px] font-semibold">ft</span>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={dimensionInputs.heightInches}
+                      onChange={(event) => setDimension("height", "inches", event.target.value)}
+                      className="h-6 w-full min-w-0 rounded border border-zinc-300 px-1.5 text-[12px] [appearance:textfield]"
+                    />
+                    <span className="text-[10px] font-semibold">in</span>
+                  </div>
+                </div>
+                <div className="mt-1 rounded border border-zinc-200 bg-white p-2 text-[11px] text-zinc-600">
+                  <div className="font-semibold text-zinc-800">Live size: {widthFeetInchesLabel} x {heightFeetInchesLabel}</div>
+                  <div className="mt-0.5 text-[10px] text-zinc-500">Allowed range: 0 ft 6 in to 20 ft 0 in</div>
+                </div>
+                {(errors.width || errors.height) && (
+                  <div className="mt-2 text-[10px] font-semibold text-rose-600">{errors.width ?? errors.height}</div>
+                )}
+              </div>
+            )}
+
+            {activePanel === "material" && !isPosterProduct && (
+              <div>
+                {isCanvasProduct || isNoCurlProduct || isMeshProduct || isHdpeProduct ? (
+                  <div className="flex h-8 items-center rounded border border-zinc-200 bg-white px-3 text-sm text-zinc-700">
+                    {isCanvasProduct ? "Canvas" : isNoCurlProduct ? "No-Curl Banner" : isMeshProduct ? "Mesh Banner" : "HDPE"}
+                  </div>
+                ) : (
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {(["13oz Vinyl", "15oz Vinyl"] as const).map((option) => (
+                      <SegButton key={option} active={form.material === option} onClick={() => set("material", option)}>
+                        {option}
+                      </SegButton>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activePanel === "print" && !(isCanvasProduct || isMeshProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct || isEconomicalStandProduct) && (
+              <div>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <SegButton active={!form.doubleSided} onClick={() => set("doubleSided", false)}>Single-Sided</SegButton>
+                  <SegButton active={form.doubleSided} onClick={() => set("doubleSided", true)} disabled={isMeshMaterial}>Double-Sided</SegButton>
+                </div>
+              </div>
+            )}
+
+            {activePanel === "finish" && !(isCanvasProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct || isEconomicalStandProduct) && (
+              <div className="space-y-3">
+                {isMeshProduct ? (
+                  <div className="grid gap-1.5 md:grid-cols-2">
+                    <div>
+                      <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">Welding</div>
+                      <div className="grid grid-cols-2 gap-1">
+                        <SegButton active={!form.meshWelding} onClick={() => set("meshWelding", false)}>No</SegButton>
+                        <SegButton active={form.meshWelding} onClick={() => set("meshWelding", true)}>Yes</SegButton>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">Rope</div>
+                      <div className="grid grid-cols-2 gap-1">
+                        <SegButton active={!form.meshRope} onClick={() => set("meshRope", false)}>None</SegButton>
+                        <SegButton active={form.meshRope} onClick={() => set("meshRope", true)}>Top & Bottom</SegButton>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">Grommets</div>
+                      <div className="grid grid-cols-2 gap-1">
+                        <SegButton active={!form.grommets} onClick={() => set("grommets", false)}>No</SegButton>
+                        <SegButton active={form.grommets} onClick={() => set("grommets", true)}>Yes</SegButton>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid gap-1.5 md:grid-cols-2">
+                    <SubControlGroup title="Hemming">
+                      <div className="grid grid-cols-2 gap-1">
+                        <SegButton active={!form.hemming} onClick={() => set("hemming", false)}>No</SegButton>
+                        <SegButton active={form.hemming} onClick={() => set("hemming", true)}>Yes</SegButton>
+                      </div>
+                    </SubControlGroup>
+                    <SubControlGroup title="Grommets">
+                      <div className="grid grid-cols-2 gap-1">
+                        <SegButton active={!form.grommets} onClick={() => set("grommets", false)}>No</SegButton>
+                        <SegButton active={form.grommets} onClick={() => set("grommets", true)}>Yes</SegButton>
+                      </div>
+                    </SubControlGroup>
+                    <SubControlGroup title="Pole Pockets">
+                      <div className="grid grid-cols-2 gap-1">
+                        <SegButton active={!form.polePockets} onClick={() => set("polePockets", false)}>None</SegButton>
+                        <SegButton active={form.polePockets} onClick={() => set("polePockets", true)}>Top & Bottom</SegButton>
+                      </div>
+                    </SubControlGroup>
+                    <SubControlGroup title="Wind Slits">
+                      <div className="grid grid-cols-2 gap-1">
+                        <SegButton active={!form.windSlits} onClick={() => set("windSlits", false)}>No</SegButton>
+                        <SegButton active={form.windSlits} onClick={() => set("windSlits", true)} disabled={isMeshMaterial}>Yes</SegButton>
+                      </div>
+                    </SubControlGroup>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activePanel === "quantity" && (
+              <div>
+                <div className="grid gap-2 md:grid-cols-[110px_1fr]">
+                  <input type="number" min={1} value={form.quantity} onChange={(e) => set("quantity", e.target.value)} className="h-8 rounded border border-zinc-300 px-3 text-sm" />
+                  <div className="flex h-8 items-center rounded border border-zinc-200 bg-white px-3 text-sm text-zinc-600">
+                    {effectiveQtyNum} billable unit{effectiveQtyNum !== 1 ? "s" : ""}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -1151,8 +1259,8 @@ function SubControlGroup({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded border border-zinc-200 bg-white p-2">
-      <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">{title}</div>
+    <div className="rounded border border-zinc-200 bg-white p-1.5">
+      <div className="mb-1 text-[9px] font-semibold uppercase tracking-[0.1em] text-zinc-500">{title}</div>
       {children}
     </div>
   );
@@ -1216,7 +1324,7 @@ function SegButton({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`h-8 rounded border text-[11px] font-semibold transition ${
+      className={`h-7 rounded border text-[10px] font-semibold transition ${
         disabled
           ? "cursor-not-allowed border-zinc-200 bg-zinc-100 text-zinc-400"
           : active

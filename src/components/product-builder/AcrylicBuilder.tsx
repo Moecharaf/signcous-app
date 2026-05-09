@@ -9,6 +9,7 @@ import {
   type ChangeEvent,
   type ReactNode,
 } from "react";
+import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
 import Button from "@/components/ui/Button";
 import { useCart } from "@/context/CartContext";
 import {
@@ -85,26 +86,6 @@ function getProductionMessage({
   }
 
   return "Estimated production time: fast production on standard configurations.";
-}
-
-function ControlBox({
-  title,
-  helper,
-  className,
-  children,
-}: {
-  title: string;
-  helper?: string;
-  className?: string;
-  children: ReactNode;
-}) {
-  return (
-    <div className={`rounded-lg border border-zinc-200 bg-white p-2 ${className ?? ""}`}>
-      <div className="mb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">{title}</div>
-      {children}
-      {helper && <div className="mt-1 text-[11px] leading-4 text-zinc-500">{helper}</div>}
-    </div>
-  );
 }
 
 function ChoiceChip({
@@ -401,6 +382,163 @@ export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
     mounting,
     quantity: safeQuantity,
   });
+  const toolbarPanels: BuilderBottomToolbarPanel[] = [
+    {
+      id: "artwork",
+      title: "Artwork",
+      value: uploadedFileName ? "Uploaded" : "No file",
+      width: 420,
+      content: (
+        <>
+          <label className="inline-flex h-10 w-full cursor-pointer items-center justify-center rounded border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-700 hover:border-zinc-400">
+            <input
+              type="file"
+              accept="image/*,.pdf,.ai,.eps,.psd,.svg"
+              className="hidden"
+              onChange={onUploadArtwork}
+            />
+            {uploadingArtwork ? "Uploading..." : uploadedFileName ? "Replace Artwork" : "Upload Artwork"}
+          </label>
+          {uploadedFileName && (
+            <div className="flex items-center justify-between gap-2 rounded border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-600">
+              <span className="truncate">{uploadedFileName}</span>
+              <button type="button" onClick={clearArtwork} className="font-semibold text-zinc-500 hover:text-zinc-900">
+                Remove
+              </button>
+            </div>
+          )}
+          {uploadError && <div className="text-xs font-medium text-red-600">{uploadError}</div>}
+          <div className="text-[11px] leading-4 text-zinc-500">Upload artwork the same way as the other builders.</div>
+        </>
+      ),
+    },
+    {
+      id: "size",
+      title: "Size",
+      value: isValid ? `${formatInches(width)} x ${formatInches(height)}` : "Set dimensions",
+      status: widthError || heightError ? "alert" : "ok",
+      width: 320,
+      content: (
+        <>
+          <div className="grid grid-cols-[1fr_auto_1fr] gap-1">
+            <input
+              type="number"
+              min={0.1}
+              max={ACRYLIC_MAX_WIDTH}
+              step={0.5}
+              value={widthStr}
+              onChange={(event) => setWidthStr(event.target.value)}
+              className="h-9 rounded border border-zinc-300 px-2 text-sm"
+            />
+            <div className="flex items-center justify-center text-sm font-semibold text-zinc-400">x</div>
+            <input
+              type="number"
+              min={0.1}
+              max={ACRYLIC_MAX_HEIGHT}
+              step={0.5}
+              value={heightStr}
+              onChange={(event) => setHeightStr(event.target.value)}
+              className="h-9 rounded border border-zinc-300 px-2 text-sm"
+            />
+          </div>
+          {(widthError || heightError) && <div className="text-xs font-medium text-red-600">{widthError || heightError}</div>}
+          <div className="text-[11px] leading-4 text-zinc-500">Custom sizes up to 96&quot; x 48&quot;.</div>
+        </>
+      ),
+    },
+    {
+      id: "thickness",
+      title: "Thickness",
+      value: thicknessOption.label,
+      width: 300,
+      content: (
+        <>
+          <div className="flex flex-wrap gap-1">
+            {ACRYLIC_THICKNESS_OPTIONS.map((option) => (
+              <ChoiceChip
+                key={option.value}
+                active={thickness === option.value}
+                label={option.label}
+                onClick={() => setThickness(option.value)}
+              />
+            ))}
+          </div>
+          <div className="text-[11px] leading-4 text-zinc-500">Selected state is highlighted.</div>
+        </>
+      ),
+    },
+    {
+      id: "standoffs",
+      title: "Standoffs",
+      value: mountingOption.label,
+      width: 320,
+      content: (
+        <>
+          <div className="flex flex-wrap gap-1">
+            <ChoiceChip active={mounting === "none"} label="None" onClick={() => setMounting("none")} />
+            <ChoiceChip active={mounting === "silver-standoff"} label="Silver" onClick={() => setMounting("silver-standoff")} />
+            <ChoiceChip active={mounting === "black-standoff"} label="Black" onClick={() => setMounting("black-standoff")} />
+          </div>
+          <div className="text-[11px] leading-4 text-zinc-500">Creates a premium floating wall-mounted look.</div>
+        </>
+      ),
+    },
+    {
+      id: "corners",
+      title: "Rounded Corners",
+      value: cornerOption.label,
+      width: 300,
+      content: (
+        <>
+          <select
+            value={roundedCorners}
+            onChange={(event) => setRoundedCorners(event.target.value as AcrylicRoundedCorner)}
+            className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"
+          >
+            {ACRYLIC_CORNER_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          <div className="text-[11px] leading-4 text-zinc-500">Choose a radius for softer, finished edges.</div>
+        </>
+      ),
+    },
+    {
+      id: "finish",
+      title: "Contour / Rush",
+      value: [contourCut ? "Contour" : "Square", rush ? "Rush" : "Standard"].join(" / "),
+      width: 320,
+      content: (
+        <>
+          <div className="grid grid-cols-2 gap-1">
+            <ToggleChip active={contourCut} label="Contour" onClick={() => setContourCut((value) => !value)} />
+            <ToggleChip active={rush} label="Rush" onClick={() => setRush((value) => !value)} />
+          </div>
+          <div className="text-[11px] leading-4 text-zinc-500">Add shaped finishing or expedited handling.</div>
+        </>
+      ),
+    },
+    {
+      id: "quantity",
+      title: "Quantity",
+      value: String(safeQuantity),
+      width: 260,
+      content: (
+        <>
+          <input
+            type="number"
+            min={1}
+            value={safeQuantity}
+            onChange={(event) => setQuantity(Math.max(1, Math.floor(Number(event.target.value) || 1)))}
+            className="h-9 w-full rounded border border-zinc-300 px-2 text-sm"
+          />
+          <div className="text-[11px] leading-4 text-zinc-500">Set the number of identical signs to add.</div>
+        </>
+      ),
+    },
+  ];
 
   useEffect(() => {
     return () => {
@@ -522,7 +660,7 @@ export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
     <div className="min-h-[calc(100vh-96px)] bg-[linear-gradient(145deg,#f4f4f5_0%,#ececef_55%,#e4e4e7_100%)] text-zinc-800">
       <div className="w-full px-3 py-3 md:px-4">
         <div className="mb-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-          <div className="grid items-end gap-4 lg:grid-cols-[1fr_auto]">
+          <div className="grid items-end gap-4 lg:grid-cols-1">
             <div>
               <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-xs text-zinc-500">
                 <Link href="/" className="transition hover:text-zinc-900">
@@ -547,13 +685,6 @@ export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
                 Premium clear and rigid signage for offices, lobbies, branding, and wall-mounted displays.
               </p>
             </div>
-            <div className="rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2 text-right shadow-[0_8px_20px_rgba(0,0,0,0.18)]">
-              <div className="text-xs uppercase tracking-[0.14em] text-[var(--brand-primary)]">Live Total</div>
-              <div className="text-3xl font-semibold text-white">{pricing ? formatCurrency(pricing.grandTotal) : formatCurrency(0)}</div>
-              <div className="text-xs text-zinc-300">
-                {pricing ? `${pricing.area.toFixed(1)} sq in · ${safeQuantity} unit${safeQuantity !== 1 ? "s" : ""}` : "Set dimensions to calculate"}
-              </div>
-            </div>
           </div>
         </div>
 
@@ -575,127 +706,40 @@ export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
               )}
             </div>
 
-            <AcrylicCanvas
-              width={width}
-              height={height}
-              isValid={isValid}
-              mounting={mounting}
-              roundedCorners={roundedCorners}
-              contourCut={contourCut}
-              thickness={thickness}
-              uploadedImage={uploadedImage}
-              uploadingArtwork={uploadingArtwork}
-            />
-
-            <div className="grid gap-2 border-t border-zinc-200 bg-zinc-50 p-3 md:grid-cols-4 xl:grid-cols-8">
-              <ControlBox title="Artwork" className="md:col-span-2" helper="Upload artwork the same way as the other builders.">
-                <div className="space-y-2">
-                  <label className="inline-flex h-9 w-full cursor-pointer items-center justify-center rounded border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-700 hover:border-zinc-400">
-                    <input
-                      type="file"
-                      accept="image/*,.pdf,.ai,.eps,.psd,.svg"
-                      className="hidden"
-                      onChange={onUploadArtwork}
-                    />
-                    {uploadingArtwork ? "Uploading..." : uploadedFileName ? "Replace Artwork" : "Upload Artwork"}
-                  </label>
-                  {uploadedFileName && (
-                    <div className="flex items-center justify-between gap-2 rounded border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-600">
-                      <span className="truncate">{uploadedFileName}</span>
-                      <button type="button" onClick={clearArtwork} className="font-semibold text-zinc-500 hover:text-zinc-900">
-                        Remove
-                      </button>
-                    </div>
-                  )}
-                  {uploadError && <div className="text-xs font-medium text-red-600">{uploadError}</div>}
+            <div className="relative">
+              <div className="absolute right-4 top-4 z-20 rounded-lg border border-zinc-800 bg-zinc-900/95 px-4 py-2 text-right shadow-sm backdrop-blur">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--brand-primary)]">Live Total</div>
+                <div className="text-2xl font-semibold text-white">{pricing ? formatCurrency(pricing.grandTotal) : formatCurrency(0)}</div>
+                <div className="text-[11px] text-zinc-300">
+                  {pricing ? `${pricing.area.toFixed(1)} sq in · ${safeQuantity} unit${safeQuantity !== 1 ? "s" : ""}` : "Set dimensions to calculate"}
                 </div>
-              </ControlBox>
+              </div>
 
-              <ControlBox title="Size" className="md:col-span-2" helper="Custom sizes up to 96&quot; x 48&quot;.">
-                <div className="grid grid-cols-[1fr_auto_1fr] gap-1">
-                  <input
-                    type="number"
-                    min={0.1}
-                    max={ACRYLIC_MAX_WIDTH}
-                    step={0.5}
-                    value={widthStr}
-                    onChange={(event) => setWidthStr(event.target.value)}
-                    className="h-9 rounded border border-zinc-300 px-2 text-sm"
-                  />
-                  <div className="flex items-center justify-center text-sm font-semibold text-zinc-400">x</div>
-                  <input
-                    type="number"
-                    min={0.1}
-                    max={ACRYLIC_MAX_HEIGHT}
-                    step={0.5}
-                    value={heightStr}
-                    onChange={(event) => setHeightStr(event.target.value)}
-                    className="h-9 rounded border border-zinc-300 px-2 text-sm"
-                  />
-                </div>
-              </ControlBox>
-
-              <ControlBox title="Thickness" helper="Selected state is highlighted.">
-                <div className="flex flex-wrap gap-1">
-                  {ACRYLIC_THICKNESS_OPTIONS.map((option) => (
-                    <ChoiceChip
-                      key={option.value}
-                      active={thickness === option.value}
-                      label={option.label}
-                      onClick={() => setThickness(option.value)}
-                    />
-                  ))}
-                </div>
-              </ControlBox>
-
-              <ControlBox title="Standoffs" className="md:col-span-2" helper="Creates a premium floating wall-mounted look.">
-                <div className="flex flex-wrap gap-1">
-                  <ChoiceChip active={mounting === "none"} label="None" onClick={() => setMounting("none")} />
-                  <ChoiceChip active={mounting === "silver-standoff"} label="Silver" onClick={() => setMounting("silver-standoff")} />
-                  <ChoiceChip active={mounting === "black-standoff"} label="Black" onClick={() => setMounting("black-standoff")} />
-                </div>
-              </ControlBox>
-
-              <ControlBox title="Rounded Corners" helper="Choose a radius for softer, finished edges.">
-                <select
-                  value={roundedCorners}
-                  onChange={(event) => setRoundedCorners(event.target.value as AcrylicRoundedCorner)}
-                  className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"
-                >
-                  {ACRYLIC_CORNER_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </ControlBox>
-
-              <ControlBox title="Contour / Rush" helper="Add shaped finishing or expedited handling.">
-                <div className="grid grid-cols-2 gap-1">
-                  <ToggleChip active={contourCut} label="Contour" onClick={() => setContourCut((value) => !value)} />
-                  <ToggleChip active={rush} label="Rush" onClick={() => setRush((value) => !value)} />
-                </div>
-              </ControlBox>
-
-              <ControlBox title="Qty / Add" className="md:col-span-2">
-                <div className="grid grid-cols-[68px_1fr] gap-1">
-                  <input
-                    type="number"
-                    min={1}
-                    value={safeQuantity}
-                    onChange={(event) => setQuantity(Math.max(1, Math.floor(Number(event.target.value) || 1)))}
-                    className="h-9 rounded border border-zinc-300 px-2 text-sm"
-                  />
-                  <Button
-                    className="h-9 rounded bg-[var(--brand-primary)] text-xs font-semibold text-white hover:bg-[var(--brand-primary-hover)]"
-                    disabled={!isValid}
-                    onClick={addToCart}
-                  >
-                    {added ? "Added" : "Add"}
-                  </Button>
-                </div>
-              </ControlBox>
+              <AcrylicCanvas
+                width={width}
+                height={height}
+                isValid={isValid}
+                mounting={mounting}
+                roundedCorners={roundedCorners}
+                contourCut={contourCut}
+                thickness={thickness}
+                uploadedImage={uploadedImage}
+                uploadingArtwork={uploadingArtwork}
+              />
             </div>
+
+            <BuilderBottomToolbar
+              panels={toolbarPanels}
+              action={
+                <Button
+                  className="h-10 w-full rounded bg-[var(--brand-primary)] text-xs font-semibold text-white hover:bg-[var(--brand-primary-hover)]"
+                  disabled={!isValid}
+                  onClick={addToCart}
+                >
+                  {added ? "Added" : "Add"}
+                </Button>
+              }
+            />
           </div>
 
           <aside className="space-y-3">
