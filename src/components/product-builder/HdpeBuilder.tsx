@@ -287,7 +287,7 @@ export default function HdpeBuilder() {
 
         {/* Header bar */}
         <div className="mb-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-          <div className="grid items-end gap-4 lg:grid-cols-[1fr_auto]">
+          <div className="grid items-end gap-4 lg:grid-cols-1">
             <div>
               <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--brand-primary)]">
                 <span className="rounded bg-zinc-900 px-1.5 py-0.5 text-[10px] tracking-normal text-[var(--brand-primary)]">SC</span>
@@ -297,11 +297,6 @@ export default function HdpeBuilder() {
               <p className="mt-1 text-sm text-zinc-600">
                 Drag to reposition artwork. Use the corner handle to resize and auto-update dimensions.
               </p>
-            </div>
-            <div className="rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2 text-right shadow-[0_8px_20px_rgba(0,0,0,0.18)]">
-              <div className="text-xs uppercase tracking-[0.14em] text-[var(--brand-primary)]">Live Total</div>
-              <div className="text-3xl font-semibold text-white">{formatPrice(pricing.totalPrice)}</div>
-              <div className="text-xs text-zinc-300">{pricing.sqFt} sqft · {qtyNum} unit{qtyNum !== 1 ? "s" : ""}</div>
             </div>
           </div>
         </div>
@@ -329,6 +324,12 @@ export default function HdpeBuilder() {
                 backgroundSize: "26px 26px",
               }}
             >
+              <div className="absolute right-4 top-4 z-20 rounded-lg border border-zinc-800 bg-zinc-900/95 px-4 py-2 text-right shadow-sm backdrop-blur">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--brand-primary)]">Live Total</div>
+                <div className="text-2xl font-semibold text-white">{formatPrice(pricing.totalPrice)}</div>
+                <div className="text-[11px] text-zinc-300">{pricing.sqFt} sqft · {qtyNum} unit{qtyNum !== 1 ? "s" : ""}</div>
+              </div>
+
               <div className="absolute left-5 top-5 rounded-md border border-zinc-200 bg-white px-3 py-1 text-xs font-medium text-zinc-600 shadow-sm">
                 Click and drag sign to move
               </div>

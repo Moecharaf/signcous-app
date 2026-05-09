@@ -1231,7 +1231,7 @@ function ToolbarButton({
   title: string;
   value: string;
   active?: boolean;
-  onClick: () => void;
+  onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
   status?: "ok" | "alert";
 }) {
   return (

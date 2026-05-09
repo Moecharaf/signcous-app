@@ -6,7 +6,6 @@ import {
   useMemo,
   useRef,
   useState,
-  type MouseEvent,
   type ReactNode,
 } from "react";
 
@@ -51,7 +50,7 @@ export default function BuilderBottomToolbar({
   }, []);
 
   const togglePanel = useCallback(
-    (panelId: string, event: MouseEvent<HTMLButtonElement>) => {
+    (panelId: string, event: React.MouseEvent<HTMLButtonElement>) => {
       if (activePanelId === panelId) {
         closePanel();
         return;
@@ -73,7 +72,7 @@ export default function BuilderBottomToolbar({
       }
     }
 
-    function handlePointerDown(event: MouseEvent) {
+    function handlePointerDown(event: globalThis.MouseEvent) {
       const target = event.target as HTMLElement;
 
       if (panelRef.current?.contains(target)) return;
