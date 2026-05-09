@@ -1,22 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useMemo, useState, type ChangeEvent, type ReactNode } from "react";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
 import Button from "@/components/ui/Button";
 import { useCart } from "@/context/CartContext";
 import {
-              <div className="absolute right-4 top-4 z-20 max-w-[220px] rounded-lg border border-zinc-200 bg-zinc-50/95 px-3 py-2 shadow-sm backdrop-blur">
-                <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">Quick Rate Reference</div>
-                <div className="space-y-1 text-[11px] leading-5 text-zinc-600">
-                  <div className="flex items-center justify-between gap-3"><span>Rate / sq ft</span><span className="font-semibold text-zinc-800">{pricing ? formatCurrency(pricing.totalPrice / Math.max(pricing.areaSqFt, 1)) : formatCurrency(0)}</span></div>
-                  <div className="flex items-center justify-between gap-3"><span>Effective / unit</span><span className="font-semibold text-zinc-800">{pricing ? formatCurrency(pricing.totalPrice / Math.max(safeQuantity, 1)) : formatCurrency(0)}</span></div>
-                  <div className="flex items-center justify-between gap-3"><span>Area</span><span className="font-semibold text-zinc-800">{pricing ? `${pricing.areaSqFt.toFixed(2)} sq ft` : "--"}</span></div>
-                </div>
-              </div>
-
-              <div className="absolute right-4 top-[132px] z-20 rounded-lg border border-zinc-800 bg-zinc-900/95 px-4 py-2 text-right shadow-sm backdrop-blur">
+  GF2030_LAMINATE_OPTIONS,
   GF2030_MAX_ROLL_WIDTH,
   calculateGF2030Pricing,
   type GF2030Laminate,
@@ -514,40 +504,6 @@ export default function GF2030Builder({ productId = 138 }: GF2030BuilderProps) {
   return (
     <div className="min-h-[calc(100vh-96px)] bg-[linear-gradient(145deg,#f4f4f5_0%,#ececef_55%,#e4e4e7_100%)] text-zinc-800">
       <div className="w-full px-3 py-3 md:px-4">
-        <div className="mb-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-          <div className="grid items-end gap-4 lg:grid-cols-1">
-            <div>
-              <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-xs text-zinc-500">
-                <Link href="/" className="transition hover:text-zinc-900">
-                  Home
-                </Link>
-                <span>/</span>
-                <Link href="/shop/adhesive" className="transition hover:text-zinc-900">
-                  Adhesive
-                </Link>
-                <span>/</span>
-                <span className="font-semibold text-zinc-900">GF 2030APAE</span>
-              </nav>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {[
-                  "3.4 mil Polymeric Calendered",
-                  "Air-Egress Adhesive",
-                  "52in Roll Split Logic",
-                  "Gloss / Matte / None",
-                ].map((item) => (
-                  <span key={item} className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-[11px] font-semibold text-zinc-600">
-                    {item}
-                  </span>
-                ))}
-              </div>
-              <h1 className="mt-3 text-3xl font-semibold tracking-tight text-zinc-900">GF 2030APAE Builder</h1>
-              <p className="mt-1 text-sm text-zinc-600">
-                3.4 mil polymeric vinyl with air-egress adhesive, 5-year durability, and automatic panel splitting for vehicle graphics, wall graphics, window decals, and more.
-              </p>
-            </div>
-          </div>
-        </div>
-
         <div className="grid gap-4">
           <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
             <div className="border-b border-zinc-200 px-4 py-3">

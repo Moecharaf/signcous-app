@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useMemo, useState, type ChangeEvent, type ReactNode } from "react";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
 import Button from "@/components/ui/Button";
@@ -348,38 +347,6 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
   return (
     <div className="min-h-[calc(100vh-96px)] bg-[linear-gradient(145deg,#f5f3ff_0%,#ede9fe_55%,#e3dcff_100%)] text-zinc-800">
       <div className="w-full px-3 py-3 md:px-4">
-        <div className="mb-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-          <div className="grid items-end gap-4 lg:grid-cols-1">
-            <div>
-              <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-xs text-zinc-500">
-                <Link href="/" className="transition hover:text-zinc-900">
-                  Home
-                </Link>
-                <span>/</span>
-                <Link href="/shop/adhesive" className="transition hover:text-zinc-900">
-                  Adhesive
-                </Link>
-                <span>/</span>
-                <span className="font-semibold text-zinc-900">Dual View</span>
-              </nav>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {["Dual View", "Single & Double Sided", "52in Panel Split", "Business Grade"].map((item) => (
-                  <span
-                    key={item}
-                    className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-[11px] font-semibold text-zinc-600"
-                  >
-                    {item}
-                  </span>
-                ))}
-              </div>
-              <h1 className="mt-3 text-3xl font-semibold tracking-tight text-zinc-900">Dual View Builder</h1>
-              <p className="mt-1 text-sm text-zinc-600">
-                Single or double-sided window graphic with 52in panel logic, tiered pricing, and contour cut option.
-              </p>
-            </div>
-          </div>
-        </div>
-
         <div className="grid gap-4">
           <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
             <div className="border-b border-zinc-200 px-4 py-3">

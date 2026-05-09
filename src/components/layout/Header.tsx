@@ -4,8 +4,8 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { useTheme } from "next-themes";
 import { useCart } from "@/context/CartContext";
+import { useTheme } from "@/components/layout/ThemeProvider";
 
 const MagnetIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="30" height="30" fill="currentColor" aria-hidden="true">

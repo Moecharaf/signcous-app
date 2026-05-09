@@ -1,22 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useMemo, useState, type ChangeEvent, type ReactNode } from "react";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
 import Button from "@/components/ui/Button";
 import { useCart } from "@/context/CartContext";
 import {
-              <div className="absolute right-4 top-4 z-20 max-w-[220px] rounded-lg border border-zinc-200 bg-zinc-50/95 px-3 py-2 shadow-sm backdrop-blur">
-                <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">Quick Rate Reference</div>
-                <div className="space-y-1 text-[11px] leading-5 text-zinc-600">
-                  <div className="flex items-center justify-between gap-3"><span>Rate / sq ft</span><span className="font-semibold text-zinc-800">{pricing ? formatCurrency(pricing.totalPrice / Math.max(pricing.sqFt, 1)) : formatCurrency(0)}</span></div>
-                  <div className="flex items-center justify-between gap-3"><span>Effective / unit</span><span className="font-semibold text-zinc-800">{pricing ? formatCurrency(pricing.totalPrice / Math.max(safeQuantity, 1)) : formatCurrency(0)}</span></div>
-                  <div className="flex items-center justify-between gap-3"><span>Area</span><span className="font-semibold text-zinc-800">{pricing ? `${pricing.sqFt} sq ft` : "--"}</span></div>
-                </div>
-              </div>
-
-              <div className="absolute right-4 top-[132px] z-20 rounded-lg border border-zinc-800 bg-zinc-900/95 px-4 py-2 text-right shadow-sm backdrop-blur">
+  LOW_TAC_WALL_MIN,
   LOW_TAC_WALL_RATE,
   calculateLowTacWallPrice,
   getLowTacWallPanelInfo,
@@ -355,74 +345,6 @@ export default function LowTacWallBuilder({ productId = 0 }: LowTacWallBuilderPr
   return (
     <div className="min-h-[calc(100vh-96px)] bg-[linear-gradient(145deg,#f4f4f5_0%,#ececef_55%,#e4e4e7_100%)] text-zinc-800">
       <div className="w-full px-3 py-3 md:px-4">
-        {/* Header */}
-        <div className="mb-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-          <div className="grid items-end gap-4 lg:grid-cols-1">
-            <div>
-              <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-xs text-zinc-500">
-                <Link href="/" className="transition hover:text-zinc-900">Home</Link>
-                <span>/</span>
-                <Link href="/shop/adhesive" className="transition hover:text-zinc-900">Adhesive</Link>
-                <span>/</span>
-                <span className="font-semibold text-zinc-900">Removable Wall Decals</span>
-              </nav>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {[
-                  "$4.25 / sq ft",
-                  "Removable Low-Tac",
-                  "Ceil-to-Foot Rounding",
-                  "Contour Cut Optional",
-                  "Rush Available",
-                  "$25 Minimum",
-                ].map((item) => (
-                  <span
-                    key={item}
-                    className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-[11px] font-semibold text-zinc-600"
-                  >
-                    {item}
-                  </span>
-                ))}
-              </div>
-              <h1 className="mt-3 text-3xl font-semibold tracking-tight text-zinc-900">
-                Removable Wall Decals Builder
-              </h1>
-              <p className="mt-1 text-sm text-zinc-600">
-                Low-tac repositionable wall graphics at $4.25/sq ft. Designed for interior walls —
-                easy to apply and remove without residue. Dimensions billed in whole feet, rounded up.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Billable size banner */}
-        {isValid && pricing && (
-          <div className="mb-3 flex flex-wrap items-center gap-3 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-xs font-medium text-blue-700">
-            <span>
-              Size: <span className="font-semibold">{widthIn}&quot; × {heightIn}&quot;</span>
-            </span>
-            <span className="text-blue-400">→</span>
-            <span>
-              Billable Size:{" "}
-              <span className="font-semibold">{pricing.widthFt} ft × {pricing.heightFt} ft</span>
-            </span>
-            <span className="text-blue-400">→</span>
-            <span>
-              Total Area: <span className="font-semibold">{pricing.sqFt} sq ft</span>
-            </span>
-            {splitCount > 0 && (
-              <>
-                <span className="text-blue-400">·</span>
-                <span>
-                  Cuts:{" "}
-                  <span className="font-semibold">
-                    {splitCount} × 48&quot; {splitDirection}
-                  </span>
-                </span>
-              </>
-            )}
-          </div>
-        )}
-
         <div className="grid gap-4">
           {/* Preview canvas + controls */}
           <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm">

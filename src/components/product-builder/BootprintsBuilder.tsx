@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useMemo, useState, type ChangeEvent, type ReactNode } from "react";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
 import Button from "@/components/ui/Button";
@@ -350,75 +349,6 @@ export default function BootprintsBuilder({ productId = 0 }: BootprintsBuilderPr
   return (
     <div className="min-h-[calc(100vh-96px)] bg-[linear-gradient(145deg,#f4f4f5_0%,#ececef_55%,#e4e4e7_100%)] text-zinc-800">
       <div className="w-full px-3 py-3 md:px-4">
-        {/* Header */}
-        <div className="mb-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-          <div className="grid items-end gap-4 lg:grid-cols-1">
-            <div>
-              <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-xs text-zinc-500">
-                <Link href="/" className="transition hover:text-zinc-900">Home</Link>
-                <span>/</span>
-                <Link href="/shop/adhesive" className="transition hover:text-zinc-900">Adhesive</Link>
-                <span>/</span>
-                <span className="font-semibold text-zinc-900">Outdoor Boot Prints</span>
-              </nav>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {[
-                  "$14.95 / sq ft",
-                  "Heavy-Duty Outdoor",
-                  "Ceil-to-Foot Rounding",
-                  "Contour Cut Optional",
-                  "Rush Available",
-                  "$40 Minimum",
-                ].map((item) => (
-                  <span
-                    key={item}
-                    className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-[11px] font-semibold text-zinc-600"
-                  >
-                    {item}
-                  </span>
-                ))}
-              </div>
-              <h1 className="mt-3 text-3xl font-semibold tracking-tight text-zinc-900">
-                Outdoor Boot Prints Builder
-              </h1>
-              <p className="mt-1 text-sm text-zinc-600">
-                Heavy-duty outdoor floor graphic panels at $14.95/sq ft. Built for high-traffic
-                exterior environments. Dimensions billed in whole feet — each dimension rounded up
-                before area is computed.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Billable size banner */}
-        {isValid && pricing && (
-          <div className="mb-3 flex flex-wrap items-center gap-3 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-xs font-medium text-blue-700">
-            <span>
-              Size: <span className="font-semibold">{widthIn}&quot; × {heightIn}&quot;</span>
-            </span>
-            <span className="text-blue-400">→</span>
-            <span>
-              Billable Size:{" "}
-              <span className="font-semibold">{pricing.widthFt} ft × {pricing.heightFt} ft</span>
-            </span>
-            <span className="text-blue-400">→</span>
-            <span>
-              Total Area: <span className="font-semibold">{pricing.sqFt} sq ft</span>
-            </span>
-            {splitCount > 0 && (
-              <>
-                <span className="text-blue-400">·</span>
-                <span>
-                  Cuts:{" "}
-                  <span className="font-semibold">
-                    {splitCount} × 48&quot; {splitDirection}
-                  </span>
-                </span>
-              </>
-            )}
-          </div>
-        )}
-
         <div className="grid gap-4">
           {/* Preview canvas + controls */}
           <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
