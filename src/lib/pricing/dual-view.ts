@@ -31,6 +31,7 @@ export interface DualViewPricingResult {
   preMinimumTotal: number;
   perItemTotal: number;
   quantity: number;
+  totalPrice: number;
   grandTotal: number;
   panelWidthIn: number;
   panelHeightIn: number;
@@ -143,6 +144,7 @@ export function calculateDualViewPrice(input: DualViewPricingInput): DualViewPri
     preMinimumTotal: preMin,
     perItemTotal,
     quantity,
+    totalPrice: perItemTotal,
     grandTotal: Math.round(perItemTotal * quantity * 100) / 100,
     panelWidthIn,
     panelHeightIn,

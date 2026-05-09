@@ -80,6 +80,7 @@ export interface SimpleSqFtPricingResult {
   sqFt: number;
   unitPrice: number;
   totalPrice: number;
+  sheetsRequired: number;
 }
 
 export interface CanvasPricingResult extends SimpleSqFtPricingResult {
@@ -245,6 +246,7 @@ export function calculateCanvasPrice(
     unitPrice: Math.round(unitPrice * 100) / 100,
     totalPrice: Math.round(totalPrice * 100) / 100,
     minimumApplied: totalPrice > baseTotalPrice,
+    sheetsRequired: 1,
   };
 }
 
@@ -486,6 +488,7 @@ export function calculateHdpePrice(
     sqFt: Math.round(sqFt * 100) / 100,
     unitPrice: Math.round(unitPrice * 100) / 100,
     totalPrice: Math.round(totalPrice * 100) / 100,
+    sheetsRequired: 1,
   };
 }
 
