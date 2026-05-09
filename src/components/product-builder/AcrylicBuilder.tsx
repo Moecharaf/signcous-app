@@ -687,7 +687,7 @@ export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
                 </div>
               </div>
 
-              <div className="absolute right-4 top-[118px] z-20 rounded-lg border border-zinc-800 bg-zinc-900/95 px-4 py-2 text-right shadow-sm backdrop-blur">
+              <div className="absolute right-4 top-[132px] z-20 rounded-lg border border-zinc-800 bg-zinc-900/95 px-4 py-2 text-right shadow-sm backdrop-blur">
                 <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--brand-primary)]">Live Total</div>
                 <div className="text-2xl font-semibold text-white">{pricing ? formatCurrency(pricing.grandTotal) : formatCurrency(0)}</div>
                 <div className="text-[11px] text-zinc-300">

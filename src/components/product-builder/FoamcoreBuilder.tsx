@@ -372,7 +372,7 @@ export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE
                 </div>
               </div>
 
-              <div className="absolute right-4 top-[118px] z-20 rounded-lg border border-zinc-800 bg-zinc-900/95 px-4 py-2 text-right shadow-sm backdrop-blur">
+              <div className="absolute right-4 top-[132px] z-20 rounded-lg border border-zinc-800 bg-zinc-900/95 px-4 py-2 text-right shadow-sm backdrop-blur">
                 <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--brand-primary)]">Live Total</div>
                 <div className="text-2xl font-semibold text-white">{formatPrice(pricing.totalPrice)}</div>
                 <div className="text-[11px] text-zinc-300">{quantity} sign{quantity !== 1 ? "s" : ""} · {pricing.sheetsRequired} sheet{pricing.sheetsRequired !== 1 ? "s" : ""}</div>
