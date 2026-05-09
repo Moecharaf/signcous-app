@@ -7,7 +7,16 @@ import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/componen
 import Button from "@/components/ui/Button";
 import { useCart } from "@/context/CartContext";
 import {
-  WINDOW_CLING_MAX_HEIGHT_IN,
+              <div className="absolute right-4 top-4 z-20 max-w-[220px] rounded-lg border border-zinc-200 bg-zinc-50/95 px-3 py-2 shadow-sm backdrop-blur">
+                <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">Quick Rate Reference</div>
+                <div className="space-y-1 text-[11px] leading-5 text-zinc-600">
+                  <div className="flex items-center justify-between gap-3"><span>Rate / sq in</span><span className="font-semibold text-zinc-800">{pricing ? formatCurrency(pricing.totalPrice / Math.max(pricing.sqIn, 1)) : formatCurrency(0)}</span></div>
+                  <div className="flex items-center justify-between gap-3"><span>Effective / unit</span><span className="font-semibold text-zinc-800">{pricing ? formatCurrency(pricing.totalPrice / Math.max(safeQuantity, 1)) : formatCurrency(0)}</span></div>
+                  <div className="flex items-center justify-between gap-3"><span>Sq in</span><span className="font-semibold text-zinc-800">{pricing ? pricing.sqIn.toFixed(0) : "--"}</span></div>
+                </div>
+              </div>
+
+              <div className="absolute right-4 top-[132px] z-20 rounded-lg border border-zinc-800 bg-zinc-900/95 px-4 py-2 text-right shadow-sm backdrop-blur">
   WINDOW_CLING_MAX_WIDTH_IN,
   WINDOW_CLING_MIN,
   WINDOW_CLING_RATE,
