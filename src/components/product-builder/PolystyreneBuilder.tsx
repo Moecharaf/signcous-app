@@ -337,15 +337,6 @@ export default function PolystyreneBuilder({
   return (
     <div className="min-h-[calc(100vh-96px)] bg-[linear-gradient(145deg,#f4f4f5_0%,#ececef_55%,#e4e4e7_100%)] text-zinc-800">
       <div className="w-full px-3 py-3 md:px-4">
-        {/* Header */}
-        <div className="mb-3 grid gap-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm md:grid-cols-1 md:items-end">
-          <div>
-            <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-500">Rigid Product</div>
-            <h1 className="mt-1 text-3xl font-semibold tracking-tight text-zinc-900">Polystyrene Configurator</h1>
-            <p className="mt-1 text-sm text-zinc-600">Signs365-style sheet layout · .03&quot; thickness · per-block artwork upload.</p>
-          </div>
-        </div>
-
         <div className="grid gap-3">
           {/* Sheet visualizer */}
           <section className="rounded-2xl border border-zinc-200 bg-white shadow-sm">

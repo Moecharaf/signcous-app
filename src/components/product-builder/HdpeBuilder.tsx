@@ -284,23 +284,6 @@ export default function HdpeBuilder() {
   return (
     <div className="min-h-[calc(100vh-96px)] bg-[linear-gradient(145deg,#f4f4f5_0%,#ececef_55%,#e4e4e7_100%)] text-zinc-800">
       <div className="w-full px-3 py-3 md:px-4">
-
-        {/* Header bar */}
-        <div className="mb-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-          <div className="grid items-end gap-4 lg:grid-cols-1">
-            <div>
-              <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--brand-primary)]">
-                <span className="rounded bg-zinc-900 px-1.5 py-0.5 text-[10px] tracking-normal text-[var(--brand-primary)]">SC</span>
-                Signcous Studio
-              </div>
-              <h2 className="mt-1 text-3xl font-semibold tracking-tight text-zinc-900">HDPE Sign Configurator</h2>
-              <p className="mt-1 text-sm text-zinc-600">
-                Drag to reposition artwork. Use the corner handle to resize and auto-update dimensions.
-              </p>
-            </div>
-          </div>
-        </div>
-
         <div className="grid gap-4">
           {/* Canvas panel */}
           <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
