@@ -11,7 +11,6 @@ export default function HdpePage() {
   return (
     <VinylBannerBuilder
       productName="HDPE Sign"
-      productDescription="Water and tear resistant HDPE sign builder with size-based pricing."
       pricingMode="hdpe"
       productId={56}
     />
