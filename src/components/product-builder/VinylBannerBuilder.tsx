@@ -1079,7 +1079,7 @@ export default function VinylBannerBuilder({
                     <span>{formatPrice(1.49)} per sqft</span>
                   </div>
                 ) : isHdpeProduct ? (
-                  <div className="grid grid-cols-[56px_1fr] gap-x-2 gap-y-0.5 text-[10px] md:text-left">
+                  <div className="grid grid-cols-[56px_1fr] gap-x-2 gap-y-0.5 text-[10px] md:text-center md:grid-cols-2 md:justify-center md:inline-grid">
                     {hdpeTierRates.map((tier) => (
                       <Fragment key={`hdpe-tier-${tier.qty}`}>
                         <span className="text-zinc-500">{tier.qty}</span>
