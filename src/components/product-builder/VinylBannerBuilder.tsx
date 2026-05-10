@@ -25,6 +25,9 @@ const materialOptions = ["13oz Vinyl", "15oz Vinyl", "Mesh Banner", "Fabric Bann
 const unitOptions = ["inches", "feet"] as const;
 
 type Unit = (typeof unitOptions)[number];
+type MeshGrommetSpacing = "every-2-3-feet" | "every-1-2-feet" | "every-6-12-inches" | "corners-only" | "custom-inches";
+type MeshRopeMode = "none" | "top-only" | "bottom-only" | "top-bottom";
+type MeshPolePocketMode = "none" | "top-only" | "bottom-only" | "left-only" | "right-only" | "top-bottom" | "left-right";
 
 interface FormState {
   width: string;
@@ -44,6 +47,11 @@ interface FormState {
   meshWelding: boolean;
   meshWebbing: boolean;
   meshRope: boolean;
+  meshGrommetSpacing: MeshGrommetSpacing;
+  meshGrommetSpacingCustom: string;
+  meshRopeMode: MeshRopeMode;
+  meshPolePocketMode: MeshPolePocketMode;
+  meshPolePocketSize: 1 | 2 | 3 | 4;
 }
 
 interface FormErrors {
@@ -86,6 +94,11 @@ const DEFAULTS: FormState = {
   meshWelding: true,
   meshWebbing: false,
   meshRope: false,
+  meshGrommetSpacing: "every-1-2-feet",
+  meshGrommetSpacingCustom: "12",
+  meshRopeMode: "none",
+  meshPolePocketMode: "none",
+  meshPolePocketSize: 2,
 };
 
 interface VinylBannerBuilderProps {
@@ -154,6 +167,25 @@ function getGrommetPoints(
   spacingIn: number
 ): Array<{ xPct: number; yPct: number }> {
   if (!enabled || widthIn <= 0 || heightIn <= 0) return [];
+
+  // spacingIn <= 0 means "corners only" — just the endpoints of each selected edge
+  if (spacingIn <= 0) {
+    const pts: Array<{ xPct: number; yPct: number }> = [];
+    const seen = new Set<string>();
+    const addPt = (x: number, y: number) => {
+      const key = `${x},${y}`;
+      if (!seen.has(key)) { seen.add(key); pts.push({ xPct: x, yPct: y }); }
+    };
+    const hasTop = placement === "all-sides" || placement.includes("top");
+    const hasBottom = placement === "all-sides" || placement.includes("bottom");
+    const hasLeft = placement === "all-sides" || placement.includes("left");
+    const hasRight = placement === "all-sides" || placement.includes("right");
+    if (hasTop) { addPt(0, 0); addPt(100, 0); }
+    if (hasBottom) { addPt(0, 100); addPt(100, 100); }
+    if (hasLeft) { addPt(0, 0); addPt(0, 100); }
+    if (hasRight) { addPt(100, 0); addPt(100, 100); }
+    return pts;
+  }
 
   const points: Array<{ xPct: number; yPct: number }> = [];
   const safeSpacing = Math.max(1, spacingIn);
@@ -363,8 +395,9 @@ export default function VinylBannerBuilder({
   const posterBillableSqFt = Math.max(1, Math.ceil((widthIn / 12) * (heightIn / 12)));
   const meshBillableSqFt = Math.max(1, Math.ceil((widthIn / 12) * (heightIn / 12)));
   const perimeterFt = 2 * ((widthIn / 12) + (heightIn / 12));
+  const meshRopeActive = isMeshProduct && form.meshRopeMode !== "none";
   const meshWebbingCost = form.meshWebbing ? perimeterFt * 1.75 : 0;
-  const meshRopeCost = form.meshRope ? perimeterFt * 1.75 : 0;
+  const meshRopeCost = meshRopeActive ? perimeterFt * 1.75 : 0;
 
   const fitScale = Math.min(
     PREVIEW_MAX_WIDTH / Math.max(widthIn, 1),
@@ -407,10 +440,21 @@ export default function VinylBannerBuilder({
   const noCurlRate = useMemo(() => getNoCurlSqFtRate(Math.max(1, Math.ceil((widthIn / 12) * (heightIn / 12)))), [widthIn, heightIn]);
   const posterRate = useMemo(() => getPosterSqFtRate(posterBillableSqFt), [posterBillableSqFt]);
   const meshRate   = useMemo(() => getMeshSqFtRate(meshBillableSqFt), [meshBillableSqFt]);
-  const meshGrommetPoints = useMemo(
-    () => getGrommetPoints(widthIn, heightIn, !isCanvasProduct && !isHdpeProduct && !isPosterProduct && !isNoCurlProduct && form.grommets, form.grommetPlacement, form.grommetSpacingIn),
-    [widthIn, heightIn, isCanvasProduct, isHdpeProduct, isPosterProduct, isNoCurlProduct, form.grommets, form.grommetPlacement, form.grommetSpacingIn]
-  );
+  const meshGrommetPoints = useMemo(() => {
+    const spacingIn = isMeshProduct
+      ? (form.meshGrommetSpacing === "every-2-3-feet" ? 30
+        : form.meshGrommetSpacing === "every-1-2-feet" ? 18
+        : form.meshGrommetSpacing === "every-6-12-inches" ? 9
+        : form.meshGrommetSpacing === "corners-only" ? 0
+        : Math.max(1, parseFloat(form.meshGrommetSpacingCustom) || 12))
+      : form.grommetSpacingIn;
+    return getGrommetPoints(
+      widthIn, heightIn,
+      !isCanvasProduct && !isHdpeProduct && !isPosterProduct && !isNoCurlProduct && form.grommets,
+      form.grommetPlacement,
+      spacingIn
+    );
+  }, [widthIn, heightIn, isCanvasProduct, isHdpeProduct, isPosterProduct, isNoCurlProduct, form.grommets, form.grommetPlacement, form.grommetSpacingIn, isMeshProduct, form.meshGrommetSpacing, form.meshGrommetSpacingCustom]);
 
   const pricing = useMemo(
     () => {
@@ -420,8 +464,8 @@ export default function VinylBannerBuilder({
           form.grommets,
           form.meshWelding,
           form.meshWebbing,
-          form.meshRope,
-          form.polePockets,
+          meshRopeActive,
+          form.meshPolePocketMode !== "none",
           form.rush
         );
         return {
@@ -568,7 +612,8 @@ export default function VinylBannerBuilder({
       form.rush,
       form.meshWelding,
       form.meshWebbing,
-      form.meshRope,
+      meshRopeActive,
+      form.meshPolePocketMode,
     ]
   );
   const unitPrice = pricing.totalPrice / Math.max(1, effectiveQtyNum);
@@ -642,7 +687,7 @@ export default function VinylBannerBuilder({
       return;
     }
 
-    const meshEdgeFinish: EdgeFinish = form.meshRope
+    const meshEdgeFinish: EdgeFinish = meshRopeActive
       ? "rope"
       : form.meshWebbing
         ? "webbing"
@@ -1109,6 +1154,41 @@ export default function VinylBannerBuilder({
               </span>
             ))}
 
+            {/* Rope visualization */}
+            {isMeshProduct && form.meshRopeMode !== "none" && (
+              <>
+                {(form.meshRopeMode === "top-only" || form.meshRopeMode === "top-bottom") && (
+                  <div
+                    className="pointer-events-none absolute rounded-sm bg-zinc-900"
+                    style={{ top: -7, left: -14, right: -14, height: 7 }}
+                  />
+                )}
+                {(form.meshRopeMode === "bottom-only" || form.meshRopeMode === "top-bottom") && (
+                  <div
+                    className="pointer-events-none absolute rounded-sm bg-zinc-900"
+                    style={{ bottom: -7, left: -14, right: -14, height: 7 }}
+                  />
+                )}
+              </>
+            )}
+
+            {/* Pole pocket visualization */}
+            {isMeshProduct && form.meshPolePocketMode !== "none" && (() => {
+              const pocketPx = Math.max(8, form.meshPolePocketSize * pxPerIn);
+              const hasTop = form.meshPolePocketMode === "top-only" || form.meshPolePocketMode === "top-bottom";
+              const hasBottom = form.meshPolePocketMode === "bottom-only" || form.meshPolePocketMode === "top-bottom";
+              const hasLeft = form.meshPolePocketMode === "left-only" || form.meshPolePocketMode === "left-right";
+              const hasRight = form.meshPolePocketMode === "right-only" || form.meshPolePocketMode === "left-right";
+              return (
+                <>
+                  {hasTop && <div className="pointer-events-none absolute left-0 right-0 top-0 border-b-2 border-[#007fff]/60 bg-[#007fff]/15" style={{ height: pocketPx }} />}
+                  {hasBottom && <div className="pointer-events-none absolute left-0 right-0 bottom-0 border-t-2 border-[#007fff]/60 bg-[#007fff]/15" style={{ height: pocketPx }} />}
+                  {hasLeft && <div className="pointer-events-none absolute top-0 bottom-0 left-0 border-r-2 border-[#007fff]/60 bg-[#007fff]/15" style={{ width: pocketPx }} />}
+                  {hasRight && <div className="pointer-events-none absolute top-0 bottom-0 right-0 border-l-2 border-[#007fff]/60 bg-[#007fff]/15" style={{ width: pocketPx }} />}
+                </>
+              );
+            })()}
+
             {!isEconomicalStandProduct && (
               <>
                 {["-top-2 -left-2", "-top-2 left-1/2 -translate-x-1/2", "-top-2 -right-2", "top-1/2 -right-2 -translate-y-1/2", "-bottom-2 -right-2", "-bottom-2 left-1/2 -translate-x-1/2", "-bottom-2 -left-2", "top-1/2 -left-2 -translate-y-1/2"].map((pos) => (
@@ -1164,7 +1244,7 @@ export default function VinylBannerBuilder({
               {!(isCanvasProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct || isEconomicalStandProduct) && (
                 <ToolbarButton
                   title="Finishing"
-                  value={isMeshProduct ? [form.meshWelding ? "Welded" : null, form.meshRope ? "Rope" : null, form.grommets ? "Grommets" : null].filter(Boolean).join(" / ") || "None" : [form.hemming ? "Hemmed" : null, form.grommets ? "Grommets" : null, form.polePockets ? "Pockets" : null, form.windSlits ? "Wind slits" : null].filter(Boolean).join(" / ") || "None"}
+                  value={isMeshProduct ? [form.meshWelding ? "Welded" : null, form.meshRopeMode !== "none" ? "Rope" : null, form.grommets ? "Grommets" : null, form.meshPolePocketMode !== "none" ? "Pockets" : null].filter(Boolean).join(" / ") || "None" : [form.hemming ? "Hemmed" : null, form.grommets ? "Grommets" : null, form.polePockets ? "Pockets" : null, form.windSlits ? "Wind slits" : null].filter(Boolean).join(" / ") || "None"}
                   active={activePanel === "finish"}
                   onClick={(event) => openPanel("finish", event)}
                 />
@@ -1315,28 +1395,114 @@ export default function VinylBannerBuilder({
             {activePanel === "finish" && !(isCanvasProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct || isEconomicalStandProduct) && (
               <div className="space-y-3">
                 {isMeshProduct ? (
-                  <div className="grid gap-1.5 md:grid-cols-2">
-                    <div>
-                      <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">Welding</div>
+                  <div className="space-y-2">
+                    {/* Welding */}
+                    <SubControlGroup title="Welding">
                       <div className="grid grid-cols-2 gap-1">
                         <SegButton active={!form.meshWelding} onClick={() => set("meshWelding", false)}>No</SegButton>
                         <SegButton active={form.meshWelding} onClick={() => set("meshWelding", true)}>Yes</SegButton>
                       </div>
-                    </div>
-                    <div>
-                      <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">Rope</div>
-                      <div className="grid grid-cols-2 gap-1">
-                        <SegButton active={!form.meshRope} onClick={() => set("meshRope", false)}>None</SegButton>
-                        <SegButton active={form.meshRope} onClick={() => set("meshRope", true)}>Top & Bottom</SegButton>
+                    </SubControlGroup>
+
+                    {/* Grommets */}
+                    <SubControlGroup title="Grommets">
+                      <div className="space-y-2">
+                        <div className="grid grid-cols-2 gap-1">
+                          <SegButton active={!form.grommets} onClick={() => { set("grommets", false); }}>No</SegButton>
+                          <SegButton active={form.grommets} onClick={() => { set("grommets", true); set("meshRopeMode", "none"); }}>Yes</SegButton>
+                        </div>
+                        {form.grommets && (
+                          <>
+                            <div>
+                              <label className="text-[9px] font-semibold uppercase tracking-[0.1em] text-zinc-500">Placement</label>
+                              <select
+                                value={form.grommetPlacement}
+                                onChange={(e) => set("grommetPlacement", e.target.value as GrommetPlacement)}
+                                className="mt-1 w-full h-7 rounded border border-zinc-300 bg-white px-2 text-[11px] font-semibold text-zinc-700"
+                              >
+                                <option value="all-sides">All Sides</option>
+                                <option value="top-left-right">Top/Left/Right</option>
+                                <option value="top-left-bottom">Top/Left/Bottom</option>
+                                <option value="top-right-bottom">Top/Right/Bottom</option>
+                                <option value="left-right-bottom">Left/Right/Bottom</option>
+                                <option value="top-left">Top &amp; Left</option>
+                                <option value="top-right">Top &amp; Right</option>
+                                <option value="top-bottom">Top &amp; Bottom</option>
+                                <option value="left-right">Left &amp; Right</option>
+                                <option value="left-bottom">Left &amp; Bottom</option>
+                                <option value="right-bottom">Right &amp; Bottom</option>
+                                <option value="top-only">Top Only</option>
+                                <option value="left-only">Left Only</option>
+                                <option value="right-only">Right Only</option>
+                                <option value="bottom-only">Bottom Only</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className="text-[9px] font-semibold uppercase tracking-[0.1em] text-zinc-500">Spacing</label>
+                              <select
+                                value={form.meshGrommetSpacing}
+                                onChange={(e) => set("meshGrommetSpacing", e.target.value as MeshGrommetSpacing)}
+                                className="mt-1 w-full h-7 rounded border border-zinc-300 bg-white px-2 text-[11px] font-semibold text-zinc-700"
+                              >
+                                <option value="every-2-3-feet">Every 2-3 Feet</option>
+                                <option value="every-1-2-feet">Every 1-2 Feet</option>
+                                <option value="every-6-12-inches">Every 6-12 Inches</option>
+                                <option value="corners-only">Corners Only</option>
+                                <option value="custom-inches">Custom Inches</option>
+                              </select>
+                              {form.meshGrommetSpacing === "custom-inches" && (
+                                <input
+                                  type="number"
+                                  min={1}
+                                  max={240}
+                                  value={form.meshGrommetSpacingCustom}
+                                  onChange={(e) => set("meshGrommetSpacingCustom", e.target.value)}
+                                  placeholder="Spacing in inches"
+                                  className="mt-1 w-full h-7 rounded border border-zinc-300 px-2 text-[11px] text-zinc-700"
+                                />
+                              )}
+                            </div>
+                          </>
+                        )}
                       </div>
-                    </div>
-                    <div>
-                      <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">Grommets</div>
-                      <div className="grid grid-cols-2 gap-1">
-                        <SegButton active={!form.grommets} onClick={() => set("grommets", false)}>No</SegButton>
-                        <SegButton active={form.grommets} onClick={() => set("grommets", true)}>Yes</SegButton>
+                    </SubControlGroup>
+
+                    {/* Rope — only when Grommets = No */}
+                    {!form.grommets && (
+                      <SubControlGroup title="Rope">
+                        <div className="grid grid-cols-2 gap-1">
+                          <SegButton active={form.meshRopeMode === "none"} onClick={() => set("meshRopeMode", "none")}>None</SegButton>
+                          <SegButton active={form.meshRopeMode === "top-only"} onClick={() => set("meshRopeMode", "top-only")}>Top Only</SegButton>
+                          <SegButton active={form.meshRopeMode === "bottom-only"} onClick={() => set("meshRopeMode", "bottom-only")}>Bottom Only</SegButton>
+                          <SegButton active={form.meshRopeMode === "top-bottom"} onClick={() => set("meshRopeMode", "top-bottom")}>Top &amp; Bottom</SegButton>
+                        </div>
+                      </SubControlGroup>
+                    )}
+
+                    {/* Pole Pockets */}
+                    <SubControlGroup title="Pole Pockets">
+                      <div className="space-y-2">
+                        <div className="grid grid-cols-2 gap-1">
+                          <SegButton active={form.meshPolePocketMode === "none"} onClick={() => set("meshPolePocketMode", "none")}>None</SegButton>
+                          <SegButton active={form.meshPolePocketMode === "top-only"} onClick={() => set("meshPolePocketMode", "top-only")}>Top Only</SegButton>
+                          <SegButton active={form.meshPolePocketMode === "bottom-only"} onClick={() => set("meshPolePocketMode", "bottom-only")}>Bottom Only</SegButton>
+                          <SegButton active={form.meshPolePocketMode === "left-only"} onClick={() => set("meshPolePocketMode", "left-only")}>Left Only</SegButton>
+                          <SegButton active={form.meshPolePocketMode === "right-only"} onClick={() => set("meshPolePocketMode", "right-only")}>Right Only</SegButton>
+                          <SegButton active={form.meshPolePocketMode === "top-bottom"} onClick={() => set("meshPolePocketMode", "top-bottom")}>Top &amp; Bottom</SegButton>
+                          <SegButton active={form.meshPolePocketMode === "left-right"} onClick={() => set("meshPolePocketMode", "left-right")}>Left &amp; Right</SegButton>
+                        </div>
+                        {form.meshPolePocketMode !== "none" && (
+                          <div>
+                            <label className="text-[9px] font-semibold uppercase tracking-[0.1em] text-zinc-500">Pocket Size</label>
+                            <div className="mt-1 grid grid-cols-4 gap-1">
+                              {([1, 2, 3, 4] as const).map((size) => (
+                                <SegButton key={size} active={form.meshPolePocketSize === size} onClick={() => set("meshPolePocketSize", size)}>{size}&quot;</SegButton>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    </div>
+                    </SubControlGroup>
                   </div>
                 ) : (
                   <div className="grid gap-1.5 md:grid-cols-2">
