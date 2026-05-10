@@ -1119,6 +1119,19 @@ export default function VinylBannerBuilder({
                     <span className="text-zinc-500">18oz Double</span>
                     <span>{formatPrice(4.25 * 1.5)} per sqft</span>
                   </div>
+                ) : isNoCurlProduct ? (
+                  <div className="grid grid-cols-[56px_1fr] gap-x-2 gap-y-0.5 text-[10px] md:text-center md:grid-cols-2 md:justify-center md:inline-grid">
+                    <span className="text-zinc-500">1-999</span>
+                    <span>{formatPrice(4.50)} per sqft</span>
+                    <span className="text-zinc-500">1000+</span>
+                    <span>{formatPrice(3.00)} per sqft</span>
+                  </div>
+                ) : isPosterProduct ? (
+                  <div className="text-[11px] leading-tight text-zinc-500">
+                    <div>{canvasHeaderProductName}</div>
+                    <div className="mt-0.5 text-zinc-700">{form.doubleSided ? "Double-Sided" : "Single-Sided"}</div>
+                    <div>{formatPrice(displaySqFtRate)} per sqft</div>
+                  </div>
                 ) : (
                   <div className="text-[11px] leading-tight text-zinc-500">
                     <div>{canvasHeaderProductName}</div>
@@ -1127,7 +1140,7 @@ export default function VinylBannerBuilder({
                   </div>
                 )}
                 <div className="mt-1 text-[10px] text-zinc-500">
-                  {!isEconomicalStandProduct && !isCanvasProduct && !isMeshProduct && `${pricing.sqFt} sqft / 24 Hours Production`}
+                  {!isEconomicalStandProduct && !isCanvasProduct && !isMeshProduct && !isNoCurlProduct && `${pricing.sqFt} sqft / 24 Hours Production`}
                 </div>
               </div>
 
@@ -1135,7 +1148,7 @@ export default function VinylBannerBuilder({
               <div className="text-left md:pt-1 md:text-right">
                 <div className="text-[38px] leading-none font-semibold text-[var(--brand-primary)] md:text-[44px]">{formatPrice(pricing.totalPrice)}</div>
                 <div className="mt-1 text-[11px] text-zinc-500">
-                  {!isEconomicalStandProduct && !isCanvasProduct && !isMeshProduct && `${pricing.sqFt} sqft / 24 Hours`}
+                  {!isEconomicalStandProduct && !isCanvasProduct && !isMeshProduct && !isNoCurlProduct && `${pricing.sqFt} sqft / 24 Hours`}
                 </div>
               </div>
             </div>
