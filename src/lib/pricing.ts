@@ -1,5 +1,7 @@
 // Pricing configuration for Signcous products
 
+export const BANNER_MARKUP = 1.5; // 50% over cost
+
 export type MaterialName = "13oz Vinyl" | "15oz Vinyl" | "Mesh Banner" | "Fabric Banner";
 export type LegacyMaterialName = "standard" | "premium" | "mesh" | "fabric";
 export type Material = MaterialName | LegacyMaterialName;
@@ -43,10 +45,10 @@ export interface PricingConfig {
 
 export const PRICING_CONFIG: PricingConfig = {
   materialRates: {
-    "13oz Vinyl": 0.75,   // USD per sq ft
-    "15oz Vinyl": 1.15,
-    "Mesh Banner": 1.05,
-    "Fabric Banner": 1.35,
+    "13oz Vinyl": 0.75 * BANNER_MARKUP,   // USD per sq ft
+    "15oz Vinyl": 1.15 * BANNER_MARKUP,
+    "Mesh Banner": 1.05 * BANNER_MARKUP,
+    "Fabric Banner": 1.35 * BANNER_MARKUP,
   },
   addOns: {
     grommetsPerPlacement: 0.35,
@@ -137,41 +139,41 @@ export interface NoCurlPricingResult {
 
 export function getHdpeSqFtRate(quantity: number): number {
   const safeQuantity = Number.isFinite(quantity) ? Math.max(1, quantity) : 1;
-  if (safeQuantity < 10) return 4.5;
-  if (safeQuantity < 50) return 4.0;
-  if (safeQuantity < 100) return 3.6;
-  if (safeQuantity < 500) return 3.2;
-  return 2.9;
+  if (safeQuantity < 10) return 4.5 * BANNER_MARKUP;
+  if (safeQuantity < 50) return 4.0 * BANNER_MARKUP;
+  if (safeQuantity < 100) return 3.6 * BANNER_MARKUP;
+  if (safeQuantity < 500) return 3.2 * BANNER_MARKUP;
+  return 2.9 * BANNER_MARKUP;
 }
 
 export function getCanvasSqFtRate(quantity: number): number {
   const safeQuantity = Number.isFinite(quantity) ? Math.max(1, quantity) : 1;
 
-  if (safeQuantity <= 5) return 6.99;
-  if (safeQuantity <= 10) return 6.49;
-  if (safeQuantity <= 25) return 5.99;
-  if (safeQuantity <= 50) return 5.49;
-  return 4.99;
+  if (safeQuantity <= 5) return 6.99 * BANNER_MARKUP;
+  if (safeQuantity <= 10) return 6.49 * BANNER_MARKUP;
+  if (safeQuantity <= 25) return 5.99 * BANNER_MARKUP;
+  if (safeQuantity <= 50) return 5.49 * BANNER_MARKUP;
+  return 4.99 * BANNER_MARKUP;
 }
 
 export function getPosterSqFtRate(areaSqFt: number): number {
   const safeAreaSqFt = Number.isFinite(areaSqFt) ? Math.max(1, areaSqFt) : 1;
 
-  if (safeAreaSqFt <= 5) return 4.5;
-  if (safeAreaSqFt <= 15) return 4.0;
-  if (safeAreaSqFt <= 30) return 3.5;
-  if (safeAreaSqFt <= 100) return 3.0;
-  return 2.6;
+  if (safeAreaSqFt <= 5) return 4.5 * BANNER_MARKUP;
+  if (safeAreaSqFt <= 15) return 4.0 * BANNER_MARKUP;
+  if (safeAreaSqFt <= 30) return 3.5 * BANNER_MARKUP;
+  if (safeAreaSqFt <= 100) return 3.0 * BANNER_MARKUP;
+  return 2.6 * BANNER_MARKUP;
 }
 
 export function getNoCurlSqFtRate(areaSqFt: number): number {
   const safeAreaSqFt = Number.isFinite(areaSqFt) ? Math.max(1, areaSqFt) : 1;
 
-  if (safeAreaSqFt <= 5) return 6.5;
-  if (safeAreaSqFt <= 15) return 6.0;
-  if (safeAreaSqFt <= 30) return 5.5;
-  if (safeAreaSqFt <= 100) return 5.0;
-  return 4.2;
+  if (safeAreaSqFt <= 5) return 6.5 * BANNER_MARKUP;
+  if (safeAreaSqFt <= 15) return 6.0 * BANNER_MARKUP;
+  if (safeAreaSqFt <= 30) return 5.5 * BANNER_MARKUP;
+  if (safeAreaSqFt <= 100) return 5.0 * BANNER_MARKUP;
+  return 4.2 * BANNER_MARKUP;
 }
 
 export function calculatePosterPrice(
@@ -273,11 +275,11 @@ export function calculateCanvasPrice(
  */
 export function getMeshSqFtRate(areaSqFt: number): number {
   const safeAreaSqFt = Number.isFinite(areaSqFt) ? Math.max(1, areaSqFt) : 1;
-  if (safeAreaSqFt <= 20) return 3.75;
-  if (safeAreaSqFt <= 50) return 3.4;
-  if (safeAreaSqFt <= 100) return 3.1;
-  if (safeAreaSqFt <= 300) return 2.85;
-  return 2.6;
+  if (safeAreaSqFt <= 20) return 3.75 * BANNER_MARKUP;
+  if (safeAreaSqFt <= 50) return 3.4 * BANNER_MARKUP;
+  if (safeAreaSqFt <= 100) return 3.1 * BANNER_MARKUP;
+  if (safeAreaSqFt <= 300) return 2.85 * BANNER_MARKUP;
+  return 2.6 * BANNER_MARKUP;
 }
 
 /**
