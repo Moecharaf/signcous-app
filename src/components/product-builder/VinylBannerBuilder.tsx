@@ -1006,6 +1006,7 @@ export default function VinylBannerBuilder({
   }, []);
 
   const viewportWidth = typeof window !== "undefined" ? window.innerWidth : 1280;
+  const isMobileViewport = viewportWidth < 768;
   const panelMaxWidth =
     activePanel === "size"
       ? 300
@@ -1024,7 +1025,7 @@ export default function VinylBannerBuilder({
     : 12;
 
   return (
-    <div className="flex h-[calc(100vh-88px)] flex-col bg-[#f4f4f4] text-zinc-800">
+    <div className="flex min-h-[calc(100dvh-88px)] flex-col bg-[#f4f4f4] text-zinc-800 md:h-[calc(100vh-88px)]">
       <div className="mx-3 mt-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
         <div
           ref={workspaceRef}
@@ -1322,15 +1323,19 @@ export default function VinylBannerBuilder({
       {activePanel && panelAnchor && (
         <div
           ref={panelRef}
-          className="fixed z-50 overflow-visible rounded-lg border border-zinc-300 bg-white p-2 shadow-2xl"
+          className="fixed z-50 rounded-lg border border-zinc-300 bg-white p-2 shadow-2xl"
           style={{
-            width: `${panelWidth}px`,
-            left: `${panelLeft}px`,
-            top: `${Math.max(16, panelAnchor.top - 10)}px`,
-            transform: "translateY(-100%)",
+            width: isMobileViewport ? "auto" : `${panelWidth}px`,
+            left: isMobileViewport ? "12px" : `${panelLeft}px`,
+            right: isMobileViewport ? "12px" : "auto",
+            top: isMobileViewport ? "auto" : `${Math.max(16, panelAnchor.top - 10)}px`,
+            bottom: isMobileViewport ? "12px" : "auto",
+            transform: isMobileViewport ? "none" : "translateY(-100%)",
+            maxHeight: isMobileViewport ? "70dvh" : "none",
+            overflowY: isMobileViewport ? "auto" : "visible",
           }}
         >
-          <div className="absolute -bottom-2 left-1/2 h-4 w-4 -translate-x-1/2 rotate-45 border-b border-r border-zinc-300 bg-white" aria-hidden="true" />
+          {!isMobileViewport && <div className="absolute -bottom-2 left-1/2 h-4 w-4 -translate-x-1/2 rotate-45 border-b border-r border-zinc-300 bg-white" aria-hidden="true" />}
           <div className="relative">
             {activePanel !== "size" && (
               <div className="mb-2 flex items-center justify-between">
