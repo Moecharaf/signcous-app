@@ -1267,18 +1267,26 @@ export default function VinylBannerBuilder({
 
             {isEconomicalStandProduct && (
               <>
-                <div className="pointer-events-none absolute -top-11 left-1/2 flex -translate-x-1/2 flex-col items-center text-[11px] font-semibold text-zinc-700">
+                <div
+                  className={`pointer-events-none absolute left-1/2 flex -translate-x-1/2 flex-col items-center text-[11px] font-semibold text-zinc-700 ${
+                    isMobileViewport ? "top-2" : "-top-11"
+                  }`}
+                >
                   <span className="text-[10px] uppercase tracking-[0.25em] text-zinc-500">Top Of Image</span>
                   <div className="mt-1 flex items-center gap-2 text-zinc-700">
-                    <span className="h-px w-12 bg-zinc-400" />
+                    <span className={`${isMobileViewport ? "w-8" : "w-12"} h-px bg-zinc-400`} />
                     <span>{widthLabelInches}</span>
-                    <span className="h-px w-12 bg-zinc-400" />
+                    <span className={`${isMobileViewport ? "w-8" : "w-12"} h-px bg-zinc-400`} />
                   </div>
                 </div>
-                <div className="pointer-events-none absolute -right-14 top-1/2 flex -translate-y-1/2 flex-col items-center text-[11px] font-semibold text-zinc-700">
-                  <span className="h-16 w-px bg-zinc-400" />
+                <div
+                  className={`pointer-events-none absolute top-1/2 flex -translate-y-1/2 flex-col items-center text-[11px] font-semibold text-zinc-700 ${
+                    isMobileViewport ? "right-2" : "-right-14"
+                  }`}
+                >
+                  <span className={`${isMobileViewport ? "h-10" : "h-16"} w-px bg-zinc-400`} />
                   <span className="my-2 -rotate-90">{heightLabelInches}</span>
-                  <span className="h-16 w-px bg-zinc-400" />
+                  <span className={`${isMobileViewport ? "h-10" : "h-16"} w-px bg-zinc-400`} />
                 </div>
               </>
             )}
