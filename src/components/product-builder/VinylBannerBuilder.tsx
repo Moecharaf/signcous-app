@@ -1078,7 +1078,7 @@ export default function VinylBannerBuilder({
                     <div>{formatPrice(ECONOMICAL_STAND_UNIT_PRICE)} per item</div>
                   </div>
                 ) : isCanvasProduct ? (
-                  <div className="grid grid-cols-[56px_1fr] gap-x-2 gap-y-0.5 text-[10px] md:text-left">
+                  <div className="grid grid-cols-[56px_1fr] gap-x-2 gap-y-0.5 text-[10px] md:text-center md:grid-cols-2 md:justify-center md:inline-grid">
                     <span className="text-zinc-500">1-999</span>
                     <span>{formatPrice(7.47)} per sqft</span>
                     <span className="text-zinc-500">1000-4999</span>
@@ -1116,7 +1116,7 @@ export default function VinylBannerBuilder({
                   </div>
                 )}
                 <div className="mt-1 text-[10px] text-zinc-500">
-                  {!isEconomicalStandProduct && `${pricing.sqFt} sqft / 24 Hours Production`}
+                  {!isEconomicalStandProduct && !isCanvasProduct && `${pricing.sqFt} sqft / 24 Hours Production`}
                 </div>
               </div>
 
@@ -1124,7 +1124,7 @@ export default function VinylBannerBuilder({
               <div className="text-left md:pt-1 md:text-right">
                 <div className="text-[38px] leading-none font-semibold text-[var(--brand-primary)] md:text-[44px]">{formatPrice(pricing.totalPrice)}</div>
                 <div className="mt-1 text-[11px] text-zinc-500">
-                  {!isEconomicalStandProduct && `${pricing.sqFt} sqft / 24 Hours`}
+                  {!isEconomicalStandProduct && !isCanvasProduct && `${pricing.sqFt} sqft / 24 Hours`}
                 </div>
               </div>
             </div>
