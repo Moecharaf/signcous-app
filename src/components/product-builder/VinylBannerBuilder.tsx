@@ -409,8 +409,10 @@ export default function VinylBannerBuilder({
     previewMaxWidth / Math.max(widthIn, 1),
     previewMaxHeight / Math.max(heightIn, 1)
   );
+  const economicalStandBasePxPerIn = ECONOMICAL_STAND_PREVIEW_HEIGHT / ECONOMICAL_STAND_HEIGHT_IN;
+  const economicalStandPxPerIn = Math.min(economicalStandBasePxPerIn, fitScale * zoom);
   const pxPerIn = isEconomicalStandProduct
-    ? ECONOMICAL_STAND_PREVIEW_HEIGHT / ECONOMICAL_STAND_HEIGHT_IN
+    ? economicalStandPxPerIn
     : fitScale * zoom;
   const artWidth = widthIn * pxPerIn;
   const artHeight = heightIn * pxPerIn;
