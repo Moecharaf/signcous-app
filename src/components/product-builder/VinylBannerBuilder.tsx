@@ -1077,6 +1077,15 @@ export default function VinylBannerBuilder({
                   <div className="text-[11px] leading-tight text-zinc-700">
                     <div>{formatPrice(ECONOMICAL_STAND_UNIT_PRICE)} per item</div>
                   </div>
+                ) : isCanvasProduct ? (
+                  <div className="grid grid-cols-[56px_1fr] gap-x-2 gap-y-0.5 text-[10px] md:text-left">
+                    <span className="text-zinc-500">1-999</span>
+                    <span>{formatPrice(7.47)} per sqft</span>
+                    <span className="text-zinc-500">1000-4999</span>
+                    <span>{formatPrice(5.69)} per sqft</span>
+                    <span className="text-zinc-500">5000+</span>
+                    <span>{formatPrice(3.74)} per sqft</span>
+                  </div>
                 ) : isHdpeProduct ? (
                   <div className="grid grid-cols-[56px_1fr] gap-x-2 gap-y-0.5 text-[10px] md:text-left">
                     {hdpeTierRates.map((tier) => (
