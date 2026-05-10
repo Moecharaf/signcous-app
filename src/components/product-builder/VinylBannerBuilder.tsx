@@ -363,6 +363,7 @@ export default function VinylBannerBuilder({
   const [uploadingArtwork, setUploadingArtwork] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [activePanel, setActivePanel] = useState<ControlPanel | null>(null);
+  const [showMobilePricingDetails, setShowMobilePricingDetails] = useState(false);
   const [showMobileOptions, setShowMobileOptions] = useState(false);
   const [panelAnchor, setPanelAnchor] = useState<{ left: number; top: number; width: number } | null>(null);
   const [dimensionInputs, setDimensionInputs] = useState(() => {
@@ -1031,13 +1032,27 @@ export default function VinylBannerBuilder({
   return (
     <div className="flex min-h-[calc(100dvh-64px)] flex-col bg-[#f4f4f4] text-zinc-800 md:min-h-[calc(100dvh-88px)] md:h-[calc(100vh-88px)]">
       <div className="mx-3 mt-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
-        <div className="border-b border-zinc-200 bg-white px-4 py-3 md:hidden">
-          <div className="text-[18px] font-semibold uppercase tracking-tight text-zinc-900">{canvasHeaderProductName}</div>
-          <div className="mt-1 text-[11px] text-zinc-600">{canvasHeaderDetail}</div>
-          {!isEconomicalStandProduct && productDescription && <div className="mt-1 text-[10px] text-zinc-500">{productDescription}</div>}
+        <div className="border-b border-zinc-200 bg-white px-3 py-2 md:hidden">
+          <div className="text-[16px] font-semibold uppercase tracking-tight text-zinc-900">{canvasHeaderProductName}</div>
+          <div className="mt-0.5 text-[10px] text-zinc-600">{canvasHeaderDetail}</div>
 
-          <div className="mt-3 text-[10px] font-bold underline uppercase tracking-[0.14em] text-zinc-500">Pricing And Shipping</div>
-          <div className="mt-1 text-[10px] text-zinc-600">
+          <div className="mt-2">
+            <div className="text-[34px] leading-none font-semibold text-[var(--brand-primary)]">{formatPrice(pricing.totalPrice)}</div>
+            <div className="mt-0.5 text-[10px] text-zinc-500">
+              {!isEconomicalStandProduct && !isCanvasProduct && !isMeshProduct && !isNoCurlProduct && !isPosterProduct && `${pricing.sqFt} sqft / 24 Hours`}
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setShowMobilePricingDetails((prev) => !prev)}
+            className="mt-2 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500"
+          >
+            Pricing And Shipping
+            <span className="text-[11px]">{showMobilePricingDetails ? "-" : "+"}</span>
+          </button>
+
+          {showMobilePricingDetails && <div className="mt-1 text-[10px] text-zinc-600">
             {isEconomicalStandProduct ? (
               <div className="text-[11px] leading-tight text-zinc-700">
                 <div>{formatPrice(ECONOMICAL_STAND_UNIT_PRICE)} per item</div>
@@ -1110,14 +1125,7 @@ export default function VinylBannerBuilder({
             <div className="mt-1 text-[10px] text-zinc-500">
               {!isEconomicalStandProduct && !isCanvasProduct && !isMeshProduct && !isNoCurlProduct && !isPosterProduct && `${pricing.sqFt} sqft / 24 Hours Production`}
             </div>
-          </div>
-
-          <div className="mt-3">
-            <div className="text-[42px] leading-none font-semibold text-[var(--brand-primary)]">{formatPrice(pricing.totalPrice)}</div>
-            <div className="mt-1 text-[11px] text-zinc-500">
-              {!isEconomicalStandProduct && !isCanvasProduct && !isMeshProduct && !isNoCurlProduct && !isPosterProduct && `${pricing.sqFt} sqft / 24 Hours`}
-            </div>
-          </div>
+          </div>}
         </div>
 
         <div
