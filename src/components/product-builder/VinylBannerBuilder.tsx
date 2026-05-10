@@ -363,6 +363,7 @@ export default function VinylBannerBuilder({
   const [uploadingArtwork, setUploadingArtwork] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [activePanel, setActivePanel] = useState<ControlPanel | null>(null);
+  const [showMobileOptions, setShowMobileOptions] = useState(false);
   const [panelAnchor, setPanelAnchor] = useState<{ left: number; top: number; width: number } | null>(null);
   const [dimensionInputs, setDimensionInputs] = useState(() => {
     const widthParts = toFeetAndInches(parseFloat(DEFAULTS.width) || 0);
@@ -398,10 +399,14 @@ export default function VinylBannerBuilder({
   const meshRopeActive = isMeshProduct && form.meshRopeMode !== "none";
   const meshWebbingCost = form.meshWebbing ? perimeterFt * 1.75 : 0;
   const meshRopeCost = meshRopeActive ? perimeterFt * 1.75 : 0;
+  const runtimeViewportWidth = typeof window !== "undefined" ? window.innerWidth : 1280;
+  const isMobileViewport = runtimeViewportWidth < 768;
+  const previewMaxWidth = isMobileViewport ? Math.max(220, runtimeViewportWidth - 48) : PREVIEW_MAX_WIDTH;
+  const previewMaxHeight = isMobileViewport ? 360 : PREVIEW_MAX_HEIGHT;
 
   const fitScale = Math.min(
-    PREVIEW_MAX_WIDTH / Math.max(widthIn, 1),
-    PREVIEW_MAX_HEIGHT / Math.max(heightIn, 1)
+    previewMaxWidth / Math.max(widthIn, 1),
+    previewMaxHeight / Math.max(heightIn, 1)
   );
   const pxPerIn = isEconomicalStandProduct
     ? ECONOMICAL_STAND_PREVIEW_HEIGHT / ECONOMICAL_STAND_HEIGHT_IN
@@ -1002,11 +1007,10 @@ export default function VinylBannerBuilder({
   }, [isEconomicalStandProduct]);
 
   useEffect(() => {
-    setArtPos({ x: 0, y: 55 });
-  }, []);
+    setArtPos({ x: 0, y: isMobileViewport ? 0 : 55 });
+  }, [isMobileViewport]);
 
-  const viewportWidth = typeof window !== "undefined" ? window.innerWidth : 1280;
-  const isMobileViewport = viewportWidth < 768;
+  const viewportWidth = runtimeViewportWidth;
   const panelMaxWidth =
     activePanel === "size"
       ? 300
@@ -1331,7 +1335,7 @@ export default function VinylBannerBuilder({
               );
             })()}
 
-            {!isEconomicalStandProduct && (
+            {!isEconomicalStandProduct && !isMobileViewport && (
               <>
                 {["-top-2 -left-2", "-top-2 left-1/2 -translate-x-1/2", "-top-2 -right-2", "top-1/2 -right-2 -translate-y-1/2", "-bottom-2 -right-2", "-bottom-2 left-1/2 -translate-x-1/2", "-bottom-2 -left-2", "top-1/2 -left-2 -translate-y-1/2"].map((pos) => (
                   <button
@@ -1353,7 +1357,15 @@ export default function VinylBannerBuilder({
       <div className="mt-2 shrink-0 border-t border-zinc-200 bg-white px-3 py-2">
         <div className="grid gap-2 xl:grid-cols-[minmax(0,1fr)_300px]">
           <div className="space-y-2">
-            <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-6">
+            <div className="md:hidden">
+              <Button
+                className="h-10 w-full rounded border border-[#22c55e] bg-white text-sm font-semibold text-[#16a34a] hover:bg-[#f0fdf4]"
+                onClick={() => setShowMobileOptions((prev) => !prev)}
+              >
+                {showMobileOptions ? "Hide Options" : "Show Options"}
+              </Button>
+            </div>
+            <div className={`${showMobileOptions ? "grid" : "hidden"} gap-2 sm:grid-cols-2 xl:grid-cols-6 md:grid`}>
               <ToolbarButton
                 title="Artwork"
                 value={uploadedFileName ? "Uploaded" : "No file"}
