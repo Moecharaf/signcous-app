@@ -432,12 +432,12 @@ export function calculateBannerPrice(input: BannerPricingInput): BannerPricingRe
 
     let edgeFinishCostPerUnit = 0;
     if (edgeFinish === "webbing" || edgeFinish === "rope") {
-      edgeFinishCostPerUnit = perimeterFt * 1.75;
+      edgeFinishCostPerUnit = perimeterFt * 1.50;
     }
 
     let polePocketCostPerUnit = 0;
     if (polePockets) {
-      polePocketCostPerUnit = (widthFt * 2 * 1.0) + 10;
+      polePocketCostPerUnit = (widthFt * 2 * 1.50) + 15.00;
     }
 
     const windSlitsCostPerUnit = 0;
