@@ -11,7 +11,7 @@ export default function NoCurlBannerPage() {
   return (
     <VinylBannerBuilder
       productName="No-Curl Banner"
-      productDescription="Premium 8mil No-Curl Banner material that lays flat and stays flat even after rolling."
+      productDescription=""
       pricingMode="nocurl"
       productId={67}
     />
