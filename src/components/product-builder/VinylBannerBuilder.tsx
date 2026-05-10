@@ -16,7 +16,7 @@ import {
   getMeshSqFtRate,
   getNoCurlSqFtRate,
   getPosterSqFtRate,
-  type GrommetMode,
+  type GrommetPlacement,
   type Material,
 } from "@/lib/pricing";
 import { useCart } from "@/context/CartContext";
@@ -34,7 +34,8 @@ interface FormState {
   material: Material;
   doubleSided: boolean;
   grommets: boolean;
-  grommetMode: GrommetMode;
+  grommetPlacement: GrommetPlacement;
+  grommetSpacingIn: number;
   edgeFinish: EdgeFinish;
   polePockets: boolean;
   windSlits: boolean;
@@ -75,7 +76,8 @@ const DEFAULTS: FormState = {
   material: "13oz Vinyl",
   doubleSided: false,
   grommets: true,
-  grommetMode: "every-2ft",
+  grommetPlacement: "all-sides" as const,
+  grommetSpacingIn: 24,
   edgeFinish: "none",
   polePockets: false,
   windSlits: false,
@@ -148,33 +150,162 @@ function getGrommetPoints(
   widthIn: number,
   heightIn: number,
   enabled: boolean,
-  mode: GrommetMode
+  placement: GrommetPlacement,
+  spacingIn: number
 ): Array<{ xPct: number; yPct: number }> {
   if (!enabled || widthIn <= 0 || heightIn <= 0) return [];
 
-  if (mode === "per-corner") {
-    return [
-      { xPct: 0, yPct: 0 },
-      { xPct: 100, yPct: 0 },
-      { xPct: 100, yPct: 100 },
-      { xPct: 0, yPct: 100 },
-    ];
-  }
-
   const points: Array<{ xPct: number; yPct: number }> = [];
-  const xSegments = Math.max(1, Math.ceil(widthIn / 24));
-  const ySegments = Math.max(1, Math.ceil(heightIn / 24));
+  const safeSpacing = Math.max(1, spacingIn);
 
-  for (let i = 0; i <= xSegments; i += 1) {
-    const xPct = (i / xSegments) * 100;
-    points.push({ xPct, yPct: 0 });
-    points.push({ xPct, yPct: 100 });
-  }
+  // Helper to add points along an edge
+  const addEdgePoints = (isHorizontal: boolean, atTop: boolean, atLeft: boolean) => {
+    const length = isHorizontal ? widthIn : heightIn;
+    const numPoints = Math.ceil(length / safeSpacing) + 1;
 
-  for (let i = 1; i < ySegments; i += 1) {
-    const yPct = (i / ySegments) * 100;
-    points.push({ xPct: 0, yPct });
-    points.push({ xPct: 100, yPct });
+    for (let i = 0; i < numPoints; i++) {
+      const position = (i / (numPoints - 1)) * 100;
+      if (isHorizontal) {
+        points.push({ xPct: position, yPct: atTop ? 0 : 100 });
+      } else {
+        points.push({ xPct: atLeft ? 0 : 100, yPct: position });
+      }
+    }
+  };
+
+  switch (placement) {
+    case "all-sides":
+      // Add all four edges
+      addEdgePoints(true, true, true);   // top
+      addEdgePoints(true, false, true);  // bottom
+      // Add left and right (excluding corners already added)
+      const heightPoints = Math.ceil(heightIn / safeSpacing) - 1;
+      for (let i = 1; i < heightPoints; i++) {
+        const yPct = (i / (heightPoints + 1)) * 100;
+        points.push({ xPct: 0, yPct });
+        points.push({ xPct: 100, yPct });
+      }
+      break;
+
+    case "top-left-right":
+      // Top and left/right edges
+      addEdgePoints(true, true, true);   // top
+      const heightPoints1 = Math.ceil(heightIn / safeSpacing) - 1;
+      for (let i = 1; i < heightPoints1; i++) {
+        const yPct = (i / (heightPoints1 + 1)) * 100;
+        points.push({ xPct: 0, yPct });
+        points.push({ xPct: 100, yPct });
+      }
+      break;
+
+    case "top-left-bottom":
+      // Top, left, and bottom
+      addEdgePoints(true, true, true);   // top
+      addEdgePoints(true, false, true);  // bottom
+      const heightPoints2 = Math.ceil(heightIn / safeSpacing) - 1;
+      for (let i = 1; i < heightPoints2; i++) {
+        const yPct = (i / (heightPoints2 + 1)) * 100;
+        points.push({ xPct: 0, yPct });
+      }
+      break;
+
+    case "top-right-bottom":
+      // Top, right, and bottom
+      addEdgePoints(true, true, true);   // top
+      addEdgePoints(true, false, true);  // bottom
+      const heightPoints3 = Math.ceil(heightIn / safeSpacing) - 1;
+      for (let i = 1; i < heightPoints3; i++) {
+        const yPct = (i / (heightPoints3 + 1)) * 100;
+        points.push({ xPct: 100, yPct });
+      }
+      break;
+
+    case "left-right-bottom":
+      // Left, right, and bottom
+      addEdgePoints(true, false, true);  // bottom
+      const heightPoints4 = Math.ceil(heightIn / safeSpacing) - 1;
+      for (let i = 1; i < heightPoints4; i++) {
+        const yPct = (i / (heightPoints4 + 1)) * 100;
+        points.push({ xPct: 0, yPct });
+        points.push({ xPct: 100, yPct });
+      }
+      break;
+
+    case "top-left":
+      // Top and left edges
+      addEdgePoints(true, true, true);   // top
+      const heightPoints5 = Math.ceil(heightIn / safeSpacing) - 1;
+      for (let i = 1; i < heightPoints5; i++) {
+        const yPct = (i / (heightPoints5 + 1)) * 100;
+        points.push({ xPct: 0, yPct });
+      }
+      break;
+
+    case "top-right":
+      // Top and right edges
+      addEdgePoints(true, true, true);   // top
+      const heightPoints6 = Math.ceil(heightIn / safeSpacing) - 1;
+      for (let i = 1; i < heightPoints6; i++) {
+        const yPct = (i / (heightPoints6 + 1)) * 100;
+        points.push({ xPct: 100, yPct });
+      }
+      break;
+
+    case "top-bottom":
+      // Top and bottom edges
+      addEdgePoints(true, true, true);   // top
+      addEdgePoints(true, false, true);  // bottom
+      break;
+
+    case "left-right":
+      // Left and right edges
+      const heightPoints7 = Math.ceil(heightIn / safeSpacing) + 1;
+      for (let i = 0; i < heightPoints7; i++) {
+        const yPct = (i / (heightPoints7 - 1)) * 100;
+        points.push({ xPct: 0, yPct });
+        points.push({ xPct: 100, yPct });
+      }
+      break;
+
+    case "left-bottom":
+      // Left and bottom edges
+      addEdgePoints(true, false, true);  // bottom
+      const heightPoints8 = Math.ceil(heightIn / safeSpacing) - 1;
+      for (let i = 1; i < heightPoints8; i++) {
+        const yPct = (i / (heightPoints8 + 1)) * 100;
+        points.push({ xPct: 0, yPct });
+      }
+      break;
+
+    case "right-bottom":
+      // Right and bottom edges
+      addEdgePoints(true, false, true);  // bottom
+      const heightPoints9 = Math.ceil(heightIn / safeSpacing) - 1;
+      for (let i = 1; i < heightPoints9; i++) {
+        const yPct = (i / (heightPoints9 + 1)) * 100;
+        points.push({ xPct: 100, yPct });
+      }
+      break;
+
+    case "top-only":
+      // Top edge only
+      addEdgePoints(true, true, true);
+      break;
+
+    case "bottom-only":
+      // Bottom edge only
+      addEdgePoints(true, false, true);
+      break;
+
+    case "left-only":
+      // Left edge only
+      addEdgePoints(false, false, true);
+      break;
+
+    case "right-only":
+      // Right edge only
+      addEdgePoints(false, false, false);
+      break;
   }
 
   return points;
@@ -249,14 +380,36 @@ export default function VinylBannerBuilder({
   const widthFeetInchesLabel = formatFeetAndInchesLabel(widthIn);
   const heightFeetInchesLabel = formatFeetAndInchesLabel(heightIn);
 
+  const canvasProductLabel = isCanvasProduct
+    ? "Canvas"
+    : isMeshProduct
+    ? "Mesh"
+    : isHdpeProduct
+    ? "HDPE"
+    : isPosterProduct
+    ? "Poster"
+    : isNoCurlProduct
+    ? "No-Curl"
+    : isEconomicalStandProduct
+    ? "Economical Stand"
+    : form.material || "Vinyl";
+
+  const canvasPrintLabel = "Vinyl";
+
+  const canvasHeaderProductName = isEconomicalStandProduct ? "Econo Banner Stand" : productName;
+  const canvasHeaderDetail = isEconomicalStandProduct
+    ? `${canvasHeaderProductName}, ${widthLabelInches} x ${heightLabelInches}`
+    : `${canvasProductLabel} ${canvasPrintLabel}, ${widthFeetInchesLabel} x ${heightFeetInchesLabel}`;
+  const showVinylRateMatrix = !isCanvasProduct && !isMeshProduct && !isHdpeProduct && !isPosterProduct && !isNoCurlProduct && !isEconomicalStandProduct;
+
   const canvasRate = useMemo(() => getCanvasSqFtRate(qtyNum), [qtyNum]);
   const hdpeRate = useMemo(() => getHdpeSqFtRate(qtyNum), [qtyNum]);
   const noCurlRate = useMemo(() => getNoCurlSqFtRate(Math.max(1, Math.ceil((widthIn / 12) * (heightIn / 12)))), [widthIn, heightIn]);
   const posterRate = useMemo(() => getPosterSqFtRate(posterBillableSqFt), [posterBillableSqFt]);
   const meshRate   = useMemo(() => getMeshSqFtRate(meshBillableSqFt), [meshBillableSqFt]);
   const meshGrommetPoints = useMemo(
-    () => getGrommetPoints(widthIn, heightIn, !isCanvasProduct && !isHdpeProduct && !isPosterProduct && !isNoCurlProduct && form.grommets, form.grommetMode),
-    [widthIn, heightIn, isCanvasProduct, isHdpeProduct, isPosterProduct, isNoCurlProduct, form.grommets, form.grommetMode]
+    () => getGrommetPoints(widthIn, heightIn, !isCanvasProduct && !isHdpeProduct && !isPosterProduct && !isNoCurlProduct && form.grommets, form.grommetPlacement, form.grommetSpacingIn),
+    [widthIn, heightIn, isCanvasProduct, isHdpeProduct, isPosterProduct, isNoCurlProduct, form.grommets, form.grommetPlacement, form.grommetSpacingIn]
   );
 
   const pricing = useMemo(
@@ -381,7 +534,8 @@ export default function VinylBannerBuilder({
         material: form.material,
         doubleSided: form.doubleSided,
         grommets: form.grommets,
-        grommetMode: form.grommetMode,
+        grommetPlacement: form.grommetPlacement,
+        grommetSpacingIn: form.grommetSpacingIn,
         edgeFinish: form.edgeFinish,
         polePockets: form.polePockets,
         windSlits: form.windSlits,
@@ -405,7 +559,8 @@ export default function VinylBannerBuilder({
       form.material,
       form.doubleSided,
       form.grommets,
-      form.grommetMode,
+      form.grommetPlacement,
+      form.grommetSpacingIn,
       form.edgeFinish,
       form.polePockets,
       form.windSlits,
@@ -416,6 +571,7 @@ export default function VinylBannerBuilder({
       form.meshRope,
     ]
   );
+  const unitPrice = pricing.totalPrice / Math.max(1, effectiveQtyNum);
 
   const set = useCallback(
     <K extends keyof FormState>(key: K, value: FormState[K]) => {
@@ -592,6 +748,7 @@ export default function VinylBannerBuilder({
   }
 
   function startMove(event: React.PointerEvent<HTMLDivElement>) {
+    return;
     const target = event.target as HTMLElement;
     if (target.dataset.role === "resize-handle") return;
     event.currentTarget.setPointerCapture(event.pointerId);
@@ -784,6 +941,10 @@ export default function VinylBannerBuilder({
     });
   }, [isEconomicalStandProduct]);
 
+  useEffect(() => {
+    setArtPos({ x: 0, y: 55 });
+  }, []);
+
   const viewportWidth = typeof window !== "undefined" ? window.innerWidth : 1280;
   const panelMaxWidth =
     activePanel === "size"
@@ -833,52 +994,56 @@ export default function VinylBannerBuilder({
             backgroundSize: isMeshProduct ? "18px 18px" : "24px 24px",
           }}
         >
-          <div className="absolute left-4 top-4 z-20 max-w-[320px] rounded-lg border border-zinc-200 bg-white/95 px-3 py-2 shadow-sm backdrop-blur">
-            <h2 className="text-sm font-semibold tracking-tight text-zinc-900">Vinyl Banner Configurator</h2>
-            <p className="mt-1 text-[11px] text-zinc-600">
-              {isNoCurlProduct ? "No-Curl Banner" : isPosterProduct ? "Poster" : isHdpeProduct ? "HDPE" : isCanvasProduct ? "Canvas" : isMeshProduct ? "Mesh Banner" : form.material}
-              {" · "}
-              {!isCanvasProduct && !isMeshProduct && !isHdpeProduct && !isPosterProduct && !isNoCurlProduct && !isEconomicalStandProduct && (form.doubleSided ? "Double-Sided" : "Single-Sided")}
-              {(isCanvasProduct || isMeshProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct || isEconomicalStandProduct) && "Single-Sided"}
-              {" · "}
-              {widthFeetInchesLabel} x {heightFeetInchesLabel}
-            </p>
-            <p className="mt-1 text-[10px] text-zinc-500">Artboard Size: {widthFeetInchesLabel} x {heightFeetInchesLabel}</p>
-            {productDescription && <p className="mt-1 text-[10px] text-zinc-500">{productDescription}</p>}
-          </div>
+          <div
+            className="pointer-events-none absolute left-1/2 top-4 z-20 w-[min(940px,calc(100%-24px))] px-2 md:px-3"
+            style={{ transform: "translateX(-50%)" }}
+          >
+            <div className="mx-auto grid w-full grid-cols-1 gap-2 px-1 md:items-start md:gap-8 max-w-[940px] md:grid-cols-[0.85fr_1.4fr_0.85fr]">
+              {/* Product Info */}
+              <div>
+                <div className={`text-[27px] leading-[0.98] uppercase tracking-tight text-zinc-900 md:whitespace-nowrap ${isEconomicalStandProduct ? "font-normal md:text-[34px]" : "font-medium md:text-[42px]"}`}>
+                  {canvasHeaderProductName}
+                </div>
+                <div className="mt-1 text-[11px] text-zinc-600 md:text-[12px]">
+                  {canvasHeaderDetail}
+                </div>
+                {productDescription && <div className="mt-1 text-[10px] text-zinc-500 md:text-[11px]">{productDescription}</div>}
+              </div>
 
-          <div className="absolute right-4 top-4 z-20 rounded-lg border border-zinc-200 bg-zinc-50/95 px-3 py-2 shadow-sm backdrop-blur">
-            <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">Quick Rate Reference ($/sqft)</div>
-            <div className="grid grid-cols-3 gap-x-3 text-[11px]">
-              <span className="font-semibold text-zinc-600">13oz</span>
-              <span className="text-zinc-600">Single: $0.75</span>
-              <span className="text-zinc-600">Double: $1.20</span>
-              <span className="font-semibold text-zinc-600">15oz</span>
-              <span className="text-zinc-600">Single: $1.15</span>
-              <span className="text-zinc-600">Double: $1.84</span>
-              <span className="font-semibold text-zinc-400">18oz</span>
-              <span className="text-zinc-400">Single: --</span>
-              <span className="text-zinc-400">Double: --</span>
+              {/* Pricing Info */}
+              <div className="text-[10px] text-zinc-600 md:pt-1 md:text-center">
+                <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500">Pricing And Shipping</div>
+                {showVinylRateMatrix ? (
+                  <div className="grid grid-cols-[56px_1fr] gap-x-2 gap-y-0.5 text-[10px] md:text-left">
+                    <span className="text-zinc-500">13oz Single</span>
+                    <span>$0.75 per sqft</span>
+                    <span className="text-zinc-500">13oz Double</span>
+                    <span>$1.20 per sqft</span>
+                    <span className="text-zinc-500">15oz Single</span>
+                    <span>$1.15 per sqft</span>
+                    <span className="text-zinc-500">15oz Double</span>
+                    <span>$1.84 per sqft</span>
+                  </div>
+                ) : (
+                  <div className="text-[11px] leading-tight text-zinc-500">
+                    <div>{canvasHeaderProductName}</div>
+                    <div className="mt-0.5 text-zinc-700">Single-Sided</div>
+                    <div>{formatPrice(unitPrice)} per item</div>
+                  </div>
+                )}
+              </div>
+
+              {/* Total Price */}
+              <div className="text-left md:pt-1 md:text-right">
+                <div className="text-[38px] leading-none font-semibold text-[var(--brand-primary)] md:text-[44px]">{formatPrice(pricing.totalPrice)}</div>
+                <div className="mt-1 text-[11px] text-zinc-500">{pricing.sqFt} sqft / 24 Hours</div>
+              </div>
             </div>
           </div>
 
-          <div className="absolute right-4 top-[132px] z-20 rounded-lg border border-[#111111] bg-[#111111]/95 px-4 py-2 text-right shadow-sm backdrop-blur">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#007fff]">Live Total</div>
-            <div className="text-2xl font-semibold text-white">{formatPrice(pricing.totalPrice)}</div>
-            <div className="text-[11px] text-zinc-300">{pricing.sqFt} sqft / 24 Hours Production</div>
-          </div>
-
-          <div className="absolute left-4 top-[122px] rounded border border-zinc-200 bg-white/95 px-3 py-1 text-xs text-zinc-600 shadow-sm">
-            Click and drag banner to move
-          </div>
-
           <div
-            className={`absolute left-1/2 top-1/2 cursor-move select-none rounded-md ${
-              isMeshProduct || isEconomicalStandProduct
-                ? "border border-zinc-500 bg-white shadow"
-                : "border-2 border-dashed border-[#007fff] bg-[#007fff]/8 shadow"
-            }`}
-            onPointerDown={startMove}
+            className="absolute left-1/2 top-1/2 select-none cursor-default rounded-md border border-zinc-500 bg-white shadow"
+            onPointerDown={undefined}
             style={{
               width: artWidth,
               height: artHeight,
@@ -1182,9 +1347,45 @@ export default function VinylBannerBuilder({
                       </div>
                     </SubControlGroup>
                     <SubControlGroup title="Grommets">
-                      <div className="grid grid-cols-2 gap-1">
-                        <SegButton active={!form.grommets} onClick={() => set("grommets", false)}>No</SegButton>
-                        <SegButton active={form.grommets} onClick={() => set("grommets", true)}>Yes</SegButton>
+                      <div className="space-y-2">
+                        <div>
+                          <label className="text-[9px] font-semibold uppercase tracking-[0.1em] text-zinc-500">Placement</label>
+                          <select
+                            value={form.grommetPlacement}
+                            onChange={(e) => set("grommetPlacement", e.target.value as GrommetPlacement)}
+                            disabled={!form.grommets}
+                            className="mt-1 w-full h-7 rounded border border-zinc-300 bg-white px-2 text-[11px] font-semibold text-zinc-700 disabled:bg-zinc-100 disabled:text-zinc-400"
+                          >
+                            <option value="all-sides">All Sides</option>
+                            <option value="top-left-right">Top, Left & Right</option>
+                            <option value="top-left-bottom">Top, Left & Bottom</option>
+                            <option value="top-right-bottom">Top, Right & Bottom</option>
+                            <option value="left-right-bottom">Left, Right & Bottom</option>
+                            <option value="top-left">Top & Left</option>
+                            <option value="top-right">Top & Right</option>
+                            <option value="top-bottom">Top & Bottom</option>
+                            <option value="left-right">Left & Right</option>
+                            <option value="left-bottom">Left & Bottom</option>
+                            <option value="right-bottom">Right & Bottom</option>
+                            <option value="top-only">Top Only</option>
+                            <option value="bottom-only">Bottom Only</option>
+                            <option value="left-only">Left Only</option>
+                            <option value="right-only">Right Only</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="text-[9px] font-semibold uppercase tracking-[0.1em] text-zinc-500">Spacing (inches)</label>
+                          <select
+                            value={form.grommetSpacingIn}
+                            onChange={(e) => set("grommetSpacingIn", parseInt(e.target.value, 10))}
+                            disabled={!form.grommets}
+                            className="mt-1 w-full h-7 rounded border border-zinc-300 bg-white px-2 text-[11px] font-semibold text-zinc-700 disabled:bg-zinc-100 disabled:text-zinc-400"
+                          >
+                            {[6, 8, 10, 12, 15, 18, 20, 24].map((spacing) => (
+                              <option key={spacing} value={spacing}>{spacing}&quot;</option>
+                            ))}
+                          </select>
+                        </div>
                       </div>
                     </SubControlGroup>
                     <SubControlGroup title="Pole Pockets">

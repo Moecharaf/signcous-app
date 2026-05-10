@@ -3,7 +3,22 @@
 export type MaterialName = "13oz Vinyl" | "15oz Vinyl" | "Mesh Banner" | "Fabric Banner";
 export type LegacyMaterialName = "standard" | "premium" | "mesh" | "fabric";
 export type Material = MaterialName | LegacyMaterialName;
-export type GrommetMode = "per-corner" | "every-2ft";
+export type GrommetPlacement =
+  | "all-sides"
+  | "top-left-right"
+  | "top-left-bottom"
+  | "top-right-bottom"
+  | "left-right-bottom"
+  | "top-left"
+  | "top-right"
+  | "top-bottom"
+  | "left-right"
+  | "left-bottom"
+  | "right-bottom"
+  | "top-only"
+  | "left-only"
+  | "right-only"
+  | "bottom-only";
 export type EdgeFinish = "none" | "welding" | "webbing" | "rope";
 
 export interface PricingConfig {
@@ -54,7 +69,8 @@ export interface BannerPricingInput {
   material: Material;
   doubleSided: boolean;
   grommets: boolean;
-  grommetMode: GrommetMode;
+  grommetPlacement: GrommetPlacement;
+  grommetSpacingIn: number;
   edgeFinish: EdgeFinish;
   polePockets: boolean;
   windSlits: boolean;
@@ -298,8 +314,7 @@ export function calculateMeshPrice(
   const ratePerSqFt      = getMeshSqFtRate(sqFt);
   const basePricePerUnit = sqFt * ratePerSqFt;
 
-  // Grommets: always free for mesh
-  const grommetCostPerUnit = grommets ? 0 : 0;
+  // Grommets: always free for mesh (no cost)
 
   // Pole pockets: $1.00/linear ft (top + bottom = 2×width) plus $10.00 setup
   const polePocketCostPerUnit = polePockets ? (widthFt * 2 * 1.00) + 10.00 : 0;
@@ -308,10 +323,9 @@ export function calculateMeshPrice(
   // - Welding: no additional cost
   // - Webbing: $1.75 per linear foot of perimeter
   // - Rope:    $1.75 per linear foot of perimeter
-  const weldingCostPerUnit = welding ? 0 : 0;
   const webbingCostPerUnit = webbing ? perimeterFt * 1.75 : 0;
   const ropeCostPerUnit = rope ? perimeterFt * 1.75 : 0;
-  const edgeFinishCostPerUnit = weldingCostPerUnit + webbingCostPerUnit + ropeCostPerUnit;
+  const edgeFinishCostPerUnit = webbingCostPerUnit + ropeCostPerUnit;
 
   const priceBeforeRush      = basePricePerUnit + polePocketCostPerUnit + edgeFinishCostPerUnit;
   const rushSurchargePerUnit = rush ? priceBeforeRush * 1.00 : 0; // 100% additional
@@ -332,11 +346,65 @@ export function calculateMeshPrice(
 }
 
 /**
+ * Calculates the total number of grommet placements based on dimensions and preference.
+ */
+export function calculateGrommetCount(
+  widthIn: number,
+  heightIn: number,
+  placement: GrommetPlacement,
+  spacingIn: number
+): number {
+  const safeSpacing = Math.max(6, Math.min(25, spacingIn));
+  const widthFt = widthIn / 12;
+  const heightFt = heightIn / 12;
+
+  const topCount = Math.max(2, Math.ceil(widthFt / (safeSpacing / 12)) + 1);
+  const bottomCount = Math.max(2, Math.ceil(widthFt / (safeSpacing / 12)) + 1);
+  const leftCount = Math.max(2, Math.ceil(heightFt / (safeSpacing / 12)) + 1);
+  const rightCount = Math.max(2, Math.ceil(heightFt / (safeSpacing / 12)) + 1);
+
+  switch (placement) {
+    case "all-sides":
+      return topCount + bottomCount + leftCount + rightCount - 4;
+    case "top-left-right":
+      return topCount + leftCount + rightCount - 2;
+    case "top-left-bottom":
+      return topCount + bottomCount + leftCount - 2;
+    case "top-right-bottom":
+      return topCount + bottomCount + rightCount - 2;
+    case "left-right-bottom":
+      return bottomCount + leftCount + rightCount - 2;
+    case "top-left":
+      return topCount + leftCount - 1;
+    case "top-right":
+      return topCount + rightCount - 1;
+    case "top-bottom":
+      return topCount + bottomCount;
+    case "left-right":
+      return leftCount + rightCount;
+    case "left-bottom":
+      return bottomCount + leftCount - 1;
+    case "right-bottom":
+      return bottomCount + rightCount - 1;
+    case "top-only":
+      return topCount;
+    case "bottom-only":
+      return bottomCount;
+    case "left-only":
+      return leftCount;
+    case "right-only":
+      return rightCount;
+    default:
+      return 4;
+  }
+}
+
+/**
  * Calculates the total price for a vinyl banner order.
  */
 export function calculateBannerPrice(input: BannerPricingInput): BannerPricingResult {
   const { widthIn, heightIn, quantity, material, doubleSided,
-          grommets, grommetMode, edgeFinish, polePockets, windSlits, hemming, rush } = input;
+          grommets, grommetPlacement, grommetSpacingIn, edgeFinish, polePockets, windSlits, hemming, rush } = input;
 
   const config = PRICING_CONFIG;
   const resolvedMaterial = resolveMaterial(material);
@@ -402,13 +470,8 @@ export function calculateBannerPrice(input: BannerPricingInput): BannerPricingRe
 
   let grommetCostPerUnit = 0;
   if (grommets) {
-    const totalPlacements = grommetMode === "per-corner"
-      ? 4
-      : Math.max(
-          config.addOns.minGrommets,
-          Math.ceil(perimeterFt / config.addOns.grommetSpacingFt)
-        );
-    grommetCostPerUnit = totalPlacements * config.addOns.grommetsPerPlacement;
+    const count = calculateGrommetCount(safeWidthIn, safeHeightIn, grommetPlacement, grommetSpacingIn);
+    grommetCostPerUnit = count * config.addOns.grommetsPerPlacement;
   }
 
   let polePocketCostPerUnit = 0;
