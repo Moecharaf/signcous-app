@@ -1025,11 +1025,11 @@ export default function VinylBannerBuilder({
     : 12;
 
   return (
-    <div className="flex min-h-[calc(100dvh-88px)] flex-col bg-[#f4f4f4] text-zinc-800 md:h-[calc(100vh-88px)]">
+    <div className="flex min-h-[calc(100dvh-64px)] flex-col bg-[#f4f4f4] text-zinc-800 md:min-h-[calc(100dvh-88px)] md:h-[calc(100vh-88px)]">
       <div className="mx-3 mt-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
         <div
           ref={workspaceRef}
-          className={`relative min-h-0 flex-1 overflow-hidden ${isMeshProduct ? "bg-[#f6f6f4]" : "bg-[#f9f9f9]"}`}
+          className={`relative min-h-[360px] flex-1 overflow-hidden md:min-h-0 ${isMeshProduct ? "bg-[#f6f6f4]" : "bg-[#f9f9f9]"}`}
           style={{
             backgroundImage:
               "linear-gradient(to right, rgba(148,163,184,0.22) 1px, transparent 1px), linear-gradient(to bottom, rgba(148,163,184,0.22) 1px, transparent 1px)",
@@ -1320,23 +1320,32 @@ export default function VinylBannerBuilder({
         </div>
       </div>
 
-      {activePanel && panelAnchor && (
-        <div
-          ref={panelRef}
-          className="fixed z-50 rounded-lg border border-zinc-300 bg-white p-2 shadow-2xl"
-          style={{
-            width: isMobileViewport ? "auto" : `${panelWidth}px`,
-            left: isMobileViewport ? "12px" : `${panelLeft}px`,
-            right: isMobileViewport ? "12px" : "auto",
-            top: isMobileViewport ? "auto" : `${Math.max(16, panelAnchor.top - 10)}px`,
-            bottom: isMobileViewport ? "12px" : "auto",
-            transform: isMobileViewport ? "none" : "translateY(-100%)",
-            maxHeight: isMobileViewport ? "70dvh" : "none",
-            overflowY: isMobileViewport ? "auto" : "visible",
-          }}
-        >
-          {!isMobileViewport && <div className="absolute -bottom-2 left-1/2 h-4 w-4 -translate-x-1/2 rotate-45 border-b border-r border-zinc-300 bg-white" aria-hidden="true" />}
-          <div className="relative">
+      {activePanel && (panelAnchor || isMobileViewport) && (
+        <>
+          {isMobileViewport && (
+            <button
+              type="button"
+              aria-label="Close controls panel"
+              onClick={closePanel}
+              className="fixed inset-0 z-40 bg-black/25"
+            />
+          )}
+          <div
+            ref={panelRef}
+            className="fixed z-50 rounded-lg border border-zinc-300 bg-white p-2 shadow-2xl"
+            style={{
+              width: isMobileViewport ? "auto" : `${panelWidth}px`,
+              left: isMobileViewport ? "12px" : `${panelLeft}px`,
+              right: isMobileViewport ? "12px" : "auto",
+              top: isMobileViewport ? "auto" : `${Math.max(16, (panelAnchor?.top ?? 80) - 10)}px`,
+              bottom: isMobileViewport ? "12px" : "auto",
+              transform: isMobileViewport ? "none" : "translateY(-100%)",
+              maxHeight: isMobileViewport ? "72dvh" : "none",
+              overflowY: isMobileViewport ? "auto" : "visible",
+            }}
+          >
+            {!isMobileViewport && <div className="absolute -bottom-2 left-1/2 h-4 w-4 -translate-x-1/2 rotate-45 border-b border-r border-zinc-300 bg-white" aria-hidden="true" />}
+            <div className="relative">
             {activePanel !== "size" && (
               <div className="mb-2 flex items-center justify-between">
                 <h3 className="text-xs font-semibold uppercase tracking-[0.08em] text-zinc-700">{CONTROL_PANEL_TITLE[activePanel]}</h3>
@@ -1638,8 +1647,9 @@ export default function VinylBannerBuilder({
                 </div>
               </div>
             )}
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );
