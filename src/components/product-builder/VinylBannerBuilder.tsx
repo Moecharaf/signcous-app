@@ -21,7 +21,7 @@ import {
 } from "@/lib/pricing";
 import { useCart } from "@/context/CartContext";
 
-const materialOptions = ["13oz Vinyl", "15oz Vinyl", "Mesh Banner", "Fabric Banner"] as const;
+const materialOptions = ["13oz Vinyl", "15oz Vinyl", "18oz Vinyl", "Mesh Banner", "Fabric Banner"] as const;
 const unitOptions = ["inches", "feet"] as const;
 
 type Unit = (typeof unitOptions)[number];
@@ -1373,7 +1373,7 @@ export default function VinylBannerBuilder({
                   </div>
                 ) : (
                   <div className="grid gap-2 sm:grid-cols-2">
-                    {(["13oz Vinyl", "15oz Vinyl"] as const).map((option) => (
+                    {(["13oz Vinyl", "15oz Vinyl", "18oz Vinyl"] as const).map((option) => (
                       <SegButton key={option} active={form.material === option} onClick={() => set("material", option)}>
                         {option}
                       </SegButton>

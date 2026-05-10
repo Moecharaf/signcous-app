@@ -2,7 +2,7 @@
 
 export const BANNER_MARKUP = 1.5; // 50% over cost
 
-export type MaterialName = "13oz Vinyl" | "15oz Vinyl" | "Mesh Banner" | "Fabric Banner";
+export type MaterialName = "13oz Vinyl" | "15oz Vinyl" | "18oz Vinyl" | "Mesh Banner" | "Fabric Banner";
 export type LegacyMaterialName = "standard" | "premium" | "mesh" | "fabric";
 export type Material = MaterialName | LegacyMaterialName;
 export type GrommetPlacement =
@@ -32,7 +32,9 @@ export interface PricingConfig {
     grommetSpacingFt: number;      // every N feet around perimeter
     minGrommets: number;           // minimum grommets per banner
     polePocketsPerLinearFt: number; // per linear foot (top + bottom)
-    windSlits: number;              // per banner (flat)
+    polePocketsSetupFee: number;    // flat setup fee
+    windSlitsPerSqFt: number;       // per sq ft
+    ropePerLinearFt: number;        // per linear foot of perimeter
     hemmingPerLinearFt: number;     // per linear foot of perimeter
     hemmingIncluded: boolean;       // if true, hemming adds no cost
     doubleSided: number;    // multiplier over base
@@ -45,22 +47,25 @@ export interface PricingConfig {
 
 export const PRICING_CONFIG: PricingConfig = {
   materialRates: {
-    "13oz Vinyl": 0.75 * BANNER_MARKUP,   // USD per sq ft
-    "15oz Vinyl": 1.15 * BANNER_MARKUP,
+    "13oz Vinyl": 1.25 * BANNER_MARKUP,   // USD per sq ft (qty 1-999 cost)
+    "15oz Vinyl": 1.75 * BANNER_MARKUP,
+    "18oz Vinyl": 2.25 * BANNER_MARKUP,
     "Mesh Banner": 1.05 * BANNER_MARKUP,
     "Fabric Banner": 1.35 * BANNER_MARKUP,
   },
   addOns: {
-    grommetsPerPlacement: 0.35,
+    grommetsPerPlacement: 0,
     grommetSpacingFt: 2,
     minGrommets: 4,
-    polePocketsPerLinearFt: 0.85,
-    windSlits: 8.00,
+    polePocketsPerLinearFt: 1.00 * BANNER_MARKUP,
+    polePocketsSetupFee: 10.00 * BANNER_MARKUP,
+    windSlitsPerSqFt: 0.50 * BANNER_MARKUP,
+    ropePerLinearFt: 1.00 * BANNER_MARKUP,
     hemmingPerLinearFt: 0.5,
     hemmingIncluded: false,
-    doubleSided: 1.6, // multiply base by this
+    doubleSided: 1.6,
   },
-  rushMultiplier: 1.35, // 35% rush surcharge
+  rushMultiplier: 2.0, // 100% additional
   minimumPrice: 15.00,
 };
 
@@ -462,41 +467,50 @@ export function calculateBannerPrice(input: BannerPricingInput): BannerPricingRe
     };
   }
 
-  // Base price per unit
-  let basePricePerUnit = sqFt * config.materialRates[resolvedMaterial];
-  if (doubleSided) {
-    basePricePerUnit *= config.addOns.doubleSided;
+  // Quantity-tiered rate (1000+ gets lower rate)
+  const highQtyRates: Partial<Record<MaterialName, number>> = {
+    "13oz Vinyl": 1.00 * BANNER_MARKUP,
+    "15oz Vinyl": 1.25 * BANNER_MARKUP,
+    "18oz Vinyl": 1.75 * BANNER_MARKUP,
+  };
+  const sqFtRate = safeQuantity >= 1000 && highQtyRates[resolvedMaterial] != null
+    ? highQtyRates[resolvedMaterial]!
+    : config.materialRates[resolvedMaterial];
+
+  // 18oz double-sided has its own cost rate ($4.25/sqft × 1.5)
+  let basePricePerUnit: number;
+  if (resolvedMaterial === "18oz Vinyl" && doubleSided) {
+    const doubleSidedRate = safeQuantity >= 1000 ? 3.25 * BANNER_MARKUP : 4.25 * BANNER_MARKUP;
+    basePricePerUnit = sqFt * doubleSidedRate;
+  } else if (doubleSided) {
+    basePricePerUnit = sqFt * sqFtRate * config.addOns.doubleSided;
+  } else {
+    basePricePerUnit = sqFt * sqFtRate;
   }
 
-  // Add-on costs
-
-  let grommetCostPerUnit = 0;
-  if (grommets) {
-    const count = calculateGrommetCount(safeWidthIn, safeHeightIn, grommetPlacement, grommetSpacingIn);
-    grommetCostPerUnit = count * config.addOns.grommetsPerPlacement;
-  }
+  // Add-on costs — grommets: free, welding: free
+  const grommetCostPerUnit = 0;
 
   let polePocketCostPerUnit = 0;
   if (polePockets) {
-    const polePocketLinearFt = widthFt * 2;
-    polePocketCostPerUnit = polePocketLinearFt * config.addOns.polePocketsPerLinearFt;
+    polePocketCostPerUnit = (widthFt * 2 * config.addOns.polePocketsPerLinearFt) + config.addOns.polePocketsSetupFee;
   }
 
-  const windSlitsCostPerUnit = windSlits ? config.addOns.windSlits : 0;
+  const windSlitsCostPerUnit = windSlits ? sqFt * config.addOns.windSlitsPerSqFt : 0;
+
+  let edgeFinishCostPerUnit = 0;
+  if (edgeFinish === "rope") {
+    edgeFinishCostPerUnit = perimeterFt * config.addOns.ropePerLinearFt;
+  }
 
   let hemmingCostPerUnit = 0;
   if (hemming && !config.addOns.hemmingIncluded) {
     hemmingCostPerUnit = perimeterFt * config.addOns.hemmingPerLinearFt;
   }
 
-  let addOnCostPerUnit = 0;
-  addOnCostPerUnit += grommetCostPerUnit;
-  const edgeFinishCostPerUnit = 0;
-  addOnCostPerUnit += polePocketCostPerUnit;
-  addOnCostPerUnit += windSlitsCostPerUnit;
-  addOnCostPerUnit += hemmingCostPerUnit;
+  const addOnCostPerUnit = grommetCostPerUnit + polePocketCostPerUnit + windSlitsCostPerUnit + edgeFinishCostPerUnit + hemmingCostPerUnit;
 
-  // Rush surcharge
+  // Rush surcharge — 100% additional
   const priceBeforeRush = basePricePerUnit + addOnCostPerUnit;
   const rushSurchargePerUnit = rush
     ? priceBeforeRush * (config.rushMultiplier - 1)
