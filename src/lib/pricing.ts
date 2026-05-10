@@ -152,11 +152,9 @@ export function getHdpeSqFtRate(quantity: number): number {
 export function getCanvasSqFtRate(quantity: number): number {
   const safeQuantity = Number.isFinite(quantity) ? Math.max(1, quantity) : 1;
 
-  if (safeQuantity <= 5) return 6.99 * BANNER_MARKUP;
-  if (safeQuantity <= 10) return 6.49 * BANNER_MARKUP;
-  if (safeQuantity <= 25) return 5.99 * BANNER_MARKUP;
-  if (safeQuantity <= 50) return 5.49 * BANNER_MARKUP;
-  return 4.99 * BANNER_MARKUP;
+  if (safeQuantity <= 999) return 4.98 * BANNER_MARKUP;
+  if (safeQuantity <= 4999) return 3.79 * BANNER_MARKUP;
+  return 2.49 * BANNER_MARKUP;
 }
 
 export function getPosterSqFtRate(areaSqFt: number): number {
