@@ -157,14 +157,12 @@ export function getCanvasSqFtRate(quantity: number): number {
   return 2.49 * BANNER_MARKUP;
 }
 
-export function getPosterSqFtRate(areaSqFt: number): number {
-  const safeAreaSqFt = Number.isFinite(areaSqFt) ? Math.max(1, areaSqFt) : 1;
+export function getPosterSqFtRate(quantity: number): number {
+  const safeQuantity = Number.isFinite(quantity) ? Math.max(1, quantity) : 1;
 
-  if (safeAreaSqFt <= 5) return 4.5 * BANNER_MARKUP;
-  if (safeAreaSqFt <= 15) return 4.0 * BANNER_MARKUP;
-  if (safeAreaSqFt <= 30) return 3.5 * BANNER_MARKUP;
-  if (safeAreaSqFt <= 100) return 3.0 * BANNER_MARKUP;
-  return 2.6 * BANNER_MARKUP;
+  if (safeQuantity <= 999) return 3.00;
+  if (safeQuantity <= 4999) return 2.25;
+  return 1.50;
 }
 
 export function getNoCurlSqFtRate(quantity: number): number {
@@ -188,7 +186,7 @@ export function calculatePosterPrice(
   const widthFt = unit === "feet" ? safeWidth : safeWidth / 12;
   const heightFt = unit === "feet" ? safeHeight : safeHeight / 12;
   const sqFt = Math.max(1, Math.ceil(widthFt * heightFt));
-  const ratePerSqFt = getPosterSqFtRate(sqFt);
+  const ratePerSqFt = getPosterSqFtRate(safeQuantity);
 
   const basePricePerUnit = sqFt * ratePerSqFt;
   const rushSurchargePerUnit = rush ? basePricePerUnit * 1.0 : 0;
