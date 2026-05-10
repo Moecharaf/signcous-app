@@ -1366,12 +1366,13 @@ export default function VinylBannerBuilder({
         <div className="grid gap-2 xl:grid-cols-[minmax(0,1fr)_300px]">
           <div className="space-y-2">
             <div className="md:hidden">
-              <Button
-                className="h-10 w-full rounded border border-[#22c55e] bg-white text-sm font-semibold text-[#16a34a] hover:bg-[#f0fdf4]"
+              <button
+                type="button"
+                className="h-10 w-full rounded border border-[#22c55e] bg-white px-3 text-left text-sm font-semibold uppercase tracking-[0.08em] text-[#16a34a]"
                 onClick={() => setShowMobileOptions((prev) => !prev)}
               >
-                {showMobileOptions ? "Hide Options" : "Show Options"}
-              </Button>
+                {showMobileOptions ? "- Hide Options" : "+ Show Options"}
+              </button>
             </div>
             <div className={`${showMobileOptions ? "grid" : "hidden"} gap-2 sm:grid-cols-2 xl:grid-cols-6 md:grid`}>
               <ToolbarButton
