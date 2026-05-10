@@ -1027,6 +1027,95 @@ export default function VinylBannerBuilder({
   return (
     <div className="flex min-h-[calc(100dvh-64px)] flex-col bg-[#f4f4f4] text-zinc-800 md:min-h-[calc(100dvh-88px)] md:h-[calc(100vh-88px)]">
       <div className="mx-3 mt-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
+        <div className="border-b border-zinc-200 bg-white px-4 py-3 md:hidden">
+          <div className="text-[18px] font-semibold uppercase tracking-tight text-zinc-900">{canvasHeaderProductName}</div>
+          <div className="mt-1 text-[11px] text-zinc-600">{canvasHeaderDetail}</div>
+          {!isEconomicalStandProduct && productDescription && <div className="mt-1 text-[10px] text-zinc-500">{productDescription}</div>}
+
+          <div className="mt-3 text-[10px] font-bold underline uppercase tracking-[0.14em] text-zinc-500">Pricing And Shipping</div>
+          <div className="mt-1 text-[10px] text-zinc-600">
+            {isEconomicalStandProduct ? (
+              <div className="text-[11px] leading-tight text-zinc-700">
+                <div>{formatPrice(ECONOMICAL_STAND_UNIT_PRICE)} per item</div>
+              </div>
+            ) : isCanvasProduct ? (
+              <div className="grid grid-cols-[56px_1fr] gap-x-2 gap-y-0.5">
+                <span className="text-zinc-500">1-999</span>
+                <span>{formatPrice(7.47)} per sqft</span>
+                <span className="text-zinc-500">1000-4999</span>
+                <span>{formatPrice(5.69)} per sqft</span>
+                <span className="text-zinc-500">5000+</span>
+                <span>{formatPrice(3.74)} per sqft</span>
+              </div>
+            ) : isMeshProduct ? (
+              <div className="grid grid-cols-[70px_1fr] gap-x-2 gap-y-0.5">
+                <span className="text-zinc-500">1-999</span>
+                <span>{formatPrice(3.66)} per sqft</span>
+                <span className="text-zinc-500">1000-2499</span>
+                <span>{formatPrice(2.24)} per sqft</span>
+                <span className="text-zinc-500">2500-4999</span>
+                <span>{formatPrice(1.64)} per sqft</span>
+                <span className="text-zinc-500">5000+</span>
+                <span>{formatPrice(1.49)} per sqft</span>
+              </div>
+            ) : isHdpeProduct ? (
+              <div className="grid grid-cols-[56px_1fr] gap-x-2 gap-y-0.5">
+                {hdpeTierRates.map((tier) => (
+                  <Fragment key={`hdpe-tier-mobile-${tier.qty}`}>
+                    <span className="text-zinc-500">{tier.qty}</span>
+                    <span>{formatPrice(tier.rate)} per sqft</span>
+                  </Fragment>
+                ))}
+                <span className="text-zinc-500">Type</span>
+                <span>Single-Sided</span>
+              </div>
+            ) : showVinylRateMatrix ? (
+              <div className="grid grid-cols-[70px_1fr] gap-x-2 gap-y-0.5">
+                <span className="text-zinc-500">13oz Single</span>
+                <span>{formatPrice(1.25 * 1.5)} per sqft</span>
+                <span className="text-zinc-500">15oz Single</span>
+                <span>{formatPrice(1.75 * 1.5)} per sqft</span>
+                <span className="text-zinc-500">18oz Single</span>
+                <span>{formatPrice(2.25 * 1.5)} per sqft</span>
+                <span className="text-zinc-500">18oz Double</span>
+                <span>{formatPrice(4.25 * 1.5)} per sqft</span>
+              </div>
+            ) : isNoCurlProduct ? (
+              <div className="grid grid-cols-[56px_1fr] gap-x-2 gap-y-0.5">
+                <span className="text-zinc-500">1-999</span>
+                <span>{formatPrice(4.50)} per sqft</span>
+                <span className="text-zinc-500">1000+</span>
+                <span>{formatPrice(3.00)} per sqft</span>
+              </div>
+            ) : isPosterProduct ? (
+              <div className="grid grid-cols-[56px_1fr] gap-x-2 gap-y-0.5">
+                <span className="text-zinc-500">1-999</span>
+                <span>{formatPrice(3.00)} per sqft</span>
+                <span className="text-zinc-500">1000-4999</span>
+                <span>{formatPrice(2.25)} per sqft</span>
+                <span className="text-zinc-500">5000+</span>
+                <span>{formatPrice(1.50)} per sqft</span>
+              </div>
+            ) : (
+              <div className="text-[11px] leading-tight text-zinc-500">
+                <div>{canvasHeaderProductName}</div>
+                <div className="mt-0.5 text-zinc-700">{form.doubleSided ? "Double-Sided" : "Single-Sided"}</div>
+                <div>{formatPrice(displaySqFtRate)} per sqft</div>
+              </div>
+            )}
+            <div className="mt-1 text-[10px] text-zinc-500">
+              {!isEconomicalStandProduct && !isCanvasProduct && !isMeshProduct && !isNoCurlProduct && !isPosterProduct && `${pricing.sqFt} sqft / 24 Hours Production`}
+            </div>
+          </div>
+
+          <div className="mt-3">
+            <div className="text-[42px] leading-none font-semibold text-[var(--brand-primary)]">{formatPrice(pricing.totalPrice)}</div>
+            <div className="mt-1 text-[11px] text-zinc-500">
+              {!isEconomicalStandProduct && !isCanvasProduct && !isMeshProduct && !isNoCurlProduct && !isPosterProduct && `${pricing.sqFt} sqft / 24 Hours`}
+            </div>
+          </div>
+        </div>
+
         <div
           ref={workspaceRef}
           className={`relative min-h-[360px] flex-1 overflow-hidden md:min-h-0 ${isMeshProduct ? "bg-[#f6f6f4]" : "bg-[#f9f9f9]"}`}
@@ -1037,7 +1126,7 @@ export default function VinylBannerBuilder({
           }}
         >
           <div
-            className="pointer-events-none absolute left-1/2 top-4 z-20 w-[min(940px,calc(100%-24px))] px-2 md:px-3"
+            className="pointer-events-none absolute left-1/2 top-4 z-20 hidden w-[min(940px,calc(100%-24px))] px-2 md:block md:px-3"
             style={{ transform: "translateX(-50%)" }}
           >
             <div className="mx-auto grid w-full grid-cols-1 gap-2 px-1 md:items-start md:gap-8 max-w-[940px] md:grid-cols-[0.85fr_1.4fr_0.85fr]">
