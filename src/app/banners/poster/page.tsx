@@ -11,7 +11,6 @@ export default function PosterPage() {
   return (
     <VinylBannerBuilder
       productName="Poster"
-      productDescription="Custom poster printing with upload-ready artwork and size-based pricing."
       pricingMode="poster"
       productId={54}
     />

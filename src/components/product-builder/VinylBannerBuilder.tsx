@@ -1026,25 +1026,6 @@ export default function VinylBannerBuilder({
   return (
     <div className="flex h-[calc(100vh-88px)] flex-col bg-[#f4f4f4] text-zinc-800">
       <div className="mx-3 mt-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
-        <div className="flex items-center justify-between border-b border-zinc-200 px-4 py-2">
-          <span className="text-xs font-semibold uppercase tracking-[0.12em] text-zinc-500">Canvas Workspace</span>
-          {!isEconomicalStandProduct && (
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] font-semibold text-zinc-500">Zoom</span>
-              <input
-                type="range"
-                min={0.6}
-                max={1.8}
-                step={0.05}
-                value={zoom}
-                onChange={(e) => setZoom(parseFloat(e.target.value) || 1)}
-                className="accent-[#007fff]"
-              />
-              <span className="w-10 text-right text-xs font-semibold text-zinc-600">{Math.round(zoom * 100)}%</span>
-            </div>
-          )}
-        </div>
-
         <div
           ref={workspaceRef}
           className={`relative min-h-0 flex-1 overflow-hidden ${isMeshProduct ? "bg-[#f6f6f4]" : "bg-[#f9f9f9]"}`}
@@ -1109,7 +1090,7 @@ export default function VinylBannerBuilder({
                     <span>Single-Sided</span>
                   </div>
                 ) : showVinylRateMatrix ? (
-                  <div className="grid grid-cols-[56px_1fr] gap-x-2 gap-y-0.5 text-[10px] md:text-left">
+                  <div className="grid grid-cols-[56px_1fr] gap-x-2 gap-y-0.5 text-[10px] md:text-center md:grid-cols-2 md:justify-center md:inline-grid">
                     <span className="text-zinc-500">13oz Single</span>
                     <span>{formatPrice(1.25 * 1.5)} per sqft</span>
                     <span className="text-zinc-500">15oz Single</span>
