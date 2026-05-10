@@ -4,7 +4,7 @@ import VinylBannerBuilder from "@/components/product-builder/VinylBannerBuilder"
 export const metadata: Metadata = {
   title: "Economical Banner Stand — Signcous",
   description:
-    "Order the Economical Banner Stand with a standard 33.5 x 80 single-sided print at a fixed $130 per banner.",
+    "Order the Economical Banner Stand at a fixed $130 per banner.",
 };
 
 export default function EconomicalBannerStandPage() {

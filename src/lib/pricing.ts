@@ -144,11 +144,9 @@ export interface NoCurlPricingResult {
 
 export function getHdpeSqFtRate(quantity: number): number {
   const safeQuantity = Number.isFinite(quantity) ? Math.max(1, quantity) : 1;
-  if (safeQuantity < 10) return 4.5 * BANNER_MARKUP;
-  if (safeQuantity < 50) return 4.0 * BANNER_MARKUP;
-  if (safeQuantity < 100) return 3.6 * BANNER_MARKUP;
-  if (safeQuantity < 500) return 3.2 * BANNER_MARKUP;
-  return 2.9 * BANNER_MARKUP;
+  if (safeQuantity < 10) return 1.50 * BANNER_MARKUP;
+  if (safeQuantity < 100) return 1.00 * BANNER_MARKUP;
+  return 0.75 * BANNER_MARKUP;
 }
 
 export function getCanvasSqFtRate(quantity: number): number {

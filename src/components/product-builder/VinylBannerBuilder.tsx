@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Button from "@/components/ui/Button";
 import {
   calculateBannerPrice,
@@ -616,7 +616,22 @@ export default function VinylBannerBuilder({
       form.meshPolePocketMode,
     ]
   );
-  const unitPrice = pricing.totalPrice / Math.max(1, effectiveQtyNum);
+  const displaySqFtRate = isHdpeProduct
+    ? hdpeRate
+    : isCanvasProduct
+      ? canvasRate
+      : isMeshProduct
+        ? meshRate
+        : isPosterProduct
+          ? posterRate
+          : isNoCurlProduct
+            ? noCurlRate
+            : pricing.basePricePerUnit / Math.max(pricing.sqFt, 1);
+  const hdpeTierRates = [
+    { qty: "1-9", rate: getHdpeSqFtRate(1) },
+    { qty: "10-99", rate: getHdpeSqFtRate(10) },
+    { qty: "100+", rate: getHdpeSqFtRate(100) },
+  ];
 
   const set = useCallback(
     <K extends keyof FormState>(key: K, value: FormState[K]) => {
@@ -1046,42 +1061,62 @@ export default function VinylBannerBuilder({
             <div className="mx-auto grid w-full grid-cols-1 gap-2 px-1 md:items-start md:gap-8 max-w-[940px] md:grid-cols-[0.85fr_1.4fr_0.85fr]">
               {/* Product Info */}
               <div>
-                <div className={`text-[27px] leading-[0.98] uppercase tracking-tight text-zinc-900 md:whitespace-nowrap ${isEconomicalStandProduct ? "font-normal md:text-[34px]" : "font-medium md:text-[42px]"}`}>
+                <div className={`text-[27px] leading-[0.98] uppercase tracking-tight text-zinc-900 md:whitespace-nowrap ${isEconomicalStandProduct ? "font-normal md:text-[34px]" : "font-medium md:text-[36px]"}`}>
                   {canvasHeaderProductName}
                 </div>
                 <div className="mt-1 text-[11px] text-zinc-600 md:text-[12px]">
                   {canvasHeaderDetail}
                 </div>
-                {productDescription && <div className="mt-1 text-[10px] text-zinc-500 md:text-[11px]">{productDescription}</div>}
+                {!isEconomicalStandProduct && productDescription && <div className="mt-1 text-[10px] text-zinc-500 md:text-[11px]">{productDescription}</div>}
               </div>
 
               {/* Pricing Info */}
               <div className="text-[10px] text-zinc-600 md:pt-1 md:text-center">
-                <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500">Pricing And Shipping</div>
-                {showVinylRateMatrix ? (
+                <div className="mb-1 text-[10px] font-bold underline uppercase tracking-[0.14em] text-zinc-500">Pricing And Shipping</div>
+                {isEconomicalStandProduct ? (
+                  <div className="text-[11px] leading-tight text-zinc-700">
+                    <div>{formatPrice(ECONOMICAL_STAND_UNIT_PRICE)} per item</div>
+                  </div>
+                ) : isHdpeProduct ? (
+                  <div className="grid grid-cols-[56px_1fr] gap-x-2 gap-y-0.5 text-[10px] md:text-left">
+                    {hdpeTierRates.map((tier) => (
+                      <Fragment key={`hdpe-tier-${tier.qty}`}>
+                        <span className="text-zinc-500">{tier.qty}</span>
+                        <span>{formatPrice(tier.rate)} per sqft</span>
+                      </Fragment>
+                    ))}
+                    <span className="text-zinc-500">Type</span>
+                    <span>Single-Sided</span>
+                  </div>
+                ) : showVinylRateMatrix ? (
                   <div className="grid grid-cols-[56px_1fr] gap-x-2 gap-y-0.5 text-[10px] md:text-left">
                     <span className="text-zinc-500">13oz Single</span>
-                    <span>$0.75 per sqft</span>
-                    <span className="text-zinc-500">13oz Double</span>
-                    <span>$1.20 per sqft</span>
+                    <span>{formatPrice(1.25 * 1.5)} per sqft</span>
                     <span className="text-zinc-500">15oz Single</span>
-                    <span>$1.15 per sqft</span>
-                    <span className="text-zinc-500">15oz Double</span>
-                    <span>$1.84 per sqft</span>
+                    <span>{formatPrice(1.75 * 1.5)} per sqft</span>
+                    <span className="text-zinc-500">18oz Single</span>
+                    <span>{formatPrice(2.25 * 1.5)} per sqft</span>
+                    <span className="text-zinc-500">18oz Double</span>
+                    <span>{formatPrice(4.25 * 1.5)} per sqft</span>
                   </div>
                 ) : (
                   <div className="text-[11px] leading-tight text-zinc-500">
                     <div>{canvasHeaderProductName}</div>
-                    <div className="mt-0.5 text-zinc-700">Single-Sided</div>
-                    <div>{formatPrice(unitPrice)} per item</div>
+                    <div className="mt-0.5 text-zinc-700">{form.doubleSided ? "Double-Sided" : "Single-Sided"}</div>
+                    <div>{formatPrice(displaySqFtRate)} per sqft</div>
                   </div>
                 )}
+                <div className="mt-1 text-[10px] text-zinc-500">
+                  {!isEconomicalStandProduct && `${pricing.sqFt} sqft / 24 Hours Production`}
+                </div>
               </div>
 
               {/* Total Price */}
               <div className="text-left md:pt-1 md:text-right">
                 <div className="text-[38px] leading-none font-semibold text-[var(--brand-primary)] md:text-[44px]">{formatPrice(pricing.totalPrice)}</div>
-                <div className="mt-1 text-[11px] text-zinc-500">{pricing.sqFt} sqft / 24 Hours</div>
+                <div className="mt-1 text-[11px] text-zinc-500">
+                  {!isEconomicalStandProduct && `${pricing.sqFt} sqft / 24 Hours`}
+                </div>
               </div>
             </div>
           </div>
