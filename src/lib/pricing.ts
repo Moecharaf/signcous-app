@@ -274,13 +274,13 @@ export function calculateCanvasPrice(
  * Tiers (placeholder — update with your pricing strategy):
  *   1–999: $2.44 | 1000–2499: $1.49 | 2500–4999: $1.09 | 5000+: $0.99
  */
-export function getMeshSqFtRate(areaSqFt: number): number {
-  const safeAreaSqFt = Number.isFinite(areaSqFt) ? Math.max(1, areaSqFt) : 1;
-  if (safeAreaSqFt <= 20) return 3.75 * BANNER_MARKUP;
-  if (safeAreaSqFt <= 50) return 3.4 * BANNER_MARKUP;
-  if (safeAreaSqFt <= 100) return 3.1 * BANNER_MARKUP;
-  if (safeAreaSqFt <= 300) return 2.85 * BANNER_MARKUP;
-  return 2.6 * BANNER_MARKUP;
+export function getMeshSqFtRate(quantity: number): number {
+  const safeQuantity = Number.isFinite(quantity) ? Math.max(1, quantity) : 1;
+
+  if (safeQuantity <= 999) return 3.66;
+  if (safeQuantity <= 2499) return 2.24;
+  if (safeQuantity <= 4999) return 1.64;
+  return 1.49;
 }
 
 /**
@@ -425,7 +425,7 @@ export function calculateBannerPrice(input: BannerPricingInput): BannerPricingRe
   // Mesh has its own pricing model and add-on rates.
   if (resolvedMaterial === "Mesh Banner") {
     const billableSqFt = Math.ceil(sqFt);
-    const meshSqFtRate = getMeshSqFtRate(billableSqFt);
+    const meshSqFtRate = getMeshSqFtRate(safeQuantity);
     const basePricePerUnit = billableSqFt * meshSqFtRate;
 
     const grommetCostPerUnit = 0;

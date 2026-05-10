@@ -1086,6 +1086,17 @@ export default function VinylBannerBuilder({
                     <span className="text-zinc-500">5000+</span>
                     <span>{formatPrice(3.74)} per sqft</span>
                   </div>
+                ) : isMeshProduct ? (
+                  <div className="grid grid-cols-[70px_1fr] gap-x-2 gap-y-0.5 text-[10px] md:text-center md:grid-cols-2 md:justify-center md:inline-grid">
+                    <span className="text-zinc-500">1-999</span>
+                    <span>{formatPrice(3.66)} per sqft</span>
+                    <span className="text-zinc-500">1000-2499</span>
+                    <span>{formatPrice(2.24)} per sqft</span>
+                    <span className="text-zinc-500">2500-4999</span>
+                    <span>{formatPrice(1.64)} per sqft</span>
+                    <span className="text-zinc-500">5000+</span>
+                    <span>{formatPrice(1.49)} per sqft</span>
+                  </div>
                 ) : isHdpeProduct ? (
                   <div className="grid grid-cols-[56px_1fr] gap-x-2 gap-y-0.5 text-[10px] md:text-left">
                     {hdpeTierRates.map((tier) => (
@@ -1116,7 +1127,7 @@ export default function VinylBannerBuilder({
                   </div>
                 )}
                 <div className="mt-1 text-[10px] text-zinc-500">
-                  {!isEconomicalStandProduct && !isCanvasProduct && `${pricing.sqFt} sqft / 24 Hours Production`}
+                  {!isEconomicalStandProduct && !isCanvasProduct && !isMeshProduct && `${pricing.sqFt} sqft / 24 Hours Production`}
                 </div>
               </div>
 
@@ -1124,7 +1135,7 @@ export default function VinylBannerBuilder({
               <div className="text-left md:pt-1 md:text-right">
                 <div className="text-[38px] leading-none font-semibold text-[var(--brand-primary)] md:text-[44px]">{formatPrice(pricing.totalPrice)}</div>
                 <div className="mt-1 text-[11px] text-zinc-500">
-                  {!isEconomicalStandProduct && !isCanvasProduct && `${pricing.sqFt} sqft / 24 Hours`}
+                  {!isEconomicalStandProduct && !isCanvasProduct && !isMeshProduct && `${pricing.sqFt} sqft / 24 Hours`}
                 </div>
               </div>
             </div>
