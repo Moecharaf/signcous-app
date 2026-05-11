@@ -540,7 +540,7 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
                 {pricing ? (
                   <>
                     <div
-                      className="absolute border border-dashed border-zinc-400/70"
+                      className="absolute pointer-events-none"
                       style={{ width: previewWidth + 18, height: previewHeight + 18 }}
                     >
                       <div className="absolute -top-7 left-1/2 -translate-x-1/2 text-xs font-semibold text-zinc-500">

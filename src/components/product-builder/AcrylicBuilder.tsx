@@ -243,10 +243,7 @@ function AcrylicCanvas({
       <div className="relative flex h-full items-center justify-center px-8 py-14">
         {isValid ? (
           <>
-            <div
-              className="absolute border border-dashed border-zinc-400/70"
-              style={{ width: previewWidth + 18, height: previewHeight + 18, borderRadius: borderRadius + 4 }}
-            >
+            <div className="absolute pointer-events-none" style={{ width: previewWidth + 18, height: previewHeight + 18 }}>
               {/* Top width dimension */}
               <div className="absolute -top-7 left-1/2 -translate-x-1/2 text-xs font-semibold text-zinc-500">
                 {formatInches(width)}

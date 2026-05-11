@@ -370,7 +370,7 @@ export default function PolystyreneBuilder({
               </div>
 
               <div
-                className="absolute left-1/2 top-1/2 border border-dashed border-zinc-400/70"
+                className="pointer-events-none absolute left-1/2 top-1/2"
                 style={{ width: 220 + 18, height: 440 + 18, transform: "translate(-50%, -50%)" }}
               >
                 <div className="pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 text-xs font-semibold text-zinc-500">48&quot;</div>

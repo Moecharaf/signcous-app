@@ -425,7 +425,7 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
               </div>
 
               <div
-                className="absolute left-1/2 top-1/2 border border-dashed border-zinc-400/70"
+                className="pointer-events-none absolute left-1/2 top-1/2"
                 style={{
                   width: 220 + 18,
                   height: 440 + 18,

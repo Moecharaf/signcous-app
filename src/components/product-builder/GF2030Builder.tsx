@@ -553,7 +553,7 @@ export default function GF2030Builder({ productId = 138 }: GF2030BuilderProps) {
                 {pricing ? (
                   <>
                     <div
-                      className="absolute border border-dashed border-zinc-400/70"
+                      className="absolute pointer-events-none"
                       style={{ width: previewWidth + 18, height: previewHeight + 18 }}
                     >
                       <div className="absolute -top-7 left-1/2 -translate-x-1/2 text-xs font-semibold text-zinc-500">

@@ -1243,20 +1243,6 @@ export default function VinylBannerBuilder({
           </div>
 
           <div
-            className="absolute left-1/2 top-1/2 border border-dashed border-zinc-400/70"
-            style={{
-              width: artWidth + 18,
-              height: artHeight + 18,
-              transform: `translate(calc(-50% + ${artPos.x}px), calc(-50% + ${artPos.y}px))`,
-            }}
-          >
-            <div className="pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 text-xs font-semibold text-zinc-500">{widthFeetInchesLabel}</div>
-            <div className="pointer-events-none absolute -bottom-7 left-1/2 -translate-x-1/2 text-xs font-semibold text-zinc-500">{widthFeetInchesLabel}</div>
-            <div className="pointer-events-none absolute -left-9 top-1/2 -translate-y-1/2 -rotate-90 text-xs font-semibold text-zinc-500">{heightFeetInchesLabel}</div>
-            <div className="pointer-events-none absolute -right-9 top-1/2 -translate-y-1/2 rotate-90 text-xs font-semibold text-zinc-500">{heightFeetInchesLabel}</div>
-          </div>
-
-          <div
             className="absolute left-1/2 top-1/2 select-none cursor-default rounded-md border border-zinc-500 bg-white shadow"
             onPointerDown={undefined}
             style={{

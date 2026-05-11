@@ -410,7 +410,7 @@ export default function DryEraseBuilder({ productId = 0 }: DryEraseBuilderProps)
                   <>
                     {/* Dashed dimension border */}
                     <div
-                      className="absolute border border-dashed border-zinc-400/70"
+                      className="absolute pointer-events-none"
                       style={{ width: preview.width + 18, height: preview.height + 18 }}
                     >
                       <div className="absolute -top-7 left-1/2 -translate-x-1/2 text-xs font-semibold text-zinc-500">
