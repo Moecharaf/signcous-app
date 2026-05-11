@@ -247,10 +247,20 @@ function AcrylicCanvas({
               className="absolute border border-dashed border-zinc-400/70"
               style={{ width: previewWidth + 18, height: previewHeight + 18, borderRadius: borderRadius + 4 }}
             >
+              {/* Top width dimension */}
               <div className="absolute -top-7 left-1/2 -translate-x-1/2 text-xs font-semibold text-zinc-500">
                 {formatInches(width)}
               </div>
+              {/* Right height dimension */}
               <div className="absolute -right-9 top-1/2 -translate-y-1/2 rotate-90 text-xs font-semibold text-zinc-500">
+                {formatInches(height)}
+              </div>
+              {/* Bottom width dimension */}
+              <div className="absolute -bottom-7 left-1/2 -translate-x-1/2 text-xs font-semibold text-zinc-500">
+                {formatInches(width)}
+              </div>
+              {/* Left height dimension */}
+              <div className="absolute -left-9 top-1/2 -translate-y-1/2 -rotate-90 text-xs font-semibold text-zinc-500">
                 {formatInches(height)}
               </div>
             </div>

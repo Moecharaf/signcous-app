@@ -1259,7 +1259,30 @@ export default function VinylBannerBuilder({
                 <div className="pointer-events-none absolute -top-4 left-1/2 -translate-x-1/2 text-[11px] text-zinc-500">
                   {widthFeetInchesLabel}
                 </div>
+                <div className="pointer-events-none absolute -bottom-4 left-1/2 -translate-x-1/2 text-[11px] text-zinc-500">
+                  {widthFeetInchesLabel}
+                </div>
+                <div className="pointer-events-none absolute -left-7 top-1/2 -translate-y-1/2 -rotate-90 text-[11px] text-zinc-500">
+                  {heightFeetInchesLabel}
+                </div>
                 <div className="pointer-events-none absolute -right-7 top-1/2 -translate-y-1/2 rotate-90 text-[11px] text-zinc-500">
+                  {heightFeetInchesLabel}
+                </div>
+              </>
+            )}
+
+            {!isMeshProduct && !isEconomicalStandProduct && (
+              <>
+                <div className="pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 text-[11px] font-semibold text-zinc-500">
+                  {widthFeetInchesLabel}
+                </div>
+                <div className="pointer-events-none absolute -bottom-7 left-1/2 -translate-x-1/2 text-[11px] font-semibold text-zinc-500">
+                  {widthFeetInchesLabel}
+                </div>
+                <div className="pointer-events-none absolute -left-9 top-1/2 -translate-y-1/2 -rotate-90 text-[11px] font-semibold text-zinc-500">
+                  {heightFeetInchesLabel}
+                </div>
+                <div className="pointer-events-none absolute -right-9 top-1/2 -translate-y-1/2 rotate-90 text-[11px] font-semibold text-zinc-500">
                   {heightFeetInchesLabel}
                 </div>
               </>
@@ -1278,6 +1301,26 @@ export default function VinylBannerBuilder({
                     <span>{widthLabelInches}</span>
                     <span className={`${isMobileViewport ? "w-8" : "w-12"} h-px bg-zinc-400`} />
                   </div>
+                </div>
+                <div
+                  className={`pointer-events-none absolute left-1/2 flex -translate-x-1/2 flex-col items-center text-[11px] font-semibold text-zinc-700 ${
+                    isMobileViewport ? "bottom-2" : "-bottom-11"
+                  }`}
+                >
+                  <div className="flex items-center gap-2 text-zinc-700">
+                    <span className={`${isMobileViewport ? "w-8" : "w-12"} h-px bg-zinc-400`} />
+                    <span>{widthLabelInches}</span>
+                    <span className={`${isMobileViewport ? "w-8" : "w-12"} h-px bg-zinc-400`} />
+                  </div>
+                </div>
+                <div
+                  className={`pointer-events-none absolute top-1/2 flex -translate-y-1/2 flex-col items-center text-[11px] font-semibold text-zinc-700 ${
+                    isMobileViewport ? "left-2" : "-left-14"
+                  }`}
+                >
+                  <span className={`${isMobileViewport ? "h-10" : "h-16"} w-px bg-zinc-400`} />
+                  <span className="my-2 rotate-90">{heightLabelInches}</span>
+                  <span className={`${isMobileViewport ? "h-10" : "h-16"} w-px bg-zinc-400`} />
                 </div>
                 <div
                   className={`pointer-events-none absolute top-1/2 flex -translate-y-1/2 flex-col items-center text-[11px] font-semibold text-zinc-700 ${

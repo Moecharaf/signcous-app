@@ -546,6 +546,12 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
                       <div className="absolute -top-7 left-1/2 -translate-x-1/2 text-xs font-semibold text-zinc-500">
                         {formatInches(pricing.widthIn)}
                       </div>
+                      <div className="absolute -bottom-7 left-1/2 -translate-x-1/2 text-xs font-semibold text-zinc-500">
+                        {formatInches(pricing.widthIn)}
+                      </div>
+                      <div className="absolute -left-9 top-1/2 -translate-y-1/2 -rotate-90 text-xs font-semibold text-zinc-500">
+                        {formatInches(pricing.heightIn)}
+                      </div>
                       <div className="absolute -right-9 top-1/2 -translate-y-1/2 rotate-90 text-xs font-semibold text-zinc-500">
                         {formatInches(pricing.heightIn)}
                       </div>
