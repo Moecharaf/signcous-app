@@ -688,10 +688,10 @@ export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
               section
               productName="ACRYLIC"
               detail="Premium rigid signage builder"
-              totalPrice={formatCurrency(pricing.grandTotal)}
+              totalPrice={formatCurrency(pricing?.grandTotal ?? 0)}
               middleRows={[
-                { label: "Area", value: `${pricing.area.toFixed(2)} sq.in` },
-                { label: "Per Item", value: formatCurrency(pricing.perItemTotal) },
+                { label: "Area", value: `${(pricing?.area ?? 0).toFixed(2)} sq.in` },
+                { label: "Per Item", value: formatCurrency(pricing?.perItemTotal ?? 0) },
                 { label: "Base Rate", value: `$${ACRYLIC_BASE_RATE}/sq.in` },
               ]}
               accentClassName="text-sky-400"
