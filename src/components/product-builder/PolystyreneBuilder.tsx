@@ -3,6 +3,7 @@
 import { useMemo, useRef, useState } from "react";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
 import Button from "@/components/ui/Button";
+import RigidPricingHeader from "@/components/product-builder/RigidPricingHeader";
 import { useCart } from "@/context/CartContext";
 import {
   POLYSTYRENE_SHEET,
@@ -131,7 +132,9 @@ export default function PolystyreneBuilder({
         return;
       }
       let blobUrl: string | null = null;
-      if (file.type.startsWith("image/")) blobUrl = URL.createObjectURL(file);
+      if (file.type.startsWith("image/")) {
+        blobUrl = URL.createObjectURL(file);
+      }
       setBlockUploads((prev) => ({
         ...prev,
         [blockIndex]: { fileUrl: data.fileUrl!, fileName: data.originalName ?? file.name, blobUrl },
@@ -340,11 +343,17 @@ export default function PolystyreneBuilder({
         <div className="grid gap-3">
           {/* Sheet visualizer */}
           <section className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
-            <div className="border-b border-zinc-200 px-4 py-3">
-              <div className="text-sm font-medium text-zinc-700">
-                Sheet #1 / {POLYSTYRENE_SHEET.width}&quot; × {POLYSTYRENE_SHEET.height}&quot; / Front Side — {sheetLayout.count} signs per sheet
-              </div>
-            </div>
+            <RigidPricingHeader
+              section
+              productName={productName}
+              detail="Rigid sheet-layout builder"
+              totalPrice={formatPrice(pricing.totalPrice)}
+              middleRows={[
+                { label: "Price / Sheet", value: formatPrice(pricing.totalPrice / Math.max(pricing.sheetsRequired, 1)) },
+                { label: "Effective / Sign", value: formatPrice(pricing.totalPrice / Math.max(quantity, 1)) },
+                { label: "Sheets Needed", value: String(pricing.sheetsRequired) },
+              ]}
+            />
 
             <div
               className="relative h-[calc(100vh-290px)] min-h-[560px] overflow-hidden rounded-b-2xl bg-[#fafaf9]"
@@ -354,21 +363,6 @@ export default function PolystyreneBuilder({
                 backgroundSize: "26px 26px",
               }}
             >
-              <div className="absolute right-4 top-4 z-20 max-w-[220px] rounded-lg border border-zinc-200 bg-zinc-50/95 px-3 py-2 shadow-sm backdrop-blur">
-                <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">Quick Rate Reference</div>
-                <div className="space-y-1 text-[11px] leading-5 text-zinc-600">
-                  <div className="flex items-center justify-between gap-3"><span>Price / Sheet</span><span className="font-semibold text-zinc-800">{formatPrice(pricing.totalPrice / Math.max(pricing.sheetsRequired, 1))}</span></div>
-                  <div className="flex items-center justify-between gap-3"><span>Effective / Sign</span><span className="font-semibold text-zinc-800">{formatPrice(pricing.totalPrice / Math.max(quantity, 1))}</span></div>
-                  <div className="flex items-center justify-between gap-3"><span>Sheets Needed</span><span className="font-semibold text-zinc-800">{pricing.sheetsRequired}</span></div>
-                </div>
-              </div>
-
-              <div className="absolute right-4 top-[132px] z-20 rounded-lg border border-zinc-800 bg-zinc-900/95 px-4 py-2 text-right shadow-sm backdrop-blur">
-                <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--brand-primary)]">Live Total</div>
-                <div className="text-2xl font-semibold text-white">{formatPrice(pricing.totalPrice)}</div>
-                <div className="text-[11px] text-zinc-300">{quantity} sign{quantity !== 1 ? "s" : ""} · {pricing.sheetsRequired} sheet{pricing.sheetsRequired !== 1 ? "s" : ""}</div>
-              </div>
-
               <div
                 className="pointer-events-none absolute left-1/2 top-1/2"
                 style={{ width: 220 + 18, height: 440 + 18, transform: "translate(-50%, -50%)" }}

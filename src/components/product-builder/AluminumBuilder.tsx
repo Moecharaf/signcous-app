@@ -3,6 +3,7 @@
 import { useMemo, useRef, useState } from "react";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
 import Button from "@/components/ui/Button";
+import RigidPricingHeader from "@/components/product-builder/RigidPricingHeader";
 import { useCart } from "@/context/CartContext";
 import {
   ALUMINUM_SHEET,
@@ -506,11 +507,18 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
           {/* ══ SHEET MODE ══════════════════════════════════════════════════════ */}
           {pricingMode === "sheet" && sheetLayout && (
             <section className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
-              <div className="border-b border-zinc-200 px-4 py-3">
-                <div className="text-sm font-medium text-zinc-700">
-                  Sheet #1 / {ALUMINUM_SHEET.width}&quot; × {ALUMINUM_SHEET.height}&quot; / Front Side — {sheetLayout.count} signs per sheet
-                </div>
-              </div>
+              <RigidPricingHeader
+                section
+                productName={productName}
+                detail="Rigid sheet-layout builder"
+                totalPrice={formatPrice(pricing.totalPrice)}
+                accentClassName="text-[var(--brand-primary)]"
+                middleRows={[
+                  { label: "Price / Sheet", value: formatPrice(pricing.sheetPrice) },
+                  { label: "Effective / Sign", value: formatPrice(pricing.totalPrice / Math.max(quantity, 1)) },
+                  { label: "Sheets Needed", value: String(pricing.sheetsRequired) },
+                ]}
+              />
 
               <div
                 className="relative h-[calc(100vh-320px)] min-h-[520px] overflow-hidden rounded-b-2xl bg-[#fafaf9]"
@@ -520,31 +528,6 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
                   backgroundSize: "26px 26px",
                 }}
               >
-                <div className="absolute right-4 top-4 z-20 max-w-[230px] rounded-lg border border-zinc-200 bg-zinc-50/95 px-3 py-2 text-left shadow-sm backdrop-blur">
-                  <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">Quick Rate Reference</div>
-                  <div className="space-y-1 text-[11px] leading-5 text-zinc-600">
-                    {pricingMode === "sheet" ? (
-                      <>
-                        <div className="flex items-center justify-between gap-3"><span>Price / Sheet</span><span className="font-semibold text-zinc-800">{formatPrice(pricing.sheetPrice)}</span></div>
-                        <div className="flex items-center justify-between gap-3"><span>Effective / Sign</span><span className="font-semibold text-zinc-800">{formatPrice(pricing.totalPrice / Math.max(quantity, 1))}</span></div>
-                        <div className="flex items-center justify-between gap-3"><span>Sheets Needed</span><span className="font-semibold text-zinc-800">{pricing.sheetsRequired}</span></div>
-                      </>
-                    ) : (
-                      <>
-                        <div className="flex items-center justify-between gap-3"><span>Rate / sq in</span><span className="font-semibold text-zinc-800">${pricing.ratePerSqIn}</span></div>
-                        <div className="flex items-center justify-between gap-3"><span>Price / Sign</span><span className="font-semibold text-zinc-800">{formatPrice(pricing.pricePerSign)}</span></div>
-                        <div className="flex items-center justify-between gap-3"><span>Minimum</span><span className="font-semibold text-zinc-800">{formatPrice(pricing.minPrice)}</span></div>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                <div className="absolute right-4 top-[132px] z-20 rounded-lg border border-zinc-800 bg-zinc-900/95 px-4 py-2 text-right shadow-sm backdrop-blur">
-                  <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--brand-primary)]">Live Total</div>
-                  <div className="text-2xl font-semibold text-white">{formatPrice(pricing.totalPrice)}</div>
-                  <div className="text-[11px] text-zinc-300">{quantity} sign{quantity !== 1 ? "s" : ""} · {pricing.sheetsRequired} sheet{pricing.sheetsRequired !== 1 ? "s" : ""}</div>
-                </div>
-
                 <div
                   className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 border border-zinc-500 bg-[#f8f8f6]"
                   style={{ width: 220, height: 440 }}
@@ -620,6 +603,19 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
                 <div className="text-sm font-medium text-zinc-700">Custom Dimensions — Sq.In Pricing</div>
               </div>
 
+              <RigidPricingHeader
+                section
+                productName={productName}
+                detail="Rigid square-inch pricing builder"
+                totalPrice={formatPrice(pricing.totalPrice)}
+                accentClassName="text-[var(--brand-primary)]"
+                middleRows={[
+                  { label: "Rate / Sq In", value: `$${pricing.ratePerSqIn}` },
+                  { label: "Price / Sign", value: formatPrice(pricing.pricePerSign) },
+                  { label: "Minimum", value: formatPrice(pricing.minPrice) },
+                ]}
+              />
+
               {/* Dimension preview */}
               <div
                 className="relative flex h-64 items-center justify-center overflow-hidden bg-[#fafaf9]"
@@ -629,12 +625,6 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
                   backgroundSize: "26px 26px",
                 }}
               >
-                <div className="absolute right-4 top-4 z-20 rounded-lg border border-zinc-800 bg-zinc-900/95 px-4 py-2 text-right shadow-sm backdrop-blur">
-                  <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--brand-primary)]">Live Total</div>
-                  <div className="text-2xl font-semibold text-white">{formatPrice(pricing.totalPrice)}</div>
-                  <div className="text-[11px] text-zinc-300">{quantity} sign{quantity !== 1 ? "s" : ""} · {pricing.sqInches} sq.in</div>
-                </div>
-
                 {sqinUpload?.blobUrl ? (
                   <div className="relative flex h-44 w-44 items-center justify-center overflow-hidden rounded border-2 border-dashed border-zinc-400 bg-white">
                     <img src={sqinUpload.blobUrl} alt="preview" className="h-full w-full object-contain" />

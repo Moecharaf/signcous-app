@@ -1,8 +1,9 @@
-"use client";
+﻿"use client";
 
 import { useMemo, useRef, useState } from "react";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
 import Button from "@/components/ui/Button";
+import RigidPricingHeader from "@/components/product-builder/RigidPricingHeader";
 import { useCart } from "@/context/CartContext";
 import {
   JBOND_SHEET,
@@ -39,10 +40,10 @@ function formatPrice(v: number) {
 export default function JBondBuilder({ productId = 0, productName = "JBOND" }: JBondBuilderProps) {
   const cart = useCart();
 
-  // ── mode (sheet vs sq.in) ──
+  // ΓöÇΓöÇ mode (sheet vs sq.in) ΓöÇΓöÇ
   const [pricingMode, setPricingMode] = useState<JBondPricingMode>("sheet");
 
-  // ── sheet mode state ──
+  // ΓöÇΓöÇ sheet mode state ΓöÇΓöÇ
   const [sizeId, setSizeId] = useState(JBOND_SIZE_OPTIONS[0].id);
   const [imageCount, setImageCount] = useState(1);
   const [blockUploads, setBlockUploads] = useState<Record<number, BlockUpload>>({});
@@ -50,7 +51,7 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
   const [blockUploadErrors, setBlockUploadErrors] = useState<Record<number, string>>({});
   const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  // ── sqin mode state ──
+  // ΓöÇΓöÇ sqin mode state ΓöÇΓöÇ
   const [customWidth, setCustomWidth] = useState(24);
   const [customHeight, setCustomHeight] = useState(18);
   const [sqinUpload, setSqinUpload] = useState<BlockUpload | null>(null);
@@ -58,7 +59,7 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
   const [sqinUploadError, setSqinUploadError] = useState<string | null>(null);
   const sqinFileRef = useRef<HTMLInputElement | null>(null);
 
-  // ── shared state ──
+  // ΓöÇΓöÇ shared state ΓöÇΓöÇ
   const [material, setMaterial] = useState<JBondMaterial>("3mm");
   const [printMode, setPrintMode] = useState<JBondPrintMode>("single");
   const [quantity, setQuantity] = useState(1);
@@ -67,7 +68,7 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
   const [rush, setRush] = useState(false);
   const [added, setAdded] = useState(false);
 
-  // ── derived ──
+  // ΓöÇΓöÇ derived ΓöÇΓöÇ
   const activeSize = useMemo(
     () => JBOND_SIZE_OPTIONS.find(s => s.id === sizeId) ?? JBOND_SIZE_OPTIONS[0],
     [sizeId]
@@ -106,7 +107,7 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
   const maxImages = sheetLayout?.count ?? 1;
   const safeImageCount = pricingMode === "sheet" ? Math.min(imageCount, maxImages) : 1;
 
-  // ── artwork upload helpers ──
+  // ΓöÇΓöÇ artwork upload helpers ΓöÇΓöÇ
   async function uploadFile(file: File): Promise<{ fileUrl: string; fileName: string; blobUrl: string | null } | string> {
     const formData = new FormData();
     formData.append("file", file);
@@ -180,7 +181,7 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
     setSqinUpload(null);
   }
 
-  // ── add to cart ──
+  // ΓöÇΓöÇ add to cart ΓöÇΓöÇ
   function addToCart() {
     const qty = Math.max(1, Math.floor(quantity));
     const materialLabel = `JBond ${material} ${printMode === "single" ? "Single-Sided" : "Double-Sided"}`;
@@ -280,7 +281,7 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
                         {upload ? (
                           <div className="flex items-center gap-1">
                             <span className="max-w-[100px] truncate text-[10px] text-emerald-700">{upload.fileName}</span>
-                            <button type="button" onClick={() => removeBlock(i)} className="rounded px-1 text-[10px] text-zinc-400 hover:text-rose-500">✕</button>
+                            <button type="button" onClick={() => removeBlock(i)} className="rounded px-1 text-[10px] text-zinc-400 hover:text-rose-500">Γ£ò</button>
                           </div>
                         ) : (
                           <button
@@ -294,7 +295,7 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
                         )}
                       </div>
                       {upload?.blobUrl && <img src={upload.blobUrl} alt={upload.fileName} className="mt-2 h-16 w-full rounded object-contain" />}
-                      {upload && !upload.blobUrl && <div className="mt-1 rounded bg-emerald-50 px-2 py-1 text-[10px] text-emerald-700">✓ {upload.fileName}</div>}
+                      {upload && !upload.blobUrl && <div className="mt-1 rounded bg-emerald-50 px-2 py-1 text-[10px] text-emerald-700">Γ£ô {upload.fileName}</div>}
                       {error && <div className="mt-1 rounded bg-rose-50 px-2 py-1 text-[10px] text-rose-700">{error}</div>}
                     </div>
                   );
@@ -391,8 +392,8 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
               {sqinUpload ? (
                 <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="truncate text-xs text-emerald-700">✓ {sqinUpload.fileName}</span>
-                    <button type="button" onClick={removeSqin} className="text-[10px] text-zinc-400 hover:text-rose-500">✕ Remove</button>
+                    <span className="truncate text-xs text-emerald-700">Γ£ô {sqinUpload.fileName}</span>
+                    <button type="button" onClick={removeSqin} className="text-[10px] text-zinc-400 hover:text-rose-500">Γ£ò Remove</button>
                   </div>
                   {sqinUpload.blobUrl && <img src={sqinUpload.blobUrl} alt={sqinUpload.fileName} className="mt-2 h-20 w-full rounded object-contain" />}
                 </div>
@@ -469,7 +470,7 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
         },
       ];
 
-  // ─── render ─────────────────────────────────────────────────────────────────
+  // ΓöÇΓöÇΓöÇ render ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
   return (
     <div className="min-h-[calc(100vh-96px)] bg-[linear-gradient(145deg,#f0f4f8_0%,#e8edf2_55%,#dde4ec_100%)] text-zinc-800">
       <div className="w-full px-3 py-3 md:px-4">
@@ -503,14 +504,21 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
 
         <div className="grid gap-3">
 
-          {/* ══ SHEET MODE ══════════════════════════════════════════════════════ */}
+          {/* Sheet mode */}
           {pricingMode === "sheet" && sheetLayout && (
             <section className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
-              <div className="border-b border-zinc-200 px-4 py-3">
-                <div className="text-sm font-medium text-zinc-700">
-                  Sheet #1 / {JBOND_SHEET.width}&quot; × {JBOND_SHEET.height}&quot; / Front Side — {sheetLayout.count} signs per sheet
-                </div>
-              </div>
+              <RigidPricingHeader
+                section
+                productName={productName}
+                detail="Rigid sheet-layout builder"
+                totalPrice={formatPrice(pricing.totalPrice)}
+                accentClassName="text-sky-400"
+                middleRows={[
+                  { label: "Price / Sheet", value: formatPrice(pricing.totalPrice / Math.max(pricing.sheetsRequired, 1)) },
+                  { label: "Effective / Sign", value: formatPrice(pricing.totalPrice / Math.max(quantity, 1)) },
+                  { label: "Sheets Needed", value: String(pricing.sheetsRequired) },
+                ]}
+              />
 
               <div
                 className="relative h-[calc(100vh-320px)] min-h-[520px] overflow-hidden rounded-b-2xl bg-[#fafaf9]"
@@ -520,21 +528,6 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
                   backgroundSize: "26px 26px",
                 }}
               >
-                <div className="absolute right-4 top-4 z-20 max-w-[220px] rounded-lg border border-zinc-200 bg-zinc-50/95 px-3 py-2 shadow-sm backdrop-blur">
-                  <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">Quick Rate Reference</div>
-                  <div className="space-y-1 text-[11px] leading-5 text-zinc-600">
-                    <div className="flex items-center justify-between gap-3"><span>Price / Sheet</span><span className="font-semibold text-zinc-800">{formatPrice(pricing.totalPrice / Math.max(pricing.sheetsRequired, 1))}</span></div>
-                    <div className="flex items-center justify-between gap-3"><span>Effective / Sign</span><span className="font-semibold text-zinc-800">{formatPrice(pricing.totalPrice / Math.max(quantity, 1))}</span></div>
-                    <div className="flex items-center justify-between gap-3"><span>Sheets Needed</span><span className="font-semibold text-zinc-800">{pricing.sheetsRequired}</span></div>
-                  </div>
-                </div>
-
-                <div className="absolute right-4 top-[132px] z-20 rounded-lg border border-zinc-800 bg-zinc-900/95 px-4 py-2 text-right shadow-sm backdrop-blur">
-                  <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-sky-400">Live Total</div>
-                  <div className="text-2xl font-semibold text-white">{formatPrice(pricing.totalPrice)}</div>
-                  <div className="text-[11px] text-zinc-300">{quantity} sign{quantity !== 1 ? "s" : ""} · {pricing.sheetsRequired} sheet{pricing.sheetsRequired !== 1 ? "s" : ""}</div>
-                </div>
-
                 <div
                   className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 border border-zinc-500 bg-[#f8f8f6]"
                   style={{ width: 220, height: 440 }}
@@ -566,7 +559,7 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
                         ) : slotIndex !== null ? (
                           <div className={`flex h-full w-full items-center justify-center ${colorClass} opacity-30`}>
                             <span className="text-[7px] font-bold text-zinc-700">
-                              {uploadingBlock === slotIndex ? "…" : slotIndex + 1}
+                              {uploadingBlock === slotIndex ? "..." : slotIndex + 1}
                             </span>
                           </div>
                         ) : null}
@@ -603,12 +596,25 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
             </section>
           )}
 
-          {/* ══ SQ.IN MODE ══════════════════════════════════════════════════════ */}
+          {/* Sq.in mode */}
           {pricingMode === "sqin" && (
             <section className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
               <div className="border-b border-zinc-200 px-4 py-3">
-                <div className="text-sm font-medium text-zinc-700">Custom Dimensions — Sq.In Pricing</div>
+                <div className="text-sm font-medium text-zinc-700">Custom Dimensions - Sq.In Pricing</div>
               </div>
+
+              <RigidPricingHeader
+                section
+                productName={productName}
+                detail="Rigid square-inch pricing builder"
+                totalPrice={formatPrice(pricing.totalPrice)}
+                accentClassName="text-sky-400"
+                middleRows={[
+                  { label: "Price / Sign", value: formatPrice(pricing.pricePerSign) },
+                  { label: "Area", value: `${pricing.sqInches} sq.in` },
+                  { label: "Rate / Sq In", value: `$${pricing.ratePerSqIn}` },
+                ]}
+              />
 
               <div
                 className="relative flex h-64 items-center justify-center overflow-hidden bg-[#fafaf9]"
@@ -618,12 +624,6 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
                   backgroundSize: "26px 26px",
                 }}
               >
-                <div className="absolute right-4 top-4 z-20 rounded-lg border border-zinc-800 bg-zinc-900/95 px-4 py-2 text-right shadow-sm backdrop-blur">
-                  <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-sky-400">Live Total</div>
-                  <div className="text-2xl font-semibold text-white">{formatPrice(pricing.totalPrice)}</div>
-                  <div className="text-[11px] text-zinc-300">{quantity} sign{quantity !== 1 ? "s" : ""} · {pricing.sqInches} sq.in</div>
-                </div>
-
                 {sqinUpload?.blobUrl ? (
                   <div className="relative flex h-44 w-44 items-center justify-center overflow-hidden rounded border-2 border-dashed border-zinc-400 bg-white">
                     <img src={sqinUpload.blobUrl} alt="preview" className="h-full w-full object-contain" />
@@ -638,17 +638,17 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
                     </svg>
                     <span className="text-xs font-semibold">
-                      {sqinUploading ? "Uploading…" : `${customWidth}" × ${customHeight}" · Click to upload artwork`}
+                      {sqinUploading ? "Uploading..." : `${customWidth}" x ${customHeight}" - Click to upload artwork`}
                     </span>
                     {pricing.sqInches > 0 && (
-                      <span className="text-[10px] text-zinc-400">{pricing.sqInches} sq.in · {formatPrice(pricing.pricePerSign)}/sign</span>
+                      <span className="text-[10px] text-zinc-400">{pricing.sqInches} sq.in - {formatPrice(pricing.pricePerSign)}/sign</span>
                     )}
                   </button>
                 )}
                 {sqinUpload && (
                   <button type="button" onClick={removeSqin}
                     className="absolute right-3 top-3 rounded-full bg-white px-2 py-0.5 text-[10px] text-zinc-500 shadow hover:text-rose-500">
-                    ✕ Remove
+                    Remove
                   </button>
                 )}
                 {sqinUploadError && (
@@ -678,7 +678,7 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
             </section>
           )}
 
-          {/* ── Aside: breakdown + add-ons + artwork ─────────────────────────── */}
+          {/* ΓöÇΓöÇ Aside: breakdown + add-ons + artwork ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
           <aside className="space-y-3">
             {/* Pricing breakdown */}
             <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
@@ -692,7 +692,7 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
                   </>
                 ) : (
                   <>
-                    <Row label="Dimensions" value={`${customWidth}" × ${customHeight}"`} />
+                    <Row label="Dimensions" value={`${customWidth}" ├ù ${customHeight}"`} />
                     <Row label="Sq. Inches" value={`${pricing.sqInches} sq.in`} />
                     <Row label="Rate" value={`$${pricing.ratePerSqIn}/sq.in (min $${pricing.minPrice})`} />
                     <Row label="Price / Sign" value={formatPrice(pricing.pricePerSign)} />
@@ -715,7 +715,7 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
   );
 }
 
-// ── Helper components ─────────────────────────────────────────────────────────
+// ΓöÇΓöÇ Helper components ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 
 function Row({ label, value, strong, className }: { label: string; value: string; strong?: boolean; className?: string }) {
   return (

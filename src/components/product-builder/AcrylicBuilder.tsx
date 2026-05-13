@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import {
   useEffect,
   useMemo,
@@ -11,6 +10,7 @@ import {
 } from "react";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
 import Button from "@/components/ui/Button";
+import RigidPricingHeader from "@/components/product-builder/RigidPricingHeader";
 import { useCart } from "@/context/CartContext";
 import {
   ACRYLIC_BASE_RATE,
@@ -684,24 +684,20 @@ export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
               )}
             </div>
 
+            <RigidPricingHeader
+              section
+              productName="ACRYLIC"
+              detail="Premium rigid signage builder"
+              totalPrice={formatCurrency(pricing.grandTotal)}
+              middleRows={[
+                { label: "Area", value: `${pricing.area.toFixed(2)} sq.in` },
+                { label: "Per Item", value: formatCurrency(pricing.perItemTotal) },
+                { label: "Base Rate", value: `$${ACRYLIC_BASE_RATE}/sq.in` },
+              ]}
+              accentClassName="text-sky-400"
+            />
+
             <div className="relative">
-              <div className="absolute right-4 top-4 z-20 max-w-[220px] rounded-lg border border-zinc-200 bg-zinc-50/95 px-3 py-2 text-left shadow-sm backdrop-blur">
-                <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">Quick Rate Reference</div>
-                <div className="space-y-1 text-[11px] leading-5 text-zinc-600">
-                  <div className="flex items-center justify-between gap-3"><span>Base / sq in</span><span className="font-semibold text-zinc-800">{formatCurrency(ACRYLIC_BASE_RATE)}</span></div>
-                  <div className="flex items-center justify-between gap-3"><span>Effective / sq in</span><span className="font-semibold text-zinc-800">{pricing ? formatCurrency(pricing.grandTotal / Math.max(pricing.area, 1)) : formatCurrency(0)}</span></div>
-                  <div className="flex items-center justify-between gap-3"><span>Minimum adj.</span><span className="font-semibold text-zinc-800">{formatCharge(minimumAdjustment)}</span></div>
-                </div>
-              </div>
-
-              <div className="absolute right-4 top-[132px] z-20 rounded-lg border border-zinc-800 bg-zinc-900/95 px-4 py-2 text-right shadow-sm backdrop-blur">
-                <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--brand-primary)]">Live Total</div>
-                <div className="text-2xl font-semibold text-white">{pricing ? formatCurrency(pricing.grandTotal) : formatCurrency(0)}</div>
-                <div className="text-[11px] text-zinc-300">
-                  {pricing ? `${pricing.area.toFixed(1)} sq in · ${safeQuantity} unit${safeQuantity !== 1 ? "s" : ""}` : "Set dimensions to calculate"}
-                </div>
-              </div>
-
               <AcrylicCanvas
                 width={width}
                 height={height}
