@@ -338,22 +338,6 @@ export default function GF830Builder({ productId = 0 }: GF830BuilderProps) {
       <div className="w-full px-3 py-3 md:px-4">
         <div className="grid gap-4">
           <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
-            <div className="border-b border-zinc-200 px-4 py-3">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="text-sm font-medium text-zinc-700">
-                  GF830 AutoMark · {pricing ? `${formatInches(pricing.widthIn)} x ${formatInches(pricing.heightIn)}` : "Set dimensions"}
-                </div>
-                <div className="text-xs font-medium text-zinc-500">
-                  {selectedLaminate.label} · {splitDirection} split · {contourCut ? "Contour cut" : "Standard cut"}
-                </div>
-              </div>
-              {(widthError || heightError) && (
-                <div className="mt-2 inline-flex rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-semibold text-red-600">
-                  {widthError || heightError}
-                </div>
-              )}
-            </div>
-
             <RigidPricingHeader
               section
               productName="GF830 AUTOMARK"
@@ -601,3 +585,4 @@ export default function GF830Builder({ productId = 0 }: GF830BuilderProps) {
     </div>
   );
 }
+

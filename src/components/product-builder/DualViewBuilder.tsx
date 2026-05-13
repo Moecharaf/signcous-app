@@ -350,45 +350,6 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
       <div className="w-full px-3 py-3 md:px-4">
         <div className="grid gap-4">
           <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
-            <div className="border-b border-zinc-200 px-4 py-3">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="text-sm font-medium text-zinc-700">
-                  Dual View ·{" "}
-                  {pricing
-                    ? `${formatInches(pricing.widthIn)} x ${formatInches(pricing.heightIn)}`
-                    : "Set dimensions"}{" "}
-                  · {side === "double" ? "Double Sided" : "Single Sided"}
-                </div>
-                <div className="text-xs font-medium text-zinc-500">
-                  {contourCut ? "Contour cut" : "Standard cut"}
-                </div>
-              </div>
-              {(widthError || heightError) && (
-                <div className="mt-2 inline-flex rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-semibold text-red-600">
-                  {widthError || heightError}
-                </div>
-              )}
-              {rotationCheck?.needsRotation && !widthError && !heightError && (
-                <div className="mt-2 flex items-center gap-2">
-                  <div className="inline-flex rounded-full border border-violet-200 bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-700">
-                    Rotate dimensions to fit double-sided constraints
-                  </div>
-                  <button
-                    type="button"
-                    onClick={rotateDimensions}
-                    className="rounded-full border border-violet-300 bg-violet-100 px-3 py-1 text-xs font-semibold text-violet-800 hover:bg-violet-200"
-                  >
-                    ↺ Rotate to Fit
-                  </button>
-                </div>
-              )}
-              {pricing && pricing.panelCount > 1 && (
-                <div className="mt-2 inline-flex rounded-full border border-violet-200 bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-700">
-                  ⚠ Width exceeds 52" — {pricing.panelCount} panels required (+{formatCurrency(pricing.panelCost)})
-                </div>
-              )}
-            </div>
-
             <RigidPricingHeader
               section
               productName="DUAL VIEW"
@@ -671,3 +632,4 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
     </div>
   );
 }
+

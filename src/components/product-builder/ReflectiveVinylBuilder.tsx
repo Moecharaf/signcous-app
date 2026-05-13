@@ -270,24 +270,6 @@ export default function ReflectiveVinylBuilder({ productId = 0 }: ReflectiveViny
         <div className="grid gap-4">
           {/* Preview canvas + controls */}
           <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
-            <div className="border-b border-zinc-200 px-4 py-3">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="text-sm font-medium text-zinc-700">
-                  Reflective Vinyl ·{" "}
-                  {isValid && pricing ? `${widthIn}" × ${heightIn}" (${pricing.widthFt} ft × ${pricing.heightFt} ft)` : "Set dimensions"}
-                </div>
-                <div className="text-xs font-medium text-zinc-500">
-                  {contourCut ? "Contour cut · " : ""}{rush ? "Rush · " : ""}
-                  Split: {splitDirection} · {splitCount} cut{splitCount !== 1 ? "s" : ""}
-                </div>
-              </div>
-              {(widthError || heightError) && (
-                <div className="mt-2 inline-flex rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-semibold text-red-600">
-                  {widthError || heightError}
-                </div>
-              )}
-            </div>
-
             <RigidPricingHeader
               section
               productName="REFLECTIVE VINYL"
@@ -568,3 +550,4 @@ export default function ReflectiveVinylBuilder({ productId = 0 }: ReflectiveViny
     </div>
   );
 }
+

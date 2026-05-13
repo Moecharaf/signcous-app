@@ -489,27 +489,6 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
       <div className="w-full px-3 py-3 md:px-4">
         <div className="grid gap-4">
           <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
-            <div className="border-b border-zinc-200 px-4 py-3">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="text-sm font-medium text-zinc-700">
-                  3M IJ-35C · {pricing ? `${formatInches(pricing.widthIn)} x ${formatInches(pricing.heightIn)}` : "Set dimensions"}
-                </div>
-                <div className="text-xs font-medium text-zinc-500">
-                  {selectedLaminate.label} · {splitDirection} split · {contourCut ? "Contour cut" : "Standard cut"}
-                </div>
-              </div>
-              {(widthError || heightError) && (
-                <div className="mt-2 inline-flex rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-semibold text-red-600">
-                  {widthError || heightError}
-                </div>
-              )}
-              {showPanelOverlapWarning && !widthError && !heightError && (
-                <div className="mt-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-900">
-                  This design will be printed in panels with overlap.
-                </div>
-              )}
-            </div>
-
             <RigidPricingHeader
               section
               productName="3M IJ-35C"
@@ -661,3 +640,4 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
     </div>
   );
 }
+

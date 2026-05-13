@@ -325,31 +325,6 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
       <div className="w-full px-3 py-3 md:px-4">
         <div className="grid gap-4">
           <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
-            <div className="border-b border-zinc-200 px-4 py-3">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="text-sm font-medium text-zinc-700">
-                  One Way Window ·{" "}
-                  {pricing
-                    ? `${formatInches(pricing.widthIn)} x ${formatInches(pricing.heightIn)}`
-                    : "Set dimensions"}
-                </div>
-                <div className="text-xs font-medium text-zinc-500">
-                  {selectedMaterial.label} · {laminate ? "Laminated" : "No Laminate"} ·{" "}
-                  {contourCut ? "Contour cut" : "Standard cut"}
-                </div>
-              </div>
-              {(widthError || heightError) && (
-                <div className="mt-2 inline-flex rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-semibold text-red-600">
-                  {widthError || heightError}
-                </div>
-              )}
-              {pricing && pricing.panelCount > 1 && (
-                <div className="mt-2 inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-                  ⚠ Width exceeds 50" — {pricing.panelCount} panels required (+{formatCurrency(pricing.panelCost)})
-                </div>
-              )}
-            </div>
-
             <RigidPricingHeader
               section
               productName="ONE WAY WINDOW"
@@ -606,3 +581,4 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
     </div>
   );
 }
+
