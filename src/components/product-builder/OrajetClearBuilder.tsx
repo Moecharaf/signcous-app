@@ -348,7 +348,7 @@ export default function OrajetClearBuilder({ productId = 0 }: OrajetClearBuilder
                 { label: "Per Item", value: pricing ? formatCurrency(pricing.grandTotal / Math.max(safeQuantity, 1)) : formatCurrency(0) },
                 { label: "Qty", value: String(safeQuantity) },
               ]}
-              accentClassName="text-sky-400"
+              accentClassName="text-[var(--brand-primary)]"
             />
 
             <div
@@ -392,10 +392,10 @@ export default function OrajetClearBuilder({ productId = 0 }: OrajetClearBuilder
                     </div>
 
                     <div
-                      className="relative overflow-hidden border border-sky-200 bg-white/80 shadow-[0_26px_70px_rgba(15,23,42,0.10)]"
+                      className="relative overflow-hidden border border-blue-200 bg-white/80 shadow-[0_26px_70px_rgba(15,23,42,0.10)]"
                       style={{ width: previewWidth, height: previewHeight }}
                     >
-                      <div className="absolute inset-0 bg-[rgba(240,249,255,0.6)]" />
+                      <div className="absolute inset-0 bg-[rgba(239,246,255,0.6)]" />
                       {uploadedImage ? (
                         <Image src={uploadedImage} alt="Uploaded Orajet Clear artwork preview" fill unoptimized className="object-contain" />
                       ) : (
@@ -416,7 +416,7 @@ export default function OrajetClearBuilder({ productId = 0 }: OrajetClearBuilder
                     </div>
                   </>
                 ) : (
-                  <div className="flex h-[250px] w-full max-w-[520px] flex-col items-center justify-center rounded-[28px] border border-dashed border-sky-300 bg-white/80 px-8 text-center shadow-inner">
+                  <div className="flex h-[250px] w-full max-w-[520px] flex-col items-center justify-center rounded-[28px] border border-dashed border-blue-300 bg-white/80 px-8 text-center shadow-inner">
                     <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-400">Preview Ready</div>
                     <div className="mt-3 text-xl font-semibold text-zinc-800">Set your dimensions to generate a scaled panel mockup</div>
                     <div className="mt-3 max-w-[30rem] text-sm leading-6 text-zinc-500">
@@ -434,10 +434,10 @@ export default function OrajetClearBuilder({ productId = 0 }: OrajetClearBuilder
                 { id: "units", title: "Units", value: unit === "inches" ? "Inches" : "Feet", width: 260, content: <select value={unit} onChange={(event) => setUnit(event.target.value as OrajetClearUnit)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"><option value="inches">Inches</option><option value="feet">Feet</option></select> },
                 { id: "laminate", title: "Laminate", value: selectedLaminate.label, width: 320, content: <select value={laminate} onChange={(event) => setLaminate(event.target.value as OrajetClearLaminate)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm">{ORAJET_CLEAR_LAMINATE_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select> },
                 { id: "split", title: "Split Direction", value: splitDirection === "auto" ? "Auto" : splitDirection.charAt(0).toUpperCase() + splitDirection.slice(1), width: 320, content: <select value={splitDirection} onChange={(event) => setSplitDirection(event.target.value as OrajetClearSplitDirection)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"><option value="auto">Auto</option><option value="vertical">Vertical</option><option value="horizontal">Horizontal</option></select> },
-                { id: "finish", title: "Contour / Rush", value: [contourCut ? "Contour" : "No contour", rush ? "Rush" : "Standard"].join(" / "), width: 320, content: <div className="grid grid-cols-2 gap-1"><button type="button" onClick={() => setContourCut((value) => !value)} className={`h-9 rounded border px-3 text-xs font-semibold transition ${contourCut ? "border-sky-300 bg-sky-50 text-sky-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Contour</button><button type="button" onClick={() => setRush((value) => !value)} className={`h-9 rounded border px-3 text-xs font-semibold transition ${rush ? "border-sky-300 bg-sky-50 text-sky-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Rush</button></div> },
+                { id: "finish", title: "Contour / Rush", value: [contourCut ? "Contour" : "No contour", rush ? "Rush" : "Standard"].join(" / "), width: 320, content: <div className="grid grid-cols-2 gap-1"><button type="button" onClick={() => setContourCut((value) => !value)} className={`h-9 rounded border px-3 text-xs font-semibold transition ${contourCut ? "border-blue-300 bg-blue-50 text-blue-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Contour</button><button type="button" onClick={() => setRush((value) => !value)} className={`h-9 rounded border px-3 text-xs font-semibold transition ${rush ? "border-blue-300 bg-blue-50 text-blue-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Rush</button></div> },
                 { id: "quantity", title: "Quantity", value: String(safeQuantity), width: 260, content: <input type="number" min={1} value={safeQuantity} onChange={(event) => setQuantity(Math.max(1, Math.floor(Number(event.target.value) || 1)))} className="h-9 w-full rounded border border-zinc-300 px-2 text-sm" /> },
               ] satisfies BuilderBottomToolbarPanel[]}
-              action={<Button className="h-10 w-full rounded bg-sky-500 text-xs font-semibold text-white hover:bg-sky-400" disabled={!isValid} onClick={addToCart}>{added ? "Added" : "Add"}</Button>}
+              action={<Button className="h-10 w-full rounded bg-[var(--brand-primary)] text-xs font-semibold text-white hover:bg-[var(--brand-primary-hover)]" disabled={!isValid} onClick={addToCart}>{added ? "Added" : "Add"}</Button>}
             />
           </div>
 
@@ -493,12 +493,12 @@ export default function OrajetClearBuilder({ productId = 0 }: OrajetClearBuilder
                     key={tier.range}
                     className={`rounded-xl border px-3 py-2 ${
                       tier.active
-                        ? "border-sky-200 bg-sky-50"
+                        ? "border-blue-200 bg-blue-50"
                         : "border-zinc-200 bg-zinc-50"
                     }`}
                   >
-                    <div className={`font-semibold ${tier.active ? "text-sky-800" : "text-zinc-800"}`}>{tier.range}</div>
-                    <div className={`text-xs ${tier.active ? "text-sky-600" : "text-zinc-600"}`}>{tier.rate}{tier.active ? " ← active" : ""}</div>
+                    <div className={`font-semibold ${tier.active ? "text-blue-800" : "text-zinc-800"}`}>{tier.range}</div>
+                    <div className={`text-xs ${tier.active ? "text-blue-600" : "text-zinc-600"}`}>{tier.rate}{tier.active ? " ← active" : ""}</div>
                   </div>
                 ))}
               </div>

@@ -101,7 +101,7 @@ function BreakdownRow({
           muted
             ? "text-zinc-400"
             : accent
-            ? "font-semibold text-violet-600"
+            ? "font-semibold text-[var(--brand-primary)]"
             : strong
             ? "font-semibold text-zinc-900"
             : "text-zinc-700"
@@ -131,8 +131,8 @@ function PanelSplitPreview({ panelCount }: { panelCount: number }) {
         const x = (lineNumber / panelCount) * 100;
         return (
           <div key={`v-${lineNumber}`} className="absolute inset-y-0" style={{ left: `${x}%` }}>
-            <div className="absolute inset-y-0 border-l-2 border-dashed border-violet-400" />
-            <div className="absolute left-1/2 top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-violet-500 text-center text-xs font-bold leading-5 text-white">
+            <div className="absolute inset-y-0 border-l-2 border-dashed border-[var(--brand-primary)]" />
+            <div className="absolute left-1/2 top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--brand-primary)] text-center text-xs font-bold leading-5 text-white">
               !
             </div>
           </div>
@@ -346,7 +346,7 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
   const previewHeight = pricing ? Math.max(180, Math.min(460, pricing.heightIn * 2.8)) : 220;
 
   return (
-    <div className="min-h-[calc(100vh-96px)] bg-[linear-gradient(145deg,#f5f3ff_0%,#ede9fe_55%,#e3dcff_100%)] text-zinc-800">
+    <div className="min-h-[calc(100vh-96px)] bg-[linear-gradient(145deg,#f4f4f5_0%,#ececef_55%,#e4e4e7_100%)] text-zinc-800">
       <div className="w-full px-3 py-3 md:px-4">
         <div className="grid gap-4">
           <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
@@ -360,14 +360,14 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
                 { label: "Per Item", value: pricing ? formatCurrency(pricing.grandTotal / Math.max(safeQuantity, 1)) : formatCurrency(0) },
                 { label: "Qty", value: String(safeQuantity) },
               ]}
-              accentClassName="text-violet-400"
+              accentClassName="text-[var(--brand-primary)]"
             />
 
             <div
-              className="relative h-[calc(100vh-290px)] min-h-[560px] overflow-hidden rounded-b-2xl bg-[#faf9ff]"
+              className="relative h-[calc(100vh-290px)] min-h-[560px] overflow-hidden rounded-b-2xl bg-[#fafaf9]"
               style={{
                 backgroundImage:
-                  "linear-gradient(to right, rgba(139,92,246,0.07) 1px, transparent 1px), linear-gradient(to bottom, rgba(139,92,246,0.07) 1px, transparent 1px)",
+                  "linear-gradient(to right, rgba(63,63,70,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(63,63,70,0.08) 1px, transparent 1px)",
                 backgroundSize: "26px 26px",
               }}
             >
@@ -425,7 +425,7 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
                       <div className="absolute inset-0 bg-[#fdfbff]" />
                       {/* Double-sided mirror effect overlay */}
                       {side === "double" && (
-                        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-violet-100/20 to-violet-100/40" />
+                        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-sky-100/20 to-sky-100/40" />
                       )}
                       {uploadedImage ? (
                         <Image
@@ -451,7 +451,7 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
                     </div>
                   </>
                 ) : (
-                  <div className="flex h-[250px] w-full max-w-[520px] flex-col items-center justify-center rounded-[28px] border border-dashed border-violet-300 bg-white/80 px-8 text-center shadow-inner">
+                  <div className="flex h-[250px] w-full max-w-[520px] flex-col items-center justify-center rounded-[28px] border border-dashed border-sky-300 bg-white/80 px-8 text-center shadow-inner">
                     <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-400">
                       Preview Ready
                     </div>
@@ -469,13 +469,13 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
             <BuilderBottomToolbar
               panels={[
                 { id: "artwork", title: "Artwork", value: uploadedFileName ? "Uploaded" : "No file", width: 420, content: <><label className="inline-flex h-10 w-full cursor-pointer items-center justify-center rounded border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-700 hover:border-zinc-400"><input type="file" accept="image/*,.pdf,.ai,.eps,.psd,.svg" className="hidden" onChange={onUploadArtwork} />{uploadingArtwork ? "Uploading..." : uploadedFileName ? "Replace Artwork" : "Upload Artwork"}</label>{uploadedFileName && <div className="flex items-center justify-between gap-2 rounded border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-600"><span className="truncate">{uploadedFileName}</span><button type="button" onClick={clearArtwork} className="font-semibold text-zinc-500 hover:text-zinc-900">Remove</button></div>}{uploadError && <div className="text-xs font-medium text-red-600">{uploadError}</div>}</> },
-                { id: "print-side", title: "Print Side", value: side === "double" ? "Double" : "Single", width: 320, content: <div className="grid grid-cols-2 gap-1"><button type="button" onClick={() => handleSideChange("single")} className={`h-9 rounded border px-3 text-xs font-semibold transition ${side === "single" ? "border-violet-300 bg-violet-50 text-violet-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Single</button><button type="button" onClick={() => handleSideChange("double")} className={`h-9 rounded border px-3 text-xs font-semibold transition ${side === "double" ? "border-violet-300 bg-violet-50 text-violet-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Double</button></div> },
+                { id: "print-side", title: "Print Side", value: side === "double" ? "Double" : "Single", width: 320, content: <div className="grid grid-cols-2 gap-1"><button type="button" onClick={() => handleSideChange("single")} className={`h-9 rounded border px-3 text-xs font-semibold transition ${side === "single" ? "border-sky-300 bg-sky-50 text-sky-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Single</button><button type="button" onClick={() => handleSideChange("double")} className={`h-9 rounded border px-3 text-xs font-semibold transition ${side === "double" ? "border-sky-300 bg-sky-50 text-sky-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Double</button></div> },
                 { id: "size", title: "Size", value: pricing ? `${formatInches(pricing.widthIn)} x ${formatInches(pricing.heightIn)}` : "Set dimensions", status: widthError || heightError ? "alert" : "ok", width: 320, content: <div className="grid grid-cols-[1fr_auto_1fr] gap-1"><input type="number" min={0.1} max={maxByUnit} step={0.25} value={widthStr} onChange={(event) => setWidthStr(event.target.value)} className="h-9 rounded border border-zinc-300 px-2 text-sm" /><div className="flex items-center justify-center text-sm font-semibold text-zinc-400">x</div><input type="number" min={0.1} max={maxByUnit} step={0.25} value={heightStr} onChange={(event) => setHeightStr(event.target.value)} className="h-9 rounded border border-zinc-300 px-2 text-sm" /></div> },
                 { id: "units", title: "Units", value: unit === "inches" ? "Inches" : "Feet", width: 260, content: <select value={unit} onChange={(event) => setUnit(event.target.value as DualViewUnit)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"><option value="inches">Inches</option><option value="feet">Feet</option></select> },
-                { id: "contour", title: "Contour", value: contourCut ? "On" : "Off", width: 260, content: <button type="button" onClick={() => setContourCut((v) => !v)} className={`h-9 w-full rounded border px-3 text-xs font-semibold transition ${contourCut ? "border-violet-300 bg-violet-50 text-violet-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>{contourCut ? "Contour: On" : "Contour: Off"}</button> },
+                { id: "contour", title: "Contour", value: contourCut ? "On" : "Off", width: 260, content: <button type="button" onClick={() => setContourCut((v) => !v)} className={`h-9 w-full rounded border px-3 text-xs font-semibold transition ${contourCut ? "border-sky-300 bg-sky-50 text-sky-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>{contourCut ? "Contour: On" : "Contour: Off"}</button> },
                 { id: "quantity", title: "Quantity", value: String(safeQuantity), width: 260, content: <input type="number" min={1} value={safeQuantity} onChange={(event) => setQuantity(Math.max(1, Math.floor(Number(event.target.value) || 1)))} className="h-9 w-full rounded border border-zinc-300 px-2 text-sm" /> },
               ] satisfies BuilderBottomToolbarPanel[]}
-              action={<Button className="h-10 w-full rounded bg-violet-600 text-xs font-semibold text-white hover:bg-violet-500" disabled={!isValid} onClick={addToCart}>{added ? "Added" : "Add"}</Button>}
+              action={<Button className="h-10 w-full rounded bg-[var(--brand-primary)] text-xs font-semibold text-white hover:bg-[var(--brand-primary-hover)]" disabled={!isValid} onClick={addToCart}>{added ? "Added" : "Add"}</Button>}
             />
           </div>
 
@@ -560,7 +560,7 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
                     key={s}
                     className={`rounded-lg border px-2 py-1.5 text-center text-xs font-semibold ${
                       side === s
-                        ? "border-violet-300 bg-violet-50 text-violet-700"
+                        ? "border-sky-300 bg-sky-50 text-sky-700"
                         : "border-zinc-200 bg-zinc-50 text-zinc-500"
                     }`}
                   >
@@ -586,13 +586,13 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
                   <div
                     key={tier.range}
                     className={`rounded-xl border px-3 py-2 ${
-                      tier.active ? "border-violet-200 bg-violet-50" : "border-zinc-200 bg-zinc-50"
+                      tier.active ? "border-sky-200 bg-sky-50" : "border-zinc-200 bg-zinc-50"
                     }`}
                   >
-                    <div className={`font-semibold ${tier.active ? "text-violet-800" : "text-zinc-800"}`}>
+                    <div className={`font-semibold ${tier.active ? "text-sky-800" : "text-zinc-800"}`}>
                       {tier.range}
                     </div>
-                    <div className={`text-xs ${tier.active ? "text-violet-600" : "text-zinc-600"}`}>
+                    <div className={`text-xs ${tier.active ? "text-sky-600" : "text-zinc-600"}`}>
                       {tier.rate}
                       {tier.active ? " ← active" : ""}
                     </div>
@@ -610,10 +610,10 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
                     <div
                       key={s}
                       className={`rounded-xl border px-3 py-2 ${
-                        isActive ? "border-violet-200 bg-violet-50" : "border-zinc-200 bg-zinc-50"
+                        isActive ? "border-sky-200 bg-sky-50" : "border-zinc-200 bg-zinc-50"
                       }`}
                     >
-                      <div className={`font-semibold ${isActive ? "text-violet-800" : "text-zinc-800"}`}>
+                      <div className={`font-semibold ${isActive ? "text-sky-800" : "text-zinc-800"}`}>
                         {s === "single" ? "Single Sided" : "Double Sided"}
                         {isActive ? " ← selected" : ""}
                       </div>

@@ -98,7 +98,7 @@ function BreakdownRow({
           muted
             ? "text-zinc-400"
             : accent
-            ? "font-semibold text-emerald-600"
+            ? "font-semibold text-[var(--brand-primary)]"
             : strong
             ? "font-semibold text-zinc-900"
             : "text-zinc-700"
@@ -130,8 +130,8 @@ function PanelSplitPreview({ panelCount }: { panelCount: number }) {
         const x = (lineNumber / panelCount) * 100;
         return (
           <div key={`v-${lineNumber}`} className="absolute inset-y-0" style={{ left: `${x}%` }}>
-            <div className="absolute inset-y-0 border-l-2 border-dashed border-emerald-500" />
-            <div className="absolute left-1/2 top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-500 text-center text-xs font-bold leading-5 text-white">
+            <div className="absolute inset-y-0 border-l-2 border-dashed border-[var(--brand-primary)]" />
+            <div className="absolute left-1/2 top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--brand-primary)] text-center text-xs font-bold leading-5 text-white">
               !
             </div>
           </div>
@@ -321,7 +321,7 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
   const previewHeight = pricing ? Math.max(180, Math.min(460, pricing.heightIn * 2.8)) : 220;
 
   return (
-    <div className="min-h-[calc(100vh-96px)] bg-[linear-gradient(145deg,#f0f7f2_0%,#e8f2ea_55%,#dceee0_100%)] text-zinc-800">
+    <div className="min-h-[calc(100vh-96px)] bg-[linear-gradient(145deg,#f4f8ff_0%,#e8f1ff_55%,#dbe9ff_100%)] text-zinc-800">
       <div className="w-full px-3 py-3 md:px-4">
         <div className="grid gap-4">
           <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
@@ -335,14 +335,14 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
                 { label: "Per Item", value: pricing ? formatCurrency(pricing.grandTotal / Math.max(safeQuantity, 1)) : formatCurrency(0) },
                 { label: "Qty", value: String(safeQuantity) },
               ]}
-              accentClassName="text-emerald-400"
+              accentClassName="text-[var(--brand-primary)]"
             />
 
             <div
-              className="relative h-[calc(100vh-290px)] min-h-[560px] overflow-hidden rounded-b-2xl bg-[#f7faf8]"
+              className="relative h-[calc(100vh-290px)] min-h-[560px] overflow-hidden rounded-b-2xl bg-[#f8fbff]"
               style={{
                 backgroundImage:
-                  "linear-gradient(to right, rgba(16,185,129,0.07) 1px, transparent 1px), linear-gradient(to bottom, rgba(16,185,129,0.07) 1px, transparent 1px)",
+                  "linear-gradient(to right, rgba(59,130,246,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(59,130,246,0.08) 1px, transparent 1px)",
                 backgroundSize: "26px 26px",
               }}
             >
@@ -379,7 +379,7 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
                     </div>
 
                     <div
-                      className="relative overflow-hidden border border-emerald-200 bg-white shadow-[0_26px_70px_rgba(15,23,42,0.10)]"
+                      className="relative overflow-hidden border border-sky-200 bg-white shadow-[0_26px_70px_rgba(15,23,42,0.10)]"
                       style={{ width: previewWidth, height: previewHeight }}
                     >
                       {/* Perforation pattern overlay */}
@@ -417,7 +417,7 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
                     </div>
                   </>
                 ) : (
-                  <div className="flex h-[250px] w-full max-w-[520px] flex-col items-center justify-center rounded-[28px] border border-dashed border-emerald-300 bg-white/80 px-8 text-center shadow-inner">
+                  <div className="flex h-[250px] w-full max-w-[520px] flex-col items-center justify-center rounded-[28px] border border-dashed border-sky-300 bg-white/80 px-8 text-center shadow-inner">
                     <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-400">
                       Preview Ready
                     </div>
@@ -438,10 +438,10 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
                 { id: "size", title: "Size", value: pricing ? `${formatInches(pricing.widthIn)} x ${formatInches(pricing.heightIn)}` : "Set dimensions", status: widthError || heightError ? "alert" : "ok", width: 320, content: <><div className="grid grid-cols-[1fr_auto_1fr] gap-1"><input type="number" min={0.1} max={maxByUnit} step={0.25} value={widthStr} onChange={(event) => setWidthStr(event.target.value)} className="h-9 rounded border border-zinc-300 px-2 text-sm" /><div className="flex items-center justify-center text-sm font-semibold text-zinc-400">x</div><input type="number" min={0.1} max={maxByUnit} step={0.25} value={heightStr} onChange={(event) => setHeightStr(event.target.value)} className="h-9 rounded border border-zinc-300 px-2 text-sm" /></div></> },
                 { id: "units", title: "Units", value: unit === "inches" ? "Inches" : "Feet", width: 260, content: <select value={unit} onChange={(event) => setUnit(event.target.value as OneWayWindowUnit)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"><option value="inches">Inches</option><option value="feet">Feet</option></select> },
                 { id: "material", title: "Material", value: selectedMaterial.label, width: 320, content: <select value={material} onChange={(event) => setMaterial(event.target.value as OneWayWindowMaterial)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm">{ONE_WAY_MATERIAL_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select> },
-                { id: "finish", title: "Laminate / Contour", value: [laminate ? "Laminate" : null, contourCut ? "Contour" : null].filter(Boolean).join(" / ") || "None", width: 320, content: <div className="grid grid-cols-2 gap-1"><button type="button" onClick={() => setLaminate((v) => !v)} className={`h-9 rounded border px-3 text-xs font-semibold transition ${laminate ? "border-emerald-300 bg-emerald-50 text-emerald-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Laminate</button><button type="button" onClick={() => setContourCut((v) => !v)} className={`h-9 rounded border px-3 text-xs font-semibold transition ${contourCut ? "border-emerald-300 bg-emerald-50 text-emerald-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Contour</button></div> },
+                { id: "finish", title: "Laminate / Contour", value: [laminate ? "Laminate" : null, contourCut ? "Contour" : null].filter(Boolean).join(" / ") || "None", width: 320, content: <div className="grid grid-cols-2 gap-1"><button type="button" onClick={() => setLaminate((v) => !v)} className={`h-9 rounded border px-3 text-xs font-semibold transition ${laminate ? "border-sky-300 bg-sky-50 text-sky-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Laminate</button><button type="button" onClick={() => setContourCut((v) => !v)} className={`h-9 rounded border px-3 text-xs font-semibold transition ${contourCut ? "border-sky-300 bg-sky-50 text-sky-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Contour</button></div> },
                 { id: "quantity", title: "Quantity", value: String(safeQuantity), width: 260, content: <input type="number" min={1} value={safeQuantity} onChange={(event) => setQuantity(Math.max(1, Math.floor(Number(event.target.value) || 1)))} className="h-9 w-full rounded border border-zinc-300 px-2 text-sm" /> },
               ] satisfies BuilderBottomToolbarPanel[]}
-              action={<Button className="h-10 w-full rounded bg-emerald-600 text-xs font-semibold text-white hover:bg-emerald-500" disabled={!isValid} onClick={addToCart}>{added ? "Added" : "Add"}</Button>}
+              action={<Button className="h-10 w-full rounded bg-[var(--brand-primary)] text-xs font-semibold text-white hover:bg-[var(--brand-primary-hover)]" disabled={!isValid} onClick={addToCart}>{added ? "Added" : "Add"}</Button>}
             />
           </div>
 
@@ -536,13 +536,13 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
                   <div
                     key={tier.range}
                     className={`rounded-xl border px-3 py-2 ${
-                      tier.active ? "border-emerald-200 bg-emerald-50" : "border-zinc-200 bg-zinc-50"
+                      tier.active ? "border-sky-200 bg-sky-50" : "border-zinc-200 bg-zinc-50"
                     }`}
                   >
-                    <div className={`font-semibold ${tier.active ? "text-emerald-800" : "text-zinc-800"}`}>
+                    <div className={`font-semibold ${tier.active ? "text-sky-800" : "text-zinc-800"}`}>
                       {tier.range}
                     </div>
-                    <div className={`text-xs ${tier.active ? "text-emerald-600" : "text-zinc-600"}`}>
+                    <div className={`text-xs ${tier.active ? "text-sky-600" : "text-zinc-600"}`}>
                       {tier.rate}
                       {tier.active ? " ← active" : ""}
                     </div>
@@ -558,13 +558,13 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
                     key={option.value}
                     className={`rounded-xl border px-3 py-2 ${
                       material === option.value
-                        ? "border-emerald-200 bg-emerald-50"
+                        ? "border-sky-200 bg-sky-50"
                         : "border-zinc-200 bg-zinc-50"
                     }`}
                   >
                     <div
                       className={`font-semibold ${
-                        material === option.value ? "text-emerald-800" : "text-zinc-800"
+                        material === option.value ? "text-sky-800" : "text-zinc-800"
                       }`}
                     >
                       {option.label}
