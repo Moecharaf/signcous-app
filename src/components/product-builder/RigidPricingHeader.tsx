@@ -56,11 +56,11 @@ export default function RigidPricingHeader({
 
         <div className="text-center md:pt-1">
           <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500">{middleTitle}</div>
-          <div className="space-y-1 text-[10px] leading-5 text-zinc-600 md:text-[10px]">
+          <div className="mx-auto w-full max-w-[320px] space-y-1 text-[10px] leading-5 text-zinc-600 md:text-[10px]">
             {middleRows.map((row) => (
-              <div key={`${row.label}-${row.value}`} className="grid grid-cols-[1fr_auto] gap-4">
+              <div key={`${row.label}-${row.value}`} className="grid grid-cols-[1fr_92px] gap-3 text-left">
                 <span className="text-zinc-500">{row.label}</span>
-                <span className="font-medium text-zinc-700">{row.value}</span>
+                <span className="text-right font-medium tabular-nums text-zinc-700">{row.value}</span>
               </div>
             ))}
           </div>

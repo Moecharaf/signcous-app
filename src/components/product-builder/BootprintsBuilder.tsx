@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useState, type ChangeEvent, type ReactNode } from "react";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
 import Button from "@/components/ui/Button";
+import RigidPricingHeader from "@/components/product-builder/RigidPricingHeader";
 import { useCart } from "@/context/CartContext";
 import {
   BOOTPRINTS_MIN,
@@ -373,6 +374,18 @@ export default function BootprintsBuilder({ productId = 0 }: BootprintsBuilderPr
               )}
             </div>
 
+            <RigidPricingHeader
+              section
+              productName="BOOTPRINTS"
+              detail="Adhesive floor graphic builder"
+              totalPrice={pricing ? formatCurrency(pricing.totalPrice) : formatCurrency(0)}
+              middleRows={[
+                { label: "Area", value: pricing ? `${pricing.sqFt} sq ft` : "--" },
+                { label: "Per Item", value: pricing ? formatCurrency(pricing.totalPrice / Math.max(safeQuantity, 1)) : formatCurrency(0) },
+                { label: "Qty", value: String(safeQuantity) },
+              ]}
+            />
+
             {/* Canvas */}
             <div
               className="relative h-[calc(100vh-380px)] min-h-[480px] overflow-hidden rounded-b-2xl bg-[#fafaf9]"
@@ -382,23 +395,6 @@ export default function BootprintsBuilder({ productId = 0 }: BootprintsBuilderPr
                 backgroundSize: "26px 26px",
               }}
             >
-              <div className="absolute right-4 top-4 z-20 max-w-[220px] rounded-lg border border-zinc-200 bg-zinc-50/95 px-3 py-2 shadow-sm backdrop-blur">
-                <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">Quick Rate Reference</div>
-                <div className="space-y-1 text-[11px] leading-5 text-zinc-600">
-                  <div className="flex items-center justify-between gap-3"><span>Rate / sq ft</span><span className="font-semibold text-zinc-800">{pricing ? formatCurrency(pricing.totalPrice / Math.max(pricing.sqFt, 1)) : formatCurrency(0)}</span></div>
-                  <div className="flex items-center justify-between gap-3"><span>Effective / unit</span><span className="font-semibold text-zinc-800">{pricing ? formatCurrency(pricing.totalPrice / Math.max(safeQuantity, 1)) : formatCurrency(0)}</span></div>
-                  <div className="flex items-center justify-between gap-3"><span>Area</span><span className="font-semibold text-zinc-800">{pricing ? `${pricing.sqFt} sq ft` : "--"}</span></div>
-                </div>
-              </div>
-
-              <div className="absolute right-4 top-[132px] z-20 rounded-lg border border-zinc-800 bg-zinc-900/95 px-4 py-2 text-right shadow-sm backdrop-blur">
-                <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--brand-primary)]">Live Total</div>
-                <div className="text-2xl font-semibold text-white">{pricing ? formatCurrency(pricing.totalPrice) : formatCurrency(0)}</div>
-                <div className="text-[11px] text-zinc-300">
-                  {pricing ? `${pricing.sqFt} sq ft · ${safeQuantity} unit${safeQuantity !== 1 ? "s" : ""}` : "Set dimensions to calculate"}
-                </div>
-              </div>
-
               <div className="absolute bottom-4 left-4 z-10 rounded-md border border-zinc-200 bg-white/95 px-3 py-1 text-xs font-medium text-zinc-600 shadow-sm">
                 Heavy-duty outdoor floor graphic — single-sided print
               </div>

@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useState, type ChangeEvent, type ReactNode } from "react";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
 import Button from "@/components/ui/Button";
+import RigidPricingHeader from "@/components/product-builder/RigidPricingHeader";
 import { useCart } from "@/context/CartContext";
 import {
   WINDOW_CLING_MAX_HEIGHT_IN,
@@ -313,6 +314,18 @@ export default function WindowClingBuilder({ productId = 137 }: WindowClingBuild
               )}
             </div>
 
+            <RigidPricingHeader
+              section
+              productName="WINDOW CLING"
+              detail="Adhesive window cling builder"
+              totalPrice={pricing ? formatCurrency(pricing.totalPrice) : formatCurrency(0)}
+              middleRows={[
+                { label: "Area", value: pricing ? `${pricing.sqIn.toFixed(0)} sq in` : "--" },
+                { label: "Per Item", value: pricing ? formatCurrency(pricing.totalPrice / Math.max(safeQuantity, 1)) : formatCurrency(0) },
+                { label: "Qty", value: String(safeQuantity) },
+              ]}
+            />
+
             <div
               className="relative h-[calc(100vh-290px)] min-h-[560px] overflow-hidden rounded-b-2xl bg-[#fafaf9]"
               style={{
@@ -321,14 +334,6 @@ export default function WindowClingBuilder({ productId = 137 }: WindowClingBuild
                 backgroundSize: "26px 26px",
               }}
             >
-              <div className="absolute right-4 top-4 z-20 rounded-lg border border-zinc-800 bg-zinc-900/95 px-4 py-2 text-right shadow-sm backdrop-blur">
-                <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--brand-primary)]">Live Total</div>
-                <div className="text-2xl font-semibold text-white">{pricing ? formatCurrency(pricing.totalPrice) : formatCurrency(0)}</div>
-                <div className="text-[11px] text-zinc-300">
-                  {pricing ? `${pricing.sqIn.toFixed(0)} sq in · ${safeQuantity} unit${safeQuantity !== 1 ? "s" : ""}` : "Set dimensions to calculate"}
-                </div>
-              </div>
-
               <div className="absolute bottom-4 left-4 z-10 rounded-md border border-zinc-200 bg-white/95 px-3 py-1 text-xs font-medium text-zinc-600 shadow-sm">
                 For best results on clear or spot-white artwork, upload a PNG with a transparent background.
               </div>

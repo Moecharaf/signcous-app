@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useState, type ChangeEvent, type ReactNode } from "react";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
 import Button from "@/components/ui/Button";
+import RigidPricingHeader from "@/components/product-builder/RigidPricingHeader";
 import { useCart } from "@/context/CartContext";
 import {
   DUAL_VIEW_CONSTRAINTS,
@@ -388,6 +389,19 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
               )}
             </div>
 
+            <RigidPricingHeader
+              section
+              productName="DUAL VIEW"
+              detail="Adhesive window film builder"
+              totalPrice={pricing ? formatCurrency(pricing.grandTotal) : formatCurrency(0)}
+              middleRows={[
+                { label: "Area", value: pricing ? `${pricing.areaSqFt.toFixed(2)} sq ft` : "--" },
+                { label: "Per Item", value: pricing ? formatCurrency(pricing.grandTotal / Math.max(safeQuantity, 1)) : formatCurrency(0) },
+                { label: "Qty", value: String(safeQuantity) },
+              ]}
+              accentClassName="text-violet-400"
+            />
+
             <div
               className="relative h-[calc(100vh-290px)] min-h-[560px] overflow-hidden rounded-b-2xl bg-[#faf9ff]"
               style={{
@@ -396,23 +410,6 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
                 backgroundSize: "26px 26px",
               }}
             >
-              <div className="absolute right-4 top-4 z-20 max-w-[220px] rounded-lg border border-zinc-200 bg-zinc-50/95 px-3 py-2 shadow-sm backdrop-blur">
-                <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">Quick Rate Reference</div>
-                <div className="space-y-1 text-[11px] leading-5 text-zinc-600">
-                  <div className="flex items-center justify-between gap-3"><span>Rate / sq ft</span><span className="font-semibold text-zinc-800">{pricing ? formatCurrency(pricing.totalPrice / Math.max(pricing.areaSqFt, 1)) : formatCurrency(0)}</span></div>
-                  <div className="flex items-center justify-between gap-3"><span>Effective / unit</span><span className="font-semibold text-zinc-800">{pricing ? formatCurrency(pricing.totalPrice / Math.max(safeQuantity, 1)) : formatCurrency(0)}</span></div>
-                  <div className="flex items-center justify-between gap-3"><span>Area</span><span className="font-semibold text-zinc-800">{pricing ? `${pricing.areaSqFt.toFixed(2)} sq ft` : "--"}</span></div>
-                </div>
-              </div>
-
-              <div className="absolute right-4 top-[132px] z-20 rounded-lg border border-zinc-800 bg-zinc-900/95 px-4 py-2 text-right shadow-sm backdrop-blur">
-                <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-violet-400">Live Total</div>
-                <div className="text-2xl font-semibold text-white">{pricing ? formatCurrency(pricing.grandTotal) : formatCurrency(0)}</div>
-                <div className="text-[11px] text-zinc-300">
-                  {pricing ? `${pricing.areaSqFt.toFixed(2)} sq ft · ${safeQuantity} unit${safeQuantity !== 1 ? "s" : ""}` : "Set dimensions to calculate"}
-                </div>
-              </div>
-
               <div className="absolute left-5 top-5 rounded-md border border-zinc-200 bg-white px-3 py-1 text-xs font-medium text-zinc-600 shadow-sm">
                 Upload artwork to preview panel splits
               </div>
