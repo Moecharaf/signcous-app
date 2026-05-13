@@ -116,7 +116,16 @@ function PaymentForm({
       return;
     }
 
-    await onSuccess(paymentIntent.id);
+    try {
+      await onSuccess(paymentIntent.id);
+    } catch (orderError) {
+      const message =
+        orderError instanceof Error
+          ? orderError.message
+          : "Payment succeeded, but order creation failed. Please contact support.";
+      setError(message);
+      setSubmitting(false);
+    }
   }
 
   return (

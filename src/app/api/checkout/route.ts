@@ -31,6 +31,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
     }
 
+    const invalidItem = items.find((item) => !Number.isFinite(item.productId) || item.productId <= 0);
+    if (invalidItem) {
+      return NextResponse.json(
+        {
+          error: `Invalid product mapping for ${invalidItem.productName}. Please contact support.`,
+        },
+        { status: 400 }
+      );
+    }
+
     if (!billing?.email || !billing?.first_name) {
       return NextResponse.json(
         { error: "Missing required billing fields" },

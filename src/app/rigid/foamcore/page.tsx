@@ -8,5 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default function FoamcoreRigidPage() {
-  return <FoamcoreBuilder productName="FOAMCORE" />;
+  return <FoamcoreBuilder productName="FOAMCORE" productId={82} />;
 }
