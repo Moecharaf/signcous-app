@@ -5,6 +5,10 @@ const WOO_BASE_URL = process.env.NEXT_PUBLIC_WOO_BASE_URL ?? "";
 const WOO_KEY = process.env.WOO_CONSUMER_KEY ?? "";
 const WOO_SECRET = process.env.WOO_CONSUMER_SECRET ?? "";
 
+const LEGACY_PRODUCT_ID_BY_NAME: Record<string, number> = {
+  FOAMCORE: 82,
+};
+
 interface BillingAddress {
   first_name: string;
   last_name: string;
@@ -31,7 +35,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
     }
 
-    const invalidItem = items.find((item) => !Number.isFinite(item.productId) || item.productId <= 0);
+    const normalizedItems = items.map((item) => {
+      if (Number.isFinite(item.productId) && item.productId > 0) {
+        return item;
+      }
+
+      const fallbackId = LEGACY_PRODUCT_ID_BY_NAME[item.productName?.trim().toUpperCase() ?? ""];
+      if (fallbackId) {
+        return {
+          ...item,
+          productId: fallbackId,
+        };
+      }
+
+      return item;
+    });
+
+    const invalidItem = normalizedItems.find((item) => !Number.isFinite(item.productId) || item.productId <= 0);
     if (invalidItem) {
       return NextResponse.json(
         {
@@ -48,7 +68,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const lineItems = items.map((item) => ({
+    const lineItems = normalizedItems.map((item) => ({
       product_id: item.productId,
       quantity: item.quantity,
       price: item.unitPrice.toFixed(2),
