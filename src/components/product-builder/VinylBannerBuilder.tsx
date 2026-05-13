@@ -379,6 +379,7 @@ export default function VinylBannerBuilder({
   });
   const workspaceRef = useRef<HTMLDivElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
+  const artworkInputRef = useRef<HTMLInputElement | null>(null);
 
   const widthNum = parseFloat(form.width) || 0;
   const heightNum = parseFloat(form.height) || 0;
@@ -658,6 +659,11 @@ export default function VinylBannerBuilder({
     setActivePanel(null);
     setPanelAnchor(null);
   }, []);
+
+  const openArtworkPicker = useCallback(() => {
+    if (uploadingArtwork) return;
+    artworkInputRef.current?.click();
+  }, [uploadingArtwork]);
 
   const setDimension = useCallback(
     (dimension: "width" | "height", part: "feet" | "inches", value: string) => {
@@ -1045,6 +1051,15 @@ export default function VinylBannerBuilder({
 
   return (
     <div className="flex min-h-[calc(100dvh-64px)] flex-col bg-[#f4f4f4] text-zinc-800 md:min-h-[calc(100dvh-88px)] md:h-[calc(100vh-88px)]">
+      <input
+        ref={artworkInputRef}
+        type="file"
+        accept=".pdf,.ai,.eps,.png,.jpg,.jpeg,.tif,.tiff"
+        onChange={onUploadArtwork}
+        disabled={uploadingArtwork}
+        className="hidden"
+      />
+
       <div className="mx-3 mt-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
         <div className="border-b border-zinc-200 bg-white px-3 py-2 md:hidden">
           <div className="text-[16px] font-semibold uppercase tracking-tight text-zinc-900">{canvasHeaderProductName}</div>
@@ -1255,7 +1270,8 @@ export default function VinylBannerBuilder({
           </div>
 
           <div
-            className={`absolute left-1/2 top-1/2 select-none cursor-default border border-zinc-500 bg-white ${isEconomicalStandProduct ? "rounded-none shadow-none" : "shadow"}`}
+            className={`absolute left-1/2 top-1/2 select-none border border-zinc-500 bg-white ${isEconomicalStandProduct ? "cursor-pointer rounded-none shadow-none" : "cursor-default shadow"}`}
+            onClick={isEconomicalStandProduct ? openArtworkPicker : undefined}
             onPointerDown={undefined}
             style={{
               width: artWidth,
