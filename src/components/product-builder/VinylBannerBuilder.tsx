@@ -725,7 +725,19 @@ export default function VinylBannerBuilder({
       height: heightNum,
       unit: form.unit,
       quantity: effectiveQtyNum,
-      material: isNoCurlProduct ? "No-Curl Banner" : isPosterProduct ? "Poster" : isHdpeProduct ? "HDPE" : isCanvasProduct ? "Canvas" : isMeshProduct ? "Mesh Banner" : form.material,
+      material: isEconomicalStandProduct
+        ? "Economical Banner Stand"
+        : isNoCurlProduct
+          ? "No-Curl Banner"
+          : isPosterProduct
+            ? "Poster"
+            : isHdpeProduct
+              ? "HDPE"
+              : isCanvasProduct
+                ? "Canvas"
+                : isMeshProduct
+                  ? "Mesh Banner"
+                  : form.material,
       doubleSided: (isCanvasProduct || isMeshProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct || isEconomicalStandProduct) ? false : form.doubleSided,
       grommets: isNoCurlProduct
         ? true
@@ -1434,14 +1446,16 @@ export default function VinylBannerBuilder({
                 active={activePanel === "artwork"}
                 onClick={(event) => openPanel("artwork", event)}
               />
-              <ToolbarButton
-                title="Size"
-                value={`${widthFeetInchesLabel} x ${heightFeetInchesLabel}`}
-                active={activePanel === "size"}
-                onClick={(event) => openPanel("size", event)}
-                status={errors.width || errors.height ? "alert" : "ok"}
-              />
-              {!isPosterProduct && (
+              {!isEconomicalStandProduct && (
+                <ToolbarButton
+                  title="Size"
+                  value={`${widthFeetInchesLabel} x ${heightFeetInchesLabel}`}
+                  active={activePanel === "size"}
+                  onClick={(event) => openPanel("size", event)}
+                  status={errors.width || errors.height ? "alert" : "ok"}
+                />
+              )}
+              {!isPosterProduct && !isEconomicalStandProduct && (
                 <ToolbarButton
                   title="Material"
                   value={isCanvasProduct ? "Canvas" : isNoCurlProduct ? "No-Curl Banner" : isMeshProduct ? "Mesh Banner" : isHdpeProduct ? "HDPE" : form.material}
