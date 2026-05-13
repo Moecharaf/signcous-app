@@ -115,7 +115,7 @@ const PREVIEW_MAX_WIDTH = 720;
 const PREVIEW_MAX_HEIGHT = 420;
 const ECONOMICAL_STAND_WIDTH_IN = 33.5;
 const ECONOMICAL_STAND_HEIGHT_IN = 80;
-const ECONOMICAL_STAND_UNIT_PRICE = 130;
+const ECONOMICAL_STAND_UNIT_PRICE = 135;
 const ECONOMICAL_STAND_PREVIEW_HEIGHT = 520;
 
 function clamp(n: number, min: number, max: number): number {
@@ -1255,7 +1255,7 @@ export default function VinylBannerBuilder({
           </div>
 
           <div
-            className="absolute left-1/2 top-1/2 select-none cursor-default rounded-md border border-zinc-500 bg-white shadow"
+            className={`absolute left-1/2 top-1/2 select-none cursor-default border border-zinc-500 bg-white ${isEconomicalStandProduct ? "rounded-none shadow-none" : "shadow"}`}
             onPointerDown={undefined}
             style={{
               width: artWidth,
@@ -1351,7 +1351,7 @@ export default function VinylBannerBuilder({
               <img
                 src={uploadedImage}
                 alt="Artwork preview"
-                className="h-full w-full rounded object-cover"
+                className={`h-full w-full object-cover ${isEconomicalStandProduct ? "rounded-none" : ""}`}
                 draggable={false}
               />
             ) : (
