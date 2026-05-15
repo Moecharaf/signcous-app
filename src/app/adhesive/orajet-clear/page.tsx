@@ -8,5 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default function OrajetClearPage() {
-  return <OrajetClearBuilder productId={0} />;
+  return <OrajetClearBuilder productId={88} />;
 }

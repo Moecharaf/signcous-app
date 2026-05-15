@@ -8,5 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default function GF830Page() {
-  return <GF830Builder productId={0} />;
+  return <GF830Builder productId={89} />;
 }

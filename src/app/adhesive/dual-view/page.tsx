@@ -8,5 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default function DualViewPage() {
-  return <DualViewBuilder productId={0} />;
+  return <DualViewBuilder productId={86} />;
 }

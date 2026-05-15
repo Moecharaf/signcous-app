@@ -8,5 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default function LowTacWallPage() {
-  return <LowTacWallBuilder productId={0} />;
+  return <LowTacWallBuilder productId={93} />;
 }

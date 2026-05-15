@@ -8,5 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default function AcrylicSignsPage() {
-  return <AcrylicBuilder productId={0} />;
+  return <AcrylicBuilder productId={35} />;
 }

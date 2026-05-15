@@ -8,5 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default function FootprintsPage() {
-  return <FootprintsBuilder productId={0} />;
+  return <FootprintsBuilder productId={95} />;
 }

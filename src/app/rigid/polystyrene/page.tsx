@@ -1,5 +1,5 @@
 import PolystyreneBuilder from "@/components/product-builder/PolystyreneBuilder";
 
 export default function PolystyreneRigidPage() {
-  return <PolystyreneBuilder productName="POLYSTYRENE" />;
+  return <PolystyreneBuilder productId={85} productName="POLYSTYRENE" />;
 }

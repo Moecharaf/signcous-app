@@ -8,5 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default function OneWayWindowPage() {
-  return <OneWayWindowBuilder productId={0} />;
+  return <OneWayWindowBuilder productId={87} />;
 }

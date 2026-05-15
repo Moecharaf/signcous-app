@@ -6,5 +6,5 @@ export const metadata = {
 };
 
 export default function DryErasePage() {
-  return <DryEraseBuilder productId={0} />;
+  return <DryEraseBuilder productId={92} />;
 }

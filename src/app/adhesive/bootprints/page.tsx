@@ -8,5 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default function BootprintsPage() {
-  return <BootprintsBuilder productId={0} />;
+  return <BootprintsBuilder productId={94} />;
 }

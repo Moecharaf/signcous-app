@@ -1,5 +1,5 @@
 import JBondBuilder from "@/components/product-builder/JBondBuilder";
 
 export default function JBondRigidPage() {
-  return <JBondBuilder productName="JBOND" />;
+  return <JBondBuilder productId={84} productName="JBOND" />;
 }

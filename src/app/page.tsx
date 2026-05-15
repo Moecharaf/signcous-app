@@ -139,7 +139,7 @@ const MANUAL_RIGID_PRODUCTS: ManualBannerProductCard[] = [
   },
   {
     id: "manual-aluminum",
-    productId: 0,
+    productId: 33,
     name: "Aluminum",
     displayName: "ALUMINUM",
     titleImage: "/card-images/Aluminum-Logo2.png",
@@ -153,7 +153,7 @@ const MANUAL_RIGID_PRODUCTS: ManualBannerProductCard[] = [
   },
   {
     id: "manual-jbond",
-    productId: 0,
+    productId: 84,
     name: "JBond",
     displayName: "JBOND",
     titleImage: "/card-images/Jbond-Logo.png",
@@ -167,7 +167,7 @@ const MANUAL_RIGID_PRODUCTS: ManualBannerProductCard[] = [
   },
   {
     id: "manual-pvc",
-    productId: 0,
+    productId: 34,
     name: "PVC",
     displayName: "PVC",
     titleImage: "/card-images/PVC-Logo.png",
@@ -181,7 +181,7 @@ const MANUAL_RIGID_PRODUCTS: ManualBannerProductCard[] = [
   },
   {
     id: "manual-polystyrene",
-    productId: 0,
+    productId: 85,
     name: "Polystyrene",
     displayName: "POLYSTYRENE",
     titleImage: "/card-images/Polystyrene-Logo.png",
@@ -195,7 +195,7 @@ const MANUAL_RIGID_PRODUCTS: ManualBannerProductCard[] = [
   },
   {
     id: "manual-acrylic",
-    productId: 0,
+    productId: 35,
     name: "Acrylic Signs",
     displayName: "ACRYLIC",
     titleImage: "/card-images/Acylic-Logo-V2.png",
@@ -212,7 +212,7 @@ const MANUAL_RIGID_PRODUCTS: ManualBannerProductCard[] = [
 const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
   {
     id: "manual-dual-view",
-    productId: 0,
+    productId: 86,
     name: "Dual View",
     displayName: "DUAL VIEW",
     titleImage: "/card-images/DUAL-View-logo-v2.png",
@@ -226,7 +226,7 @@ const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
   },
   {
     id: "manual-one-way-window",
-    productId: 0,
+    productId: 87,
     name: "One Way Window",
     displayName: "ONE WAY WINDOW",
     titleImage: "/card-images/One-Way-Window-LOGO-v2.png",
@@ -240,7 +240,7 @@ const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
   },
   {
     id: "manual-orajet-clear",
-    productId: 0,
+    productId: 88,
     name: "Orajet Clear",
     displayName: "ORAJET CLEAR",
     titleImage: "/card-images/Orajet-Clear-Logo-v3.png",
@@ -254,7 +254,7 @@ const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
   },
   {
     id: "manual-gf830",
-    productId: 0,
+    productId: 89,
     name: "GF830 AutoMark",
     displayName: "GF830 AUTOWRAP",
     titleImage: "/card-images/GF-830-AutoWrap-LOGO-v2.png",
@@ -310,7 +310,7 @@ const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
   },
   {
     id: "manual-reflective-vinyl",
-    productId: 0,
+    productId: 90,
     name: "Reflective Vinyl",
     displayName: "REFLECTIVE",
     href: "/adhesive/reflective-vinyl",
@@ -324,7 +324,7 @@ const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
   },
   {
     id: "manual-dry-erase",
-    productId: 0,
+    productId: 92,
     name: "Dry Erase Wall Graphics",
     displayName: "DRY ERASE",
     href: "/adhesive/dry-erase",
@@ -338,7 +338,7 @@ const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
   },
   {
     id: "manual-low-tac-wall",
-    productId: 0,
+    productId: 93,
     name: "Removable Wall Decals",
     displayName: "LOW TAC WALL",
     href: "/adhesive/low-tac-wall",
@@ -352,7 +352,7 @@ const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
   },
   {
     id: "manual-bootprints",
-    productId: 0,
+    productId: 94,
     name: "Outdoor Boot Prints",
     displayName: "BOOT PRINTS",
     href: "/adhesive/bootprints",
@@ -366,7 +366,7 @@ const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
   },
   {
     id: "manual-footprints",
-    productId: 0,
+    productId: 95,
     name: "Footprints",
     displayName: "FOOTPRINTS",
     href: "/adhesive/footprints",
