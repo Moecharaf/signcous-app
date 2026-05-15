@@ -527,7 +527,7 @@ function ShowcaseCard({
         </div>
 
         <div
-          className={`relative w-[45%] translate-x-full transition duration-500 ease-out group-hover:translate-x-0 group-focus:translate-x-0 group-focus-within:translate-x-0 ${isExpanded ? "translate-x-0" : ""}`}
+          className={`relative w-[45%] translate-x-full transition duration-500 ease-out group-hover:translate-x-0 group-focus:translate-x-0 group-focus-within:translate-x-0 overflow-hidden ${isExpanded ? "translate-x-0" : ""}`}
         >
           {card.image ? (
             <Image
@@ -537,7 +537,7 @@ function ShowcaseCard({
               quality={75}
               loading="lazy"
               sizes="(max-width: 640px) 45vw, (max-width: 1024px) 22vw, 15vw"
-              className="object-cover"
+              className="object-contain"
             />
           ) : (
             <div className="h-full bg-[#f0f0f0]" />
