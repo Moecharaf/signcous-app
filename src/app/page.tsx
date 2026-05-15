@@ -51,7 +51,7 @@ const MANUAL_BANNER_PRODUCTS: ManualBannerProductCard[] = [
     href: "/banners/hdpe",
     description: "Water & Tear Resistant Paper",
     label: "Builder",
-    image: "/card-images/HDPE.png",
+    image: "/card-images/HDPE_V3.jpeg",
     imageAlt: "HDPE",
   },
   {
