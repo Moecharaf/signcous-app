@@ -25,7 +25,7 @@ const MANUAL_BANNER_PRODUCTS: ManualBannerProductCard[] = [
     href: "/banners/vinyl-banner",
     description: "Custom HD vinyl banner with live sizing, finishing options, and rush production.",
     label: "Builder",
-    image: "/card-images/HD-Banner.png",
+    image: "/card-images/HDBanner_v3.jpeg",
     imageAlt: "HD Banner",
   },
   {
@@ -103,7 +103,7 @@ const MANUAL_BANNER_PRODUCTS: ManualBannerProductCard[] = [
     href: "/banners/poster",
     description: "Poster Builder with Upload and Rounded-Up Area Pricing",
     label: "Builder",
-    image: "/card-images/Poster.png",
+    image: "/card-images/Poster_V3.jpeg",
     imageAlt: "Poster",
   },
 ];
