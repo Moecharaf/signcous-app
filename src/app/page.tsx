@@ -64,7 +64,7 @@ const MANUAL_BANNER_PRODUCTS: ManualBannerProductCard[] = [
     href: "/banners/canvas",
     description: "Poly-Cotton Blend, Stretch & Frame",
     label: "Builder",
-    image: "/card-images/canva.png",
+    image: "/card-images/Canva_V3.jpeg",
     imageAlt: "Canvas",
   },
   {
