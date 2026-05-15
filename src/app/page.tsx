@@ -90,7 +90,7 @@ const MANUAL_BANNER_PRODUCTS: ManualBannerProductCard[] = [
     href: "/banners/no-curl-banner",
     description: "Premium 8mil No-Curl Banner for Flat, High-End Displays",
     label: "Builder",
-    image: "/card-images/No Curl.png",
+    image: "/card-images/NoCurl_V3.jpeg",
     imageAlt: "No-Curl Banner",
   },
   {
