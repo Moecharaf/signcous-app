@@ -77,7 +77,7 @@ const MANUAL_BANNER_PRODUCTS: ManualBannerProductCard[] = [
     href: "/banners/mesh-banner",
     description: "Durable 8oz Coated Polyester Mesh with 37% Air-Flow Perforation",
     label: "Builder",
-    image: "/card-images/Mesh Banner.png",
+    image: "/card-images/Mesh_V3.jpeg",
     imageAlt: "Mesh Banner",
   },
   {
