@@ -357,8 +357,22 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
     window.setTimeout(() => setAdded(false), 1800);
   }
 
-  const previewWidth = pricing ? Math.max(240, Math.min(640, pricing.widthIn * 2.8)) : 320;
-  const previewHeight = pricing ? Math.max(180, Math.min(460, pricing.heightIn * 2.8)) : 220;
+  const previewMaxWidth = 640;
+  const previewMaxHeight = 460;
+  const previewMinWidth = 80;
+  const previewMinHeight = 60;
+  const previewScale = pricing
+    ? Math.min(
+        previewMaxWidth / Math.max(pricing.widthIn, 1),
+        previewMaxHeight / Math.max(pricing.heightIn, 1)
+      )
+    : 1;
+  const previewWidth = pricing
+    ? Math.max(previewMinWidth, Math.round(pricing.widthIn * previewScale))
+    : 320;
+  const previewHeight = pricing
+    ? Math.max(previewMinHeight, Math.round(pricing.heightIn * previewScale))
+    : 220;
 
   return (
     <div className="min-h-[calc(100vh-96px)] bg-[linear-gradient(145deg,#f4f4f5_0%,#ececef_55%,#e4e4e7_100%)] text-zinc-800">
@@ -434,7 +448,7 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
                     </div>
 
                     <div
-                      className="relative overflow-hidden border border-zinc-300 bg-white shadow-[0_26px_70px_rgba(15,23,42,0.13)]"
+                      className="relative overflow-hidden border border-zinc-300 bg-white shadow-[0_26px_70px_rgba(15,23,42,0.13)] transition-[width,height] duration-150"
                       style={{ width: previewWidth, height: previewHeight }}
                     >
                       <div className="absolute inset-0 bg-[#fdfbff]" />
