@@ -36,6 +36,31 @@ function dimensionLabel(value: number): string {
   return `${text}\"`;
 }
 
+function parseDimensionPart(value: string): number {
+  const cleaned = value.replace(/[^\d.]/g, "");
+  const parsed = Number.parseFloat(cleaned);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+}
+
+function toFeetAndInches(totalInches: number): { feet: string; inches: string } {
+  const safeInches = Math.max(0, totalInches);
+  const feet = Math.floor(safeInches / 12);
+  const inches = Number((safeInches - feet * 12).toFixed(2));
+  return {
+    feet: String(feet),
+    inches: Number.isInteger(inches) ? String(inches) : inches.toString(),
+  };
+}
+
+function composeDimensionInches(feet: string, inches: string): number {
+  return parseDimensionPart(feet) * 12 + parseDimensionPart(inches);
+}
+
+function formatFeetAndInchesLabel(totalInches: number): string {
+  const parts = toFeetAndInches(totalInches);
+  return `${parts.feet} ft ${parts.inches} in`;
+}
+
 export default function CustomMagnetBuilder() {
   const cart = useCart();
 
@@ -59,6 +84,8 @@ export default function CustomMagnetBuilder() {
   const width = Number.parseFloat(widthInput) || 0;
   const height = Number.parseFloat(heightInput) || 0;
   const quantity = Number.parseInt(quantityInput, 10) || 0;
+  const widthParts = toFeetAndInches(width);
+  const heightParts = toFeetAndInches(height);
 
   const hasPositiveSize = width > 0 && height > 0;
   const isSizeValid =
@@ -280,37 +307,71 @@ export default function CustomMagnetBuilder() {
     {
       id: "size",
       title: "Size",
-      value: `${dimensionLabel(width)} x ${dimensionLabel(height)}`,
+      value: `${formatFeetAndInchesLabel(width)} x ${formatFeetAndInchesLabel(height)}`,
       width: 320,
       status: sizeError ? "alert" : isSizeValid ? "ok" : "neutral",
       content: (
         <>
-          <div className="grid grid-cols-2 gap-1">
-            <input
-              type="number"
-              min={0}
-              step={0.01}
-              value={widthInput}
-              onChange={(event) => {
-                setWidthInput(event.target.value);
-                if (sizeError) setSizeError(null);
-              }}
-              className="h-9 rounded border border-zinc-300 px-2 text-sm"
-            />
-            <input
-              type="number"
-              min={0}
-              step={0.01}
-              value={heightInput}
-              onChange={(event) => {
-                setHeightInput(event.target.value);
-                if (sizeError) setSizeError(null);
-              }}
-              className="h-9 rounded border border-zinc-300 px-2 text-sm"
-            />
+          <div className="space-y-2">
+            <div className="grid grid-cols-[1fr_1fr_auto] gap-1">
+              <input
+                type="number"
+                min={0}
+                step={1}
+                value={widthParts.feet}
+                onChange={(event) => {
+                  const next = composeDimensionInches(event.target.value, widthParts.inches);
+                  setWidthInput(String(next));
+                  if (sizeError) setSizeError(null);
+                }}
+                className="h-9 rounded border border-zinc-300 px-2 text-sm"
+              />
+              <input
+                type="number"
+                min={0}
+                max={11.99}
+                step={0.25}
+                value={widthParts.inches}
+                onChange={(event) => {
+                  const next = composeDimensionInches(widthParts.feet, event.target.value);
+                  setWidthInput(String(next));
+                  if (sizeError) setSizeError(null);
+                }}
+                className="h-9 rounded border border-zinc-300 px-2 text-sm"
+              />
+              <div className="flex items-center text-xs font-semibold text-zinc-500">W</div>
+            </div>
+            <div className="grid grid-cols-[1fr_1fr_auto] gap-1">
+              <input
+                type="number"
+                min={0}
+                step={1}
+                value={heightParts.feet}
+                onChange={(event) => {
+                  const next = composeDimensionInches(event.target.value, heightParts.inches);
+                  setHeightInput(String(next));
+                  if (sizeError) setSizeError(null);
+                }}
+                className="h-9 rounded border border-zinc-300 px-2 text-sm"
+              />
+              <input
+                type="number"
+                min={0}
+                max={11.99}
+                step={0.25}
+                value={heightParts.inches}
+                onChange={(event) => {
+                  const next = composeDimensionInches(heightParts.feet, event.target.value);
+                  setHeightInput(String(next));
+                  if (sizeError) setSizeError(null);
+                }}
+                className="h-9 rounded border border-zinc-300 px-2 text-sm"
+              />
+              <div className="flex items-center text-xs font-semibold text-zinc-500">H</div>
+            </div>
           </div>
           {sizeError && <div className="text-xs font-medium text-rose-600">{sizeError}</div>}
-          <div className="text-[11px] leading-4 text-zinc-500">Maximum size is 24in x 96in.</div>
+          <div className="text-[11px] leading-4 text-zinc-500">Maximum size is 2 ft 0 in x 8 ft 0 in (one side must stay at 2 ft 0 in or less).</div>
         </>
       ),
     },

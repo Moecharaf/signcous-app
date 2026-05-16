@@ -38,6 +38,26 @@ function formatCharge(value: number): string {
   return value <= 0 ? formatCurrency(0) : `+${formatCurrency(value)}`;
 }
 
+function parseDimensionPart(value: string): number {
+  const cleaned = value.replace(/[^\d.]/g, "");
+  const parsed = Number.parseFloat(cleaned);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+}
+
+function toFeetAndInches(totalInches: number): { feet: string; inches: string } {
+  const safeInches = Math.max(0, totalInches);
+  const feet = Math.floor(safeInches / 12);
+  const inches = Number((safeInches - feet * 12).toFixed(2));
+  return {
+    feet: String(feet),
+    inches: Number.isInteger(inches) ? String(inches) : inches.toString(),
+  };
+}
+
+function composeDimensionInches(feet: string, inches: string): number {
+  return parseDimensionPart(feet) * 12 + parseDimensionPart(inches);
+}
+
 function ControlBox({
   title,
   helper,
@@ -130,6 +150,8 @@ export default function WindowClingBuilder({ productId = 137 }: WindowClingBuild
 
   const width = parseFloat(widthStr) || 0;
   const height = parseFloat(heightStr) || 0;
+  const widthParts = toFeetAndInches(width);
+  const heightParts = toFeetAndInches(height);
   const safeQuantity = Math.max(1, Math.floor(quantity) || 1);
 
   const widthError =
@@ -388,7 +410,7 @@ export default function WindowClingBuilder({ productId = 137 }: WindowClingBuild
             <BuilderBottomToolbar
               panels={[
                 { id: "artwork", title: "Artwork", value: uploadedFileName ? "Uploaded" : "No file", width: 420, content: <><label className="inline-flex h-10 w-full cursor-pointer items-center justify-center rounded border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-700 hover:border-zinc-400"><input type="file" accept="image/*,.pdf,.ai,.eps,.psd,.svg" className="hidden" onChange={onUploadArtwork} />{uploadingArtwork ? "Uploading..." : uploadedFileName ? "Replace Artwork" : "Upload Artwork"}</label>{uploadedFileName && <div className="flex items-center justify-between gap-2 rounded border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-600"><span className="truncate">{uploadedFileName}</span><button type="button" onClick={clearArtwork} className="font-semibold text-zinc-500 hover:text-zinc-900">Remove</button></div>}{uploadError && <div className="text-xs font-medium text-red-600">{uploadError}</div>}</> },
-                { id: "size", title: "Size", value: isValid ? `${width.toFixed(2)}\" x ${height.toFixed(2)}\"` : "Set dimensions", status: widthError || heightError ? "alert" : "ok", width: 320, content: <><div className="grid grid-cols-[1fr_auto_1fr] gap-1"><input type="number" min={0.1} max={WINDOW_CLING_MAX_WIDTH_IN} step={0.25} value={widthStr} onChange={(event) => setWidthStr(event.target.value)} className="h-9 rounded border border-zinc-300 px-2 text-sm" /><div className="flex items-center justify-center text-sm font-semibold text-zinc-400">x</div><input type="number" min={0.1} max={WINDOW_CLING_MAX_HEIGHT_IN} step={0.25} value={heightStr} onChange={(event) => setHeightStr(event.target.value)} className="h-9 rounded border border-zinc-300 px-2 text-sm" /></div></> },
+                { id: "size", title: "Size", value: isValid ? `${width.toFixed(2)}\" x ${height.toFixed(2)}\"` : "Set dimensions", status: widthError || heightError ? "alert" : "ok", width: 360, content: <><div className="space-y-2"><div className="grid grid-cols-[1fr_1fr_auto] gap-1"><input type="number" min={0} step={1} value={widthParts.feet} onChange={(event) => setWidthStr(String(composeDimensionInches(event.target.value, widthParts.inches)))} className="h-9 rounded border border-zinc-300 px-2 text-sm" /><input type="number" min={0} max={11.99} step={0.25} value={widthParts.inches} onChange={(event) => setWidthStr(String(composeDimensionInches(widthParts.feet, event.target.value)))} className="h-9 rounded border border-zinc-300 px-2 text-sm" /><div className="flex items-center text-xs font-semibold text-zinc-500">W</div></div><div className="grid grid-cols-[1fr_1fr_auto] gap-1"><input type="number" min={0} step={1} value={heightParts.feet} onChange={(event) => setHeightStr(String(composeDimensionInches(event.target.value, heightParts.inches)))} className="h-9 rounded border border-zinc-300 px-2 text-sm" /><input type="number" min={0} max={11.99} step={0.25} value={heightParts.inches} onChange={(event) => setHeightStr(String(composeDimensionInches(heightParts.feet, event.target.value)))} className="h-9 rounded border border-zinc-300 px-2 text-sm" /><div className="flex items-center text-xs font-semibold text-zinc-500">H</div></div></div></> },
                 { id: "application", title: "Application", value: application, width: 280, content: <select value={application} onChange={(event) => setApplication(event.target.value as WindowClingApplication)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"><option value="inside">Inside</option><option value="outside">Outside</option></select> },
                 { id: "viewable", title: "Viewable", value: viewable, width: 280, content: <select value={viewable} onChange={(event) => setViewable(event.target.value as WindowClingViewable)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"><option value="inside">Inside</option><option value="outside">Outside</option></select> },
                 { id: "contour", title: "Contour Cut", value: contourCut ? "Enabled" : "Disabled", width: 280, content: <button type="button" onClick={() => setContourCut((value) => !value)} className={`h-9 w-full rounded border px-3 text-xs font-semibold transition ${contourCut ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>{contourCut ? "Enabled" : "Disabled"}</button> },

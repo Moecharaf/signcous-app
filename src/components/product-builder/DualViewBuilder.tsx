@@ -15,7 +15,6 @@ import {
   canFitWithRotation,
   getDualViewRate,
   type DualViewSide,
-  type DualViewUnit,
 } from "@/lib/pricing/dual-view";
 
 interface DualViewBuilderProps {
@@ -38,6 +37,26 @@ function formatInches(value: number): string {
 
 function formatCharge(value: number): string {
   return value <= 0 ? formatCurrency(0) : `+${formatCurrency(value)}`;
+}
+
+function parseDimensionPart(value: string): number {
+  const cleaned = value.replace(/[^\d.]/g, "");
+  const parsed = Number.parseFloat(cleaned);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+}
+
+function toFeetAndInches(totalInches: number): { feet: string; inches: string } {
+  const safeInches = Math.max(0, totalInches);
+  const feet = Math.floor(safeInches / 12);
+  const inches = Number((safeInches - feet * 12).toFixed(2));
+  return {
+    feet: String(feet),
+    inches: Number.isInteger(inches) ? String(inches) : inches.toString(),
+  };
+}
+
+function composeDimensionInches(feet: string, inches: string): number {
+  return parseDimensionPart(feet) * 12 + parseDimensionPart(inches);
 }
 
 function ControlBox({
@@ -145,9 +164,10 @@ function PanelSplitPreview({ panelCount }: { panelCount: number }) {
 export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps) {
   const cart = useCart();
 
-  const [widthStr, setWidthStr] = useState("48");
-  const [heightStr, setHeightStr] = useState("36");
-  const [unit, setUnit] = useState<DualViewUnit>("inches");
+  const [widthFeet, setWidthFeet] = useState("4");
+  const [widthInches, setWidthInches] = useState("0");
+  const [heightFeet, setHeightFeet] = useState("3");
+  const [heightInches, setHeightInches] = useState("0");
   const [quantity, setQuantity] = useState(1);
   const [side, setSide] = useState<DualViewSide>("single");
   const [contourCut, setContourCut] = useState(false);
@@ -158,55 +178,53 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
   const [uploadingArtwork, setUploadingArtwork] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
-  const width = parseFloat(widthStr) || 0;
-  const height = parseFloat(heightStr) || 0;
+  const width = composeDimensionInches(widthFeet, widthInches);
+  const height = composeDimensionInches(heightFeet, heightInches);
   const safeQuantity = Math.max(1, Math.floor(quantity) || 1);
 
   // When switching to double, clamp height if it exceeds the double-sided max
   function handleSideChange(newSide: DualViewSide) {
     if (newSide === "double") {
-      const maxH = unit === "feet" ? DUAL_VIEW_CONSTRAINTS.double.maxHeight / 12 : DUAL_VIEW_CONSTRAINTS.double.maxHeight;
-      if (parseFloat(heightStr) > maxH) {
-        setHeightStr(String(maxH));
+      const maxH = DUAL_VIEW_CONSTRAINTS.double.maxHeight;
+      if (height > maxH) {
+        const cappedHeight = toFeetAndInches(maxH);
+        setHeightFeet(cappedHeight.feet);
+        setHeightInches(cappedHeight.inches);
       }
     }
     setSide(newSide);
   }
 
   const constraints = DUAL_VIEW_CONSTRAINTS[side];
-  const maxByUnit = unit === "inches" ? 300 : 25;
-  const maxWIn = unit === "feet" ? constraints.maxWidth / 12 : constraints.maxWidth;
-  const maxHIn = unit === "feet" ? constraints.maxHeight / 12 : constraints.maxHeight;
+  const maxWIn = constraints.maxWidth;
+  const maxHIn = constraints.maxHeight;
 
   // Check rotation for double-sided
   const rotationCheck = useMemo(() => {
     if (side !== "double" || !width || !height) return null;
-    const wIn = unit === "feet" ? width * 12 : width;
-    const hIn = unit === "feet" ? height * 12 : height;
-    return canFitWithRotation(wIn, hIn, "double");
-  }, [width, height, unit, side]);
+    return canFitWithRotation(width, height, "double");
+  }, [width, height, side]);
 
   function rotateDimensions() {
-    const w = widthStr;
-    setWidthStr(heightStr);
-    setHeightStr(w);
+    const currentWidth = toFeetAndInches(width);
+    const currentHeight = toFeetAndInches(height);
+    setWidthFeet(currentHeight.feet);
+    setWidthInches(currentHeight.inches);
+    setHeightFeet(currentWidth.feet);
+    setHeightInches(currentWidth.inches);
   }
 
   const widthError = useMemo(() => {
-    if (widthStr === "") return null;
     if (width <= 0) return "Width must be greater than 0.";
-    if (width > maxByUnit) return `Maximum width is ${maxByUnit} ${unit}.`;
     if (width > maxWIn) return `Max width for ${side}-sided is ${constraints.maxWidth}".`;
     return null;
-  }, [widthStr, width, maxByUnit, maxWIn, unit, side, constraints.maxWidth]);
+  }, [width, maxWIn, side, constraints.maxWidth]);
 
   const heightError = useMemo(() => {
-    if (heightStr === "") return null;
     if (height <= 0) return "Height must be greater than 0.";
-    if (height > maxByUnit) return `Maximum height is ${maxByUnit} ${unit}.`;
     if (height > maxHIn) return `Max height for ${side}-sided is ${constraints.maxHeight}".`;
     return null;
-  }, [heightStr, height, maxByUnit, maxHIn, unit, side, constraints.maxHeight]);
+  }, [height, maxHIn, side, constraints.maxHeight]);
 
   const isValid = !widthError && !heightError && width > 0 && height > 0;
 
@@ -216,13 +234,13 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
         ? calculateDualViewPrice({
             width,
             height,
-            unit,
+            unit: "inches",
             quantity: safeQuantity,
             side,
             contourCut,
           })
         : null,
-    [width, height, unit, safeQuantity, side, contourCut, isValid]
+    [width, height, safeQuantity, side, contourCut, isValid]
   );
 
   useEffect(() => {
@@ -311,7 +329,7 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
       productName: "Dual View",
       width,
       height,
-      unit,
+      unit: "inches",
       quantity: safeQuantity,
       material: `Dual View ${side === "double" ? "Double" : "Single"} Sided`,
       doubleSided: side === "double",
@@ -326,8 +344,8 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
       unitPrice: pricing.perItemTotal,
       totalPrice: pricing.grandTotal,
       customOptions: {
-        custom_width: `${width} ${unit}`,
-        custom_height: `${height} ${unit}`,
+        custom_width: `${width} inches`,
+        custom_height: `${height} inches`,
         custom_side: side === "double" ? "Double Sided" : "Single Sided",
         custom_contour_cut: contourCut ? "Yes" : "No",
         custom_panel_count: String(pricing.panelCount),
@@ -470,8 +488,28 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
               panels={[
                 { id: "artwork", title: "Artwork", value: uploadedFileName ? "Uploaded" : "No file", width: 420, content: <><label className="inline-flex h-10 w-full cursor-pointer items-center justify-center rounded border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-700 hover:border-zinc-400"><input type="file" accept="image/*,.pdf,.ai,.eps,.psd,.svg" className="hidden" onChange={onUploadArtwork} />{uploadingArtwork ? "Uploading..." : uploadedFileName ? "Replace Artwork" : "Upload Artwork"}</label>{uploadedFileName && <div className="flex items-center justify-between gap-2 rounded border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-600"><span className="truncate">{uploadedFileName}</span><button type="button" onClick={clearArtwork} className="font-semibold text-zinc-500 hover:text-zinc-900">Remove</button></div>}{uploadError && <div className="text-xs font-medium text-red-600">{uploadError}</div>}</> },
                 { id: "print-side", title: "Print Side", value: side === "double" ? "Double" : "Single", width: 320, content: <div className="grid grid-cols-2 gap-1"><button type="button" onClick={() => handleSideChange("single")} className={`h-9 rounded border px-3 text-xs font-semibold transition ${side === "single" ? "border-sky-300 bg-sky-50 text-sky-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Single</button><button type="button" onClick={() => handleSideChange("double")} className={`h-9 rounded border px-3 text-xs font-semibold transition ${side === "double" ? "border-sky-300 bg-sky-50 text-sky-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Double</button></div> },
-                { id: "size", title: "Size", value: pricing ? `${formatInches(pricing.widthIn)} x ${formatInches(pricing.heightIn)}` : "Set dimensions", status: widthError || heightError ? "alert" : "ok", width: 320, content: <div className="grid grid-cols-[1fr_auto_1fr] gap-1"><input type="number" min={0.1} max={maxByUnit} step={0.25} value={widthStr} onChange={(event) => setWidthStr(event.target.value)} className="h-9 rounded border border-zinc-300 px-2 text-sm" /><div className="flex items-center justify-center text-sm font-semibold text-zinc-400">x</div><input type="number" min={0.1} max={maxByUnit} step={0.25} value={heightStr} onChange={(event) => setHeightStr(event.target.value)} className="h-9 rounded border border-zinc-300 px-2 text-sm" /></div> },
-                { id: "units", title: "Units", value: unit === "inches" ? "Inches" : "Feet", width: 260, content: <select value={unit} onChange={(event) => setUnit(event.target.value as DualViewUnit)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"><option value="inches">Inches</option><option value="feet">Feet</option></select> },
+                {
+                  id: "size",
+                  title: "Size",
+                  value: pricing ? `${formatInches(pricing.widthIn)} x ${formatInches(pricing.heightIn)}` : "Set dimensions",
+                  status: widthError || heightError ? "alert" : "ok",
+                  width: 360,
+                  content: (
+                    <div className="space-y-2">
+                      <div className="grid grid-cols-[1fr_1fr_auto] gap-1">
+                        <input type="number" min={0} step={1} value={widthFeet} onChange={(event) => setWidthFeet(event.target.value)} className="h-9 rounded border border-zinc-300 px-2 text-sm" />
+                        <input type="number" min={0} max={11.99} step={0.25} value={widthInches} onChange={(event) => setWidthInches(event.target.value)} className="h-9 rounded border border-zinc-300 px-2 text-sm" />
+                        <div className="flex items-center text-xs font-semibold text-zinc-500">W</div>
+                      </div>
+                      <div className="grid grid-cols-[1fr_1fr_auto] gap-1">
+                        <input type="number" min={0} step={1} value={heightFeet} onChange={(event) => setHeightFeet(event.target.value)} className="h-9 rounded border border-zinc-300 px-2 text-sm" />
+                        <input type="number" min={0} max={11.99} step={0.25} value={heightInches} onChange={(event) => setHeightInches(event.target.value)} className="h-9 rounded border border-zinc-300 px-2 text-sm" />
+                        <div className="flex items-center text-xs font-semibold text-zinc-500">H</div>
+                      </div>
+                      <div className="text-[11px] leading-4 text-zinc-500">Format: feet + inches (for example 4 ft and 2 in).</div>
+                    </div>
+                  ),
+                },
                 { id: "contour", title: "Contour", value: contourCut ? "On" : "Off", width: 260, content: <button type="button" onClick={() => setContourCut((v) => !v)} className={`h-9 w-full rounded border px-3 text-xs font-semibold transition ${contourCut ? "border-sky-300 bg-sky-50 text-sky-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>{contourCut ? "Contour: On" : "Contour: Off"}</button> },
                 { id: "quantity", title: "Quantity", value: String(safeQuantity), width: 260, content: <input type="number" min={1} value={safeQuantity} onChange={(event) => setQuantity(Math.max(1, Math.floor(Number(event.target.value) || 1)))} className="h-9 w-full rounded border border-zinc-300 px-2 text-sm" /> },
               ] satisfies BuilderBottomToolbarPanel[]}

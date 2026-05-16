@@ -37,6 +37,31 @@ function formatPrice(v: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(v);
 }
 
+function parseDimensionPart(value: string): number {
+  const cleaned = value.replace(/[^\d.]/g, "");
+  const parsed = Number.parseFloat(cleaned);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+}
+
+function toFeetAndInches(totalInches: number): { feet: string; inches: string } {
+  const safeInches = Math.max(0, totalInches);
+  const feet = Math.floor(safeInches / 12);
+  const inches = Number((safeInches - feet * 12).toFixed(2));
+  return {
+    feet: String(feet),
+    inches: Number.isInteger(inches) ? String(inches) : inches.toString(),
+  };
+}
+
+function composeDimensionInches(feet: string, inches: string): number {
+  return parseDimensionPart(feet) * 12 + parseDimensionPart(inches);
+}
+
+function formatFeetAndInchesLabel(totalInches: number): string {
+  const parts = toFeetAndInches(totalInches);
+  return `${parts.feet} ft ${parts.inches} in`;
+}
+
 export default function JBondBuilder({ productId = 0, productName = "JBOND" }: JBondBuilderProps) {
   const cart = useCart();
 
@@ -103,6 +128,8 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
     () => pricingMode === "sheet" ? getBestJBondSheetLayout(activeSize.width, activeSize.height) : null,
     [pricingMode, activeSize]
   );
+  const customWidthParts = useMemo(() => toFeetAndInches(customWidth), [customWidth]);
+  const customHeightParts = useMemo(() => toFeetAndInches(customHeight), [customHeight]);
 
   const maxImages = sheetLayout?.count ?? 1;
   const safeImageCount = pricingMode === "sheet" ? Math.min(imageCount, maxImages) : 1;
@@ -224,7 +251,7 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
       customOptions: {
         custom_pricing_mode: pricingMode === "sheet" ? "Sheet Pricing" : "Custom Size (Sq.In)",
         custom_sheet_size: `${JBOND_SHEET.width}" x ${JBOND_SHEET.height}"`,
-        custom_sign_size: pricingMode === "sheet" ? formatJBondSize(activeSize) : `${customWidth}" x ${customHeight}"`,
+        custom_sign_size: pricingMode === "sheet" ? formatJBondSize(activeSize) : `${formatFeetAndInchesLabel(customWidth)} x ${formatFeetAndInchesLabel(customHeight)}`,
         custom_material_thickness: `JBond ${material}`,
         custom_print_mode: printMode === "single" ? "Single-Sided" : "Double-Sided",
         ...(pricingMode === "sheet"
@@ -410,12 +437,20 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
         {
           id: "dimensions",
           title: "Dimensions",
-          value: `${customWidth}" x ${customHeight}"`,
+          value: `${formatFeetAndInchesLabel(customWidth)} x ${formatFeetAndInchesLabel(customHeight)}`,
           width: 300,
           content: (
-            <div className="grid grid-cols-2 gap-1">
-              <input type="number" min={1} step={0.5} value={customWidth} onChange={e => setCustomWidth(Math.max(0.5, Number(e.target.value) || 1))} className="h-9 rounded border border-zinc-300 px-2 text-sm" />
-              <input type="number" min={1} step={0.5} value={customHeight} onChange={e => setCustomHeight(Math.max(0.5, Number(e.target.value) || 1))} className="h-9 rounded border border-zinc-300 px-2 text-sm" />
+            <div className="space-y-2">
+              <div className="grid grid-cols-[1fr_1fr_auto] gap-1">
+                <input type="number" min={0} step={1} value={customWidthParts.feet} onChange={e => setCustomWidth(Math.max(0.5, composeDimensionInches(e.target.value, customWidthParts.inches)))} className="h-9 rounded border border-zinc-300 px-2 text-sm" />
+                <input type="number" min={0} max={11.99} step={0.25} value={customWidthParts.inches} onChange={e => setCustomWidth(Math.max(0.5, composeDimensionInches(customWidthParts.feet, e.target.value)))} className="h-9 rounded border border-zinc-300 px-2 text-sm" />
+                <div className="flex items-center text-xs font-semibold text-zinc-500">W</div>
+              </div>
+              <div className="grid grid-cols-[1fr_1fr_auto] gap-1">
+                <input type="number" min={0} step={1} value={customHeightParts.feet} onChange={e => setCustomHeight(Math.max(0.5, composeDimensionInches(e.target.value, customHeightParts.inches)))} className="h-9 rounded border border-zinc-300 px-2 text-sm" />
+                <input type="number" min={0} max={11.99} step={0.25} value={customHeightParts.inches} onChange={e => setCustomHeight(Math.max(0.5, composeDimensionInches(customHeightParts.feet, e.target.value)))} className="h-9 rounded border border-zinc-300 px-2 text-sm" />
+                <div className="flex items-center text-xs font-semibold text-zinc-500">H</div>
+              </div>
             </div>
           ),
         },
@@ -638,7 +673,7 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
                     </svg>
                     <span className="text-xs font-semibold">
-                      {sqinUploading ? "Uploading..." : `${customWidth}" x ${customHeight}" - Click to upload artwork`}
+                      {sqinUploading ? "Uploading..." : `${formatFeetAndInchesLabel(customWidth)} x ${formatFeetAndInchesLabel(customHeight)} - Click to upload artwork`}
                     </span>
                     {pricing.sqInches > 0 && (
                       <span className="text-[10px] text-zinc-400">{pricing.sqInches} sq.in - {formatPrice(pricing.pricePerSign)}/sign</span>
@@ -692,7 +727,7 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
                   </>
                 ) : (
                   <>
-                    <Row label="Dimensions" value={`${customWidth}" ├ù ${customHeight}"`} />
+                    <Row label="Dimensions" value={`${formatFeetAndInchesLabel(customWidth)} x ${formatFeetAndInchesLabel(customHeight)}`} />
                     <Row label="Sq. Inches" value={`${pricing.sqInches} sq.in`} />
                     <Row label="Rate" value={`$${pricing.ratePerSqIn}/sq.in (min $${pricing.minPrice})`} />
                     <Row label="Price / Sign" value={formatPrice(pricing.pricePerSign)} />

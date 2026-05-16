@@ -12,7 +12,6 @@ import {
   calculateIJ35CPricing,
   type IJ35CLaminate,
   type IJ35CSplitDirection,
-  type IJ35CUnit,
 } from "@/lib/pricing/ij35c";
 
 interface Ij35cBuilderProps {
@@ -35,6 +34,26 @@ function formatInches(value: number): string {
 
 function formatCharge(value: number): string {
   return value <= 0 ? formatCurrency(0) : `+${formatCurrency(value)}`;
+}
+
+function parseDimensionPart(value: string): number {
+  const cleaned = value.replace(/[^\d.]/g, "");
+  const parsed = Number.parseFloat(cleaned);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+}
+
+function toFeetAndInches(totalInches: number): { feet: string; inches: string } {
+  const safeInches = Math.max(0, totalInches);
+  const feet = Math.floor(safeInches / 12);
+  const inches = Number((safeInches - feet * 12).toFixed(2));
+  return {
+    feet: String(feet),
+    inches: Number.isInteger(inches) ? String(inches) : inches.toString(),
+  };
+}
+
+function composeDimensionInches(feet: string, inches: string): number {
+  return parseDimensionPart(feet) * 12 + parseDimensionPart(inches);
 }
 
 function PanelCard({
@@ -135,9 +154,10 @@ function SplitLinePreview({
 export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
   const cart = useCart();
 
-  const [widthStr, setWidthStr] = useState("51");
-  const [heightStr, setHeightStr] = useState("36");
-  const [unit, setUnit] = useState<IJ35CUnit>("inches");
+  const [widthFeet, setWidthFeet] = useState("4");
+  const [widthInches, setWidthInches] = useState("3");
+  const [heightFeet, setHeightFeet] = useState("3");
+  const [heightInches, setHeightInches] = useState("0");
   const [quantity, setQuantity] = useState(1);
   const [laminate, setLaminate] = useState<IJ35CLaminate>("gloss");
   const [contourCut, setContourCut] = useState(false);
@@ -150,17 +170,12 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
   const [uploadingArtwork, setUploadingArtwork] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
-  const width = parseFloat(widthStr) || 0;
-  const height = parseFloat(heightStr) || 0;
+  const width = composeDimensionInches(widthFeet, widthInches);
+  const height = composeDimensionInches(heightFeet, heightInches);
   const safeQuantity = Math.max(1, Math.floor(quantity) || 1);
 
-  const maxByUnit = unit === "inches" ? 300 : 25;
-  const widthError =
-    widthStr !== "" &&
-    (width <= 0 ? "Width must be greater than 0." : width > maxByUnit ? `Maximum width is ${maxByUnit} ${unit}.` : null);
-  const heightError =
-    heightStr !== "" &&
-    (height <= 0 ? "Height must be greater than 0." : height > maxByUnit ? `Maximum height is ${maxByUnit} ${unit}.` : null);
+  const widthError = width <= 0 ? "Width must be greater than 0." : width > 300 ? "Maximum width is 25 ft 0 in." : null;
+  const heightError = height <= 0 ? "Height must be greater than 0." : height > 300 ? "Maximum height is 25 ft 0 in." : null;
   const isValid = !widthError && !heightError && width > 0 && height > 0;
 
   const pricing = useMemo(
@@ -169,14 +184,14 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
         ? calculateIJ35CPricing({
             width,
             height,
-            unit,
+            unit: "inches",
             quantity: safeQuantity,
             contourCut,
             rush,
             splitDirection,
           })
         : null,
-    [width, height, unit, safeQuantity, contourCut, rush, splitDirection, isValid]
+    [width, height, safeQuantity, contourCut, rush, splitDirection, isValid]
   );
 
   const showPanelOverlapWarning = Boolean(pricing && pricing.panelOverlap);
@@ -269,7 +284,7 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
       productName: "3M IJ-35C",
       width,
       height,
-      unit,
+      unit: "inches",
       quantity: safeQuantity,
       material: "3M IJ-35C Adhesive Vinyl",
       doubleSided: false,
@@ -284,8 +299,8 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
       unitPrice: pricing.perItemTotal,
       totalPrice: pricing.grandTotal,
       customOptions: {
-        custom_width: `${width} ${unit}`,
-        custom_height: `${height} ${unit}`,
+        custom_width: `${width} inches`,
+        custom_height: `${height} inches`,
         custom_laminate: selectedLaminate.label,
         custom_contour_cut: contourCut ? "Yes" : "No",
         custom_rush: rush ? "Yes" : "No",
@@ -339,51 +354,23 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
       title: "Size",
       value: isValid ? `${formatInches(pricing?.widthIn ?? width)} x ${formatInches(pricing?.heightIn ?? height)}` : "Set dimensions",
       status: widthError || heightError ? "alert" : "ok",
-      width: 320,
+      width: 360,
       content: (
         <>
-          <div className="grid grid-cols-[1fr_auto_1fr] gap-1">
-            <input
-              type="number"
-              min={0.1}
-              max={maxByUnit}
-              step={0.25}
-              value={widthStr}
-              onChange={(event) => setWidthStr(event.target.value)}
-              className="h-9 rounded border border-zinc-300 px-2 text-sm"
-            />
-            <div className="flex items-center justify-center text-sm font-semibold text-zinc-400">x</div>
-            <input
-              type="number"
-              min={0.1}
-              max={maxByUnit}
-              step={0.25}
-              value={heightStr}
-              onChange={(event) => setHeightStr(event.target.value)}
-              className="h-9 rounded border border-zinc-300 px-2 text-sm"
-            />
+          <div className="space-y-2">
+            <div className="grid grid-cols-[1fr_1fr_auto] gap-1">
+              <input type="number" min={0} step={1} value={widthFeet} onChange={(event) => setWidthFeet(event.target.value)} className="h-9 rounded border border-zinc-300 px-2 text-sm" />
+              <input type="number" min={0} max={11.99} step={0.25} value={widthInches} onChange={(event) => setWidthInches(event.target.value)} className="h-9 rounded border border-zinc-300 px-2 text-sm" />
+              <div className="flex items-center text-xs font-semibold text-zinc-500">W</div>
+            </div>
+            <div className="grid grid-cols-[1fr_1fr_auto] gap-1">
+              <input type="number" min={0} step={1} value={heightFeet} onChange={(event) => setHeightFeet(event.target.value)} className="h-9 rounded border border-zinc-300 px-2 text-sm" />
+              <input type="number" min={0} max={11.99} step={0.25} value={heightInches} onChange={(event) => setHeightInches(event.target.value)} className="h-9 rounded border border-zinc-300 px-2 text-sm" />
+              <div className="flex items-center text-xs font-semibold text-zinc-500">H</div>
+            </div>
           </div>
           {(widthError || heightError) && <div className="text-xs font-medium text-red-600">{widthError || heightError}</div>}
-          <div className="text-[11px] leading-4 text-zinc-500">Up to 300in / 25ft per side.</div>
-        </>
-      ),
-    },
-    {
-      id: "units",
-      title: "Units",
-      value: unit === "inches" ? "Inches" : "Feet",
-      width: 260,
-      content: (
-        <>
-          <select
-            value={unit}
-            onChange={(event) => setUnit(event.target.value as IJ35CUnit)}
-            className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"
-          >
-            <option value="inches">Inches</option>
-            <option value="feet">Feet</option>
-          </select>
-          <div className="text-[11px] leading-4 text-zinc-500">Switch between inches and feet.</div>
+          <div className="text-[11px] leading-4 text-zinc-500">Up to 25 ft 0 in per side.</div>
         </>
       ),
     },

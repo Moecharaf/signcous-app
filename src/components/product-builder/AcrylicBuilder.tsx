@@ -43,6 +43,26 @@ function formatInches(value: number): string {
   return `${text.replace(/\.0+$/, "")}"`;
 }
 
+function parseDimensionPart(value: string): number {
+  const cleaned = value.replace(/[^\d.]/g, "");
+  const parsed = Number.parseFloat(cleaned);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+}
+
+function toFeetAndInches(totalInches: number): { feet: string; inches: string } {
+  const safeInches = Math.max(0, totalInches);
+  const feet = Math.floor(safeInches / 12);
+  const inches = Number((safeInches - feet * 12).toFixed(2));
+  return {
+    feet: String(feet),
+    inches: Number.isInteger(inches) ? String(inches) : inches.toString(),
+  };
+}
+
+function composeDimensionInches(feet: string, inches: string): number {
+  return parseDimensionPart(feet) * 12 + parseDimensionPart(inches);
+}
+
 function formatCharge(value: number): string {
   return value === 0 ? formatCurrency(0) : `+${formatCurrency(value)}`;
 }
@@ -352,6 +372,8 @@ export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
 
   const width = parseFloat(widthStr) || 0;
   const height = parseFloat(heightStr) || 0;
+  const widthParts = toFeetAndInches(width);
+  const heightParts = toFeetAndInches(height);
   const safeQuantity = Math.max(1, Math.floor(quantity) || 1);
 
   const widthError =
@@ -424,29 +446,20 @@ export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
       title: "Size",
       value: isValid ? `${formatInches(width)} x ${formatInches(height)}` : "Set dimensions",
       status: widthError || heightError ? "alert" : "ok",
-      width: 320,
+      width: 360,
       content: (
         <>
-          <div className="grid grid-cols-[1fr_auto_1fr] gap-1">
-            <input
-              type="number"
-              min={0.1}
-              max={ACRYLIC_MAX_WIDTH}
-              step={0.5}
-              value={widthStr}
-              onChange={(event) => setWidthStr(event.target.value)}
-              className="h-9 rounded border border-zinc-300 px-2 text-sm"
-            />
-            <div className="flex items-center justify-center text-sm font-semibold text-zinc-400">x</div>
-            <input
-              type="number"
-              min={0.1}
-              max={ACRYLIC_MAX_HEIGHT}
-              step={0.5}
-              value={heightStr}
-              onChange={(event) => setHeightStr(event.target.value)}
-              className="h-9 rounded border border-zinc-300 px-2 text-sm"
-            />
+          <div className="space-y-2">
+            <div className="grid grid-cols-[1fr_1fr_auto] gap-1">
+              <input type="number" min={0} step={1} value={widthParts.feet} onChange={(event) => setWidthStr(String(composeDimensionInches(event.target.value, widthParts.inches)))} className="h-9 rounded border border-zinc-300 px-2 text-sm" />
+              <input type="number" min={0} max={11.99} step={0.25} value={widthParts.inches} onChange={(event) => setWidthStr(String(composeDimensionInches(widthParts.feet, event.target.value)))} className="h-9 rounded border border-zinc-300 px-2 text-sm" />
+              <div className="flex items-center text-xs font-semibold text-zinc-500">W</div>
+            </div>
+            <div className="grid grid-cols-[1fr_1fr_auto] gap-1">
+              <input type="number" min={0} step={1} value={heightParts.feet} onChange={(event) => setHeightStr(String(composeDimensionInches(event.target.value, heightParts.inches)))} className="h-9 rounded border border-zinc-300 px-2 text-sm" />
+              <input type="number" min={0} max={11.99} step={0.25} value={heightParts.inches} onChange={(event) => setHeightStr(String(composeDimensionInches(heightParts.feet, event.target.value)))} className="h-9 rounded border border-zinc-300 px-2 text-sm" />
+              <div className="flex items-center text-xs font-semibold text-zinc-500">H</div>
+            </div>
           </div>
           {(widthError || heightError) && <div className="text-xs font-medium text-red-600">{widthError || heightError}</div>}
           <div className="text-[11px] leading-4 text-zinc-500">Custom sizes up to 96&quot; x 48&quot;.</div>
