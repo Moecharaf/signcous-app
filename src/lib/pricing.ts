@@ -7,6 +7,17 @@ function toInches(value: number, unit: "inches" | "feet"): number {
   return unit === "feet" ? safeValue * 12 : safeValue;
 }
 
+export interface ProductionFootprintResult {
+  enteredWidthIn: number;
+  enteredHeightIn: number;
+  billedWidthIn: number;
+  billedHeightIn: number;
+  actualSqft: number;
+  billedWidthFt: number;
+  billedHeightFt: number;
+  billedSqft: number;
+}
+
 export function calculateActualSqft(
   width: number,
   height: number,
@@ -27,6 +38,34 @@ export function calculateBilledSqft(
   const billedWidthFt = Math.max(1, Math.ceil(widthIn / 12));
   const billedHeightFt = Math.max(1, Math.ceil(heightIn / 12));
   return billedWidthFt * billedHeightFt;
+}
+
+export function calculateProductionFootprint(
+  width: number,
+  height: number,
+  unit: "inches" | "feet",
+  bleedInches: number = 1
+): ProductionFootprintResult {
+  const enteredWidthIn = toInches(width, unit);
+  const enteredHeightIn = toInches(height, unit);
+  const safeBleed = Number.isFinite(bleedInches) ? Math.max(0, bleedInches) : 0;
+  const billedWidthIn = enteredWidthIn + safeBleed;
+  const billedHeightIn = enteredHeightIn + safeBleed;
+  const actualSqft = Math.round(((enteredWidthIn * enteredHeightIn) / 144) * 100) / 100;
+  const billedWidthFt = Math.max(1, Math.ceil(billedWidthIn / 12));
+  const billedHeightFt = Math.max(1, Math.ceil(billedHeightIn / 12));
+  const billedSqft = billedWidthFt * billedHeightFt;
+
+  return {
+    enteredWidthIn,
+    enteredHeightIn,
+    billedWidthIn,
+    billedHeightIn,
+    actualSqft,
+    billedWidthFt,
+    billedHeightFt,
+    billedSqft,
+  };
 }
 
 export function calculateRetailPrice(productionCost: number, markup: number = BANNER_MARKUP): number {

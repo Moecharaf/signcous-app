@@ -1,4 +1,4 @@
-import { calculateActualSqft, calculateBilledSqft, calculateRetailPrice } from "../pricing";
+import { calculateProductionFootprint, calculateRetailPrice } from "../pricing";
 
 export type DualViewUnit = "inches" | "feet";
 export type DualViewSide = "single" | "double";
@@ -18,7 +18,11 @@ export interface DualViewPricingInput {
 }
 
 export interface DualViewPricingResult {
+  enteredWidthIn: number;
+  enteredHeightIn: number;
   actualSqft: number;
+  billedWidthIn: number;
+  billedHeightIn: number;
   billedWidthFt: number;
   billedHeightFt: number;
   billedSqft: number;
@@ -103,46 +107,45 @@ export function calculateDualViewPanels(widthIn: number): number {
 }
 
 export function calculateDualViewPrice(input: DualViewPricingInput): DualViewPricingResult {
-  const widthIn = Math.max(0, toInches(input.width, input.unit));
-  const heightIn = Math.max(0, toInches(input.height, input.unit));
   const quantity = Math.max(1, Math.floor(input.quantity || 1));
 
-  const actualSqft = calculateActualSqft(widthIn, heightIn, "inches");
-  const billedWidthFt = Math.max(1, Math.ceil(widthIn / 12));
-  const billedHeightFt = Math.max(1, Math.ceil(heightIn / 12));
-  const billedSqft = calculateBilledSqft(widthIn, heightIn, "inches");
+  const footprint = calculateProductionFootprint(input.width, input.height, input.unit, 1);
   const supplierRate = getDualViewRate(input.side);
-  const productionCost = billedSqft * supplierRate;
+  const productionCost = footprint.billedSqft * supplierRate;
 
   const contourAdjustedBase = input.contourCut
     ? productionCost * DUAL_VIEW_CONTOUR_MULTIPLIER
     : productionCost;
   const contourCutCharge = contourAdjustedBase - productionCost;
 
-  const panelCount = calculateDualViewPanels(widthIn);
+  const panelCount = calculateDualViewPanels(footprint.billedWidthIn);
   const panelCostPer = DUAL_VIEW_PANEL_COST[input.side];
   const panelCost = (panelCount - 1) * panelCostPer;
 
   const minimumPrice = DUAL_VIEW_MINIMUM[input.side];
-  const preMinimumTotal = contourAdjustedBase;
+  const preMinimumTotal = contourAdjustedBase + panelCost;
   const retailBeforeMinimum = calculateRetailPrice(preMinimumTotal);
   const minimumApplied = retailBeforeMinimum < minimumPrice;
   const perItemTotal = Math.max(retailBeforeMinimum, minimumPrice);
 
-  const panelWidthIn = widthIn / panelCount;
-  const panelHeightIn = heightIn;
+  const panelWidthIn = footprint.billedWidthIn / panelCount;
+  const panelHeightIn = footprint.billedHeightIn;
 
   return {
-    actualSqft,
-    billedWidthFt,
-    billedHeightFt,
-    billedSqft,
+    enteredWidthIn: footprint.enteredWidthIn,
+    enteredHeightIn: footprint.enteredHeightIn,
+    actualSqft: footprint.actualSqft,
+    billedWidthIn: footprint.billedWidthIn,
+    billedHeightIn: footprint.billedHeightIn,
+    billedWidthFt: footprint.billedWidthFt,
+    billedHeightFt: footprint.billedHeightFt,
+    billedSqft: footprint.billedSqft,
     supplierRate,
     productionCost,
     retailPrice: perItemTotal,
-    widthIn,
-    heightIn,
-    areaSqFt: actualSqft,
+    widthIn: footprint.billedWidthIn,
+    heightIn: footprint.billedHeightIn,
+    areaSqFt: footprint.actualSqft,
     baseRate: supplierRate,
     rawBase: productionCost,
     contourCutCharge,

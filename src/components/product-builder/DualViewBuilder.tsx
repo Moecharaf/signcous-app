@@ -17,6 +17,7 @@ import {
   getDualViewRate,
   type DualViewSide,
 } from "@/lib/pricing/dual-view";
+import { calculateProductionFootprint } from "@/lib/pricing";
 
 interface DualViewBuilderProps {
   productId?: number;
@@ -162,6 +163,7 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
   const width = composeDimensionInches(widthFeet, widthInches);
   const height = composeDimensionInches(heightFeet, heightInches);
   const safeQuantity = Math.max(1, Math.floor(quantity) || 1);
+  const footprint = useMemo(() => calculateProductionFootprint(width, height, "inches", 1), [width, height]);
 
   // When switching to double, clamp height if it exceeds the double-sided max
   function handleSideChange(newSide: DualViewSide) {
@@ -182,9 +184,9 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
 
   // Check rotation for double-sided
   const rotationCheck = useMemo(() => {
-    if (side !== "double" || !width || !height) return null;
-    return canFitWithRotation(width, height, "double");
-  }, [width, height, side]);
+    if (side !== "double" || !footprint.billedWidthIn || !footprint.billedHeightIn) return null;
+    return canFitWithRotation(footprint.billedWidthIn, footprint.billedHeightIn, "double");
+  }, [footprint.billedWidthIn, footprint.billedHeightIn, side]);
 
   function rotateDimensions() {
     const currentWidth = toFeetAndInches(width);
@@ -197,15 +199,15 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
 
   const widthError = useMemo(() => {
     if (width <= 0) return "Width must be greater than 0.";
-    if (width > maxWIn) return `Max width for ${side}-sided is ${constraints.maxWidth}".`;
+    if (footprint.billedWidthIn > maxWIn) return `Max width for ${side}-sided is ${constraints.maxWidth}".`;
     return null;
-  }, [width, maxWIn, side, constraints.maxWidth]);
+  }, [width, footprint.billedWidthIn, maxWIn, side, constraints.maxWidth]);
 
   const heightError = useMemo(() => {
     if (height <= 0) return "Height must be greater than 0.";
-    if (height > maxHIn) return `Max height for ${side}-sided is ${constraints.maxHeight}".`;
+    if (footprint.billedHeightIn > maxHIn) return `Max height for ${side}-sided is ${constraints.maxHeight}".`;
     return null;
-  }, [height, maxHIn, side, constraints.maxHeight]);
+  }, [height, footprint.billedHeightIn, maxHIn, side, constraints.maxHeight]);
 
   const isValid = !widthError && !heightError && width > 0 && height > 0;
 
@@ -228,6 +230,7 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
   const billedAreaLabel = pricing ? `${pricing.billedSqft.toFixed(2)} sq ft` : "--";
   const supplierRateLabel = pricing ? `${formatCurrency(pricing.supplierRate)}/sq ft` : "--";
   const retailPriceLabel = pricing ? formatCurrency(pricing.perItemTotal) : formatCurrency(0);
+  const enteredSizeLabel = `${widthFeet} ft ${widthInches} in x ${heightFeet} ft ${heightInches} in`;
 
   useEffect(() => {
     return () => {
@@ -313,8 +316,8 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
     cart.addItem({
       productId,
       productName: "Dual View",
-      width,
-      height,
+      width: pricing.billedWidthIn,
+      height: pricing.billedHeightIn,
       unit: "inches",
       quantity: safeQuantity,
       material: `Dual View ${side === "double" ? "Double" : "Single"} Sided`,
@@ -330,14 +333,22 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
       unitPrice: pricing.perItemTotal,
       totalPrice: pricing.grandTotal,
       customOptions: {
-        custom_width: `${width} inches`,
-        custom_height: `${height} inches`,
+        custom_entered_width: `${pricing.enteredWidthIn} inches`,
+        custom_entered_height: `${pricing.enteredHeightIn} inches`,
+        custom_billed_width: `${pricing.billedWidthIn} inches`,
+        custom_billed_height: `${pricing.billedHeightIn} inches`,
+        custom_width: `${pricing.billedWidthIn} inches`,
+        custom_height: `${pricing.billedHeightIn} inches`,
         custom_side: side === "double" ? "Double Sided" : "Single Sided",
         custom_contour_cut: contourCut ? "Yes" : "No",
         custom_panel_count: String(pricing.panelCount),
         custom_panel_size: `${formatInches(pricing.panelWidthIn)} x ${formatInches(pricing.panelHeightIn)}`,
         custom_area_sqft: pricing.areaSqFt.toFixed(2),
+        custom_billed_sqft: pricing.billedSqft.toFixed(2),
         custom_base_rate: `${formatCurrency(pricing.baseRate)}/sq ft`,
+        custom_supplier_rate: `${formatCurrency(pricing.supplierRate)}/sq ft`,
+        custom_production_cost: formatCurrency(pricing.productionCost),
+        custom_retail_price: formatCurrency(pricing.perItemTotal),
         custom_panel_cost: formatCurrency(pricing.panelCost),
       },
     });
@@ -477,7 +488,7 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
                 {
                   id: "size",
                   title: "Size",
-                  value: pricing ? `${formatInches(pricing.widthIn)} x ${formatInches(pricing.heightIn)}` : "Set dimensions",
+                    value: pricing ? `${formatInches(pricing.billedWidthIn)} x ${formatInches(pricing.billedHeightIn)}` : "Set dimensions",
                   status: widthError || heightError ? "alert" : "ok",
                   width: 360,
                   content: (
@@ -517,6 +528,11 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
                   value={billedAreaLabel}
                   muted={!pricing}
                 />
+                      <BreakdownRow
+                        label="Entered size"
+                        value={enteredSizeLabel}
+                        muted={!pricing}
+                      />
                 <BreakdownRow
                   label="Print side"
                   value={side === "double" ? "Double Sided" : "Single Sided"}
@@ -601,8 +617,10 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
 
             <PanelCard eyebrow="Debug Panel" title="Production Footprint Check">
               <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
-                <SummaryItem label="Width Inches" value={pricing ? formatInches(pricing.widthIn) : "--"} />
-                <SummaryItem label="Height Inches" value={pricing ? formatInches(pricing.heightIn) : "--"} />
+                <SummaryItem label="Entered Width" value={pricing ? formatInches(pricing.enteredWidthIn) : "--"} />
+                <SummaryItem label="Entered Height" value={pricing ? formatInches(pricing.enteredHeightIn) : "--"} />
+                <SummaryItem label="Billed Width" value={pricing ? formatInches(pricing.billedWidthIn) : "--"} />
+                <SummaryItem label="Billed Height" value={pricing ? formatInches(pricing.billedHeightIn) : "--"} />
                 <SummaryItem label="Actual Sq Ft" value={pricing ? pricing.actualSqft.toFixed(2) : "--"} />
                 <SummaryItem label="Billed Width Ft" value={pricing ? String(pricing.billedWidthFt) : "--"} />
                 <SummaryItem label="Billed Height Ft" value={pricing ? String(pricing.billedHeightFt) : "--"} />
