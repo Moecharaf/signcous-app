@@ -47,6 +47,7 @@ export interface ManualBannerProductCard {
   label: string;
   image: string | null;
   imageAlt: string;
+  imagePosition?: string;
   theme?: ManualBannerThemeKey;
 }
 
@@ -58,6 +59,7 @@ export interface HomeCatalogProductCard {
   summary: string;
   image: string | null;
   imageAlt: string;
+  imagePosition?: string;
 }
 
 export interface HomeCatalogSection {
@@ -301,6 +303,7 @@ interface ShowcaseCardData {
   description: string;
   image: string | null;
   imageAlt: string;
+  imagePosition?: string;
   eyebrow: string;
   texture: string;
   ghost: string;
@@ -537,7 +540,8 @@ function ShowcaseCard({
               quality={75}
               loading="lazy"
               sizes="(max-width: 640px) 45vw, (max-width: 1024px) 22vw, 15vw"
-              className="object-contain"
+              className="object-cover"
+              style={{ objectPosition: card.imagePosition ?? "center center" }}
             />
           ) : (
             <div className="h-full bg-[#f0f0f0]" />
@@ -788,6 +792,7 @@ export default function HomeCatalogClient({
                     description: manualProduct.description,
                     image: manualProduct.image,
                     imageAlt: manualProduct.imageAlt,
+                    imagePosition: manualProduct.imagePosition,
                     eyebrow: visual.eyebrow,
                     texture: visual.texture,
                     ghost: visual.ghost,
@@ -818,6 +823,7 @@ export default function HomeCatalogClient({
                     description: product.summary || `Custom ${activeSection.name.toLowerCase()} print product.`,
                     image: product.image,
                     imageAlt: product.imageAlt,
+                    imagePosition: product.imagePosition,
                     eyebrow: visual.eyebrow,
                     texture: visual.texture,
                     ghost: visual.ghost,
