@@ -200,6 +200,8 @@ function AcrylicCanvas({
   contourCut,
   thickness,
   uploadedImage,
+  uploadedFileUrl,
+  uploadedFileName,
   uploadingArtwork,
 }: {
   width: number;
@@ -210,6 +212,8 @@ function AcrylicCanvas({
   contourCut: boolean;
   thickness: AcrylicThickness;
   uploadedImage: string | null;
+  uploadedFileUrl: string | null;
+  uploadedFileName: string | null;
   uploadingArtwork: boolean;
 }) {
   const maxWidth = 680;
@@ -706,6 +710,8 @@ export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
                 contourCut={contourCut}
                 thickness={thickness}
                 uploadedImage={uploadedImage}
+                uploadedFileUrl={uploadedFileUrl}
+                uploadedFileName={uploadedFileName}
                 uploadingArtwork={uploadingArtwork}
               />
             </div>
