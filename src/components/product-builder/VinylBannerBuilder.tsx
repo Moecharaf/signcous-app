@@ -1371,15 +1371,17 @@ export default function VinylBannerBuilder({
                 draggable={false}
               />
             ) : uploadedFileUrl && uploadedFileName?.toLowerCase().endsWith(".pdf") ? (
-                        <div className="relative h-full w-full">
-                          <iframe
-                            src={`${uploadedFileUrl}#toolbar=0&navpanes=0&scrollbar=0&page=1&view=FitH`}
-                            title="Uploaded PDF artwork preview"
-                            className="absolute left-0 top-0 h-full pointer-events-none"
-                            style={{ width: "calc(100% + 18px)" }}
-                          />
-                        </div>
-                      ) : (
+              <div className="relative h-full w-full">
+                <iframe
+                  src={`${uploadedFileUrl}#toolbar=0&navpanes=0&scrollbar=0&page=1&view=FitH`}
+                  title="Uploaded PDF artwork preview"
+                  className="absolute -left-3 top-0 h-full w-[calc(100%+32px)] pointer-events-none"
+                  scrolling="no"
+                  style={{ clipPath: "inset(0 20px 0 0)" }}
+                />
+                <div className="pointer-events-none absolute inset-y-0 right-0 w-5 bg-white" />
+              </div>
+            ) : (
               <div className="flex h-full items-center justify-center px-6 text-center text-zinc-400">
                 <div>
                   <div className="text-base font-medium">Drop Artwork Here</div>
