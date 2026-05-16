@@ -274,13 +274,6 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
                 Upload artwork to preview panel splits
               </div>
 
-              <div className="pointer-events-none absolute left-1/2 top-5 -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
-                Outside (Print Side)
-              </div>
-              <div className="pointer-events-none absolute bottom-5 left-1/2 -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
-                Inside (See-Through)
-              </div>
-
               <div className="relative flex h-full items-center justify-center px-8 py-14">
                 {pricing ? (
                   <>
