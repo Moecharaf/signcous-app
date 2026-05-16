@@ -348,15 +348,11 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
                           className="object-fill"
                         />
                       ) : uploadedPdf ? (
-                        <object
-                          data={uploadedPdf}
-                          type="application/pdf"
-                          className="absolute inset-0 h-full w-full"
-                        >
-                          <div className="absolute inset-0 flex items-center justify-center px-4 text-center text-zinc-500 text-sm">
-                            PDF preview unavailable in this browser.
-                          </div>
-                        </object>
+                        <iframe
+                          src={`${uploadedPdf}#toolbar=0&navpanes=0&scrollbar=0&page=1&view=FitH`}
+                          title="Uploaded One Way Window PDF preview"
+                          className="absolute inset-0 h-full w-full pointer-events-none"
+                        />
                       ) : (
                         <div className="absolute inset-0 flex items-center justify-center text-center text-zinc-400">
                           <div>
