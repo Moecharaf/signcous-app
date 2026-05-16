@@ -124,8 +124,8 @@ export function calculateDualViewPrice(input: DualViewPricingInput): DualViewPri
   const panelCost = (panelCount - 1) * panelCostPer;
 
   const minimumPrice = DUAL_VIEW_MINIMUM[input.side];
-  const preMinimumTotal = contourAdjustedBase + panelCost;
-  const retailBeforeMinimum = calculateRetailPrice(preMinimumTotal, 1.5);
+  const preMinimumTotal = contourAdjustedBase;
+  const retailBeforeMinimum = calculateRetailPrice(preMinimumTotal);
   const minimumApplied = retailBeforeMinimum < minimumPrice;
   const perItemTotal = Math.max(retailBeforeMinimum, minimumPrice);
 
