@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
 import Button from "@/components/ui/Button";
 import RigidPricingHeader from "@/components/product-builder/RigidPricingHeader";
@@ -463,16 +463,10 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
                           <img src={upload.blobUrl} alt="" className="h-full w-full object-contain" />
                         </div>
                       ) : upload && upload.fileName.toLowerCase().endsWith(".pdf") ? (
-                        <div className="relative h-full w-full overflow-hidden bg-white">
-                          <iframe
-                            src={`${upload.fileUrl}#toolbar=0&navpanes=0&scrollbar=0&page=1&view=FitH`}
-                            title={`Uploaded Coro PDF preview ${slotIndex !== null ? slotIndex + 1 : ""}`}
-                            className="pointer-events-none absolute -left-2 top-0 h-full w-[calc(100%+20px)]"
-                            scrolling="no"
-                            style={{ clipPath: "inset(0 14px 0 0)" }}
-                          />
-                          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-4 bg-white" />
-                        </div>
+                        <CoroPdfStretchPreview
+                          fileUrl={upload.fileUrl}
+                          title={`Uploaded Coro PDF preview ${slotIndex !== null ? slotIndex + 1 : ""}`}
+                        />
                       ) : slotIndex !== null ? (
                         <div className={`flex h-full w-full items-center justify-center ${colorClass} opacity-30`}>
                           <span className="text-[7px] font-bold text-zinc-700">
@@ -607,5 +601,71 @@ function ToggleField({
       <span>{label}</span>
       <span className={value ? "text-emerald-600" : "text-zinc-500"}>{value ? "Yes" : "No"}</span>
     </button>
+  );
+}
+
+function CoroPdfStretchPreview({ fileUrl, title }: { fileUrl: string; title: string }) {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [renderFailed, setRenderFailed] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function renderPdfFirstPage() {
+      setRenderFailed(false);
+      try {
+        const pdfjsLib = await import("pdfjs-dist");
+        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+
+        const loadingTask = pdfjsLib.getDocument(fileUrl);
+        const pdf = await loadingTask.promise;
+        const page = await pdf.getPage(1);
+        const viewport = page.getViewport({ scale: 1.5 });
+        if (cancelled || !canvasRef.current) {
+          await pdf.destroy();
+          return;
+        }
+
+        const canvas = canvasRef.current;
+        const context = canvas.getContext("2d");
+        if (!context) {
+          await pdf.destroy();
+          throw new Error("Canvas context unavailable");
+        }
+
+        canvas.width = Math.max(1, Math.floor(viewport.width));
+        canvas.height = Math.max(1, Math.floor(viewport.height));
+        await page.render({ canvasContext: context, viewport }).promise;
+        await pdf.destroy();
+      } catch {
+        if (!cancelled) setRenderFailed(true);
+      }
+    }
+
+    void renderPdfFirstPage();
+    return () => {
+      cancelled = true;
+    };
+  }, [fileUrl]);
+
+  if (renderFailed) {
+    return (
+      <div className="relative h-full w-full overflow-hidden bg-white">
+        <iframe
+          src={`${fileUrl}#toolbar=0&navpanes=0&scrollbar=0&page=1&view=FitH`}
+          title={title}
+          className="pointer-events-none absolute -left-2 top-0 h-full w-[calc(100%+20px)]"
+          scrolling="no"
+          style={{ clipPath: "inset(0 14px 0 0)" }}
+        />
+        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-4 bg-white" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative h-full w-full overflow-hidden bg-white">
+      <canvas ref={canvasRef} aria-label={title} className="h-full w-full" style={{ objectFit: "fill" }} />
+    </div>
   );
 }
