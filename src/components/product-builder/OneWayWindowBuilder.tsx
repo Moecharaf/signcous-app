@@ -1,20 +1,15 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState, type ChangeEvent, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
 import SizeInputPanel, { composeDimensionInches } from "@/components/product-builder/SizeInputPanel";
 import Button from "@/components/ui/Button";
 import RigidPricingHeader from "@/components/product-builder/RigidPricingHeader";
 import { useCart } from "@/context/CartContext";
 import {
-  ONE_WAY_MARKUP_MULTIPLIER,
   ONE_WAY_MATERIAL_OPTIONS,
   ONE_WAY_MAX_PANEL_WIDTH,
-  ONE_WAY_MINIMUM_PRICE,
-  ONE_WAY_PANEL_EXTRA_COST,
-  ONE_WAY_SUPPLIER_LAMINATE_RATE,
-  ONE_WAY_SUPPLIER_RATE,
   calculateOneWayWindowPrice,
   type OneWayWindowMaterial,
 } from "@/lib/pricing/one-way-window";
@@ -35,90 +30,6 @@ function formatInches(value: number): string {
   const rounded = parseFloat(value.toFixed(2));
   const text = Number.isInteger(rounded) ? rounded.toFixed(0) : rounded.toString();
   return `${text.replace(/\.0+$/, "")}"`;
-}
-
-function formatCharge(value: number): string {
-  return value <= 0 ? formatCurrency(0) : `+${formatCurrency(value)}`;
-}
-
-function ControlBox({
-  title,
-  helper,
-  className,
-  children,
-}: {
-  title: string;
-  helper?: string;
-  className?: string;
-  children: ReactNode;
-}) {
-  return (
-    <div className={`rounded-lg border border-zinc-200 bg-white p-2 ${className ?? ""}`}>
-      <div className="mb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">{title}</div>
-      {children}
-      {helper && <div className="mt-1 text-[11px] leading-4 text-zinc-500">{helper}</div>}
-    </div>
-  );
-}
-
-function PanelCard({
-  eyebrow,
-  title,
-  children,
-}: {
-  eyebrow: string;
-  title: string;
-  children: ReactNode;
-}) {
-  return (
-    <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-      <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-500">{eyebrow}</div>
-      <div className="mt-1 text-lg font-semibold text-zinc-900">{title}</div>
-      <div className="mt-3">{children}</div>
-    </div>
-  );
-}
-
-function BreakdownRow({
-  label,
-  value,
-  strong,
-  accent,
-  muted,
-}: {
-  label: string;
-  value: string;
-  strong?: boolean;
-  accent?: boolean;
-  muted?: boolean;
-}) {
-  return (
-    <div className="flex items-center justify-between gap-4 py-1.5 text-sm">
-      <span className={muted ? "text-zinc-400" : strong ? "font-semibold text-zinc-900" : "text-zinc-600"}>{label}</span>
-      <span
-        className={`tabular-nums ${
-          muted
-            ? "text-zinc-400"
-            : accent
-            ? "font-semibold text-[var(--brand-primary)]"
-            : strong
-            ? "font-semibold text-zinc-900"
-            : "text-zinc-700"
-        }`}
-      >
-        {value}
-      </span>
-    </div>
-  );
-}
-
-function SummaryItem({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5">
-      <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-500">{label}</div>
-      <div className="mt-1.5 text-sm font-semibold text-zinc-900">{value}</div>
-    </div>
-  );
 }
 
 function PanelSplitPreview({ panelCount }: { panelCount: number }) {
@@ -455,154 +366,6 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
               action={<Button className="h-10 w-full rounded bg-[var(--brand-primary)] text-xs font-semibold text-white hover:bg-[var(--brand-primary-hover)]" disabled={!isValid} onClick={addToCart}>{added ? "Added" : "Add"}</Button>}
             />
           </div>
-
-          <aside className="space-y-3">
-            <PanelCard eyebrow="Pricing" title="One Way Window Breakdown">
-              <div className="space-y-1">
-                <BreakdownRow
-                  label="Area"
-                  value={pricing ? `${pricing.areaSqFt.toFixed(2)} sq ft` : "--"}
-                  muted={!pricing}
-                />
-                <BreakdownRow
-                  label="Billed area"
-                  value={pricing ? `${pricing.billedSqFt.toFixed(2)} sq ft` : "--"}
-                  muted={!pricing}
-                />
-                <BreakdownRow
-                  label="Supplier rate"
-                  value={pricing ? `${formatCurrency(pricing.supplierRate)}/sq ft` : "--"}
-                  muted={!pricing}
-                />
-                <BreakdownRow
-                  label="Base production cost"
-                  value={pricing ? formatCurrency(pricing.baseCost) : formatCurrency(0)}
-                  muted={!pricing}
-                />
-                <BreakdownRow
-                  label={`Laminate (+${formatCurrency(ONE_WAY_SUPPLIER_LAMINATE_RATE)}/sq ft supplier)`}
-                  value={pricing ? formatCharge(pricing.laminateCost) : formatCurrency(0)}
-                  muted={!pricing || !laminate}
-                />
-                <BreakdownRow
-                  label="Contour cut"
-                  value={pricing ? formatCharge(pricing.contourCutCharge) : formatCurrency(0)}
-                  muted={!pricing || !contourCut}
-                />
-                <BreakdownRow
-                  label="Rush (100% additional)"
-                  value={pricing ? formatCharge(pricing.rushCharge) : formatCurrency(0)}
-                  muted={!pricing || !rush}
-                />
-                <BreakdownRow
-                  label={`Markup (${Math.round((ONE_WAY_MARKUP_MULTIPLIER - 1) * 100)}%)`}
-                  value={pricing ? `${formatCurrency(pricing.retailBeforeMinimum - pricing.preMinimumTotal)}` : formatCurrency(0)}
-                  muted={!pricing}
-                />
-                <BreakdownRow
-                  label="Minimum floor"
-                  value={formatCurrency(ONE_WAY_MINIMUM_PRICE)}
-                  muted={!pricing}
-                />
-                <BreakdownRow
-                  label={`Panel cost (${pricing ? pricing.panelCount : "—"} panel${pricing && pricing.panelCount !== 1 ? "s" : ""})`}
-                  value={pricing ? formatCharge(pricing.panelCost) : formatCurrency(0)}
-                  muted={!pricing || (pricing?.panelCount ?? 1) <= 1}
-                />
-                <div className="my-2 border-t border-zinc-200" />
-                <BreakdownRow
-                  label="Per-item total"
-                  value={pricing ? formatCurrency(pricing.perItemTotal) : formatCurrency(0)}
-                  strong
-                />
-                <BreakdownRow label="Quantity" value={String(pricing?.quantity ?? safeQuantity)} strong />
-                <BreakdownRow
-                  label="Grand total"
-                  value={pricing ? formatCurrency(pricing.grandTotal) : formatCurrency(0)}
-                  strong
-                  accent
-                />
-              </div>
-            </PanelCard>
-
-            <PanelCard eyebrow="Split Logic" title="Panel Planning">
-              <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
-                <SummaryItem label="Max Panel Width" value={`${ONE_WAY_MAX_PANEL_WIDTH}" (STRICT)`} />
-                <SummaryItem label="Panel Count" value={pricing ? String(pricing.panelCount) : "--"} />
-                <SummaryItem
-                  label="Panel Size"
-                  value={
-                    pricing
-                      ? `${formatInches(pricing.panelWidthIn)} x ${formatInches(pricing.panelHeightIn)}`
-                      : "--"
-                  }
-                />
-                <SummaryItem label="Panel Surcharge" value={pricing ? formatCurrency(pricing.panelCost) : "--"} />
-                <SummaryItem label="Material" value={selectedMaterial.label} />
-                <SummaryItem label="Laminate" value={laminate ? "Yes" : "No"} />
-              </div>
-            </PanelCard>
-
-            <PanelCard eyebrow="Supplier Rates" title="Cost + 50% Markup Pricing">
-              <div className="space-y-2 text-sm text-zinc-600">
-                {[
-                  { range: "50/50 Perforation", rate: `${formatCurrency(ONE_WAY_SUPPLIER_RATE)}/sq ft supplier`, active: material === "50/50" },
-                  {
-                    range: "70/30 Perforation",
-                    rate: `${formatCurrency(ONE_WAY_SUPPLIER_RATE)}/sq ft supplier`,
-                    active: material === "70/30",
-                  },
-                  {
-                    range: "Gloss Laminate",
-                    rate: `${formatCurrency(ONE_WAY_SUPPLIER_LAMINATE_RATE)}/sq ft supplier`,
-                    active: laminate,
-                  },
-                  { range: "Rush", rate: "100% additional", active: rush },
-                  { range: "Markup", rate: `${Math.round((ONE_WAY_MARKUP_MULTIPLIER - 1) * 100)}% over supplier cost`, active: true },
-                ].map((tier) => (
-                  <div
-                    key={tier.range}
-                    className={`rounded-xl border px-3 py-2 ${
-                      tier.active ? "border-sky-200 bg-sky-50" : "border-zinc-200 bg-zinc-50"
-                    }`}
-                  >
-                    <div className={`font-semibold ${tier.active ? "text-sky-800" : "text-zinc-800"}`}>
-                      {tier.range}
-                    </div>
-                    <div className={`text-xs ${tier.active ? "text-sky-600" : "text-zinc-600"}`}>
-                      {tier.rate}
-                      {tier.active ? " ← active" : ""}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </PanelCard>
-
-            <PanelCard eyebrow="Material" title="Perforation Options">
-              <div className="space-y-2 text-sm text-zinc-600">
-                {ONE_WAY_MATERIAL_OPTIONS.map((option) => (
-                  <div
-                    key={option.value}
-                    className={`rounded-xl border px-3 py-2 ${
-                      material === option.value
-                        ? "border-sky-200 bg-sky-50"
-                        : "border-zinc-200 bg-zinc-50"
-                    }`}
-                  >
-                    <div
-                      className={`font-semibold ${
-                        material === option.value ? "text-sky-800" : "text-zinc-800"
-                      }`}
-                    >
-                      {option.label}
-                      {material === option.value ? " ← selected" : ""}
-                    </div>
-                    <div className="text-xs text-zinc-600">{option.note}</div>
-                  </div>
-                ))}
-              </div>
-            </PanelCard>
-          </aside>
         </div>
       </div>
     </div>
