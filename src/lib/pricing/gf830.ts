@@ -35,6 +35,8 @@ export interface GF830PricingResult {
 export const GF830_MINIMUM_PRICE = 30;
 export const GF830_MAX_PANEL_WIDTH = 60; // inches
 export const GF830_PANEL_EXTRA_COST = 8; // per extra panel
+export const GF830_SUPPLIER_RATE = 3.99; // cost per sq ft
+export const GF830_MARKUP_MULTIPLIER = 1.5; // +50% markup
 export const GF830_CONTOUR_MULTIPLIER = 1.10;
 export const GF830_RUSH_MULTIPLIER = 2;
 
@@ -49,10 +51,7 @@ function toInches(value: number, unit: GF830Unit): number {
 }
 
 export function getDynamicRate(sqFt: number): number {
-  if (sqFt < 10) return 6.75;
-  if (sqFt < 50) return 6.25;
-  if (sqFt < 150) return 5.95;
-  return 5.75;
+  return GF830_SUPPLIER_RATE * GF830_MARKUP_MULTIPLIER;
 }
 
 export function calculateGF830Panels(widthIn: number, heightIn: number, splitDirection: GF830SplitDirection): number {
