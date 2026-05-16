@@ -69,6 +69,7 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
   const [rush, setRush] = useState(false);
   const [added, setAdded] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [uploadedPdf, setUploadedPdf] = useState<string | null>(null);
   const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null);
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
   const [uploadingArtwork, setUploadingArtwork] = useState(false);
@@ -109,8 +110,9 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
   useEffect(() => {
     return () => {
       if (uploadedImage) URL.revokeObjectURL(uploadedImage);
+      if (uploadedPdf) URL.revokeObjectURL(uploadedPdf);
     };
-  }, [uploadedImage]);
+  }, [uploadedImage, uploadedPdf]);
 
   async function onUploadArtwork(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -156,8 +158,26 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
           if (previous) URL.revokeObjectURL(previous);
           return blobUrl;
         });
+        setUploadedPdf((previous) => {
+          if (previous) URL.revokeObjectURL(previous);
+          return null;
+        });
+      } else if (file.type === "application/pdf") {
+        const blobUrl = URL.createObjectURL(file);
+        setUploadedPdf((previous) => {
+          if (previous) URL.revokeObjectURL(previous);
+          return blobUrl;
+        });
+        setUploadedImage((previous) => {
+          if (previous) URL.revokeObjectURL(previous);
+          return null;
+        });
       } else {
         setUploadedImage((previous) => {
+          if (previous) URL.revokeObjectURL(previous);
+          return null;
+        });
+        setUploadedPdf((previous) => {
           if (previous) URL.revokeObjectURL(previous);
           return null;
         });
@@ -172,6 +192,10 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
 
   function clearArtwork() {
     setUploadedImage((previous) => {
+      if (previous) URL.revokeObjectURL(previous);
+      return null;
+    });
+    setUploadedPdf((previous) => {
       if (previous) URL.revokeObjectURL(previous);
       return null;
     });
@@ -323,6 +347,16 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
                           unoptimized
                           className="object-fill"
                         />
+                      ) : uploadedPdf ? (
+                        <object
+                          data={uploadedPdf}
+                          type="application/pdf"
+                          className="absolute inset-0 h-full w-full"
+                        >
+                          <div className="absolute inset-0 flex items-center justify-center px-4 text-center text-zinc-500 text-sm">
+                            PDF preview unavailable in this browser.
+                          </div>
+                        </object>
                       ) : (
                         <div className="absolute inset-0 flex items-center justify-center text-center text-zinc-400">
                           <div>
