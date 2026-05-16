@@ -314,8 +314,22 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
     window.setTimeout(() => setAdded(false), 1800);
   }
 
-  const previewWidth = pricing ? Math.max(240, Math.min(640, pricing.widthIn * 2.8)) : 320;
-  const previewHeight = pricing ? Math.max(180, Math.min(460, pricing.heightIn * 2.8)) : 220;
+  const previewMaxWidth = 640;
+  const previewMaxHeight = 460;
+  const previewMinWidth = 80;
+  const previewMinHeight = 60;
+  const previewScale = pricing
+    ? Math.min(
+        previewMaxWidth / Math.max(pricing.widthIn, 1),
+        previewMaxHeight / Math.max(pricing.heightIn, 1)
+      )
+    : 1;
+  const previewWidth = pricing
+    ? Math.max(previewMinWidth, Math.round(pricing.widthIn * previewScale))
+    : 320;
+  const previewHeight = pricing
+    ? Math.max(previewMinHeight, Math.round(pricing.heightIn * previewScale))
+    : 220;
 
   return (
     <div className="min-h-[calc(100vh-96px)] bg-[linear-gradient(145deg,#f4f8ff_0%,#e8f1ff_55%,#dbe9ff_100%)] text-zinc-800">
@@ -377,7 +391,7 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
                     </div>
 
                     <div
-                      className="relative overflow-hidden border border-sky-200 bg-white shadow-[0_26px_70px_rgba(15,23,42,0.10)]"
+                      className="relative overflow-hidden border border-sky-200 bg-white shadow-[0_26px_70px_rgba(15,23,42,0.10)] transition-[width,height] duration-150"
                       style={{ width: previewWidth, height: previewHeight }}
                     >
                       {/* Perforation pattern overlay */}
@@ -397,7 +411,7 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
                           alt="Uploaded One Way Window artwork preview"
                           fill
                           unoptimized
-                          className="object-contain"
+                          className="object-fill"
                         />
                       ) : (
                         <div className="absolute inset-0 flex items-center justify-center text-center text-zinc-400">
