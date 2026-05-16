@@ -448,7 +448,7 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
                           alt="Uploaded Dual View artwork preview"
                           fill
                           unoptimized
-                          className="object-contain"
+                          className="object-fill"
                         />
                       ) : (
                         <div className="absolute inset-0 flex items-center justify-center text-center text-zinc-400">
