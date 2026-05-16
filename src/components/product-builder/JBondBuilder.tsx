@@ -82,6 +82,9 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
     [sizeId]
   );
 
+  const customWidth = Math.max(0.5, composeDimensionInches(customWidthFeet, customWidthInches));
+  const customHeight = Math.max(0.5, composeDimensionInches(customHeightFeet, customHeightInches));
+
   const pricing = useMemo(() => {
     if (pricingMode === "sheet") {
       return calculateJBondSheetPricing({
@@ -111,8 +114,7 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
     () => pricingMode === "sheet" ? getBestJBondSheetLayout(activeSize.width, activeSize.height) : null,
     [pricingMode, activeSize]
   );
-  const customWidth = Math.max(0.5, composeDimensionInches(customWidthFeet, customWidthInches));
-  const customHeight = Math.max(0.5, composeDimensionInches(customHeightFeet, customHeightInches));
+
 
   const maxImages = sheetLayout?.count ?? 1;
   const safeImageCount = pricingMode === "sheet" ? Math.min(imageCount, maxImages) : 1;

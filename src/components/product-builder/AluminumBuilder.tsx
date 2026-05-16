@@ -82,6 +82,9 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
     [sizeId]
   );
 
+  const customWidth = Math.max(0.5, composeDimensionInches(customWidthFeet, customWidthInches));
+  const customHeight = Math.max(0.5, composeDimensionInches(customHeightFeet, customHeightInches));
+
   const pricing = useMemo(() => {
     if (pricingMode === "sheet") {
       return calculateAluminumSheetPricing({
@@ -111,8 +114,6 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
     () => pricingMode === "sheet" ? getBestAluminumSheetLayout(activeSize.width, activeSize.height) : null,
     [pricingMode, activeSize]
   );
-
-  const maxImages = sheetLayout?.count ?? 1;
   const safeImageCount = pricingMode === "sheet" ? Math.min(imageCount, maxImages) : 1;
   const customWidth = Math.max(0.5, composeDimensionInches(customWidthFeet, customWidthInches));
   const customHeight = Math.max(0.5, composeDimensionInches(customHeightFeet, customHeightInches));
