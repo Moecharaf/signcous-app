@@ -224,6 +224,11 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
     [width, height, safeQuantity, side, contourCut, isValid]
   );
 
+  const actualAreaLabel = pricing ? `${pricing.actualSqft.toFixed(2)} sq ft` : "--";
+  const billedAreaLabel = pricing ? `${pricing.billedSqft.toFixed(2)} sq ft` : "--";
+  const supplierRateLabel = pricing ? `${formatCurrency(pricing.supplierRate)}/sq ft` : "--";
+  const retailPriceLabel = pricing ? formatCurrency(pricing.perItemTotal) : formatCurrency(0);
+
   useEffect(() => {
     return () => {
       if (uploadedImage) URL.revokeObjectURL(uploadedImage);
@@ -355,8 +360,8 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
               detail="Adhesive window film builder"
               totalPrice={pricing ? formatCurrency(pricing.grandTotal) : formatCurrency(0)}
               middleRows={[
-                { label: "Area", value: pricing ? `${pricing.areaSqFt.toFixed(2)} sq ft` : "--" },
-                { label: "Per Item", value: pricing ? formatCurrency(pricing.grandTotal / Math.max(safeQuantity, 1)) : formatCurrency(0) },
+                { label: "Actual Area", value: actualAreaLabel },
+                { label: "Billed Area", value: billedAreaLabel },
                 { label: "Qty", value: String(safeQuantity) },
               ]}
               accentClassName="text-[var(--brand-primary)]"
@@ -503,8 +508,13 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
             <PanelCard eyebrow="Pricing" title="Dual View Breakdown">
               <div className="space-y-1">
                 <BreakdownRow
-                  label="Area"
-                  value={pricing ? `${pricing.areaSqFt.toFixed(2)} sq ft` : "--"}
+                  label="Actual area"
+                  value={actualAreaLabel}
+                  muted={!pricing}
+                />
+                <BreakdownRow
+                  label="Billed area"
+                  value={billedAreaLabel}
                   muted={!pricing}
                 />
                 <BreakdownRow
@@ -513,13 +523,13 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
                   muted={!pricing}
                 />
                 <BreakdownRow
-                  label="Base rate (tiered)"
-                  value={pricing ? `${formatCurrency(pricing.baseRate)}/sq ft` : "--"}
+                  label="Production rate"
+                  value={supplierRateLabel}
                   muted={!pricing}
                 />
                 <BreakdownRow
-                  label="Raw base"
-                  value={pricing ? formatCurrency(pricing.rawBase) : formatCurrency(0)}
+                  label="Production cost"
+                  value={pricing ? formatCurrency(pricing.productionCost) : formatCurrency(0)}
                   muted={!pricing}
                 />
                 <BreakdownRow
@@ -528,14 +538,20 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
                   muted={!pricing || !contourCut}
                 />
                 <BreakdownRow
+                  label="Panel cost"
+                  value={pricing ? formatCharge(pricing.panelCost) : formatCurrency(0)}
+                  muted={!pricing || (pricing?.panelCount ?? 1) <= 1}
+                />
+                <BreakdownRow
+                  label="Retail price"
+                  value={retailPriceLabel}
+                  strong
+                  accent
+                />
+                <BreakdownRow
                   label="Minimum floor"
                   value={formatCurrency(pricing ? pricing.minimumPrice : DUAL_VIEW_MINIMUM[side])}
                   muted={!pricing}
-                />
-                <BreakdownRow
-                  label={`Panel cost (${pricing ? pricing.panelCount : "—"} panel${pricing && pricing.panelCount !== 1 ? "s" : ""})`}
-                  value={pricing ? formatCharge(pricing.panelCost) : formatCurrency(0)}
-                  muted={!pricing || (pricing?.panelCount ?? 1) <= 1}
                 />
                 <div className="my-2 border-t border-zinc-200" />
                 <BreakdownRow
@@ -573,51 +589,26 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
               </div>
             </PanelCard>
 
-            <PanelCard eyebrow="Rate Tiers" title="Dynamic Pricing">
-              <div className="mb-3 grid grid-cols-2 gap-1">
-                {(["single", "double"] as DualViewSide[]).map((s) => (
-                  <div
-                    key={s}
-                    className={`rounded-lg border px-2 py-1.5 text-center text-xs font-semibold ${
-                      side === s
-                        ? "border-sky-300 bg-sky-50 text-sky-700"
-                        : "border-zinc-200 bg-zinc-50 text-zinc-500"
-                    }`}
-                  >
-                    {s === "single" ? "Single Sided" : "Double Sided"}
-                  </div>
-                ))}
+            <PanelCard eyebrow="Production Rates" title="Supplier Pricing">
+              <div className="grid grid-cols-2 gap-2">
+                <SummaryItem label="Single Sided" value={formatCurrency(2.79) + "/sq ft"} />
+                <SummaryItem label="Double Sided" value={formatCurrency(4.99) + "/sq ft"} />
               </div>
-              <div className="space-y-2 text-sm text-zinc-600">
-                {(side === "single"
-                  ? [
-                      { range: "Under 10 sq ft", rate: "$4.90/sq ft", active: !!pricing && pricing.areaSqFt < 10 },
-                      { range: "10–49 sq ft", rate: "$4.40/sq ft", active: !!pricing && pricing.areaSqFt >= 10 && pricing.areaSqFt < 50 },
-                      { range: "50–149 sq ft", rate: "$4.10/sq ft", active: !!pricing && pricing.areaSqFt >= 50 && pricing.areaSqFt < 150 },
-                      { range: "150+ sq ft", rate: "$3.90/sq ft", active: !!pricing && pricing.areaSqFt >= 150 },
-                    ]
-                  : [
-                      { range: "Under 10 sq ft", rate: "$7.90/sq ft", active: !!pricing && pricing.areaSqFt < 10 },
-                      { range: "10–49 sq ft", rate: "$7.10/sq ft", active: !!pricing && pricing.areaSqFt >= 10 && pricing.areaSqFt < 50 },
-                      { range: "50–149 sq ft", rate: "$6.50/sq ft", active: !!pricing && pricing.areaSqFt >= 50 && pricing.areaSqFt < 150 },
-                      { range: "150+ sq ft", rate: "$6.20/sq ft", active: !!pricing && pricing.areaSqFt >= 150 },
-                    ]
-                ).map((tier) => (
-                  <div
-                    key={tier.range}
-                    className={`rounded-xl border px-3 py-2 ${
-                      tier.active ? "border-sky-200 bg-sky-50" : "border-zinc-200 bg-zinc-50"
-                    }`}
-                  >
-                    <div className={`font-semibold ${tier.active ? "text-sky-800" : "text-zinc-800"}`}>
-                      {tier.range}
-                    </div>
-                    <div className={`text-xs ${tier.active ? "text-sky-600" : "text-zinc-600"}`}>
-                      {tier.rate}
-                      {tier.active ? " ← active" : ""}
-                    </div>
-                  </div>
-                ))}
+              <div className="mt-3 text-sm text-zinc-600">
+                Pricing uses rounded production footprint, not exact artwork area.
+              </div>
+            </PanelCard>
+
+            <PanelCard eyebrow="Debug Panel" title="Production Footprint Check">
+              <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
+                <SummaryItem label="Width Inches" value={pricing ? formatInches(pricing.widthIn) : "--"} />
+                <SummaryItem label="Height Inches" value={pricing ? formatInches(pricing.heightIn) : "--"} />
+                <SummaryItem label="Actual Sq Ft" value={pricing ? pricing.actualSqft.toFixed(2) : "--"} />
+                <SummaryItem label="Billed Width Ft" value={pricing ? String(pricing.billedWidthFt) : "--"} />
+                <SummaryItem label="Billed Height Ft" value={pricing ? String(pricing.billedHeightFt) : "--"} />
+                <SummaryItem label="Billed Sq Ft" value={pricing ? String(pricing.billedSqft) : "--"} />
+                <SummaryItem label="Supplier Price" value={pricing ? formatCurrency(pricing.supplierRate) : "--"} />
+                <SummaryItem label="Final Retail" value={pricing ? formatCurrency(pricing.perItemTotal) : "--"} />
               </div>
             </PanelCard>
 

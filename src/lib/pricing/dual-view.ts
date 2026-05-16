@@ -1,3 +1,5 @@
+import { calculateActualSqft, calculateBilledSqft, calculateRetailPrice } from "../pricing";
+
 export type DualViewUnit = "inches" | "feet";
 export type DualViewSide = "single" | "double";
 
@@ -16,6 +18,13 @@ export interface DualViewPricingInput {
 }
 
 export interface DualViewPricingResult {
+  actualSqft: number;
+  billedWidthFt: number;
+  billedHeightFt: number;
+  billedSqft: number;
+  supplierRate: number;
+  productionCost: number;
+  retailPrice: number;
   widthIn: number;
   heightIn: number;
   areaSqFt: number;
@@ -54,8 +63,8 @@ export const DUAL_VIEW_MINIMUM: Record<DualViewSide, number> = {
   double: 40,
 };
 
-export const DUAL_VIEW_SINGLE_BASE_RATE = 4.20;
-export const DUAL_VIEW_DOUBLE_BASE_RATE = 7.99;
+export const DUAL_VIEW_SINGLE_SUPPLIER_RATE = 2.79;
+export const DUAL_VIEW_DOUBLE_SUPPLIER_RATE = 4.99;
 
 export const DUAL_VIEW_CONTOUR_MULTIPLIER = 1.10;
 
@@ -63,8 +72,8 @@ function toInches(value: number, unit: DualViewUnit): number {
   return unit === "feet" ? value * 12 : value;
 }
 
-export function getDualViewRate(sqFt: number, side: DualViewSide): number {
-  return side === "single" ? DUAL_VIEW_SINGLE_BASE_RATE : DUAL_VIEW_DOUBLE_BASE_RATE;
+export function getDualViewRate(side: DualViewSide): number {
+  return side === "single" ? DUAL_VIEW_SINGLE_SUPPLIER_RATE : DUAL_VIEW_DOUBLE_SUPPLIER_RATE;
 }
 
 export function getDualViewConstraints(side: DualViewSide): DualViewConstraints {
@@ -98,35 +107,44 @@ export function calculateDualViewPrice(input: DualViewPricingInput): DualViewPri
   const heightIn = Math.max(0, toInches(input.height, input.unit));
   const quantity = Math.max(1, Math.floor(input.quantity || 1));
 
-  const areaSqFt = (widthIn * heightIn) / 144;
-  const baseRate = getDualViewRate(areaSqFt, input.side);
-  const rawBase = areaSqFt * baseRate;
+  const actualSqft = calculateActualSqft(widthIn, heightIn, "inches");
+  const billedWidthFt = Math.max(1, Math.ceil(widthIn / 12));
+  const billedHeightFt = Math.max(1, Math.ceil(heightIn / 12));
+  const billedSqft = calculateBilledSqft(widthIn, heightIn, "inches");
+  const supplierRate = getDualViewRate(input.side);
+  const productionCost = billedSqft * supplierRate;
 
   const contourAdjustedBase = input.contourCut
-    ? rawBase * DUAL_VIEW_CONTOUR_MULTIPLIER
-    : rawBase;
-  const contourCutCharge = contourAdjustedBase - rawBase;
+    ? productionCost * DUAL_VIEW_CONTOUR_MULTIPLIER
+    : productionCost;
+  const contourCutCharge = contourAdjustedBase - productionCost;
 
   const panelCount = calculateDualViewPanels(widthIn);
   const panelCostPer = DUAL_VIEW_PANEL_COST[input.side];
   const panelCost = (panelCount - 1) * panelCostPer;
 
   const minimumPrice = DUAL_VIEW_MINIMUM[input.side];
-  const preMin = contourAdjustedBase;
-  const minimumApplied = preMin < minimumPrice;
-  const afterMinimum = Math.max(preMin, minimumPrice);
-
-  const perItemTotal = Math.round((afterMinimum + panelCost) * 100) / 100;
+  const preMinimumTotal = contourAdjustedBase + panelCost;
+  const retailBeforeMinimum = calculateRetailPrice(preMinimumTotal, 1.5);
+  const minimumApplied = retailBeforeMinimum < minimumPrice;
+  const perItemTotal = Math.max(retailBeforeMinimum, minimumPrice);
 
   const panelWidthIn = widthIn / panelCount;
   const panelHeightIn = heightIn;
 
   return {
+    actualSqft,
+    billedWidthFt,
+    billedHeightFt,
+    billedSqft,
+    supplierRate,
+    productionCost,
+    retailPrice: perItemTotal,
     widthIn,
     heightIn,
-    areaSqFt,
-    baseRate,
-    rawBase,
+    areaSqFt: actualSqft,
+    baseRate: supplierRate,
+    rawBase: productionCost,
     contourCutCharge,
     contourAdjustedBase,
     panelCount,
@@ -134,7 +152,7 @@ export function calculateDualViewPrice(input: DualViewPricingInput): DualViewPri
     panelCost,
     minimumPrice,
     minimumApplied,
-    preMinimumTotal: preMin,
+    preMinimumTotal,
     perItemTotal,
     quantity,
     totalPrice: perItemTotal,

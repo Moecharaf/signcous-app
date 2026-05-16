@@ -2,6 +2,39 @@
 
 export const BANNER_MARKUP = 1.5; // 50% over cost
 
+function toInches(value: number, unit: "inches" | "feet"): number {
+  const safeValue = Number.isFinite(value) ? Math.max(0, value) : 0;
+  return unit === "feet" ? safeValue * 12 : safeValue;
+}
+
+export function calculateActualSqft(
+  width: number,
+  height: number,
+  unit: "inches" | "feet"
+): number {
+  const widthIn = toInches(width, unit);
+  const heightIn = toInches(height, unit);
+  return Math.round(((widthIn * heightIn) / 144) * 100) / 100;
+}
+
+export function calculateBilledSqft(
+  width: number,
+  height: number,
+  unit: "inches" | "feet"
+): number {
+  const widthIn = toInches(width, unit);
+  const heightIn = toInches(height, unit);
+  const billedWidthFt = Math.max(1, Math.ceil(widthIn / 12));
+  const billedHeightFt = Math.max(1, Math.ceil(heightIn / 12));
+  return billedWidthFt * billedHeightFt;
+}
+
+export function calculateRetailPrice(productionCost: number, markup: number = BANNER_MARKUP): number {
+  const safeCost = Number.isFinite(productionCost) ? Math.max(0, productionCost) : 0;
+  const safeMarkup = Number.isFinite(markup) ? Math.max(0, markup) : BANNER_MARKUP;
+  return Math.round(safeCost * safeMarkup * 100) / 100;
+}
+
 export type MaterialName = "13oz Vinyl" | "15oz Vinyl" | "18oz Vinyl" | "Mesh Banner" | "Fabric Banner";
 export type LegacyMaterialName = "standard" | "premium" | "mesh" | "fabric";
 export type Material = MaterialName | LegacyMaterialName;
