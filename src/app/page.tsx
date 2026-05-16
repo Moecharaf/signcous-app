@@ -220,8 +220,9 @@ const MANUAL_ADHESIVE_PRODUCTS: ManualBannerProductCard[] = [
     href: "/adhesive/dual-view",
     description: "Single or double-sided window graphic with 52in panel logic, tiered pricing, and contour cut option.",
     label: "Builder",
-    image: "/card-images/DualView_V3.jpeg",
+    image: "/uploads/1778691674255-f31e3a75-1120-4043-8b9e-9252b3f0cb0f.png",
     imageAlt: "Dual View Window Graphic",
+    imagePosition: "center top",
     theme: "manual-dual-view",
   },
   {
