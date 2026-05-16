@@ -8,6 +8,7 @@ import Button from "@/components/ui/Button";
 import RigidPricingHeader from "@/components/product-builder/RigidPricingHeader";
 import { useCart } from "@/context/CartContext";
 import {
+  GF830_MAX_PANEL_HEIGHT,
   GF830_LAMINATE_OPTIONS,
   GF830_MAX_PANEL_WIDTH,
   GF830_MINIMUM_PRICE,
@@ -316,6 +317,7 @@ export default function GF830Builder({ productId = 0 }: GF830BuilderProps) {
         custom_panel_count: String(pricing.panelCount),
         custom_panel_size: `${formatInches(pricing.panelWidthIn)} x ${formatInches(pricing.panelHeightIn)}`,
         custom_roll_width_limit: `${GF830_MAX_PANEL_WIDTH}"`,
+        custom_roll_height_limit: `${GF830_MAX_PANEL_HEIGHT}"`,
         custom_area_sqft: pricing.areaSqFt.toFixed(2),
         custom_base_rate: `${formatCurrency(pricing.baseRate)}/sq ft`,
         custom_panel_cost: formatCurrency(pricing.panelCost),
@@ -537,7 +539,7 @@ export default function GF830Builder({ productId = 0 }: GF830BuilderProps) {
 
             <PanelCard eyebrow="Split Logic" title="Panel Planning">
               <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
-                <SummaryItem label="Max Panel Width" value={`${GF830_MAX_PANEL_WIDTH}"`} />
+                <SummaryItem label="Max Panel Size" value={`${GF830_MAX_PANEL_WIDTH}" x ${GF830_MAX_PANEL_HEIGHT}"`} />
                 <SummaryItem label="Requested Direction" value={splitDirection} />
                 <SummaryItem label="Applied Direction" value={pricing ? appliedSplitDirection : "--"} />
                 <SummaryItem label="Panel Count" value={pricing ? String(pricing.panelCount) : "--"} />

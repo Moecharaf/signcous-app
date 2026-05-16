@@ -32,8 +32,21 @@ export interface GF830PricingResult {
   panelHeightIn: number;
 }
 
+export interface GF830PanelConfig {
+  maxPanelWidthInches: number;
+  maxPanelHeightInches: number;
+}
+
 export const GF830_MINIMUM_PRICE = 30;
-export const GF830_MAX_PANEL_WIDTH = 60; // inches
+export const GF830_PRODUCT_CONFIG = {
+  gf830AutoMark: {
+    maxPanelWidthInches: 48,
+    maxPanelHeightInches: 48,
+  },
+} as const;
+export const GF830_AUTOMARK_PANEL_CONFIG: GF830PanelConfig = GF830_PRODUCT_CONFIG.gf830AutoMark;
+export const GF830_MAX_PANEL_WIDTH = GF830_AUTOMARK_PANEL_CONFIG.maxPanelWidthInches; // inches
+export const GF830_MAX_PANEL_HEIGHT = GF830_AUTOMARK_PANEL_CONFIG.maxPanelHeightInches; // inches
 export const GF830_PANEL_EXTRA_COST = 8; // per extra panel
 export const GF830_SUPPLIER_RATE = 3.99; // cost per sq ft
 export const GF830_MARKUP_MULTIPLIER = 1.5; // +50% markup
@@ -54,15 +67,26 @@ export function getDynamicRate(sqFt: number): number {
   return GF830_SUPPLIER_RATE * GF830_MARKUP_MULTIPLIER;
 }
 
-export function calculateGF830Panels(widthIn: number, heightIn: number, splitDirection: GF830SplitDirection): number {
+export function calculateGF830Panels(
+  widthIn: number,
+  heightIn: number,
+  splitDirection: GF830SplitDirection,
+  panelConfig: GF830PanelConfig = GF830_AUTOMARK_PANEL_CONFIG
+): number {
+  const maxPanelWidth = Math.max(1, panelConfig.maxPanelWidthInches);
+  const maxPanelHeight = Math.max(1, panelConfig.maxPanelHeightInches);
+
   if (splitDirection === "vertical") {
-    return Math.max(1, Math.ceil(widthIn / GF830_MAX_PANEL_WIDTH));
+    return Math.max(1, Math.ceil(widthIn / maxPanelWidth));
   }
   if (splitDirection === "horizontal") {
-    return Math.max(1, Math.ceil(heightIn / GF830_MAX_PANEL_WIDTH));
+    return Math.max(1, Math.ceil(heightIn / maxPanelHeight));
   }
-  // Auto: use max dimension
-  return Math.max(1, Math.ceil(Math.max(widthIn, heightIn) / GF830_MAX_PANEL_WIDTH));
+
+  // Auto: honor product-specific max panel constraints on both axes.
+  const widthPanels = Math.max(1, Math.ceil(widthIn / maxPanelWidth));
+  const heightPanels = Math.max(1, Math.ceil(heightIn / maxPanelHeight));
+  return Math.max(widthPanels, heightPanels);
 }
 
 export function calculateGF830Price(input: GF830PricingInput): GF830PricingResult {
@@ -86,7 +110,7 @@ export function calculateGF830Price(input: GF830PricingInput): GF830PricingResul
   const afterMinimum = Math.max(preMin, GF830_MINIMUM_PRICE);
 
   // Step 6: Panel splitting — cost added AFTER minimum
-  const panelCount = calculateGF830Panels(widthIn, heightIn, input.splitDirection);
+  const panelCount = calculateGF830Panels(widthIn, heightIn, input.splitDirection, GF830_AUTOMARK_PANEL_CONFIG);
   const panelCost = (panelCount - 1) * GF830_PANEL_EXTRA_COST;
 
   const perItemTotal = Math.round((afterMinimum + panelCost) * 100) / 100;
