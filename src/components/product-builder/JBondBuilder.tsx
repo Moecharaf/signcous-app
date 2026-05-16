@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
+import SizeInputPanel, { composeDimensionInches, toFeetAndInches } from "@/components/product-builder/SizeInputPanel";
 import Button from "@/components/ui/Button";
 import RigidPricingHeader from "@/components/product-builder/RigidPricingHeader";
 import { useCart } from "@/context/CartContext";
@@ -37,26 +38,6 @@ function formatPrice(v: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(v);
 }
 
-function parseDimensionPart(value: string): number {
-  const cleaned = value.replace(/[^\d.]/g, "");
-  const parsed = Number.parseFloat(cleaned);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
-}
-
-function toFeetAndInches(totalInches: number): { feet: string; inches: string } {
-  const safeInches = Math.max(0, totalInches);
-  const feet = Math.floor(safeInches / 12);
-  const inches = Number((safeInches - feet * 12).toFixed(2));
-  return {
-    feet: String(feet),
-    inches: Number.isInteger(inches) ? String(inches) : inches.toString(),
-  };
-}
-
-function composeDimensionInches(feet: string, inches: string): number {
-  return parseDimensionPart(feet) * 12 + parseDimensionPart(inches);
-}
-
 function formatFeetAndInchesLabel(totalInches: number): string {
   const parts = toFeetAndInches(totalInches);
   return `${parts.feet} ft ${parts.inches} in`;
@@ -77,8 +58,10 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
   const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   // ΓöÇΓöÇ sqin mode state ΓöÇΓöÇ
-  const [customWidth, setCustomWidth] = useState(24);
-  const [customHeight, setCustomHeight] = useState(18);
+  const [customWidthFeet, setCustomWidthFeet] = useState("2");
+  const [customWidthInches, setCustomWidthInches] = useState("0");
+  const [customHeightFeet, setCustomHeightFeet] = useState("1");
+  const [customHeightInches, setCustomHeightInches] = useState("6");
   const [sqinUpload, setSqinUpload] = useState<BlockUpload | null>(null);
   const [sqinUploading, setSqinUploading] = useState(false);
   const [sqinUploadError, setSqinUploadError] = useState<string | null>(null);
@@ -128,8 +111,8 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
     () => pricingMode === "sheet" ? getBestJBondSheetLayout(activeSize.width, activeSize.height) : null,
     [pricingMode, activeSize]
   );
-  const customWidthParts = useMemo(() => toFeetAndInches(customWidth), [customWidth]);
-  const customHeightParts = useMemo(() => toFeetAndInches(customHeight), [customHeight]);
+  const customWidth = Math.max(0.5, composeDimensionInches(customWidthFeet, customWidthInches));
+  const customHeight = Math.max(0.5, composeDimensionInches(customHeightFeet, customHeightInches));
 
   const maxImages = sheetLayout?.count ?? 1;
   const safeImageCount = pricingMode === "sheet" ? Math.min(imageCount, maxImages) : 1;
@@ -440,18 +423,20 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
           value: `${formatFeetAndInchesLabel(customWidth)} x ${formatFeetAndInchesLabel(customHeight)}`,
           width: 300,
           content: (
-            <div className="space-y-2">
-              <div className="grid grid-cols-[1fr_1fr_auto] gap-1">
-                <input type="number" min={0} step={1} value={customWidthParts.feet} onChange={e => setCustomWidth(Math.max(0.5, composeDimensionInches(e.target.value, customWidthParts.inches)))} className="h-9 rounded border border-zinc-300 px-2 text-sm" />
-                <input type="number" min={0} max={11.99} step={0.25} value={customWidthParts.inches} onChange={e => setCustomWidth(Math.max(0.5, composeDimensionInches(customWidthParts.feet, e.target.value)))} className="h-9 rounded border border-zinc-300 px-2 text-sm" />
-                <div className="flex items-center text-xs font-semibold text-zinc-500">W</div>
-              </div>
-              <div className="grid grid-cols-[1fr_1fr_auto] gap-1">
-                <input type="number" min={0} step={1} value={customHeightParts.feet} onChange={e => setCustomHeight(Math.max(0.5, composeDimensionInches(e.target.value, customHeightParts.inches)))} className="h-9 rounded border border-zinc-300 px-2 text-sm" />
-                <input type="number" min={0} max={11.99} step={0.25} value={customHeightParts.inches} onChange={e => setCustomHeight(Math.max(0.5, composeDimensionInches(customHeightParts.feet, e.target.value)))} className="h-9 rounded border border-zinc-300 px-2 text-sm" />
-                <div className="flex items-center text-xs font-semibold text-zinc-500">H</div>
-              </div>
-            </div>
+            <SizeInputPanel
+              widthFeet={customWidthFeet}
+              widthInches={customWidthInches}
+              heightFeet={customHeightFeet}
+              heightInches={customHeightInches}
+              onWidthFeetChange={setCustomWidthFeet}
+              onWidthInchesChange={setCustomWidthInches}
+              onHeightFeetChange={setCustomHeightFeet}
+              onHeightInchesChange={setCustomHeightInches}
+              onWidthNormalize={(f, i) => { setCustomWidthFeet(f); setCustomWidthInches(i); }}
+              onHeightNormalize={(f, i) => { setCustomHeightFeet(f); setCustomHeightInches(i); }}
+              error={null}
+              helper=""
+            />
           ),
         },
         {

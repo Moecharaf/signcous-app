@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
+import SizeInputPanel, { composeDimensionInches } from "@/components/product-builder/SizeInputPanel";
 import Button from "@/components/ui/Button";
 import RigidPricingHeader from "@/components/product-builder/RigidPricingHeader";
 import { useCart } from "@/context/CartContext";
@@ -41,26 +42,6 @@ function formatInches(value: number): string {
   const rounded = parseFloat(value.toFixed(2));
   const text = Number.isInteger(rounded) ? rounded.toFixed(0) : rounded.toString();
   return `${text.replace(/\.0+$/, "")}"`;
-}
-
-function parseDimensionPart(value: string): number {
-  const cleaned = value.replace(/[^\d.]/g, "");
-  const parsed = Number.parseFloat(cleaned);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
-}
-
-function toFeetAndInches(totalInches: number): { feet: string; inches: string } {
-  const safeInches = Math.max(0, totalInches);
-  const feet = Math.floor(safeInches / 12);
-  const inches = Number((safeInches - feet * 12).toFixed(2));
-  return {
-    feet: String(feet),
-    inches: Number.isInteger(inches) ? String(inches) : inches.toString(),
-  };
-}
-
-function composeDimensionInches(feet: string, inches: string): number {
-  return parseDimensionPart(feet) * 12 + parseDimensionPart(inches);
 }
 
 function formatCharge(value: number): string {
@@ -355,8 +336,10 @@ function AcrylicCanvas({
 export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
   const cart = useCart();
 
-  const [widthStr, setWidthStr] = useState("24");
-  const [heightStr, setHeightStr] = useState("18");
+  const [widthFeet, setWidthFeet] = useState("2");
+  const [widthInches, setWidthInches] = useState("0");
+  const [heightFeet, setHeightFeet] = useState("1");
+  const [heightInches, setHeightInches] = useState("6");
   const [quantity, setQuantity] = useState(1);
   const [thickness, setThickness] = useState<AcrylicThickness>("1/8");
   const [mounting, setMounting] = useState<AcrylicMounting>("none");
@@ -370,18 +353,14 @@ export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
   const [uploadingArtwork, setUploadingArtwork] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
-  const width = parseFloat(widthStr) || 0;
-  const height = parseFloat(heightStr) || 0;
-  const widthParts = toFeetAndInches(width);
-  const heightParts = toFeetAndInches(height);
+  const width = composeDimensionInches(widthFeet, widthInches);
+  const height = composeDimensionInches(heightFeet, heightInches);
   const safeQuantity = Math.max(1, Math.floor(quantity) || 1);
 
   const widthError =
-    widthStr !== "" &&
-    (width <= 0 ? 'Width must be greater than 0".' : width > ACRYLIC_MAX_WIDTH ? `Maximum width is ${ACRYLIC_MAX_WIDTH}".` : null);
+    width > ACRYLIC_MAX_WIDTH ? `Maximum width is ${ACRYLIC_MAX_WIDTH}".` : null;
   const heightError =
-    heightStr !== "" &&
-    (height <= 0 ? 'Height must be greater than 0".' : height > ACRYLIC_MAX_HEIGHT ? `Maximum height is ${ACRYLIC_MAX_HEIGHT}".` : null);
+    height > ACRYLIC_MAX_HEIGHT ? `Maximum height is ${ACRYLIC_MAX_HEIGHT}".` : null;
   const isValid = !widthError && !heightError && width > 0 && height > 0;
 
   const pricing = useMemo(
@@ -448,22 +427,20 @@ export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
       status: widthError || heightError ? "alert" : "ok",
       width: 360,
       content: (
-        <>
-          <div className="space-y-2">
-            <div className="grid grid-cols-[1fr_1fr_auto] gap-1">
-              <input type="number" min={0} step={1} value={widthParts.feet} onChange={(event) => setWidthStr(String(composeDimensionInches(event.target.value, widthParts.inches)))} className="h-9 rounded border border-zinc-300 px-2 text-sm" />
-              <input type="number" min={0} max={11.99} step={0.25} value={widthParts.inches} onChange={(event) => setWidthStr(String(composeDimensionInches(widthParts.feet, event.target.value)))} className="h-9 rounded border border-zinc-300 px-2 text-sm" />
-              <div className="flex items-center text-xs font-semibold text-zinc-500">W</div>
-            </div>
-            <div className="grid grid-cols-[1fr_1fr_auto] gap-1">
-              <input type="number" min={0} step={1} value={heightParts.feet} onChange={(event) => setHeightStr(String(composeDimensionInches(event.target.value, heightParts.inches)))} className="h-9 rounded border border-zinc-300 px-2 text-sm" />
-              <input type="number" min={0} max={11.99} step={0.25} value={heightParts.inches} onChange={(event) => setHeightStr(String(composeDimensionInches(heightParts.feet, event.target.value)))} className="h-9 rounded border border-zinc-300 px-2 text-sm" />
-              <div className="flex items-center text-xs font-semibold text-zinc-500">H</div>
-            </div>
-          </div>
-          {(widthError || heightError) && <div className="text-xs font-medium text-red-600">{widthError || heightError}</div>}
-          <div className="text-[11px] leading-4 text-zinc-500">Custom sizes up to 96&quot; x 48&quot;.</div>
-        </>
+        <SizeInputPanel
+          widthFeet={widthFeet}
+          widthInches={widthInches}
+          heightFeet={heightFeet}
+          heightInches={heightInches}
+          onWidthFeetChange={setWidthFeet}
+          onWidthInchesChange={setWidthInches}
+          onHeightFeetChange={setHeightFeet}
+          onHeightInchesChange={setHeightInches}
+          onWidthNormalize={(f, i) => { setWidthFeet(f); setWidthInches(i); }}
+          onHeightNormalize={(f, i) => { setHeightFeet(f); setHeightInches(i); }}
+          error={widthError || heightError}
+          helper={`Custom sizes up to ${ACRYLIC_MAX_WIDTH}" x ${ACRYLIC_MAX_HEIGHT}".`}
+        />
       ),
     },
     {

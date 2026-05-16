@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState, type ChangeEvent, type ReactNode } from "react";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
+import SizeInputPanel, { composeDimensionInches, formatSizeLabel } from "@/components/product-builder/SizeInputPanel";
 import Button from "@/components/ui/Button";
 import RigidPricingHeader from "@/components/product-builder/RigidPricingHeader";
 import { useCart } from "@/context/CartContext";
@@ -36,26 +37,6 @@ function formatInches(value: number): string {
 
 function formatCharge(value: number): string {
   return value <= 0 ? formatCurrency(0) : `+${formatCurrency(value)}`;
-}
-
-function parseDimensionPart(value: string): number {
-  const cleaned = value.replace(/[^\d.]/g, "");
-  const parsed = Number.parseFloat(cleaned);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
-}
-
-function toFeetAndInches(totalInches: number): { feet: string; inches: string } {
-  const safeInches = Math.max(0, totalInches);
-  const feet = Math.floor(safeInches / 12);
-  const inches = Number((safeInches - feet * 12).toFixed(2));
-  return {
-    feet: String(feet),
-    inches: Number.isInteger(inches) ? String(inches) : inches.toString(),
-  };
-}
-
-function composeDimensionInches(feet: string, inches: string): number {
-  return parseDimensionPart(feet) * 12 + parseDimensionPart(inches);
 }
 
 function ControlBox({
@@ -135,8 +116,10 @@ function SummaryItem({ label, value }: { label: string; value: string }) {
 export default function WindowClingBuilder({ productId = 137 }: WindowClingBuilderProps) {
   const cart = useCart();
 
-  const [widthStr, setWidthStr] = useState("24");
-  const [heightStr, setHeightStr] = useState("24");
+  const [widthFeet, setWidthFeet] = useState("2");
+  const [widthInches, setWidthInches] = useState("0");
+  const [heightFeet, setHeightFeet] = useState("2");
+  const [heightInches, setHeightInches] = useState("0");
   const [quantity, setQuantity] = useState(1);
   const [application, setApplication] = useState<WindowClingApplication>("inside");
   const [viewable, setViewable] = useState<WindowClingViewable>("outside");
@@ -148,27 +131,19 @@ export default function WindowClingBuilder({ productId = 137 }: WindowClingBuild
   const [uploadingArtwork, setUploadingArtwork] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
-  const width = parseFloat(widthStr) || 0;
-  const height = parseFloat(heightStr) || 0;
-  const widthParts = toFeetAndInches(width);
-  const heightParts = toFeetAndInches(height);
+  const width = composeDimensionInches(widthFeet, widthInches);
+  const height = composeDimensionInches(heightFeet, heightInches);
   const safeQuantity = Math.max(1, Math.floor(quantity) || 1);
 
   const widthError =
-    widthStr !== "" &&
-    (width <= 0
-      ? "Width must be greater than 0."
-      : width > WINDOW_CLING_MAX_WIDTH_IN
-        ? `Maximum width for Window Cling is ${WINDOW_CLING_MAX_WIDTH_IN} inches.`
-        : null);
+    width > WINDOW_CLING_MAX_WIDTH_IN
+      ? `Maximum width for Window Cling is ${WINDOW_CLING_MAX_WIDTH_IN} inches.`
+      : null;
 
   const heightError =
-    heightStr !== "" &&
-    (height <= 0
-      ? "Height must be greater than 0."
-      : height > WINDOW_CLING_MAX_HEIGHT_IN
-        ? `Maximum height is ${WINDOW_CLING_MAX_HEIGHT_IN} inches.`
-        : null);
+    height > WINDOW_CLING_MAX_HEIGHT_IN
+      ? `Maximum height is ${WINDOW_CLING_MAX_HEIGHT_IN} inches.`
+      : null;
 
   const isValid = !widthError && !heightError && width > 0 && height > 0;
 
@@ -410,7 +385,7 @@ export default function WindowClingBuilder({ productId = 137 }: WindowClingBuild
             <BuilderBottomToolbar
               panels={[
                 { id: "artwork", title: "Artwork", value: uploadedFileName ? "Uploaded" : "No file", width: 420, content: <><label className="inline-flex h-10 w-full cursor-pointer items-center justify-center rounded border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-700 hover:border-zinc-400"><input type="file" accept="image/*,.pdf,.ai,.eps,.psd,.svg" className="hidden" onChange={onUploadArtwork} />{uploadingArtwork ? "Uploading..." : uploadedFileName ? "Replace Artwork" : "Upload Artwork"}</label>{uploadedFileName && <div className="flex items-center justify-between gap-2 rounded border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-600"><span className="truncate">{uploadedFileName}</span><button type="button" onClick={clearArtwork} className="font-semibold text-zinc-500 hover:text-zinc-900">Remove</button></div>}{uploadError && <div className="text-xs font-medium text-red-600">{uploadError}</div>}</> },
-                { id: "size", title: "Size", value: isValid ? `${width.toFixed(2)}\" x ${height.toFixed(2)}\"` : "Set dimensions", status: widthError || heightError ? "alert" : "ok", width: 360, content: <><div className="space-y-2"><div className="grid grid-cols-[1fr_1fr_auto] gap-1"><input type="number" min={0} step={1} value={widthParts.feet} onChange={(event) => setWidthStr(String(composeDimensionInches(event.target.value, widthParts.inches)))} className="h-9 rounded border border-zinc-300 px-2 text-sm" /><input type="number" min={0} max={11.99} step={0.25} value={widthParts.inches} onChange={(event) => setWidthStr(String(composeDimensionInches(widthParts.feet, event.target.value)))} className="h-9 rounded border border-zinc-300 px-2 text-sm" /><div className="flex items-center text-xs font-semibold text-zinc-500">W</div></div><div className="grid grid-cols-[1fr_1fr_auto] gap-1"><input type="number" min={0} step={1} value={heightParts.feet} onChange={(event) => setHeightStr(String(composeDimensionInches(event.target.value, heightParts.inches)))} className="h-9 rounded border border-zinc-300 px-2 text-sm" /><input type="number" min={0} max={11.99} step={0.25} value={heightParts.inches} onChange={(event) => setHeightStr(String(composeDimensionInches(heightParts.feet, event.target.value)))} className="h-9 rounded border border-zinc-300 px-2 text-sm" /><div className="flex items-center text-xs font-semibold text-zinc-500">H</div></div></div></> },
+                { id: "size", title: "Size", value: formatSizeLabel(width, height), status: widthError || heightError ? "alert" : "ok", width: 360, content: (<SizeInputPanel widthFeet={widthFeet} widthInches={widthInches} heightFeet={heightFeet} heightInches={heightInches} onWidthFeetChange={setWidthFeet} onWidthInchesChange={setWidthInches} onHeightFeetChange={setHeightFeet} onHeightInchesChange={setHeightInches} onWidthNormalize={(f, i) => { setWidthFeet(f); setWidthInches(i); }} onHeightNormalize={(f, i) => { setHeightFeet(f); setHeightInches(i); }} error={widthError || heightError} helper={`Max ${WINDOW_CLING_MAX_WIDTH_IN}" wide x ${WINDOW_CLING_MAX_HEIGHT_IN}" tall.`} />) },
                 { id: "application", title: "Application", value: application, width: 280, content: <select value={application} onChange={(event) => setApplication(event.target.value as WindowClingApplication)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"><option value="inside">Inside</option><option value="outside">Outside</option></select> },
                 { id: "viewable", title: "Viewable", value: viewable, width: 280, content: <select value={viewable} onChange={(event) => setViewable(event.target.value as WindowClingViewable)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"><option value="inside">Inside</option><option value="outside">Outside</option></select> },
                 { id: "contour", title: "Contour Cut", value: contourCut ? "Enabled" : "Disabled", width: 280, content: <button type="button" onClick={() => setContourCut((value) => !value)} className={`h-9 w-full rounded border px-3 text-xs font-semibold transition ${contourCut ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>{contourCut ? "Enabled" : "Disabled"}</button> },

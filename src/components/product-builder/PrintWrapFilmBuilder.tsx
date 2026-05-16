@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState, type ChangeEvent, type ReactNode } from "react";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
+import SizeInputPanel, { composeDimensionInches } from "@/components/product-builder/SizeInputPanel";
 import Button from "@/components/ui/Button";
 import RigidPricingHeader from "@/components/product-builder/RigidPricingHeader";
 import { useCart } from "@/context/CartContext";
@@ -36,16 +37,6 @@ function formatInches(value: number): string {
 
 function formatCharge(value: number): string {
   return value <= 0 ? formatCurrency(0) : `+${formatCurrency(value)}`;
-}
-
-function parseDimensionPart(value: string): number {
-  const cleaned = value.replace(/[^\d.]/g, "");
-  const parsed = Number.parseFloat(cleaned);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
-}
-
-function composeDimensionInches(feet: string, inches: string): number {
-  return parseDimensionPart(feet) * 12 + parseDimensionPart(inches);
 }
 
 function ControlBox({
@@ -432,7 +423,7 @@ export default function PrintWrapFilmBuilder({ productId = 136 }: PrintWrapFilmB
             <BuilderBottomToolbar
               panels={[
                 { id: "artwork", title: "Artwork", value: uploadedFileName ? "Uploaded" : "No file", width: 420, content: <><label className="inline-flex h-10 w-full cursor-pointer items-center justify-center rounded border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-700 hover:border-zinc-400"><input type="file" accept="image/*,.pdf,.ai,.eps,.psd,.svg" className="hidden" onChange={onUploadArtwork} />{uploadingArtwork ? "Uploading..." : uploadedFileName ? "Replace Artwork" : "Upload Artwork"}</label>{uploadedFileName && <div className="flex items-center justify-between gap-2 rounded border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-600"><span className="truncate">{uploadedFileName}</span><button type="button" onClick={clearArtwork} className="font-semibold text-zinc-500 hover:text-zinc-900">Remove</button></div>}{uploadError && <div className="text-xs font-medium text-red-600">{uploadError}</div>}</> },
-                { id: "size", title: "Size", value: pricing ? `${formatInches(pricing.widthIn)} x ${formatInches(pricing.heightIn)}` : "Set dimensions", status: widthError || heightError ? "alert" : "ok", width: 360, content: <><div className="space-y-2"><div className="grid grid-cols-[1fr_1fr_auto] gap-1"><input type="number" min={0} step={1} value={widthFeet} onChange={(event) => setWidthFeet(event.target.value)} className="h-9 rounded border border-zinc-300 px-2 text-sm" /><input type="number" min={0} max={11.99} step={0.25} value={widthInches} onChange={(event) => setWidthInches(event.target.value)} className="h-9 rounded border border-zinc-300 px-2 text-sm" /><div className="flex items-center text-xs font-semibold text-zinc-500">W</div></div><div className="grid grid-cols-[1fr_1fr_auto] gap-1"><input type="number" min={0} step={1} value={heightFeet} onChange={(event) => setHeightFeet(event.target.value)} className="h-9 rounded border border-zinc-300 px-2 text-sm" /><input type="number" min={0} max={11.99} step={0.25} value={heightInches} onChange={(event) => setHeightInches(event.target.value)} className="h-9 rounded border border-zinc-300 px-2 text-sm" /><div className="flex items-center text-xs font-semibold text-zinc-500">H</div></div></div>{(widthError || heightError) && <div className="text-xs font-medium text-red-600">{widthError || heightError}</div>}</> },
+                { id: "size", title: "Size", value: pricing ? `${formatInches(pricing.widthIn)} x ${formatInches(pricing.heightIn)}` : "Set dimensions", status: widthError || heightError ? "alert" : "ok", width: 360, content: (<SizeInputPanel widthFeet={widthFeet} widthInches={widthInches} heightFeet={heightFeet} heightInches={heightInches} onWidthFeetChange={setWidthFeet} onWidthInchesChange={setWidthInches} onHeightFeetChange={setHeightFeet} onHeightInchesChange={setHeightInches} onWidthNormalize={(f, i) => { setWidthFeet(f); setWidthInches(i); }} onHeightNormalize={(f, i) => { setHeightFeet(f); setHeightInches(i); }} error={widthError || heightError} helper="Up to 25 ft 0 in per side." />) },
                 { id: "laminate", title: "Laminate", value: selectedLaminate.label, width: 320, content: <select value={laminate} onChange={(event) => setLaminate(event.target.value as PrintWrapLaminate)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm">{PRINT_WRAP_LAMINATE_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select> },
                 { id: "split", title: "Split Direction", value: splitDirection === "auto" ? "Auto" : splitDirection.charAt(0).toUpperCase() + splitDirection.slice(1), width: 320, content: <select value={splitDirection} onChange={(event) => setSplitDirection(event.target.value as PrintWrapSplitDirection)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"><option value="auto">Auto</option><option value="vertical">Vertical</option><option value="horizontal">Horizontal</option></select> },
                 { id: "finish", title: "Contour / Rush", value: [contourCut ? "Contour" : "No contour", rush ? "Rush" : "Standard"].join(" / "), width: 320, content: <div className="grid grid-cols-2 gap-1"><button type="button" onClick={() => setContourCut((value) => !value)} className={`h-9 rounded border px-3 text-xs font-semibold transition ${contourCut ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Contour</button><button type="button" onClick={() => setRush((value) => !value)} className={`h-9 rounded border px-3 text-xs font-semibold transition ${rush ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Rush</button></div> },

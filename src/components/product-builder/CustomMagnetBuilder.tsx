@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
+import SizeInputPanel, { composeDimensionInches, formatSizeLabel } from "@/components/product-builder/SizeInputPanel";
 import Button from "@/components/ui/Button";
 import { useCart } from "@/context/CartContext";
 
@@ -36,36 +37,13 @@ function dimensionLabel(value: number): string {
   return `${text}\"`;
 }
 
-function parseDimensionPart(value: string): number {
-  const cleaned = value.replace(/[^\d.]/g, "");
-  const parsed = Number.parseFloat(cleaned);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
-}
-
-function toFeetAndInches(totalInches: number): { feet: string; inches: string } {
-  const safeInches = Math.max(0, totalInches);
-  const feet = Math.floor(safeInches / 12);
-  const inches = Number((safeInches - feet * 12).toFixed(2));
-  return {
-    feet: String(feet),
-    inches: Number.isInteger(inches) ? String(inches) : inches.toString(),
-  };
-}
-
-function composeDimensionInches(feet: string, inches: string): number {
-  return parseDimensionPart(feet) * 12 + parseDimensionPart(inches);
-}
-
-function formatFeetAndInchesLabel(totalInches: number): string {
-  const parts = toFeetAndInches(totalInches);
-  return `${parts.feet} ft ${parts.inches} in`;
-}
-
 export default function CustomMagnetBuilder() {
   const cart = useCart();
 
-  const [widthInput, setWidthInput] = useState("24");
-  const [heightInput, setHeightInput] = useState("18");
+  const [widthFeet, setWidthFeet] = useState("2");
+  const [widthInches, setWidthInches] = useState("0");
+  const [heightFeet, setHeightFeet] = useState("1");
+  const [heightInches, setHeightInches] = useState("6");
   const [quantityInput, setQuantityInput] = useState("1");
   const [roundedCorners, setRoundedCorners] = useState<RoundedCornerOption>("none");
   const [contourCut, setContourCut] = useState(false);
@@ -81,11 +59,9 @@ export default function CustomMagnetBuilder() {
   const [uploadingArtwork, setUploadingArtwork] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
-  const width = Number.parseFloat(widthInput) || 0;
-  const height = Number.parseFloat(heightInput) || 0;
+  const width = composeDimensionInches(widthFeet, widthInches);
+  const height = composeDimensionInches(heightFeet, heightInches);
   const quantity = Number.parseInt(quantityInput, 10) || 0;
-  const widthParts = toFeetAndInches(width);
-  const heightParts = toFeetAndInches(height);
 
   const hasPositiveSize = width > 0 && height > 0;
   const isSizeValid =
@@ -307,72 +283,24 @@ export default function CustomMagnetBuilder() {
     {
       id: "size",
       title: "Size",
-      value: `${formatFeetAndInchesLabel(width)} x ${formatFeetAndInchesLabel(height)}`,
+      value: formatSizeLabel(width, height),
       width: 320,
       status: sizeError ? "alert" : isSizeValid ? "ok" : "neutral",
       content: (
-        <>
-          <div className="space-y-2">
-            <div className="grid grid-cols-[1fr_1fr_auto] gap-1">
-              <input
-                type="number"
-                min={0}
-                step={1}
-                value={widthParts.feet}
-                onChange={(event) => {
-                  const next = composeDimensionInches(event.target.value, widthParts.inches);
-                  setWidthInput(String(next));
-                  if (sizeError) setSizeError(null);
-                }}
-                className="h-9 rounded border border-zinc-300 px-2 text-sm"
-              />
-              <input
-                type="number"
-                min={0}
-                max={11.99}
-                step={0.25}
-                value={widthParts.inches}
-                onChange={(event) => {
-                  const next = composeDimensionInches(widthParts.feet, event.target.value);
-                  setWidthInput(String(next));
-                  if (sizeError) setSizeError(null);
-                }}
-                className="h-9 rounded border border-zinc-300 px-2 text-sm"
-              />
-              <div className="flex items-center text-xs font-semibold text-zinc-500">W</div>
-            </div>
-            <div className="grid grid-cols-[1fr_1fr_auto] gap-1">
-              <input
-                type="number"
-                min={0}
-                step={1}
-                value={heightParts.feet}
-                onChange={(event) => {
-                  const next = composeDimensionInches(event.target.value, heightParts.inches);
-                  setHeightInput(String(next));
-                  if (sizeError) setSizeError(null);
-                }}
-                className="h-9 rounded border border-zinc-300 px-2 text-sm"
-              />
-              <input
-                type="number"
-                min={0}
-                max={11.99}
-                step={0.25}
-                value={heightParts.inches}
-                onChange={(event) => {
-                  const next = composeDimensionInches(heightParts.feet, event.target.value);
-                  setHeightInput(String(next));
-                  if (sizeError) setSizeError(null);
-                }}
-                className="h-9 rounded border border-zinc-300 px-2 text-sm"
-              />
-              <div className="flex items-center text-xs font-semibold text-zinc-500">H</div>
-            </div>
-          </div>
-          {sizeError && <div className="text-xs font-medium text-rose-600">{sizeError}</div>}
-          <div className="text-[11px] leading-4 text-zinc-500">Maximum size is 2 ft 0 in x 8 ft 0 in (one side must stay at 2 ft 0 in or less).</div>
-        </>
+        <SizeInputPanel
+          widthFeet={widthFeet}
+          widthInches={widthInches}
+          heightFeet={heightFeet}
+          heightInches={heightInches}
+          onWidthFeetChange={setWidthFeet}
+          onWidthInchesChange={setWidthInches}
+          onHeightFeetChange={setHeightFeet}
+          onHeightInchesChange={setHeightInches}
+          onWidthNormalize={(f, i) => { setWidthFeet(f); setWidthInches(i); }}
+          onHeightNormalize={(f, i) => { setHeightFeet(f); setHeightInches(i); }}
+          error={sizeError}
+          helper="Max 2 ft 0 in × 8 ft 0 in. One side must be 24\" or less."
+        />
       ),
     },
     {

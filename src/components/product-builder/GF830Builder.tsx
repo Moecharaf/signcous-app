@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState, type ChangeEvent, type ReactNode } from "react";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
+import SizeInputPanel, { composeDimensionInches } from "@/components/product-builder/SizeInputPanel";
 import Button from "@/components/ui/Button";
 import RigidPricingHeader from "@/components/product-builder/RigidPricingHeader";
 import { useCart } from "@/context/CartContext";
@@ -37,16 +38,6 @@ function formatInches(value: number): string {
 
 function formatCharge(value: number): string {
   return value <= 0 ? formatCurrency(0) : `+${formatCurrency(value)}`;
-}
-
-function parseDimensionPart(value: string): number {
-  const cleaned = value.replace(/[^\d.]/g, "");
-  const parsed = Number.parseFloat(cleaned);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
-}
-
-function composeDimensionInches(feet: string, inches: string): number {
-  return parseDimensionPart(feet) * 12 + parseDimensionPart(inches);
 }
 
 function ControlBox({
@@ -461,21 +452,19 @@ export default function GF830Builder({ productId = 0 }: GF830BuilderProps) {
                   status: widthError || heightError ? "alert" : "ok",
                   width: 360,
                   content: (
-                    <>
-                      <div className="space-y-2">
-                        <div className="grid grid-cols-[1fr_1fr_auto] gap-1">
-                          <input type="number" min={0} step={1} value={widthFeet} onChange={(event) => setWidthFeet(event.target.value)} className="h-9 rounded border border-zinc-300 px-2 text-sm" />
-                          <input type="number" min={0} max={11.99} step={0.25} value={widthInches} onChange={(event) => setWidthInches(event.target.value)} className="h-9 rounded border border-zinc-300 px-2 text-sm" />
-                          <div className="flex items-center text-xs font-semibold text-zinc-500">W</div>
-                        </div>
-                        <div className="grid grid-cols-[1fr_1fr_auto] gap-1">
-                          <input type="number" min={0} step={1} value={heightFeet} onChange={(event) => setHeightFeet(event.target.value)} className="h-9 rounded border border-zinc-300 px-2 text-sm" />
-                          <input type="number" min={0} max={11.99} step={0.25} value={heightInches} onChange={(event) => setHeightInches(event.target.value)} className="h-9 rounded border border-zinc-300 px-2 text-sm" />
-                          <div className="flex items-center text-xs font-semibold text-zinc-500">H</div>
-                        </div>
-                      </div>
-                      {(widthError || heightError) && <div className="text-xs font-medium text-red-600">{widthError || heightError}</div>}
-                    </>
+                    <SizeInputPanel
+                      widthFeet={widthFeet}
+                      widthInches={widthInches}
+                      heightFeet={heightFeet}
+                      heightInches={heightInches}
+                      onWidthFeetChange={setWidthFeet}
+                      onWidthInchesChange={setWidthInches}
+                      onHeightFeetChange={setHeightFeet}
+                      onHeightInchesChange={setHeightInches}
+                      onWidthNormalize={(f, i) => { setWidthFeet(f); setWidthInches(i); }}
+                      onHeightNormalize={(f, i) => { setHeightFeet(f); setHeightInches(i); }}
+                      error={widthError || heightError}
+                    />
                   ),
                 },
                 {
