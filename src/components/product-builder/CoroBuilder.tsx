@@ -635,7 +635,7 @@ function CoroPdfStretchPreview({ fileUrl, title }: { fileUrl: string; title: str
 
         canvas.width = Math.max(1, Math.floor(viewport.width));
         canvas.height = Math.max(1, Math.floor(viewport.height));
-        await page.render({ canvasContext: context, viewport }).promise;
+        await page.render({ canvas, canvasContext: context, viewport }).promise;
         await pdf.destroy();
       } catch {
         if (!cancelled) setRenderFailed(true);
