@@ -1,3 +1,5 @@
+import { calculateProductionFootprint, calculateRetailPrice } from "../pricing";
+
 export type OneWayWindowUnit = "inches" | "feet";
 export type OneWayWindowMaterial = "50/50" | "70/30";
 
@@ -9,12 +11,24 @@ export interface OneWayWindowPricingInput {
   material: OneWayWindowMaterial;
   laminate: boolean;
   contourCut: boolean;
+  rush: boolean;
 }
 
 export interface OneWayWindowPricingResult {
+  enteredWidthIn: number;
+  enteredHeightIn: number;
   widthIn: number;
   heightIn: number;
+  billedWidthFt: number;
+  billedHeightFt: number;
+  billedSqFt: number;
   areaSqFt: number;
+  supplierRate: number;
+  baseCost: number;
+  laminateCost: number;
+  rushCharge: number;
+  markupMultiplier: number;
+  retailBeforeMinimum: number;
   baseRate: number;
   rawBase: number;
   laminateCharge: number;
@@ -35,7 +49,10 @@ export interface OneWayWindowPricingResult {
 export const ONE_WAY_MINIMUM_PRICE = 25;
 export const ONE_WAY_MAX_PANEL_WIDTH = 50; // inches — STRICT
 export const ONE_WAY_PANEL_EXTRA_COST = 7; // per extra panel
-export const ONE_WAY_LAMINATE_RATE = 3.50; // per sq ft
+export const ONE_WAY_SUPPLIER_RATE = 2.75; // per sq ft
+export const ONE_WAY_SUPPLIER_LAMINATE_RATE = 1.24; // per sq ft
+export const ONE_WAY_MARKUP_MULTIPLIER = 1.5;
+export const ONE_WAY_RUSH_MULTIPLIER = 2.0; // 100% additional
 export const ONE_WAY_CONTOUR_MULTIPLIER = 1.10;
 
 export const ONE_WAY_MATERIAL_OPTIONS: { value: OneWayWindowMaterial; label: string; note: string }[] = [
@@ -55,29 +72,22 @@ function toInches(value: number, unit: OneWayWindowUnit): number {
   return unit === "feet" ? value * 12 : value;
 }
 
-export function getDynamicRate(sqFt: number): number {
-  if (sqFt < 10) return 6.25;
-  if (sqFt < 50) return 5.75;
-  if (sqFt < 150) return 5.45;
-  return 5.25;
-}
-
 export function calculateOneWayPanels(widthIn: number): number {
   return Math.max(1, Math.ceil(widthIn / ONE_WAY_MAX_PANEL_WIDTH));
 }
 
 export function calculateOneWayWindowPrice(input: OneWayWindowPricingInput): OneWayWindowPricingResult {
-  const widthIn = Math.max(0, toInches(input.width, input.unit));
-  const heightIn = Math.max(0, toInches(input.height, input.unit));
+  const footprint = calculateProductionFootprint(input.width, input.height, input.unit, 1);
+  const widthIn = footprint.billedWidthIn;
+  const heightIn = footprint.billedHeightIn;
   const quantity = Math.max(1, Math.floor(input.quantity || 1));
 
-  const areaSqFt = (widthIn * heightIn) / 144;
-  const baseRate = getDynamicRate(areaSqFt);
-  const rawBase = areaSqFt * baseRate;
+  const supplierRate = ONE_WAY_SUPPLIER_RATE;
+  const baseCost = footprint.billedSqft * supplierRate;
 
-  // Laminate adds $3.50/sq ft
-  const laminateCharge = input.laminate ? areaSqFt * ONE_WAY_LAMINATE_RATE : 0;
-  const laminateAdjustedBase = rawBase + laminateCharge;
+  // Laminate supplier cost per billed sq ft
+  const laminateCost = input.laminate ? footprint.billedSqft * ONE_WAY_SUPPLIER_LAMINATE_RATE : 0;
+  const laminateAdjustedBase = baseCost + laminateCost;
 
   // Contour +10%
   const contourAdjustedBase = input.contourCut
@@ -85,33 +95,47 @@ export function calculateOneWayWindowPrice(input: OneWayWindowPricingInput): One
     : laminateAdjustedBase;
   const contourCutCharge = contourAdjustedBase - laminateAdjustedBase;
 
+  // Rush = 100% additional on production subtotal
+  const rushCharge = input.rush ? contourAdjustedBase * (ONE_WAY_RUSH_MULTIPLIER - 1) : 0;
+  const productionSubtotal = contourAdjustedBase + rushCharge;
+
   // Panel splitting — always based on 50in max width
   const panelCount = calculateOneWayPanels(widthIn);
   const panelCost = (panelCount - 1) * ONE_WAY_PANEL_EXTRA_COST;
+  const preMinimumTotal = productionSubtotal + panelCost;
+  const retailBeforeMinimum = calculateRetailPrice(preMinimumTotal, ONE_WAY_MARKUP_MULTIPLIER);
 
-  // Minimum — panel cost added AFTER
-  const preMin = contourAdjustedBase;
-  const minimumApplied = preMin < ONE_WAY_MINIMUM_PRICE;
-  const afterMinimum = Math.max(preMin, ONE_WAY_MINIMUM_PRICE);
-
-  const perItemTotal = Math.round((afterMinimum + panelCost) * 100) / 100;
+  // Minimum retail floor
+  const minimumApplied = retailBeforeMinimum < ONE_WAY_MINIMUM_PRICE;
+  const perItemTotal = Math.max(retailBeforeMinimum, ONE_WAY_MINIMUM_PRICE);
 
   const panelWidthIn = widthIn / panelCount;
   const panelHeightIn = heightIn;
 
   return {
+    enteredWidthIn: Math.max(0, toInches(input.width, input.unit)),
+    enteredHeightIn: Math.max(0, toInches(input.height, input.unit)),
     widthIn,
     heightIn,
-    areaSqFt,
-    baseRate,
-    rawBase,
-    laminateCharge,
+    billedWidthFt: footprint.billedWidthFt,
+    billedHeightFt: footprint.billedHeightFt,
+    billedSqFt: footprint.billedSqft,
+    areaSqFt: footprint.actualSqft,
+    supplierRate,
+    baseCost,
+    laminateCost,
+    rushCharge,
+    markupMultiplier: ONE_WAY_MARKUP_MULTIPLIER,
+    retailBeforeMinimum,
+    baseRate: supplierRate,
+    rawBase: baseCost,
+    laminateCharge: laminateCost,
     laminateAdjustedBase,
     contourCutCharge,
     contourAdjustedBase,
     panelCount,
     panelCost,
-    preMinimumTotal: preMin,
+    preMinimumTotal,
     minimumApplied,
     perItemTotal,
     quantity,

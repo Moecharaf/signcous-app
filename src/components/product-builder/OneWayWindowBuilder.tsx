@@ -8,11 +8,13 @@ import Button from "@/components/ui/Button";
 import RigidPricingHeader from "@/components/product-builder/RigidPricingHeader";
 import { useCart } from "@/context/CartContext";
 import {
-  ONE_WAY_LAMINATE_RATE,
+  ONE_WAY_MARKUP_MULTIPLIER,
   ONE_WAY_MATERIAL_OPTIONS,
   ONE_WAY_MAX_PANEL_WIDTH,
   ONE_WAY_MINIMUM_PRICE,
   ONE_WAY_PANEL_EXTRA_COST,
+  ONE_WAY_SUPPLIER_LAMINATE_RATE,
+  ONE_WAY_SUPPLIER_RATE,
   calculateOneWayWindowPrice,
   type OneWayWindowMaterial,
 } from "@/lib/pricing/one-way-window";
@@ -152,6 +154,7 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
   const [material, setMaterial] = useState<OneWayWindowMaterial>("50/50");
   const [laminate, setLaminate] = useState(false);
   const [contourCut, setContourCut] = useState(false);
+  const [rush, setRush] = useState(false);
   const [added, setAdded] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null);
@@ -178,9 +181,10 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
             material,
             laminate,
             contourCut,
+            rush,
           })
         : null,
-    [width, height, safeQuantity, material, laminate, contourCut, isValid]
+    [width, height, safeQuantity, material, laminate, contourCut, rush, isValid]
   );
 
   const selectedMaterial = ONE_WAY_MATERIAL_OPTIONS.find((o) => o.value === material)!;
@@ -280,7 +284,7 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
       polePockets: false,
       windSlits: false,
       hemming: false,
-      rush: false,
+      rush,
       uploadedFileUrl,
       uploadedFileName,
       unitPrice: pricing.perItemTotal,
@@ -290,12 +294,17 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
         custom_height: `${height} inches`,
         custom_material: selectedMaterial.label,
         custom_laminate: laminate ? "Yes" : "No",
+        custom_rush: rush ? "Yes" : "No",
         custom_contour_cut: contourCut ? "Yes" : "No",
         custom_panel_count: String(pricing.panelCount),
         custom_panel_size: `${formatInches(pricing.panelWidthIn)} x ${formatInches(pricing.panelHeightIn)}`,
         custom_max_panel_width: `${ONE_WAY_MAX_PANEL_WIDTH}"`,
         custom_area_sqft: pricing.areaSqFt.toFixed(2),
-        custom_base_rate: `${formatCurrency(pricing.baseRate)}/sq ft`,
+        custom_billed_sqft: pricing.billedSqFt.toFixed(2),
+        custom_base_rate: `${formatCurrency(pricing.supplierRate)}/sq ft`,
+        custom_supplier_rate: `${formatCurrency(pricing.supplierRate)}/sq ft`,
+        custom_markup: `${Math.round((ONE_WAY_MARKUP_MULTIPLIER - 1) * 100)}%`,
+        custom_rush_charge: formatCurrency(pricing.rushCharge),
         custom_panel_cost: formatCurrency(pricing.panelCost),
         custom_laminate_charge: formatCurrency(pricing.laminateCharge),
       },
@@ -319,7 +328,8 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
               detail="Adhesive window film builder"
               totalPrice={pricing ? formatCurrency(pricing.grandTotal) : formatCurrency(0)}
               middleRows={[
-                { label: "Area", value: pricing ? `${pricing.areaSqFt.toFixed(2)} sq ft` : "--" },
+                { label: "Actual Area", value: pricing ? `${pricing.areaSqFt.toFixed(2)} sq ft` : "--" },
+                { label: "Billed Area", value: pricing ? `${pricing.billedSqFt.toFixed(2)} sq ft` : "--" },
                 { label: "Per Item", value: pricing ? formatCurrency(pricing.grandTotal / Math.max(safeQuantity, 1)) : formatCurrency(0) },
                 { label: "Qty", value: String(safeQuantity) },
               ]}
@@ -425,7 +435,7 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
                 { id: "artwork", title: "Artwork", value: uploadedFileName ? "Uploaded" : "No file", width: 420, content: <><label className="inline-flex h-10 w-full cursor-pointer items-center justify-center rounded border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-700 hover:border-zinc-400"><input type="file" accept="image/*,.pdf,.ai,.eps,.psd,.svg" className="hidden" onChange={onUploadArtwork} />{uploadingArtwork ? "Uploading..." : uploadedFileName ? "Replace Artwork" : "Upload Artwork"}</label>{uploadedFileName && <div className="flex items-center justify-between gap-2 rounded border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-600"><span className="truncate">{uploadedFileName}</span><button type="button" onClick={clearArtwork} className="font-semibold text-zinc-500 hover:text-zinc-900">Remove</button></div>}{uploadError && <div className="text-xs font-medium text-red-600">{uploadError}</div>}</> },
                 { id: "size", title: "Size", value: pricing ? `${formatInches(pricing.widthIn)} x ${formatInches(pricing.heightIn)}` : "Set dimensions", status: widthError || heightError ? "alert" : "ok", width: 360, content: (<SizeInputPanel widthFeet={widthFeet} widthInches={widthInches} heightFeet={heightFeet} heightInches={heightInches} onWidthFeetChange={setWidthFeet} onWidthInchesChange={setWidthInches} onHeightFeetChange={setHeightFeet} onHeightInchesChange={setHeightInches} onWidthNormalize={(f, i) => { setWidthFeet(f); setWidthInches(i); }} onHeightNormalize={(f, i) => { setHeightFeet(f); setHeightInches(i); }} error={widthError || heightError} helper="Up to 25 ft 0 in per side." />) },
                 { id: "material", title: "Material", value: selectedMaterial.label, width: 320, content: <select value={material} onChange={(event) => setMaterial(event.target.value as OneWayWindowMaterial)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm">{ONE_WAY_MATERIAL_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select> },
-                { id: "finish", title: "Laminate / Contour", value: [laminate ? "Laminate" : null, contourCut ? "Contour" : null].filter(Boolean).join(" / ") || "None", width: 320, content: <div className="grid grid-cols-2 gap-1"><button type="button" onClick={() => setLaminate((v) => !v)} className={`h-9 rounded border px-3 text-xs font-semibold transition ${laminate ? "border-sky-300 bg-sky-50 text-sky-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Laminate</button><button type="button" onClick={() => setContourCut((v) => !v)} className={`h-9 rounded border px-3 text-xs font-semibold transition ${contourCut ? "border-sky-300 bg-sky-50 text-sky-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Contour</button></div> },
+                { id: "finish", title: "Laminate / Contour / Rush", value: [laminate ? "Laminate" : null, contourCut ? "Contour" : null, rush ? "Rush" : null].filter(Boolean).join(" / ") || "None", width: 360, content: <div className="grid grid-cols-3 gap-1"><button type="button" onClick={() => setLaminate((v) => !v)} className={`h-9 rounded border px-3 text-xs font-semibold transition ${laminate ? "border-sky-300 bg-sky-50 text-sky-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Laminate</button><button type="button" onClick={() => setContourCut((v) => !v)} className={`h-9 rounded border px-3 text-xs font-semibold transition ${contourCut ? "border-sky-300 bg-sky-50 text-sky-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Contour</button><button type="button" onClick={() => setRush((v) => !v)} className={`h-9 rounded border px-3 text-xs font-semibold transition ${rush ? "border-sky-300 bg-sky-50 text-sky-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Rush</button></div> },
                 { id: "quantity", title: "Quantity", value: String(safeQuantity), width: 260, content: <input type="number" min={1} value={safeQuantity} onChange={(event) => setQuantity(Math.max(1, Math.floor(Number(event.target.value) || 1)))} className="h-9 w-full rounded border border-zinc-300 px-2 text-sm" /> },
               ] satisfies BuilderBottomToolbarPanel[]}
               action={<Button className="h-10 w-full rounded bg-[var(--brand-primary)] text-xs font-semibold text-white hover:bg-[var(--brand-primary-hover)]" disabled={!isValid} onClick={addToCart}>{added ? "Added" : "Add"}</Button>}
@@ -441,24 +451,39 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
                   muted={!pricing}
                 />
                 <BreakdownRow
-                  label="Base rate (tiered)"
-                  value={pricing ? `${formatCurrency(pricing.baseRate)}/sq ft` : "--"}
+                  label="Billed area"
+                  value={pricing ? `${pricing.billedSqFt.toFixed(2)} sq ft` : "--"}
                   muted={!pricing}
                 />
                 <BreakdownRow
-                  label="Raw base"
-                  value={pricing ? formatCurrency(pricing.rawBase) : formatCurrency(0)}
+                  label="Supplier rate"
+                  value={pricing ? `${formatCurrency(pricing.supplierRate)}/sq ft` : "--"}
                   muted={!pricing}
                 />
                 <BreakdownRow
-                  label={`Laminate (+${formatCurrency(ONE_WAY_LAMINATE_RATE)}/sq ft)`}
-                  value={pricing ? formatCharge(pricing.laminateCharge) : formatCurrency(0)}
+                  label="Base production cost"
+                  value={pricing ? formatCurrency(pricing.baseCost) : formatCurrency(0)}
+                  muted={!pricing}
+                />
+                <BreakdownRow
+                  label={`Laminate (+${formatCurrency(ONE_WAY_SUPPLIER_LAMINATE_RATE)}/sq ft supplier)`}
+                  value={pricing ? formatCharge(pricing.laminateCost) : formatCurrency(0)}
                   muted={!pricing || !laminate}
                 />
                 <BreakdownRow
                   label="Contour cut"
                   value={pricing ? formatCharge(pricing.contourCutCharge) : formatCurrency(0)}
                   muted={!pricing || !contourCut}
+                />
+                <BreakdownRow
+                  label="Rush (100% additional)"
+                  value={pricing ? formatCharge(pricing.rushCharge) : formatCurrency(0)}
+                  muted={!pricing || !rush}
+                />
+                <BreakdownRow
+                  label={`Markup (${Math.round((ONE_WAY_MARKUP_MULTIPLIER - 1) * 100)}%)`}
+                  value={pricing ? `${formatCurrency(pricing.retailBeforeMinimum - pricing.preMinimumTotal)}` : formatCurrency(0)}
+                  muted={!pricing}
                 />
                 <BreakdownRow
                   label="Minimum floor"
@@ -504,21 +529,22 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
               </div>
             </PanelCard>
 
-            <PanelCard eyebrow="Rate Tiers" title="Dynamic Pricing">
+            <PanelCard eyebrow="Supplier Rates" title="Cost + 50% Markup Pricing">
               <div className="space-y-2 text-sm text-zinc-600">
                 {[
-                  { range: "Under 10 sq ft", rate: "$6.25/sq ft", active: !!pricing && pricing.areaSqFt < 10 },
+                  { range: "50/50 Perforation", rate: `${formatCurrency(ONE_WAY_SUPPLIER_RATE)}/sq ft supplier`, active: material === "50/50" },
                   {
-                    range: "10–49 sq ft",
-                    rate: "$5.75/sq ft",
-                    active: !!pricing && pricing.areaSqFt >= 10 && pricing.areaSqFt < 50,
+                    range: "70/30 Perforation",
+                    rate: `${formatCurrency(ONE_WAY_SUPPLIER_RATE)}/sq ft supplier`,
+                    active: material === "70/30",
                   },
                   {
-                    range: "50–149 sq ft",
-                    rate: "$5.45/sq ft",
-                    active: !!pricing && pricing.areaSqFt >= 50 && pricing.areaSqFt < 150,
+                    range: "Gloss Laminate",
+                    rate: `${formatCurrency(ONE_WAY_SUPPLIER_LAMINATE_RATE)}/sq ft supplier`,
+                    active: laminate,
                   },
-                  { range: "150+ sq ft", rate: "$5.25/sq ft", active: !!pricing && pricing.areaSqFt >= 150 },
+                  { range: "Rush", rate: "100% additional", active: rush },
+                  { range: "Markup", rate: `${Math.round((ONE_WAY_MARKUP_MULTIPLIER - 1) * 100)}% over supplier cost`, active: true },
                 ].map((tier) => (
                   <div
                     key={tier.range}
