@@ -401,7 +401,16 @@ export default function VehicleMagnetBuilder() {
                       className="h-full w-full object-cover"
                       draggable={false}
                     />
-                  ) : (
+                  ) : uploadedFileUrl && uploadedFileName?.toLowerCase().endsWith(".pdf") ? (
+                        <div className="relative h-full w-full">
+                          <iframe
+                            src={`${uploadedFileUrl}#toolbar=0&navpanes=0&scrollbar=0&page=1&view=FitH`}
+                            title="Uploaded PDF artwork preview"
+                            className="absolute left-0 top-0 h-full pointer-events-none"
+                            style={{ width: "calc(100% + 18px)" }}
+                          />
+                        </div>
+                      ) : (
                     <div className="flex h-full items-center justify-center px-6 text-center text-zinc-500">
                       <div>
                         <div className="text-lg font-medium">Upload Artwork</div>

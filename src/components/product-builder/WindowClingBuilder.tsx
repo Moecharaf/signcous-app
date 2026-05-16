@@ -358,6 +358,15 @@ export default function WindowClingBuilder({ productId = 137 }: WindowClingBuild
                       <div className="absolute inset-0 bg-[#f6f6f6]" />
                       {uploadedImage ? (
                         <Image src={uploadedImage} alt="Uploaded window cling artwork preview" fill unoptimized className="object-contain" />
+                      ) : uploadedFileUrl && uploadedFileName?.toLowerCase().endsWith(".pdf") ? (
+                        <div className="relative h-full w-full">
+                          <iframe
+                            src={`${uploadedFileUrl}#toolbar=0&navpanes=0&scrollbar=0&page=1&view=FitH`}
+                            title="Uploaded PDF artwork preview"
+                            className="absolute left-0 top-0 h-full pointer-events-none"
+                            style={{ width: "calc(100% + 18px)" }}
+                          />
+                        </div>
                       ) : (
                         <div className="absolute inset-0 flex items-center justify-center text-center text-zinc-400">
                           <div>
