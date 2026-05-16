@@ -299,7 +299,7 @@ export default function CustomMagnetBuilder() {
           onWidthNormalize={(f, i) => { setWidthFeet(f); setWidthInches(i); }}
           onHeightNormalize={(f, i) => { setHeightFeet(f); setHeightInches(i); }}
           error={sizeError}
-          helper="Max 2 ft 0 in × 8 ft 0 in. One side must be 24\" or less."
+          helper='Max 2 ft 0 in × 8 ft 0 in. One side must be 24" or less.'
         />
       ),
     },
