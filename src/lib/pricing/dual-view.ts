@@ -62,16 +62,16 @@ function toInches(value: number, unit: DualViewUnit): number {
 
 export function getDualViewRate(sqFt: number, side: DualViewSide): number {
   if (side === "single") {
-    if (sqFt < 10) return 4.90;
-    if (sqFt < 50) return 4.40;
-    if (sqFt < 150) return 4.10;
-    return 3.90;
+    if (sqFt < 10) return 4.19;
+    if (sqFt < 50) return 3.99;
+    if (sqFt < 150) return 3.79;
+    return 3.59;
   }
   // double
-  if (sqFt < 10) return 7.90;
-  if (sqFt < 50) return 7.10;
-  if (sqFt < 150) return 6.50;
-  return 6.20;
+  if (sqFt < 10) return 7.49;
+  if (sqFt < 50) return 7.19;
+  if (sqFt < 150) return 6.89;
+  return 6.59;
 }
 
 export function getDualViewConstraints(side: DualViewSide): DualViewConstraints {
