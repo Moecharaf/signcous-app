@@ -35,6 +35,8 @@ export interface OrajetClearPricingResult {
 export const ORAJET_CLEAR_MINIMUM_PRICE = 35;
 export const ORAJET_CLEAR_MAX_PANEL_WIDTH = 54; // inches
 export const ORAJET_CLEAR_PANEL_EXTRA_COST = 10; // per extra panel
+export const ORAJET_CLEAR_SUPPLIER_RATE = 6.0; // cost per sq ft
+export const ORAJET_CLEAR_MARKUP_MULTIPLIER = 1.5; // +50% on cost
 export const ORAJET_CLEAR_CONTOUR_MULTIPLIER = 1.10;
 export const ORAJET_CLEAR_RUSH_MULTIPLIER = 1.75;
 
@@ -49,10 +51,7 @@ function toInches(value: number, unit: OrajetClearUnit): number {
 }
 
 export function getDynamicRate(sqFt: number): number {
-  if (sqFt < 10) return 8.50;
-  if (sqFt < 50) return 7.75;
-  if (sqFt < 150) return 7.25;
-  return 6.95;
+  return ORAJET_CLEAR_SUPPLIER_RATE * ORAJET_CLEAR_MARKUP_MULTIPLIER;
 }
 
 export function calculateOrajetClearPanels(

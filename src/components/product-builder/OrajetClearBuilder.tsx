@@ -399,8 +399,8 @@ export default function OrajetClearBuilder({ productId = 0 }: OrajetClearBuilder
                           <iframe
                             src={`${uploadedFileUrl}#toolbar=0&navpanes=0&scrollbar=0&page=1&view=FitH`}
                             title="Uploaded PDF artwork preview"
-                            className="absolute left-0 top-0 h-full pointer-events-none"
-                            style={{ width: "calc(100% + 18px)" }}
+                            className="absolute -left-3 top-0 h-full w-[calc(100%+32px)] pointer-events-none"
+                            scrolling="no" style={{ clipPath: "inset(0 20px 0 0)" }}
                           />
                         </div>
                       ) : (
@@ -450,7 +450,7 @@ export default function OrajetClearBuilder({ productId = 0 }: OrajetClearBuilder
               <div className="space-y-1">
                 <BreakdownRow label="Area" value={pricing ? `${pricing.areaSqFt.toFixed(2)} sq ft` : "--"} muted={!pricing} />
                 <BreakdownRow
-                  label="Base rate (tiered)"
+                  label="Base rate ($6.00 cost + 50%)"
                   value={pricing ? `${formatCurrency(pricing.baseRate)}/sq ft` : "--"}
                   muted={!pricing}
                 />
@@ -485,13 +485,12 @@ export default function OrajetClearBuilder({ productId = 0 }: OrajetClearBuilder
               </div>
             </PanelCard>
 
-            <PanelCard eyebrow="Rate Tiers" title="Dynamic Pricing">
+            <PanelCard eyebrow="Cost Model" title="Orajet Clear Pricing Rules">
               <div className="space-y-2 text-sm text-zinc-600">
                 {[
-                  { range: "Under 10 sq ft", rate: "$8.50/sq ft", active: !!pricing && pricing.areaSqFt < 10 },
-                  { range: "10–49 sq ft", rate: "$7.75/sq ft", active: !!pricing && pricing.areaSqFt >= 10 && pricing.areaSqFt < 50 },
-                  { range: "50–149 sq ft", rate: "$7.25/sq ft", active: !!pricing && pricing.areaSqFt >= 50 && pricing.areaSqFt < 150 },
-                  { range: "150+ sq ft", rate: "$6.95/sq ft", active: !!pricing && pricing.areaSqFt >= 150 },
+                  { range: "Supplier base", rate: "$6.00/sq ft", active: true },
+                  { range: "Retail markup", rate: "+50%", active: true },
+                  { range: "Contour cutting", rate: "+10% additional", active: contourCut },
                 ].map((tier) => (
                   <div
                     key={tier.range}
