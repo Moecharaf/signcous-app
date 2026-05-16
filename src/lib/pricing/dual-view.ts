@@ -54,8 +54,8 @@ export const DUAL_VIEW_MINIMUM: Record<DualViewSide, number> = {
   double: 40,
 };
 
-export const DUAL_VIEW_SINGLE_BASE_RATE = 4.16; // $2.77 cost + 50% markup
-export const DUAL_VIEW_DOUBLE_BASE_RATE = 7.49; // $4.99 cost + 50% markup
+export const DUAL_VIEW_SINGLE_BASE_RATE = 4.20;
+export const DUAL_VIEW_DOUBLE_BASE_RATE = 7.99;
 
 export const DUAL_VIEW_CONTOUR_MULTIPLIER = 1.10;
 
