@@ -77,7 +77,7 @@ export function calculateOneWayPanels(widthIn: number): number {
 }
 
 export function calculateOneWayWindowPrice(input: OneWayWindowPricingInput): OneWayWindowPricingResult {
-  const footprint = calculateProductionFootprint(input.width, input.height, input.unit, 1);
+  const footprint = calculateProductionFootprint(input.width, input.height, input.unit, 0);
   const widthIn = footprint.billedWidthIn;
   const heightIn = footprint.billedHeightIn;
   const quantity = Math.max(1, Math.floor(input.quantity || 1));
