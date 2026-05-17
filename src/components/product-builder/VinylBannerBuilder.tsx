@@ -660,11 +660,25 @@ export default function VinylBannerBuilder({
           }
         }
 
+        if (prev.meshWebbing && key === "meshRopeMode" && value !== "none") {
+          return prev;
+        }
+
         const next = { ...prev, [key]: value } as FormState;
 
         if (key === "meshRopeMode" && value !== "none") {
           next.grommets = false;
           next.meshPolePocketMode = "none";
+          next.meshWebbing = false;
+        }
+
+        if (key === "meshWebbing" && value === true) {
+          next.meshWelding = false;
+          next.meshRopeMode = "none";
+        }
+
+        if (key === "meshWelding" && value === true) {
+          next.meshWebbing = false;
         }
 
         return next;
@@ -1583,7 +1597,7 @@ export default function VinylBannerBuilder({
                 <>
                   <ToolbarButton
                     title="Welding"
-                    value={form.meshWelding ? "Yes" : "No"}
+                    value={form.meshWebbing ? "Webbing" : form.meshWelding ? "Welding" : "None"}
                     active={activePanel === "meshWelding"}
                     onClick={(event) => openPanel("meshWelding", event)}
                   />
@@ -1838,9 +1852,10 @@ export default function VinylBannerBuilder({
             {activePanel === "meshWelding" && isMeshProduct && (
               <div>
                 <SubControlGroup title="Welding">
-                  <div className="grid grid-cols-2 gap-1">
-                    <SegButton active={!form.meshWelding} onClick={() => set("meshWelding", false)}>No</SegButton>
-                    <SegButton active={form.meshWelding} onClick={() => set("meshWelding", true)}>Yes</SegButton>
+                  <div className="grid grid-cols-3 gap-1">
+                    <SegButton active={!form.meshWelding && !form.meshWebbing} onClick={() => { set("meshWelding", false); set("meshWebbing", false); }}>None</SegButton>
+                    <SegButton active={form.meshWelding && !form.meshWebbing} onClick={() => set("meshWelding", true)}>Welding</SegButton>
+                    <SegButton active={form.meshWebbing} onClick={() => set("meshWebbing", true)}>Webbing</SegButton>
                   </div>
                 </SubControlGroup>
               </div>
@@ -1919,15 +1934,19 @@ export default function VinylBannerBuilder({
 
             {activePanel === "meshRope" && isMeshProduct && (
               <div>
-                {!form.grommets ? (
+                {!form.grommets && !form.meshWebbing ? (
                   <SubControlGroup title="Rope">
                     <div className="grid grid-cols-2 gap-1">
                       <SegButton active={form.meshRopeMode === "none"} onClick={() => set("meshRopeMode", "none")}>None</SegButton>
-                      <SegButton active={form.meshRopeMode === "top-only"} onClick={() => set("meshRopeMode", "top-only")}>Top Only</SegButton>
-                      <SegButton active={form.meshRopeMode === "bottom-only"} onClick={() => set("meshRopeMode", "bottom-only")}>Bottom Only</SegButton>
-                      <SegButton active={form.meshRopeMode === "top-bottom"} onClick={() => set("meshRopeMode", "top-bottom")}>Top &amp; Bottom</SegButton>
+                      <SegButton active={form.meshRopeMode === "top-only"} disabled={form.meshWebbing} onClick={() => set("meshRopeMode", "top-only")}>Top Only</SegButton>
+                      <SegButton active={form.meshRopeMode === "bottom-only"} disabled={form.meshWebbing} onClick={() => set("meshRopeMode", "bottom-only")}>Bottom Only</SegButton>
+                      <SegButton active={form.meshRopeMode === "top-bottom"} disabled={form.meshWebbing} onClick={() => set("meshRopeMode", "top-bottom")}>Top &amp; Bottom</SegButton>
                     </div>
                   </SubControlGroup>
+                ) : form.meshWebbing ? (
+                  <div className="rounded border border-zinc-200 bg-zinc-50 p-2 text-[11px] text-zinc-600">
+                    Rope cannot be enabled while Webbing is selected.
+                  </div>
                 ) : (
                   <div className="rounded border border-zinc-200 bg-zinc-50 p-2 text-[11px] text-zinc-600">
                     Rope is available only when Grommets is set to No.
