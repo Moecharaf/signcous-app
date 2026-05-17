@@ -83,7 +83,7 @@ const DEFAULTS: FormState = {
   quantity: "1",
   material: "13oz Vinyl",
   doubleSided: false,
-  grommets: true,
+  grommets: false,
   grommetPlacement: "all-sides" as const,
   grommetSpacingIn: 24,
   edgeFinish: "none",
