@@ -829,7 +829,7 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
                       ) : slotIndex !== null ? (
                         <div className={`flex h-full w-full items-center justify-center ${colorClass} opacity-30`}>
                           <span className="text-[7px] font-bold text-zinc-700">
-                            {uploadingBlock === slotIndex ? "…" : slotIndex + 1}
+                            {uploadingBlock === `${slotIndex}:${previewSide}` ? "…" : slotIndex + 1}
                           </span>
                         </div>
                       ) : null}
