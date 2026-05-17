@@ -476,8 +476,8 @@ export default function BootprintsBuilder({ productId = 0 }: BootprintsBuilderPr
                           <iframe
                             src={`${uploadedFileUrl}#toolbar=0&navpanes=0&scrollbar=0&page=1&view=FitH`}
                             title="Uploaded PDF artwork preview"
-                            className="absolute left-0 top-0 h-full pointer-events-none"
-                            style={{ width: "calc(100% + 18px)" }}
+                            className="absolute -left-3 top-0 h-full w-[calc(100%+32px)] pointer-events-none"
+                            scrolling="no" style={{ clipPath: "inset(0 20px 0 0)" }}
                           />
                         </div>
                       ) : (

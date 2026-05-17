@@ -1447,7 +1447,7 @@ export default function VinylBannerBuilder({
               </div>
             )}
 
-            {meshGrommetPoints.map((point, index) => (
+            {form.grommets && !isCanvasProduct && !isHdpeProduct && !isPosterProduct && !isNoCurlProduct && meshGrommetPoints.map((point, index) => (
               <span
                 key={`grommet-${index}`}
                 className="pointer-events-none absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-zinc-500 bg-zinc-100 shadow"
@@ -1714,7 +1714,7 @@ export default function VinylBannerBuilder({
               <div>
                 <div className="grid gap-2 sm:grid-cols-2">
                   <SegButton active={!form.doubleSided} onClick={() => set("doubleSided", false)}>Single-Sided</SegButton>
-                  <SegButton active={form.doubleSided} onClick={() => set("doubleSided", true)} disabled={!canEnableDoubleSided}>Double-Sided</SegButton>
+                  <SegButton active={form.doubleSided && canEnableDoubleSided} onClick={() => canEnableDoubleSided && set("doubleSided", true)} disabled={!canEnableDoubleSided}>Double-Sided</SegButton>
                 </div>
                 {!canEnableDoubleSided && (
                   <div className="mt-2 text-[10px] font-semibold text-zinc-500">Double-sided is available only with 18oz Vinyl.</div>
