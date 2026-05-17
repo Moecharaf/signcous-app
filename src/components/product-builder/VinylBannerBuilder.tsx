@@ -441,7 +441,7 @@ export default function VinylBannerBuilder({
   const canvasHeaderProductName = isEconomicalStandProduct ? "Econo Banner Stand" : productName;
   const canvasHeaderDetail = isEconomicalStandProduct
     ? `${canvasHeaderProductName}, ${widthLabelInches} x ${heightLabelInches}`
-    : `${canvasProductLabel} ${canvasPrintLabel}, ${widthFeetInchesLabel} x ${heightFeetInchesLabel}`;
+    : `${canvasProductLabel} ${canvasPrintLabel}, ${widthLabelInches} x ${heightLabelInches}`;
   const showVinylRateMatrix = !isCanvasProduct && !isMeshProduct && !isHdpeProduct && !isPosterProduct && !isNoCurlProduct && !isEconomicalStandProduct;
 
   const canvasRate = useMemo(() => getCanvasSqFtRate(qtyNum), [qtyNum]);
@@ -1285,16 +1285,16 @@ export default function VinylBannerBuilder({
                   Top Of Image
                 </div>
                 <div className="pointer-events-none absolute -top-4 left-1/2 -translate-x-1/2 text-[11px] text-zinc-500">
-                  {widthFeetInchesLabel}
+                  {widthLabelInches}
                 </div>
                 <div className="pointer-events-none absolute -bottom-4 left-1/2 -translate-x-1/2 text-[11px] text-zinc-500">
-                  {widthFeetInchesLabel}
+                  {widthLabelInches}
                 </div>
                 <div className="pointer-events-none absolute -left-7 top-1/2 -translate-y-1/2 -rotate-90 text-[11px] text-zinc-500">
-                  {heightFeetInchesLabel}
+                  {heightLabelInches}
                 </div>
                 <div className="pointer-events-none absolute -right-7 top-1/2 -translate-y-1/2 rotate-90 text-[11px] text-zinc-500">
-                  {heightFeetInchesLabel}
+                  {heightLabelInches}
                 </div>
               </>
             )}
@@ -1302,16 +1302,16 @@ export default function VinylBannerBuilder({
             {!isMeshProduct && !isEconomicalStandProduct && (
               <>
                 <div className="pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 text-[11px] font-semibold text-zinc-500">
-                  {widthFeetInchesLabel}
+                  {widthLabelInches}
                 </div>
                 <div className="pointer-events-none absolute -bottom-7 left-1/2 -translate-x-1/2 text-[11px] font-semibold text-zinc-500">
-                  {widthFeetInchesLabel}
+                  {widthLabelInches}
                 </div>
                 <div className="pointer-events-none absolute -left-9 top-1/2 -translate-y-1/2 -rotate-90 text-[11px] font-semibold text-zinc-500">
-                  {heightFeetInchesLabel}
+                  {heightLabelInches}
                 </div>
                 <div className="pointer-events-none absolute -right-9 top-1/2 -translate-y-1/2 rotate-90 text-[11px] font-semibold text-zinc-500">
-                  {heightFeetInchesLabel}
+                  {heightLabelInches}
                 </div>
               </>
             )}
