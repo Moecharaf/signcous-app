@@ -1533,7 +1533,7 @@ export default function VinylBannerBuilder({
                   status={errors.width || errors.height ? "alert" : "ok"}
                 />
               )}
-              {!isPosterProduct && !isEconomicalStandProduct && !isHdpeProduct && !isCanvasProduct && (
+              {!isPosterProduct && !isEconomicalStandProduct && !isHdpeProduct && !isCanvasProduct && !isMeshProduct && (
                 <ToolbarButton
                   title="Material"
                   value={isCanvasProduct ? "Canvas" : isNoCurlProduct ? "No-Curl Banner" : isMeshProduct ? "Mesh Banner" : isHdpeProduct ? "HDPE" : form.material}
@@ -1557,7 +1557,7 @@ export default function VinylBannerBuilder({
                   onClick={(event) => openPanel("finish", event)}
                 />
               )}
-              {!isHdpeProduct && !isCanvasProduct && (
+              {!isHdpeProduct && !isCanvasProduct && !isMeshProduct && (
                 <ToolbarButton
                   title="Quantity"
                   value={`${form.quantity} unit${effectiveQtyNum !== 1 ? "s" : ""}`}
@@ -1688,7 +1688,7 @@ export default function VinylBannerBuilder({
               </div>
             )}
 
-            {activePanel === "material" && !isPosterProduct && !isHdpeProduct && !isCanvasProduct && (
+            {activePanel === "material" && !isPosterProduct && !isHdpeProduct && !isCanvasProduct && !isMeshProduct && (
               <div>
                 {isCanvasProduct || isNoCurlProduct || isMeshProduct || isHdpeProduct ? (
                   <div className="flex h-8 items-center rounded border border-zinc-200 bg-white px-3 text-sm text-zinc-700">
@@ -1897,7 +1897,7 @@ export default function VinylBannerBuilder({
               </div>
             )}
 
-            {activePanel === "quantity" && !isHdpeProduct && !isCanvasProduct && (
+            {activePanel === "quantity" && !isHdpeProduct && !isCanvasProduct && !isMeshProduct && (
               <div>
                 <div className="grid gap-2 md:grid-cols-[110px_1fr]">
                   <input type="number" min={1} value={form.quantity} onChange={(e) => set("quantity", e.target.value)} className="h-8 rounded border border-zinc-300 px-3 text-sm" />
