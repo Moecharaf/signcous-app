@@ -911,12 +911,20 @@ export default function VinylBannerBuilder({
       setDrag({ mode: "none" });
     }
 
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape" && drag.mode !== "none") {
+        setDrag({ mode: "none" });
+      }
+    }
+
     window.addEventListener("pointermove", onPointerMove);
     window.addEventListener("pointerup", onPointerUp);
+    window.addEventListener("keydown", onKeyDown);
 
     return () => {
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", onPointerUp);
+      window.removeEventListener("keydown", onKeyDown);
     };
   }, [drag, form.unit, pxPerIn, set]);
 
