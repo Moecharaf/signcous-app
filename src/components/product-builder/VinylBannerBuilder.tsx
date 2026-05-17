@@ -405,6 +405,10 @@ export default function VinylBannerBuilder({
   const meshBillableSqFt = Math.max(1, Math.ceil((widthIn / 12) * (heightIn / 12)));
   const perimeterFt = 2 * ((widthIn / 12) + (heightIn / 12));
   const meshRopeActive = isMeshProduct && form.meshRopeMode !== "none";
+  const meshWebbingLocked = isMeshProduct && (!form.meshWelding || form.meshRopeMode !== "none");
+  const meshRopeLocked = isMeshProduct && (!form.meshWelding || form.meshWebbing || form.grommets);
+  const meshGrommetsLocked = isMeshProduct && form.meshRopeMode !== "none";
+  const meshPolePocketsLocked = isMeshProduct && form.meshRopeMode !== "none";
   const meshWebbingCost = form.meshWebbing ? perimeterFt * 1.75 : 0;
   const meshRopeCost = meshRopeActive ? perimeterFt * 1.75 : 0;
   const runtimeViewportWidth = typeof window !== "undefined" ? window.innerWidth : 1280;
@@ -1616,24 +1620,28 @@ export default function VinylBannerBuilder({
                     value={form.meshWebbing ? "Yes" : "No"}
                     active={activePanel === "meshWebbing"}
                     onClick={(event) => openPanel("meshWebbing", event)}
+                    status={meshWebbingLocked ? "alert" : "ok"}
                   />
                   <ToolbarButton
                     title="Grommets"
                     value={form.grommets ? "Yes" : "No"}
                     active={activePanel === "meshGrommets"}
                     onClick={(event) => openPanel("meshGrommets", event)}
+                    status={meshGrommetsLocked ? "alert" : "ok"}
                   />
                   <ToolbarButton
                     title="Rope"
                     value={form.meshRopeMode === "none" ? "None" : form.meshRopeMode === "top-only" ? "Top" : form.meshRopeMode === "bottom-only" ? "Bottom" : "Top & Bottom"}
                     active={activePanel === "meshRope"}
                     onClick={(event) => openPanel("meshRope", event)}
+                    status={meshRopeLocked ? "alert" : "ok"}
                   />
                   <ToolbarButton
                     title="Pole Pockets"
                     value={form.meshPolePocketMode === "none" ? "None" : form.meshPolePocketMode === "top-only" ? "Top" : form.meshPolePocketMode === "bottom-only" ? "Bottom" : form.meshPolePocketMode === "left-only" ? "Left" : form.meshPolePocketMode === "right-only" ? "Right" : form.meshPolePocketMode === "top-bottom" ? "Top & Bottom" : "Left & Right"}
                     active={activePanel === "meshPolePockets"}
                     onClick={(event) => openPanel("meshPolePockets", event)}
+                    status={meshPolePocketsLocked ? "alert" : "ok"}
                   />
                 </>
               )}
