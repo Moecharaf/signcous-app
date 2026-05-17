@@ -650,7 +650,16 @@ export default function VinylBannerBuilder({
 
   const set = useCallback(
     <K extends keyof FormState>(key: K, value: FormState[K]) => {
-      setForm((prev) => ({ ...prev, [key]: value }));
+      setForm((prev) => {
+        const next = { ...prev, [key]: value } as FormState;
+
+        if (key === "meshRopeMode" && value !== "none") {
+          next.grommets = false;
+          next.meshPolePocketMode = "none";
+        }
+
+        return next;
+      });
     },
     []
   );
