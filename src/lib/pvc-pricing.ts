@@ -1,6 +1,10 @@
 export type PvcMaterial = "3mm" | "6mm";
 export type PvcPrintMode = "single" | "double";
 
+// ─── Markup for Signs365 supplier cost ──────────────────────────────────────
+
+export const PVC_MARKUP = 1.5; // 50% markup over Signs365 cost
+
 export interface PvcSizeOption {
   id: string;
   width: number;
@@ -320,7 +324,8 @@ export function calculatePvcPricing(input: PvcPricingInput): PvcPricingResult {
   const sheetsRequired = Math.max(1, Math.ceil(safeQuantity / signsPerSheet));
 
   const sheetPrice = getPvcSheetPrice(safeQuantity, input.material, input.printMode);
-  const retailUnitPrice = (sheetsRequired * sheetPrice) / safeQuantity;
+  const markedUpSheetPrice = sheetPrice * PVC_MARKUP;
+  const retailUnitPrice = (sheetsRequired * markedUpSheetPrice) / safeQuantity;
   const baseSubtotal = retailUnitPrice * safeQuantity;
 
   const contourCutFee = input.contourCut ? baseSubtotal * 0.2 : 0;

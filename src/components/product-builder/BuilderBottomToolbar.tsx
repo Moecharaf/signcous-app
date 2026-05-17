@@ -111,7 +111,7 @@ export default function BuilderBottomToolbar({
                 onClick={(event) => togglePanel(panel.id, event)}
                 className={`min-w-0 rounded border px-3 py-2 text-left transition ${
                   activePanelId === panel.id
-                    ? "border-[#007fff] bg-[#007fff]/5 shadow-sm"
+                    ? "border-emerald-500 bg-emerald-50 shadow-sm"
                     : "border-zinc-200 bg-white hover:border-zinc-300"
                 }`}
               >
@@ -132,8 +132,8 @@ export default function BuilderBottomToolbar({
             ))}
           </div>
 
-          <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500">{actionTitle}</div>
+          <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-emerald-700">{actionTitle}</div>
             <div className="mt-3">{action}</div>
           </div>
         </div>

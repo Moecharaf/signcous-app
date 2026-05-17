@@ -54,6 +54,10 @@ export const FOAMCORE_SHEET = {
   height: 96,
 };
 
+// ─── Markup for Signs365 supplier cost ──────────────────────────────────────
+
+export const FOAMCORE_MARKUP = 1.5; // 50% markup over Signs365 cost
+
 // Signs365 uses fixed sheet counts for some sizes instead of pure max packing.
 const SIGNS365_SIGNS_PER_SHEET_OVERRIDES: Record<string, number> = {
   "11x11": 32,
@@ -404,7 +408,8 @@ export function calculateFoamcorePricing(input: FoamcorePricingInput): FoamcoreP
   const sheetsRequired = Math.max(1, Math.ceil(safeQuantity / signsPerSheet));
 
   const sheetPrice = getFoamcoreRetailSheetPrice(safeQuantity, input.printMode);
-  const retailTotalCost = sheetsRequired * sheetPrice;
+  const markedUpSheetPrice = sheetPrice * FOAMCORE_MARKUP;
+  const retailTotalCost = sheetsRequired * markedUpSheetPrice;
   const retailUnitPrice = retailTotalCost / safeQuantity;
   const baseSubtotal = retailUnitPrice * safeQuantity;
 

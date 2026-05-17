@@ -54,6 +54,10 @@ export const POLYSTYRENE_SHEET = {
   height: 96,
 };
 
+// ─── Markup for Signs365 supplier cost ──────────────────────────────────────
+
+export const POLYSTYRENE_MARKUP = 1.5; // 50% markup over Signs365 cost
+
 const SIGNS365_SIGNS_PER_SHEET_OVERRIDES: Record<string, number> = {
   "11x11": 32,
   "14x10": 27,
@@ -339,7 +343,8 @@ export function calculatePolystyrenePricing(
   const sheetsRequired = Math.max(1, Math.ceil(safeQty / signsPerSheet));
 
   const sheetPrice = getPolystyreneSheetPrice(safeQty, input.printMode);
-  const retailUnitPrice = (sheetsRequired * sheetPrice) / safeQty;
+  const markedUpSheetPrice = sheetPrice * POLYSTYRENE_MARKUP;
+  const retailUnitPrice = (sheetsRequired * markedUpSheetPrice) / safeQty;
   const baseSubtotal = retailUnitPrice * safeQty;
 
   const contourCutFee = input.contourCut ? baseSubtotal * 0.2 : 0;

@@ -12,6 +12,10 @@ export interface JBondSizeOption {
 
 export const JBOND_SHEET = { width: 48, height: 96 };
 
+// ─── Markup for Signs365 supplier cost ──────────────────────────────────────
+
+export const JBOND_MARKUP = 1.5; // 50% markup over Signs365 cost
+
 const SIGNS365_OVERRIDES: Record<string, number> = {
   "11x11": 32,
   "14x10": 27,
@@ -289,11 +293,12 @@ export function calculateJBondSheetPricing(input: JBondSheetPricingInput): JBond
   const signsPerSheet = getBestJBondSheetLayout(input.width, input.height).count;
   const sheetsRequired = Math.max(1, Math.ceil(qty / signsPerSheet));
   const sheetPrice = getJBondSheetPrice(input.material, input.printMode);
-  const retailUnitPrice = (sheetsRequired * sheetPrice) / qty;
+  const markedUpSheetPrice = sheetPrice * JBOND_MARKUP;
+  const retailUnitPrice = (sheetsRequired * markedUpSheetPrice) / qty;
   const baseSubtotal = retailUnitPrice * qty;
 
   const contourCutFee = input.contourCut ? baseSubtotal * 0.1 : 0;
-  const roundedCornersFee = input.roundedCorners ? 15 : 0;
+  const roundedCornersFee = input.roundedCorners ? 15 * JBOND_MARKUP : 0;
   const preRush = baseSubtotal + contourCutFee + roundedCornersFee;
   const rushFee = input.rush ? preRush * 1.0 : 0;
   const totalPrice = preRush + rushFee;
@@ -330,11 +335,12 @@ export function calculateJBondSqinPricing(input: JBondSqinPricingInput): JBondPr
   const qty = Math.max(1, Math.floor(input.quantity));
   const sqInches = Math.max(0, input.customWidth) * Math.max(0, input.customHeight);
   const { rate, min } = getJBondSqinRate(input.material, input.printMode);
-  const pricePerSign = Math.max(min, sqInches * rate);
+  const basePricePerSign = Math.max(min, sqInches * rate);
+  const pricePerSign = basePricePerSign * JBOND_MARKUP;
   const baseSubtotal = pricePerSign * qty;
 
   const contourCutFee = input.contourCut ? baseSubtotal * 0.1 : 0;
-  const roundedCornersFee = input.roundedCorners ? 15 : 0;
+  const roundedCornersFee = input.roundedCorners ? 15 * JBOND_MARKUP : 0;
   const preRush = baseSubtotal + contourCutFee + roundedCornersFee;
   const rushFee = input.rush ? preRush * 1.0 : 0;
   const totalPrice = preRush + rushFee;

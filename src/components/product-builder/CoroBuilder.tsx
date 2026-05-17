@@ -15,6 +15,9 @@ import {
   type CoroPrintMode,
 } from "@/lib/coro-pricing";
 
+type GrommetPosition = "all-sides" | "top-bottom" | "left-right";
+type GrommetSpacingMode = "every-2-3-feet" | "corners-only" | "custom";
+
 interface CoroBuilderProps {
   productId?: number;
   productName?: string;
@@ -24,6 +27,11 @@ interface CoroBuilderProps {
     fileUrl: string;
     fileName: string;
     blobUrl: string | null;
+  }
+
+  interface BlockUploadPair {
+    front?: BlockUpload;
+    back?: BlockUpload;
   }
 
   const SLOT_COLORS = [
@@ -42,6 +50,10 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
   const cart = useCart();
 
   const [sizeId, setSizeId] = useState(CORO_SIZE_OPTIONS[0].id);
+  const [sizeMode, setSizeMode] = useState<"preset" | "custom">("preset");
+  const [customWidth, setCustomWidth] = useState(24);
+  const [customHeight, setCustomHeight] = useState(18);
+  const [sizeRatioLocked, setSizeRatioLocked] = useState(true);
   const [material, setMaterial] = useState<CoroMaterial>("4mm");
   const [printMode, setPrintMode] = useState<CoroPrintMode>("single");
   const [quantity, setQuantity] = useState(1);
@@ -49,24 +61,54 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
   const [stepStakes, setStepStakes] = useState(0);
   const [heavyDutyStakes, setHeavyDutyStakes] = useState(0);
   const [grommetsEnabled, setGrommetsEnabled] = useState(false);
-  const [grommetCount, setGrommetCount] = useState(4);
+  const [grommetPosition, setGrommetPosition] = useState<GrommetPosition>("top-bottom");
+  const [grommetSpacingMode, setGrommetSpacingMode] = useState<GrommetSpacingMode>("every-2-3-feet");
+  const [grommetSpacing, setGrommetSpacing] = useState(24);
   const [gloss, setGloss] = useState(false);
   const [contourCut, setContourCut] = useState(false);
   const [rush, setRush] = useState(false);
+  const [colorMatching, setColorMatching] = useState(false);
 
-  // Per-block upload state
+  // Per-block upload state (supports front/back for double-sided)
   const [imageCount, setImageCount] = useState(1);
-  const [blockUploads, setBlockUploads] = useState<Record<number, BlockUpload>>({});
-  const [uploadingBlock, setUploadingBlock] = useState<number | null>(null);
-  const [blockUploadErrors, setBlockUploadErrors] = useState<Record<number, string>>({});
+  const [blockUploads, setBlockUploads] = useState<Record<number, BlockUploadPair>>({});
+  const [uploadingBlock, setUploadingBlock] = useState<string | null>(null); // format: "blockIndex:side"
+  const [blockUploadErrors, setBlockUploadErrors] = useState<Record<string, string>>({});
+  const [previewSide, setPreviewSide] = useState<"front" | "back">("front"); // New: toggle for double-sided preview
   const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const fileInputBackRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const [added, setAdded] = useState(false);
 
   const activeSize = useMemo(
-    () => CORO_SIZE_OPTIONS.find((size) => size.id === sizeId) ?? CORO_SIZE_OPTIONS[0],
-    [sizeId]
+    () => {
+      if (sizeMode === "custom") {
+        return {
+          id: "custom",
+          width: Math.min(CORO_SHEET.width, Math.max(1, customWidth || 1)),
+          height: Math.min(CORO_SHEET.height, Math.max(1, customHeight || 1)),
+        };
+      }
+
+      return CORO_SIZE_OPTIONS.find((size) => size.id === sizeId) ?? CORO_SIZE_OPTIONS[0];
+    },
+    [sizeId, sizeMode, customWidth, customHeight]
   );
+
+  const doubleSidedAllowed = material === "10mm";
+  const contourCutAllowed = activeSize.width === 48 && activeSize.height === 96;
+
+  useEffect(() => {
+    if (!doubleSidedAllowed && printMode === "double") {
+      setPrintMode("single");
+    }
+  }, [doubleSidedAllowed, printMode]);
+
+  useEffect(() => {
+    if (!contourCutAllowed && contourCut) {
+      setContourCut(false);
+    }
+  }, [contourCutAllowed, contourCut]);
 
   const pricing = useMemo(
     () =>
@@ -79,7 +121,10 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
         stepStakes,
         heavyDutyStakes,
         grommetsEnabled,
-        grommetCount,
+        grommetCount:
+          grommetsEnabled
+            ? estimateGrommetCount(activeSize.width, activeSize.height, grommetPosition, grommetSpacingMode, grommetSpacing)
+            : 0,
         gloss,
         contourCut,
         rush,
@@ -93,7 +138,9 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
       stepStakes,
       heavyDutyStakes,
       grommetsEnabled,
-      grommetCount,
+      grommetPosition,
+      grommetSpacingMode,
+      grommetSpacing,
       gloss,
       contourCut,
       rush,
@@ -105,14 +152,43 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
     [activeSize.height, activeSize.width]
   );
 
+  function clampCustomWidth(value: number): number {
+    return Math.min(CORO_SHEET.width, Math.max(1, value || 1));
+  }
+
+  function clampCustomHeight(value: number): number {
+    return Math.min(CORO_SHEET.height, Math.max(1, value || 1));
+  }
+
+  function handleCustomWidthChange(nextRawWidth: number) {
+    const nextWidth = clampCustomWidth(nextRawWidth);
+    if (sizeRatioLocked) {
+      const ratio = customWidth / Math.max(customHeight, 1);
+      const nextHeight = clampCustomHeight(nextWidth / Math.max(ratio, 0.001));
+      setCustomHeight(Number(nextHeight.toFixed(3)));
+    }
+    setCustomWidth(Number(nextWidth.toFixed(3)));
+  }
+
+  function handleCustomHeightChange(nextRawHeight: number) {
+    const nextHeight = clampCustomHeight(nextRawHeight);
+    if (sizeRatioLocked) {
+      const ratio = customWidth / Math.max(customHeight, 1);
+      const nextWidth = clampCustomWidth(nextHeight * ratio);
+      setCustomWidth(Number(nextWidth.toFixed(3)));
+    }
+    setCustomHeight(Number(nextHeight.toFixed(3)));
+  }
+
     const maxImages = sheetLayout.count;
     const safeImageCount = Math.min(imageCount, maxImages);
 
-    async function uploadArtworkForBlock(blockIndex: number, file: File) {
-      setUploadingBlock(blockIndex);
+    async function uploadArtworkForBlock(blockIndex: number, file: File, side: "front" | "back" = "front") {
+      const uploadKey = `${blockIndex}:${side}`;
+      setUploadingBlock(uploadKey);
       setBlockUploadErrors((prev) => {
         const n = { ...prev };
-        delete n[blockIndex];
+        delete n[uploadKey];
         return n;
       });
       try {
@@ -133,43 +209,68 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
           };
         }
         if (!response.ok || !data.fileUrl) {
-          setBlockUploadErrors((prev) => ({ ...prev, [blockIndex]: data.error ?? "Upload failed." }));
+          setBlockUploadErrors((prev) => ({ ...prev, [uploadKey]: data.error ?? "Upload failed." }));
           return;
         }
         let blobUrl: string | null = null;
         if (file.type.startsWith("image/")) {
           blobUrl = URL.createObjectURL(file);
         }
-        setBlockUploads((prev) => ({
-          ...prev,
-          [blockIndex]: { fileUrl: data.fileUrl!, fileName: data.originalName ?? file.name, blobUrl },
-        }));
+        const newUpload = { fileUrl: data.fileUrl!, fileName: data.originalName ?? file.name, blobUrl };
+        
+        // Auto-fill: Check if this is the first upload for this side
+        // If so, fill all empty blocks with the same image (Signs365 behavior)
+        setBlockUploads((prev) => {
+          const updated = { ...prev };
+          const isFirstUpload = !Object.values(prev).some(pair => pair?.[side]);
+          
+          if (isFirstUpload) {
+            // Fill all blocks with this image if they're empty on this side
+            for (let i = 0; i < safeImageCount; i++) {
+              if (!updated[i]?.[side]) {
+                updated[i] = { ...updated[i], [side]: newUpload };
+              }
+            }
+          } else {
+            // If not the first upload, only fill the clicked block
+            updated[blockIndex] = { ...updated[blockIndex], [side]: newUpload };
+          }
+          return updated;
+        });
       } catch {
-        setBlockUploadErrors((prev) => ({ ...prev, [blockIndex]: "Upload failed. Please try again." }));
+        setBlockUploadErrors((prev) => ({ ...prev, [uploadKey]: "Upload failed. Please try again." }));
       } finally {
         setUploadingBlock(null);
       }
     }
 
-    function handleFileChange(blockIndex: number, event: React.ChangeEvent<HTMLInputElement>) {
+    function handleFileChange(blockIndex: number, event: React.ChangeEvent<HTMLInputElement>, side: "front" | "back" = "front") {
       const file = event.target.files?.[0];
-      if (file) void uploadArtworkForBlock(blockIndex, file);
+      if (file) void uploadArtworkForBlock(blockIndex, file, side);
       event.target.value = "";
     }
 
-    function removeBlockUpload(blockIndex: number) {
+    function removeBlockUpload(blockIndex: number, side: "front" | "back" = "front") {
       setBlockUploads((prev) => {
-        const n = { ...prev };
-        if (n[blockIndex]?.blobUrl) URL.revokeObjectURL(n[blockIndex].blobUrl!);
-        delete n[blockIndex];
-        return n;
+        const pair = prev[blockIndex];
+        if (!pair) return prev;
+        if (pair[side]?.blobUrl) URL.revokeObjectURL(pair[side]!.blobUrl!);
+        const updated = { ...pair };
+        delete updated[side];
+        if (Object.keys(updated).length === 0) {
+          const n = { ...prev };
+          delete n[blockIndex];
+          return n;
+        }
+        return { ...prev, [blockIndex]: updated };
       });
     }
 
   function addToCart() {
     const safeQty = Math.max(1, Math.floor(quantity));
     const materialLabel = `${productName} ${material} ${printMode === "single" ? "Single-Sided" : "Double-Sided"}`;
-    const uploadedFileUrls = Array.from({ length: safeImageCount }, (_, i) => blockUploads[i]?.fileUrl ?? "").filter(Boolean);
+    const uploadedFileUrls = Array.from({ length: safeImageCount }, (_, i) => blockUploads[i]?.front?.fileUrl ?? "").filter(Boolean);
+    const uploadedBackUrls = printMode === "double" ? Array.from({ length: safeImageCount }, (_, i) => blockUploads[i]?.back?.fileUrl ?? "").filter(Boolean) : [];
 
     cart.addItem({
       productId,
@@ -187,7 +288,7 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
       hemming: false,
       rush,
       uploadedFileUrl: uploadedFileUrls[0] ?? null,
-      uploadedFileName: blockUploads[0]?.fileName ?? null,
+      uploadedFileName: blockUploads[0]?.front?.fileName ?? null,
       uploadedFileUrls: uploadedFileUrls.length > 0 ? uploadedFileUrls : undefined,
       customOptions: {
         custom_sheet_size: `${CORO_SHEET.width}\" x ${CORO_SHEET.height}\"`,
@@ -196,10 +297,24 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
         custom_sheets_required: String(pricing.sheetsRequired),
         custom_material_thickness: material,
         custom_print_mode: printMode === "single" ? "Single-Sided" : "Double-Sided",
+        custom_front_images: String(uploadedFileUrls.length),
+        custom_back_images: printMode === "double" ? String(uploadedBackUrls.length) : "0",
+        custom_back_image_urls: uploadedBackUrls.length > 0 ? uploadedBackUrls.join(",") : "none",
         custom_step_stakes: String(stepStakes),
         custom_heavy_duty_stakes: String(heavyDutyStakes),
-        custom_grommet_count: grommetsEnabled ? String(grommetCount) : "0",
+        custom_grommet_count: grommetsEnabled
+          ? String(estimateGrommetCount(activeSize.width, activeSize.height, grommetPosition, grommetSpacingMode, grommetSpacing))
+          : "0",
+        custom_grommet_position: grommetsEnabled ? grommetPosition : "none",
+        custom_grommet_spacing: grommetsEnabled
+          ? grommetSpacingMode === "every-2-3-feet"
+            ? "Every 2-3 Feet"
+            : grommetSpacingMode === "corners-only"
+              ? "Corners Only"
+              : `${grommetSpacing} in`
+          : "n/a",
         custom_gloss: gloss ? "yes" : "no",
+        custom_color_matching: colorMatching ? "yes" : "no",
         custom_contour_cut: contourCut ? "yes" : "no",
         custom_rush_surcharge_mode: rush ? "+120%" : "none",
         custom_image_count: String(safeImageCount),
@@ -212,66 +327,261 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
     window.setTimeout(() => setAdded(false), 1800);
   }
 
-    const uploadedCount = Object.keys(blockUploads).filter((k) => Number(k) < safeImageCount).length;
+      const uploadedCount = Object.keys(blockUploads).filter((k) => Number(k) < safeImageCount && blockUploads[Number(k)]?.front).length;
+    const uploadedBackCount = printMode === "double" ? Object.keys(blockUploads).filter((k) => Number(k) < safeImageCount && blockUploads[Number(k)]?.back).length : 0;
   const toolbarPanels: BuilderBottomToolbarPanel[] = [
     {
-      id: "artwork",
-      title: "Artwork",
-      value: `${uploadedCount}/${safeImageCount} uploaded`,
-      width: 420,
-      status: uploadedCount === safeImageCount && safeImageCount > 0 ? "ok" : "neutral",
+      id: "grommet-presets",
+      title: "Grommet Presets",
+      value: grommetsEnabled
+        ? `${grommetPosition.replace("-", " ")} / ${grommetSpacingMode === "every-2-3-feet" ? "Every 2-3 Ft" : grommetSpacingMode === "corners-only" ? "Corners Only" : "Custom"}`
+        : "Disabled",
+      width: 360,
       content: (
         <>
-          <div className="text-[11px] leading-4 text-zinc-500">
-            {safeImageCount === 1
-              ? "Upload 1 artwork for all signs."
-              : `Upload up to ${safeImageCount} artworks. Click a block on the sheet or use the slots below.`}
+          <button
+            type="button"
+            onClick={() => setGrommetsEnabled((prev) => !prev)}
+            className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-left text-sm font-semibold mb-2"
+          >
+            {grommetsEnabled ? "✓ Enabled" : "Disabled"}
+          </button>
+          {grommetsEnabled && (
+            <div className="space-y-2">
+              <select
+                value={grommetPosition}
+                onChange={(event) => setGrommetPosition(event.target.value as GrommetPosition)}
+                className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"
+              >
+                <option value="all-sides">All Sides</option>
+                <option value="top-bottom">Top and Bottom</option>
+                <option value="left-right">Left and Right</option>
+              </select>
+              <select
+                value={grommetSpacingMode}
+                onChange={(event) => setGrommetSpacingMode(event.target.value as GrommetSpacingMode)}
+                className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"
+              >
+                <option value="every-2-3-feet">Every 2-3 Feet</option>
+                <option value="corners-only">Corners Only</option>
+                <option value="custom">Custom Spacing</option>
+              </select>
+              {grommetSpacingMode === "custom" && (
+                <input
+                  type="number"
+                  min={6}
+                  max={48}
+                  step={1}
+                  value={grommetSpacing}
+                  onChange={(event) => setGrommetSpacing(Math.min(48, Math.max(6, Number(event.target.value) || 24)))}
+                  className="h-9 w-full rounded border border-zinc-300 px-2 text-sm"
+                />
+              )}
+              <div className="text-[11px] leading-4 text-zinc-500">
+                Approx: {estimateGrommetCount(activeSize.width, activeSize.height, grommetPosition, grommetSpacingMode, grommetSpacing)} per sign
+              </div>
+            </div>
+          )}
+        </>
+      ),
+    },
+    {
+      id: "size",
+      title: "Size",
+      value: `${formatCoroSize(activeSize)}${sizeMode === "custom" ? " (Custom)" : ""}`,
+      width: 360,
+      content: (
+        <>
+          <div className="mb-2 grid grid-cols-2 gap-1">
+            <button
+              type="button"
+              onClick={() => setSizeMode("preset")}
+              className={`h-9 rounded border text-sm ${
+                sizeMode === "preset"
+                  ? "border-[var(--brand-primary)] bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]"
+                  : "border-zinc-300 bg-white text-zinc-700"
+              }`}
+            >
+              Preset
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (sizeMode !== "custom") {
+                  setCustomWidth(activeSize.width);
+                  setCustomHeight(activeSize.height);
+                }
+                setSizeMode("custom");
+              }}
+              className={`h-9 rounded border text-sm ${
+                sizeMode === "custom"
+                  ? "border-[var(--brand-primary)] bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]"
+                  : "border-zinc-300 bg-white text-zinc-700"
+              }`}
+            >
+              Custom
+            </button>
           </div>
-          <div className="space-y-2">
-            {Array.from({ length: safeImageCount }).map((_, i) => {
-              const upload = blockUploads[i];
-              const error = blockUploadErrors[i];
-              const isUploading = uploadingBlock === i;
-              const color = SLOT_COLORS[i % SLOT_COLORS.length];
-              return (
-                <div key={`slot-${i}`} className="rounded-lg border border-zinc-200 bg-zinc-50 p-2">
-                  <div className="flex items-center gap-2">
-                    <div className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-sm ${color} text-[10px] font-bold text-white`}>
-                      {i + 1}
-                    </div>
-                    <div className="min-w-0 flex-1 text-xs font-medium text-zinc-700">Block {i + 1}</div>
-                    {upload ? (
-                      <div className="flex items-center gap-1">
-                        <span className="max-w-[100px] truncate text-[10px] text-emerald-700">{upload.fileName}</span>
-                        <button
-                          type="button"
-                          onClick={() => removeBlockUpload(i)}
-                          className="rounded px-1 text-[10px] text-zinc-400 hover:text-rose-500"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => fileInputRefs.current[i]?.click()}
-                        disabled={isUploading}
-                        className="shrink-0 rounded border border-dashed border-zinc-300 px-2 py-1 text-[10px] text-zinc-500 hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)] disabled:opacity-50"
-                      >
-                        {isUploading ? "Uploading..." : "+ Upload"}
-                      </button>
-                    )}
-                  </div>
-                  {upload?.blobUrl && <img src={upload.blobUrl} alt={upload.fileName} className="mt-2 h-16 w-full rounded object-contain" />}
-                  {upload && !upload.blobUrl && (
-                    <div className="mt-1 rounded bg-emerald-50 px-2 py-1 text-[10px] text-emerald-700">✓ {upload.fileName}</div>
-                  )}
-                  {error && <div className="mt-1 rounded bg-rose-50 px-2 py-1 text-[10px] text-rose-700">{error}</div>}
+
+          {sizeMode === "preset" ? (
+            <select
+              value={sizeId}
+              onChange={(event) => setSizeId(event.target.value)}
+              className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"
+            >
+              {CORO_SIZE_OPTIONS.map((size) => (
+                <option key={size.id} value={size.id}>{formatCoroSize(size)}</option>
+              ))}
+            </select>
+          ) : (
+            <div className="space-y-2">
+              <div className="grid grid-cols-[1fr_auto_1fr] gap-1">
+                <div>
+                  <label className="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">Width (in)</label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={CORO_SHEET.width}
+                    step={0.5}
+                    value={customWidth}
+                    onChange={(event) => handleCustomWidthChange(Number(event.target.value) || 1)}
+                    className="h-9 w-full rounded border border-zinc-300 px-2 text-sm"
+                  />
                 </div>
-              );
-            })}
+                <div className="flex items-end">
+                  <button
+                    type="button"
+                    onClick={() => setSizeRatioLocked((prev) => !prev)}
+                    className={`h-9 rounded border px-2 text-xs font-semibold ${
+                      sizeRatioLocked
+                        ? "border-[var(--brand-primary)] bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]"
+                        : "border-zinc-300 bg-white text-zinc-600"
+                    }`}
+                    aria-label={sizeRatioLocked ? "Unlock aspect ratio" : "Lock aspect ratio"}
+                  >
+                    {sizeRatioLocked ? "Locked" : "Unlocked"}
+                  </button>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">Height (in)</label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={CORO_SHEET.height}
+                    step={0.5}
+                    value={customHeight}
+                    onChange={(event) => handleCustomHeightChange(Number(event.target.value) || 1)}
+                    className="h-9 w-full rounded border border-zinc-300 px-2 text-sm"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setCustomWidth(24);
+                  setCustomHeight(18);
+                  setSizeRatioLocked(true);
+                }}
+                className="h-8 w-full rounded border border-zinc-300 bg-white text-xs font-semibold text-zinc-600 hover:border-zinc-400"
+              >
+                Reset to 24 x 18
+              </button>
+            </div>
+          )}
+
+          {sizeMode === "custom" && (
+            <div className="mt-2 text-[11px] leading-4 text-zinc-500">
+              Custom sizes are constrained to the 48&quot; x 96&quot; sheet.
+            </div>
+          )}
+        </>
+      ),
+    },
+    {
+      id: "material",
+      title: "Material / Print",
+      value: `${material} / ${printMode === "single" ? "Single" : "Double"}`,
+      width: 320,
+      content: (
+        <div>
+          <div className="grid grid-cols-2 gap-1">
+            <select
+              value={material}
+              onChange={(event) => setMaterial(event.target.value as CoroMaterial)}
+              className="h-9 rounded border border-zinc-300 bg-white px-2 text-sm"
+            >
+              <option value="4mm">4mm</option>
+              <option value="10mm">10mm</option>
+            </select>
+            <select
+              value={printMode}
+              onChange={(event) => setPrintMode(event.target.value as CoroPrintMode)}
+              className="h-9 rounded border border-zinc-300 bg-white px-2 text-sm"
+            >
+              <option value="single">Single</option>
+              <option value="double" disabled={!doubleSidedAllowed}>Double</option>
+            </select>
           </div>
-          <div className="text-[10px] text-zinc-400">Accepted: PDF, AI, EPS, PNG, JPG, TIFF, PSD (up to 100MB)</div>
+          {!doubleSidedAllowed && (
+            <div className="mt-2 rounded border border-amber-200 bg-amber-50 px-2 py-1 text-[11px] leading-4 text-amber-700">
+              Double-sided is only available for 10mm material.
+            </div>
+          )}
+        </div>
+      ),
+    },
+    {
+      id: "quantity",
+      title: "Quantity",
+      value: String(quantity),
+      width: 260,
+      content: (
+        <>
+          <input
+            type="number"
+            min={1}
+            value={quantity}
+            onChange={(event) => setQuantity(Math.max(1, Number(event.target.value) || 1))}
+            className="h-9 w-full rounded border border-zinc-300 px-2 text-sm"
+          />
+          <div className="text-[11px] leading-4 text-zinc-500">Set the number of signs in this order.</div>
+        </>
+      ),
+    },
+    {
+      id: "stakes",
+      title: "Stakes",
+      value: [stepStakes > 0 ? `Step ${stepStakes}` : "None", heavyDutyStakes > 0 ? `Heavy ${heavyDutyStakes}` : "None"]
+        .filter((v) => v !== "None")
+        .join(" + ") || "None",
+      width: 320,
+      content: (
+        <div className="space-y-2">
+          <NumberField label="Step Stakes ($2.50 ea)" value={stepStakes} onChange={setStepStakes} />
+          <NumberField label="Heavy Duty Stakes ($4.00 ea)" value={heavyDutyStakes} onChange={setHeavyDutyStakes} />
+        </div>
+      ),
+    },
+    {
+      id: "quality-addons",
+      title: "Quality Add-ons",
+      value: [gloss ? "Gloss" : "Matte", colorMatching ? "Color Match" : "None", contourCut && contourCutAllowed ? "Contour" : "None"]
+        .filter((v) => v !== "None")
+        .join(" + ") || "Standard",
+      width: 360,
+      content: (
+        <>
+          <ToggleField label="Gloss (+$6 / sign)" value={gloss} onChange={setGloss} />
+          <ToggleField label="Color Matching (+$75 / sheet)" value={colorMatching} onChange={setColorMatching} />
+          <ToggleField
+            label="Contour Cut (+20%)"
+            value={contourCut}
+            onChange={setContourCut}
+            disabled={!contourCutAllowed}
+            helperText={!contourCutAllowed ? "Contour cutting is only available for full sheet 48\" x 96\" jobs." : undefined}
+          />
+          <ToggleField label="Rush (+120%)" value={rush} onChange={setRush} />
         </>
       ),
     },
@@ -295,97 +605,134 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
       ),
     },
     {
-      id: "size",
-      title: "Size",
-      value: formatCoroSize(activeSize),
-      width: 300,
-      content: (
-        <select
-          value={sizeId}
-          onChange={(event) => setSizeId(event.target.value)}
-          className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"
-        >
-          {CORO_SIZE_OPTIONS.map((size) => (
-            <option key={size.id} value={size.id}>{formatCoroSize(size)}</option>
-          ))}
-        </select>
-      ),
-    },
-    {
-      id: "material",
-      title: "Material / Print",
-      value: `${material} / ${printMode === "single" ? "Single" : "Double"}`,
-      width: 320,
-      content: (
-        <div className="grid grid-cols-2 gap-1">
-          <select
-            value={material}
-            onChange={(event) => setMaterial(event.target.value as CoroMaterial)}
-            className="h-9 rounded border border-zinc-300 bg-white px-2 text-sm"
-          >
-            <option value="4mm">4mm</option>
-            <option value="10mm">10mm</option>
-          </select>
-          <select
-            value={printMode}
-            onChange={(event) => setPrintMode(event.target.value as CoroPrintMode)}
-            className="h-9 rounded border border-zinc-300 bg-white px-2 text-sm"
-          >
-            <option value="single">Single</option>
-            <option value="double">Double</option>
-          </select>
-        </div>
-      ),
-    },
-    {
-      id: "addons",
-      title: "Add-ons",
-      value: [grommetsEnabled ? `Grommets ${grommetCount}` : "No grommets", gloss ? "Gloss" : "Matte", rush ? "Rush" : "Standard"].join(" / "),
-      width: 360,
+      id: "artwork",
+      title: "Artwork",
+      value: printMode === "double" ? `${uploadedCount}/${safeImageCount} front, ${uploadedBackCount}/${safeImageCount} back` : `${uploadedCount}/${safeImageCount} uploaded`,
+      width: 480,
+      status: printMode === "double"
+        ? uploadedCount === safeImageCount && uploadedBackCount === safeImageCount && safeImageCount > 0 ? "ok" : "neutral"
+        : uploadedCount === safeImageCount && safeImageCount > 0 ? "ok" : "neutral",
       content: (
         <>
-          <NumberField label="Step Stakes ($2.50 ea)" value={stepStakes} onChange={setStepStakes} />
-          <NumberField label="Heavy Duty Stakes ($4.00 ea)" value={heavyDutyStakes} onChange={setHeavyDutyStakes} />
-          <div>
-            <label className="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">Grommets</label>
-            <button
-              type="button"
-              onClick={() => setGrommetsEnabled((prev) => !prev)}
-              className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-left text-sm"
-            >
-              {grommetsEnabled ? "Enabled" : "Disabled"}
-            </button>
-            {grommetsEnabled && (
-              <input
-                type="number"
-                min={1}
-                value={grommetCount}
-                onChange={(event) => setGrommetCount(Math.max(1, Number(event.target.value) || 1))}
-                className="mt-2 h-9 w-full rounded border border-zinc-300 px-2 text-sm"
-              />
-            )}
+          <div className="text-[11px] leading-4 text-zinc-500 mb-3">
+            {printMode === "double"
+              ? "Upload front and back artworks. Click a block on the sheet or use the slots below."
+              : safeImageCount === 1
+                ? "Upload 1 artwork for all signs."
+                : `Upload up to ${safeImageCount} artworks. Click a block on the sheet or use the slots below.`}
           </div>
-          <ToggleField label="Gloss (+$6 / sign)" value={gloss} onChange={setGloss} />
-          <ToggleField label="Contour Cut (+20%)" value={contourCut} onChange={setContourCut} />
-          <ToggleField label="Rush (+120%)" value={rush} onChange={setRush} />
-        </>
-      ),
-    },
-    {
-      id: "quantity",
-      title: "Quantity",
-      value: String(quantity),
-      width: 260,
-      content: (
-        <>
-          <input
-            type="number"
-            min={1}
-            value={quantity}
-            onChange={(event) => setQuantity(Math.max(1, Number(event.target.value) || 1))}
-            className="h-9 w-full rounded border border-zinc-300 px-2 text-sm"
-          />
-          <div className="text-[11px] leading-4 text-zinc-500">Set the number of signs in this order.</div>
+          <div className="space-y-2">
+            {Array.from({ length: safeImageCount }).map((_, i) => {
+              const uploadPair = blockUploads[i];
+              const frontUpload = uploadPair?.front;
+              const backUpload = uploadPair?.back;
+              const frontError = blockUploadErrors[`${i}:front`];
+              const backError = blockUploadErrors[`${i}:back`];
+              const isFrontUploading = uploadingBlock === `${i}:front`;
+              const isBackUploading = uploadingBlock === `${i}:back`;
+              const color = SLOT_COLORS[i % SLOT_COLORS.length];
+              return (
+                <div key={`slot-${i}`} className="rounded-lg border border-zinc-200 bg-zinc-50 p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-sm ${color} text-[10px] font-bold text-white`}>
+                        {i + 1}
+                      </div>
+                      <div className="min-w-0 flex-1 text-xs font-medium text-zinc-700">Block {i + 1}</div>
+                    </div>
+                    {printMode === "double" && (
+                      <div className="text-[10px] font-semibold text-zinc-500">
+                        {frontUpload && backUpload ? "✓ Both" : frontUpload ? "Front" : backUpload ? "Back" : "Empty"}
+                      </div>
+                    )}
+                  </div>
+                  {printMode === "double" ? (
+                    <div className="mt-2 grid grid-cols-2 gap-2">
+                      <div className="space-y-1 rounded border border-blue-200 bg-blue-50/50 p-2">
+                        <div className="text-[10px] font-semibold text-blue-700">🔵 FRONT</div>
+                        {frontUpload ? (
+                          <div className="flex items-center gap-1">
+                            <span className="max-w-[70px] truncate text-[10px] text-emerald-700">{frontUpload.fileName}</span>
+                            <button
+                              type="button"
+                              onClick={() => removeBlockUpload(i, "front")}
+                              className="rounded px-1 text-[10px] text-zinc-400 hover:text-rose-500"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => fileInputRefs.current[i]?.click()}
+                            disabled={isFrontUploading}
+                            className="w-full shrink-0 rounded border border-dashed border-blue-300 px-2 py-1 text-[10px] text-blue-600 hover:border-blue-500 hover:text-blue-700 disabled:opacity-50"
+                          >
+                            {isFrontUploading ? "Uploading..." : "+ Upload"}
+                          </button>
+                        )}
+                        {frontUpload?.blobUrl && <img src={frontUpload.blobUrl} alt={frontUpload.fileName} className="mt-1 h-12 w-full rounded object-contain" />}
+                        {frontError && <div className="mt-1 rounded bg-rose-50 px-2 py-1 text-[10px] text-rose-700">{frontError}</div>}
+                      </div>
+                      <div className="space-y-1 rounded border border-orange-200 bg-orange-50/50 p-2">
+                        <div className="text-[10px] font-semibold text-orange-700">🟠 BACK</div>
+                        {backUpload ? (
+                          <div className="flex items-center gap-1">
+                            <span className="max-w-[70px] truncate text-[10px] text-emerald-700">{backUpload.fileName}</span>
+                            <button
+                              type="button"
+                              onClick={() => removeBlockUpload(i, "back")}
+                              className="rounded px-1 text-[10px] text-zinc-400 hover:text-rose-500"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => fileInputBackRefs.current[i]?.click()}
+                            disabled={isBackUploading}
+                            className="w-full shrink-0 rounded border border-dashed border-orange-300 px-2 py-1 text-[10px] text-orange-600 hover:border-orange-500 hover:text-orange-700 disabled:opacity-50"
+                          >
+                            {isBackUploading ? "Uploading..." : "+ Upload"}
+                          </button>
+                        )}
+                        {backUpload?.blobUrl && <img src={backUpload.blobUrl} alt={backUpload.fileName} className="mt-1 h-12 w-full rounded object-contain" />}
+                        {backError && <div className="mt-1 rounded bg-rose-50 px-2 py-1 text-[10px] text-rose-700">{backError}</div>}
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      {frontUpload ? (
+                        <div className="flex items-center gap-1 mt-2">
+                          <span className="max-w-[100px] truncate text-[10px] text-emerald-700">{frontUpload.fileName}</span>
+                          <button
+                            type="button"
+                            onClick={() => removeBlockUpload(i, "front")}
+                            className="rounded px-1 text-[10px] text-zinc-400 hover:text-rose-500"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => fileInputRefs.current[i]?.click()}
+                          disabled={isFrontUploading}
+                          className="shrink-0 mt-2 rounded border border-dashed border-zinc-300 px-2 py-1 text-[10px] text-zinc-500 hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)] disabled:opacity-50"
+                        >
+                          {isFrontUploading ? "Uploading..." : "+ Upload"}
+                        </button>
+                      )}
+                      {frontUpload?.blobUrl && <img src={frontUpload.blobUrl} alt={frontUpload.fileName} className="mt-2 h-16 w-full rounded object-contain" />}
+                      {frontError && <div className="mt-1 rounded bg-rose-50 px-2 py-1 text-[10px] text-rose-700">{frontError}</div>}
+                    </>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          <div className="text-[10px] text-zinc-400">Accepted: PDF, AI, EPS, PNG, JPG, TIFF, PSD (up to 100MB)</div>
         </>
       ),
     },
@@ -408,14 +755,15 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
               ]}
             />
 
-            <div
-              className="relative h-[calc(100vh-290px)] min-h-[560px] overflow-hidden rounded-b-2xl bg-[#fafaf9]"
-              style={{
-                backgroundImage:
-                  "linear-gradient(to right, rgba(63,63,70,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(63,63,70,0.08) 1px, transparent 1px)",
-                backgroundSize: "26px 26px",
-              }}
-            >
+            <div className="relative">
+              {/* Canvas Area */}
+              <div className="relative h-[calc(100vh-290px)] min-h-[560px] overflow-hidden rounded-b-2xl bg-[#fafaf9]"
+                style={{
+                  backgroundImage:
+                    "linear-gradient(to right, rgba(63,63,70,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(63,63,70,0.08) 1px, transparent 1px)",
+                  backgroundSize: "26px 26px",
+                }}
+              >
               <div
                 className="pointer-events-none absolute left-1/2 top-1/2"
                 style={{
@@ -439,15 +787,26 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
               >
                 {sheetLayout.placements.map((placement, index) => {
                   const slotIndex = index < safeImageCount ? index : null;
-                  const upload = slotIndex !== null ? blockUploads[slotIndex] : null;
+                  const upload = slotIndex !== null ? blockUploads[slotIndex]?.[previewSide] : null;
                   const colorClass = slotIndex !== null ? SLOT_COLORS[slotIndex % SLOT_COLORS.length] : "";
+                  const markerPoints = grommetsEnabled
+                    ? getGrommetMarkers(placement.width, placement.height, grommetPosition, grommetSpacingMode, grommetSpacing)
+                    : [];
 
                   return (
                     <button
                       key={`cell-${index}`}
                       type="button"
                       disabled={slotIndex === null}
-                      onClick={() => { if (slotIndex !== null) fileInputRefs.current[slotIndex]?.click(); }}
+                      onClick={() => {
+                        if (slotIndex !== null) {
+                          if (printMode === "double" && previewSide === "back") {
+                            fileInputBackRefs.current[slotIndex]?.click();
+                          } else {
+                            fileInputRefs.current[slotIndex]?.click();
+                          }
+                        }
+                      }}
                       className={`absolute overflow-hidden border ${
                         slotIndex !== null ? "cursor-pointer hover:opacity-85" : "cursor-default"
                       } ${upload ? "border-emerald-500" : "border-blue-400 bg-zinc-50"}`}
@@ -459,8 +818,8 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
                       }}
                     >
                       {upload?.blobUrl ? (
-                        <div className="flex h-full w-full items-center justify-center bg-white p-[1px]">
-                          <img src={upload.blobUrl} alt="" className="h-full w-full object-contain" />
+                        <div className="h-full w-full bg-white p-[1px]">
+                          <img src={upload.blobUrl} alt="" className="h-full w-full object-fill" />
                         </div>
                       ) : upload && upload.fileName.toLowerCase().endsWith(".pdf") ? (
                         <CoroPdfStretchPreview
@@ -474,6 +833,13 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
                           </span>
                         </div>
                       ) : null}
+                      {slotIndex !== null && grommetsEnabled && markerPoints.map((point, markerIndex) => (
+                        <span
+                          key={`gm-${index}-${markerIndex}`}
+                          className="pointer-events-none absolute h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-rose-500 ring-1 ring-white"
+                          style={{ left: `${point.xPercent}%`, top: `${point.yPercent}%` }}
+                        />
+                      ))}
                     </button>
                   );
                 })}
@@ -483,13 +849,41 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
                 Top of Sheet
               </div>
               <div className="pointer-events-none absolute left-1/2 top-[calc(50%+232px)] -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
-                Front Side
+                {previewSide === "front" ? "Front Side" : "Back Side"}
               </div>
+
+              {printMode === "double" && (
+                <div className="pointer-events-auto absolute right-4 top-4 flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setPreviewSide("front")}
+                    className={`rounded-lg px-3 py-1 text-xs font-semibold transition-colors ${
+                      previewSide === "front"
+                        ? "bg-blue-500 text-white"
+                        : "border border-zinc-300 bg-white text-zinc-600 hover:border-blue-400 hover:text-blue-600"
+                    }`}
+                  >
+                    Front
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPreviewSide("back")}
+                    className={`rounded-lg px-3 py-1 text-xs font-semibold transition-colors ${
+                      previewSide === "back"
+                        ? "bg-orange-500 text-white"
+                        : "border border-zinc-300 bg-white text-zinc-600 hover:border-orange-400 hover:text-orange-600"
+                    }`}
+                  >
+                    Back
+                  </button>
+                </div>
+              )}
               <div className="pointer-events-none absolute left-[calc(50%-128px)] top-1/2 -translate-y-1/2 -rotate-90 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
                 Left
               </div>
               <div className="pointer-events-none absolute left-[calc(50%+128px)] top-1/2 -translate-y-1/2 rotate-90 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
                 Right
+              </div>
               </div>
             </div>
 
@@ -500,7 +894,18 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
                 type="file"
                 accept=".pdf,.ai,.eps,.png,.jpg,.jpeg,.tif,.tiff,.psd"
                 className="hidden"
-                onChange={(e) => handleFileChange(i, e)}
+                onChange={(e) => handleFileChange(i, e, "front")}
+                disabled={uploadingBlock !== null}
+              />
+            ))}
+            {printMode === "double" && Array.from({ length: safeImageCount }).map((_, i) => (
+              <input
+                key={`file-input-back-${i}`}
+                ref={(el) => { fileInputBackRefs.current[i] = el; }}
+                type="file"
+                accept=".pdf,.ai,.eps,.png,.jpg,.jpeg,.tif,.tiff,.psd"
+                className="hidden"
+                onChange={(e) => handleFileChange(i, e, "back")}
                 disabled={uploadingBlock !== null}
               />
             ))}
@@ -508,8 +913,8 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
             <BuilderBottomToolbar
               panels={toolbarPanels}
               action={
-                <Button className="h-10 w-full rounded bg-[var(--brand-primary)] text-xs font-semibold text-white hover:bg-[var(--brand-primary-hover)]" onClick={addToCart}>
-                  {added ? "Added" : "Add"}
+                <Button className="h-12 w-full rounded bg-[var(--brand-primary)] text-sm font-bold text-white hover:bg-[var(--brand-primary-hover)]" onClick={addToCart}>
+                  {added ? "✓ Added to Cart" : "Add to Cart"}
                 </Button>
               }
             />
@@ -524,8 +929,10 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
                 <Row label="Base Subtotal" value={formatPrice(pricing.baseSubtotal)} />
                 <Row label="Step Stakes" value={formatPrice(pricing.stepStakesFee)} />
                 <Row label="Heavy Stakes" value={formatPrice(pricing.heavyDutyStakesFee)} />
+                <Row label="Stakes" value={formatPrice(pricing.stepStakesFee + pricing.heavyDutyStakesFee)} />
                 <Row label="Grommets" value={formatPrice(pricing.grommetFee)} />
                 <Row label="Gloss" value={formatPrice(pricing.glossFee)} />
+                <Row label="Color Matching" value={formatPrice(colorMatching ? pricing.sheetsRequired * 50 * 1.5 : 0)} />
                 <Row label="Contour Cut" value={formatPrice(pricing.contourCutFee)} />
                 <Row label="Rush (+120%)" value={formatPrice(pricing.rushFee)} />
                 <div className="my-2 border-t border-zinc-200" />
@@ -587,20 +994,28 @@ function ToggleField({
   label,
   value,
   onChange,
+  disabled,
+  helperText,
 }: {
   label: string;
   value: boolean;
   onChange: (value: boolean) => void;
+  disabled?: boolean;
+  helperText?: string;
 }) {
   return (
-    <button
-      type="button"
-      onClick={() => onChange(!value)}
-      className="flex h-9 w-full items-center justify-between rounded border border-zinc-300 bg-white px-3 text-sm"
-    >
-      <span>{label}</span>
-      <span className={value ? "text-emerald-600" : "text-zinc-500"}>{value ? "Yes" : "No"}</span>
-    </button>
+    <div>
+      <button
+        type="button"
+        onClick={() => !disabled && onChange(!value)}
+        disabled={disabled}
+        className="flex h-9 w-full items-center justify-between rounded border border-zinc-300 bg-white px-3 text-sm disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:text-zinc-400"
+      >
+        <span>{label}</span>
+        <span className={disabled ? "text-zinc-400" : value ? "text-emerald-600" : "text-zinc-500"}>{value ? "Yes" : "No"}</span>
+      </button>
+      {helperText && <div className="mt-1 text-[11px] leading-4 text-amber-700">{helperText}</div>}
+    </div>
   );
 }
 
@@ -668,4 +1083,91 @@ function CoroPdfStretchPreview({ fileUrl, title }: { fileUrl: string; title: str
       <canvas ref={canvasRef} aria-label={title} className="h-full w-full" style={{ objectFit: "fill" }} />
     </div>
   );
+}
+
+function estimateGrommetCount(
+  width: number,
+  height: number,
+  position: GrommetPosition,
+  spacingMode: GrommetSpacingMode,
+  spacing: number
+): number {
+  const safeWidth = Math.max(1, width);
+  const safeHeight = Math.max(1, height);
+  const safeSpacing = spacingMode === "every-2-3-feet" ? 30 : Math.max(1, spacing);
+
+  if (spacingMode === "corners-only") {
+    return 4;
+  }
+
+  const topBottomEach = Math.max(2, Math.floor(safeWidth / safeSpacing) + 1);
+  const leftRightEach = Math.max(2, Math.floor(safeHeight / safeSpacing) + 1);
+
+  if (position === "top-bottom") return topBottomEach * 2;
+  if (position === "left-right") return leftRightEach * 2;
+
+  return Math.max(4, topBottomEach * 2 + Math.max(0, leftRightEach - 2) * 2);
+}
+
+function getGrommetMarkers(
+  width: number,
+  height: number,
+  position: GrommetPosition,
+  spacingMode: GrommetSpacingMode,
+  spacing: number
+): Array<{ xPercent: number; yPercent: number }> {
+  const safeWidth = Math.max(1, width);
+  const safeHeight = Math.max(1, height);
+  const safeSpacing = spacingMode === "every-2-3-feet" ? 30 : Math.max(1, spacing);
+
+  const edgeInsetXPercent = (0.45 / safeWidth) * 100;
+  const edgeInsetYPercent = (0.45 / safeHeight) * 100;
+  const minX = edgeInsetXPercent;
+  const maxX = 100 - edgeInsetXPercent;
+  const minY = edgeInsetYPercent;
+  const maxY = 100 - edgeInsetYPercent;
+
+  const points = new Map<string, { xPercent: number; yPercent: number }>();
+
+  const addPoint = (xPercent: number, yPercent: number) => {
+    const x = Math.max(0, Math.min(100, xPercent));
+    const y = Math.max(0, Math.min(100, yPercent));
+    const key = `${x.toFixed(2)}:${y.toFixed(2)}`;
+    points.set(key, { xPercent: x, yPercent: y });
+  };
+
+  const generateLinePercents = (lengthInches: number, spacingInches: number): number[] => {
+    const count = Math.max(2, Math.floor(lengthInches / spacingInches) + 1);
+    if (count <= 2) return [0, 100];
+    return Array.from({ length: count }, (_, i) => (i / (count - 1)) * 100);
+  };
+
+  const xPercents = generateLinePercents(safeWidth, safeSpacing);
+  const yPercents = generateLinePercents(safeHeight, safeSpacing);
+
+  if (spacingMode === "corners-only") {
+    addPoint(minX, minY);
+    addPoint(maxX, minY);
+    addPoint(minX, maxY);
+    addPoint(maxX, maxY);
+    return Array.from(points.values());
+  }
+
+  if (position === "all-sides" || position === "top-bottom") {
+    xPercents.forEach((x) => {
+      const shifted = minX + (x / 100) * (maxX - minX);
+      addPoint(shifted, minY);
+      addPoint(shifted, maxY);
+    });
+  }
+
+  if (position === "all-sides" || position === "left-right") {
+    yPercents.slice(1, -1).forEach((y) => {
+      const shifted = minY + (y / 100) * (maxY - minY);
+      addPoint(minX, shifted);
+      addPoint(maxX, shifted);
+    });
+  }
+
+  return Array.from(points.values());
 }

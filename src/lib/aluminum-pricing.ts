@@ -220,6 +220,10 @@ export function getBestAluminumSheetLayout(w: number, h: number): AluminumSheetL
   return { count: Math.max(1, best.count), placements: centerPlacements(best.placements) };
 }
 
+// ─── Markup for Signs365 supplier cost ──────────────────────────────────────
+
+export const ALUMINUM_MARKUP = 1.5; // 50% markup over Signs365 cost
+
 // ─── Sheet pricing ───────────────────────────────────────────────────────────
 
 interface SheetTier {
@@ -305,11 +309,12 @@ export function calculateAluminumSheetPricing(input: AluminumSheetPricingInput):
   const signsPerSheet = getBestAluminumSheetLayout(input.width, input.height).count;
   const sheetsRequired = Math.max(1, Math.ceil(qty / signsPerSheet));
   const sheetPrice = getAluminumSheetPrice(sheetsRequired, input.material, input.printMode);
-  const retailUnitPrice = (sheetsRequired * sheetPrice) / qty;
+  const markedUpSheetPrice = sheetPrice * ALUMINUM_MARKUP;
+  const retailUnitPrice = (sheetsRequired * markedUpSheetPrice) / qty;
   const baseSubtotal = retailUnitPrice * qty;
 
   const contourCutFee = input.contourCut ? baseSubtotal * 0.1 : 0;
-  const roundedCornersFee = input.roundedCorners ? 20 : 0;
+  const roundedCornersFee = input.roundedCorners ? 20 * ALUMINUM_MARKUP : 0;
   const preRush = baseSubtotal + contourCutFee + roundedCornersFee;
   const rushFee = input.rush ? preRush * 1.0 : 0;
   const totalPrice = preRush + rushFee;
@@ -346,11 +351,12 @@ export function calculateAluminumSqinPricing(input: AluminumSqinPricingInput): A
   const qty = Math.max(1, Math.floor(input.quantity));
   const sqInches = Math.max(0, input.customWidth) * Math.max(0, input.customHeight);
   const { rate, min } = getAluminumSqinRate(input.material, input.printMode);
-  const pricePerSign = Math.max(min, sqInches * rate);
+  const basePricePerSign = Math.max(min, sqInches * rate);
+  const pricePerSign = basePricePerSign * ALUMINUM_MARKUP;
   const baseSubtotal = pricePerSign * qty;
 
   const contourCutFee = input.contourCut ? baseSubtotal * 0.1 : 0;
-  const roundedCornersFee = input.roundedCorners ? 20 : 0;
+  const roundedCornersFee = input.roundedCorners ? 20 * ALUMINUM_MARKUP : 0;
   const preRush = baseSubtotal + contourCutFee + roundedCornersFee;
   const rushFee = input.rush ? preRush * 1.0 : 0;
   const totalPrice = preRush + rushFee;
