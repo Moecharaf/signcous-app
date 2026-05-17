@@ -65,7 +65,7 @@ type DragState =
   | { mode: "move"; startX: number; startY: number; originX: number; originY: number }
   | { mode: "resize"; startX: number; startY: number; startW: number; startH: number; startPxPerIn: number };
 
-type ControlPanel = "artwork" | "size" | "material" | "print" | "finish" | "quantity" | "meshWelding" | "meshGrommets" | "meshRope" | "meshPolePockets";
+type ControlPanel = "artwork" | "size" | "material" | "print" | "finish" | "quantity" | "meshWelding" | "meshWebbing" | "meshGrommets" | "meshRope" | "meshPolePockets";
 
 const CONTROL_PANEL_TITLE: Record<ControlPanel, string> = {
   artwork: "Artwork",
@@ -75,6 +75,7 @@ const CONTROL_PANEL_TITLE: Record<ControlPanel, string> = {
   finish: "Finishing",
   quantity: "Quantity",
   meshWelding: "Welding",
+  meshWebbing: "Webbing",
   meshGrommets: "Grommets",
   meshRope: "Rope",
   meshPolePockets: "Pole Pockets",
@@ -673,12 +674,7 @@ export default function VinylBannerBuilder({
         }
 
         if (key === "meshWebbing" && value === true) {
-          next.meshWelding = false;
           next.meshRopeMode = "none";
-        }
-
-        if (key === "meshWelding" && value === true) {
-          next.meshWebbing = false;
         }
 
         return next;
@@ -1597,9 +1593,15 @@ export default function VinylBannerBuilder({
                 <>
                   <ToolbarButton
                     title="Welding"
-                    value={form.meshWebbing ? "Webbing" : form.meshWelding ? "Welding" : "None"}
+                    value={form.meshWelding ? "Yes" : "No"}
                     active={activePanel === "meshWelding"}
                     onClick={(event) => openPanel("meshWelding", event)}
+                  />
+                  <ToolbarButton
+                    title="Webbing"
+                    value={form.meshWebbing ? "Yes" : "No"}
+                    active={activePanel === "meshWebbing"}
+                    onClick={(event) => openPanel("meshWebbing", event)}
                   />
                   <ToolbarButton
                     title="Grommets"
@@ -1852,10 +1854,20 @@ export default function VinylBannerBuilder({
             {activePanel === "meshWelding" && isMeshProduct && (
               <div>
                 <SubControlGroup title="Welding">
-                  <div className="grid grid-cols-3 gap-1">
-                    <SegButton active={!form.meshWelding && !form.meshWebbing} onClick={() => { set("meshWelding", false); set("meshWebbing", false); }}>None</SegButton>
-                    <SegButton active={form.meshWelding && !form.meshWebbing} onClick={() => set("meshWelding", true)}>Welding</SegButton>
-                    <SegButton active={form.meshWebbing} onClick={() => set("meshWebbing", true)}>Webbing</SegButton>
+                  <div className="grid grid-cols-2 gap-1">
+                    <SegButton active={!form.meshWelding} onClick={() => set("meshWelding", false)}>No</SegButton>
+                    <SegButton active={form.meshWelding} onClick={() => set("meshWelding", true)}>Yes</SegButton>
+                  </div>
+                </SubControlGroup>
+              </div>
+            )}
+
+            {activePanel === "meshWebbing" && isMeshProduct && (
+              <div>
+                <SubControlGroup title="Webbing">
+                  <div className="grid grid-cols-2 gap-1">
+                    <SegButton active={!form.meshWebbing} onClick={() => set("meshWebbing", false)}>No</SegButton>
+                    <SegButton active={form.meshWebbing} onClick={() => set("meshWebbing", true)}>Yes</SegButton>
                   </div>
                 </SubControlGroup>
               </div>
