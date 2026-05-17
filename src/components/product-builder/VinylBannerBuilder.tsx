@@ -65,7 +65,7 @@ type DragState =
   | { mode: "move"; startX: number; startY: number; originX: number; originY: number }
   | { mode: "resize"; startX: number; startY: number; startW: number; startH: number; startPxPerIn: number };
 
-type ControlPanel = "artwork" | "size" | "material" | "print" | "finish" | "quantity";
+type ControlPanel = "artwork" | "size" | "material" | "print" | "finish" | "quantity" | "meshWelding" | "meshGrommets" | "meshRope" | "meshPolePockets";
 
 const CONTROL_PANEL_TITLE: Record<ControlPanel, string> = {
   artwork: "Artwork",
@@ -74,6 +74,10 @@ const CONTROL_PANEL_TITLE: Record<ControlPanel, string> = {
   print: "Print Sides",
   finish: "Finishing",
   quantity: "Quantity",
+  meshWelding: "Welding",
+  meshGrommets: "Grommets",
+  meshRope: "Rope",
+  meshPolePockets: "Pole Pockets",
 };
 
 const DEFAULTS: FormState = {
@@ -1549,13 +1553,41 @@ export default function VinylBannerBuilder({
                   onClick={(event) => openPanel("print", event)}
                 />
               )}
-              {!(isCanvasProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct || isEconomicalStandProduct) && (
+              {!(isCanvasProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct || isEconomicalStandProduct || isMeshProduct) && (
                 <ToolbarButton
                   title="Finishing"
                   value={isMeshProduct ? [form.meshWelding ? "Welded" : null, form.meshRopeMode !== "none" ? "Rope" : null, form.grommets ? "Grommets" : null, form.meshPolePocketMode !== "none" ? "Pockets" : null].filter(Boolean).join(" / ") || "None" : [form.hemming ? "Hemmed" : null, form.grommets ? "Grommets" : null, form.polePockets ? "Pockets" : null, form.windSlits ? "Wind slits" : null].filter(Boolean).join(" / ") || "None"}
                   active={activePanel === "finish"}
                   onClick={(event) => openPanel("finish", event)}
                 />
+              )}
+              {isMeshProduct && (
+                <>
+                  <ToolbarButton
+                    title="Welding"
+                    value={form.meshWelding ? "Yes" : "No"}
+                    active={activePanel === "meshWelding"}
+                    onClick={(event) => openPanel("meshWelding", event)}
+                  />
+                  <ToolbarButton
+                    title="Grommets"
+                    value={form.grommets ? "Yes" : "No"}
+                    active={activePanel === "meshGrommets"}
+                    onClick={(event) => openPanel("meshGrommets", event)}
+                  />
+                  <ToolbarButton
+                    title="Rope"
+                    value={form.meshRopeMode === "none" ? "None" : form.meshRopeMode === "top-only" ? "Top" : form.meshRopeMode === "bottom-only" ? "Bottom" : "Top & Bottom"}
+                    active={activePanel === "meshRope"}
+                    onClick={(event) => openPanel("meshRope", event)}
+                  />
+                  <ToolbarButton
+                    title="Pole Pockets"
+                    value={form.meshPolePocketMode === "none" ? "None" : form.meshPolePocketMode === "top-only" ? "Top" : form.meshPolePocketMode === "bottom-only" ? "Bottom" : form.meshPolePocketMode === "left-only" ? "Left" : form.meshPolePocketMode === "right-only" ? "Right" : form.meshPolePocketMode === "top-bottom" ? "Top & Bottom" : "Left & Right"}
+                    active={activePanel === "meshPolePockets"}
+                    onClick={(event) => openPanel("meshPolePockets", event)}
+                  />
+                </>
               )}
               {!isHdpeProduct && !isCanvasProduct && !isMeshProduct && (
                 <ToolbarButton
@@ -1718,120 +1750,9 @@ export default function VinylBannerBuilder({
               </div>
             )}
 
-            {activePanel === "finish" && !(isCanvasProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct || isEconomicalStandProduct) && (
+            {activePanel === "finish" && !(isCanvasProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct || isEconomicalStandProduct || isMeshProduct) && (
               <div className="space-y-3">
-                {isMeshProduct ? (
-                  <div className="space-y-2">
-                    {/* Welding */}
-                    <SubControlGroup title="Welding">
-                      <div className="grid grid-cols-2 gap-1">
-                        <SegButton active={!form.meshWelding} onClick={() => set("meshWelding", false)}>No</SegButton>
-                        <SegButton active={form.meshWelding} onClick={() => set("meshWelding", true)}>Yes</SegButton>
-                      </div>
-                    </SubControlGroup>
-
-                    {/* Grommets */}
-                    <SubControlGroup title="Grommets">
-                      <div className="space-y-2">
-                        <div className="grid grid-cols-2 gap-1">
-                          <SegButton active={!form.grommets} onClick={() => { set("grommets", false); }}>No</SegButton>
-                          <SegButton active={form.grommets} onClick={() => { set("grommets", true); set("meshRopeMode", "none"); }}>Yes</SegButton>
-                        </div>
-                        {form.grommets && (
-                          <>
-                            <div>
-                              <label className="text-[9px] font-semibold uppercase tracking-[0.1em] text-zinc-500">Placement</label>
-                              <select
-                                value={form.grommetPlacement}
-                                onChange={(e) => set("grommetPlacement", e.target.value as GrommetPlacement)}
-                                className="mt-1 w-full h-7 rounded border border-zinc-300 bg-white px-2 text-[11px] font-semibold text-zinc-700"
-                              >
-                                <option value="all-sides">All Sides</option>
-                                <option value="top-left-right">Top/Left/Right</option>
-                                <option value="top-left-bottom">Top/Left/Bottom</option>
-                                <option value="top-right-bottom">Top/Right/Bottom</option>
-                                <option value="left-right-bottom">Left/Right/Bottom</option>
-                                <option value="top-left">Top &amp; Left</option>
-                                <option value="top-right">Top &amp; Right</option>
-                                <option value="top-bottom">Top &amp; Bottom</option>
-                                <option value="left-right">Left &amp; Right</option>
-                                <option value="left-bottom">Left &amp; Bottom</option>
-                                <option value="right-bottom">Right &amp; Bottom</option>
-                                <option value="top-only">Top Only</option>
-                                <option value="left-only">Left Only</option>
-                                <option value="right-only">Right Only</option>
-                                <option value="bottom-only">Bottom Only</option>
-                              </select>
-                            </div>
-                            <div>
-                              <label className="text-[9px] font-semibold uppercase tracking-[0.1em] text-zinc-500">Spacing</label>
-                              <select
-                                value={form.meshGrommetSpacing}
-                                onChange={(e) => set("meshGrommetSpacing", e.target.value as MeshGrommetSpacing)}
-                                className="mt-1 w-full h-7 rounded border border-zinc-300 bg-white px-2 text-[11px] font-semibold text-zinc-700"
-                              >
-                                <option value="every-2-3-feet">Every 2-3 Feet</option>
-                                <option value="every-1-2-feet">Every 1-2 Feet</option>
-                                <option value="every-6-12-inches">Every 6-12 Inches</option>
-                                <option value="corners-only">Corners Only</option>
-                                <option value="custom-inches">Custom Inches</option>
-                              </select>
-                              {form.meshGrommetSpacing === "custom-inches" && (
-                                <input
-                                  type="number"
-                                  min={1}
-                                  max={240}
-                                  value={form.meshGrommetSpacingCustom}
-                                  onChange={(e) => set("meshGrommetSpacingCustom", e.target.value)}
-                                  placeholder="Spacing in inches"
-                                  className="mt-1 w-full h-7 rounded border border-zinc-300 px-2 text-[11px] text-zinc-700"
-                                />
-                              )}
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    </SubControlGroup>
-
-                    {/* Rope — only when Grommets = No */}
-                    {!form.grommets && (
-                      <SubControlGroup title="Rope">
-                        <div className="grid grid-cols-2 gap-1">
-                          <SegButton active={form.meshRopeMode === "none"} onClick={() => set("meshRopeMode", "none")}>None</SegButton>
-                          <SegButton active={form.meshRopeMode === "top-only"} onClick={() => set("meshRopeMode", "top-only")}>Top Only</SegButton>
-                          <SegButton active={form.meshRopeMode === "bottom-only"} onClick={() => set("meshRopeMode", "bottom-only")}>Bottom Only</SegButton>
-                          <SegButton active={form.meshRopeMode === "top-bottom"} onClick={() => set("meshRopeMode", "top-bottom")}>Top &amp; Bottom</SegButton>
-                        </div>
-                      </SubControlGroup>
-                    )}
-
-                    {/* Pole Pockets */}
-                    <SubControlGroup title="Pole Pockets">
-                      <div className="space-y-2">
-                        <div className="grid grid-cols-2 gap-1">
-                          <SegButton active={form.meshPolePocketMode === "none"} onClick={() => set("meshPolePocketMode", "none")}>None</SegButton>
-                          <SegButton active={form.meshPolePocketMode === "top-only"} onClick={() => set("meshPolePocketMode", "top-only")}>Top Only</SegButton>
-                          <SegButton active={form.meshPolePocketMode === "bottom-only"} onClick={() => set("meshPolePocketMode", "bottom-only")}>Bottom Only</SegButton>
-                          <SegButton active={form.meshPolePocketMode === "left-only"} onClick={() => set("meshPolePocketMode", "left-only")}>Left Only</SegButton>
-                          <SegButton active={form.meshPolePocketMode === "right-only"} onClick={() => set("meshPolePocketMode", "right-only")}>Right Only</SegButton>
-                          <SegButton active={form.meshPolePocketMode === "top-bottom"} onClick={() => set("meshPolePocketMode", "top-bottom")}>Top &amp; Bottom</SegButton>
-                          <SegButton active={form.meshPolePocketMode === "left-right"} onClick={() => set("meshPolePocketMode", "left-right")}>Left &amp; Right</SegButton>
-                        </div>
-                        {form.meshPolePocketMode !== "none" && (
-                          <div>
-                            <label className="text-[9px] font-semibold uppercase tracking-[0.1em] text-zinc-500">Pocket Size</label>
-                            <div className="mt-1 grid grid-cols-4 gap-1">
-                              {([1, 2, 3, 4] as const).map((size) => (
-                                <SegButton key={size} active={form.meshPolePocketSize === size} onClick={() => set("meshPolePocketSize", size)}>{size}&quot;</SegButton>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </SubControlGroup>
-                  </div>
-                ) : (
-                  <div className="grid gap-1.5 md:grid-cols-2">
+                <div className="grid gap-1.5 md:grid-cols-2">
                     <SubControlGroup title="Hemming">
                       <div className="grid grid-cols-2 gap-1">
                         <SegButton active={!form.hemming} onClick={() => set("hemming", false)}>No</SegButton>
@@ -1893,7 +1814,130 @@ export default function VinylBannerBuilder({
                       </div>
                     </SubControlGroup>
                   </div>
+              </div>
+            )}
+
+            {activePanel === "meshWelding" && isMeshProduct && (
+              <div>
+                <SubControlGroup title="Welding">
+                  <div className="grid grid-cols-2 gap-1">
+                    <SegButton active={!form.meshWelding} onClick={() => set("meshWelding", false)}>No</SegButton>
+                    <SegButton active={form.meshWelding} onClick={() => set("meshWelding", true)}>Yes</SegButton>
+                  </div>
+                </SubControlGroup>
+              </div>
+            )}
+
+            {activePanel === "meshGrommets" && isMeshProduct && (
+              <div>
+                <SubControlGroup title="Grommets">
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-2 gap-1">
+                      <SegButton active={!form.grommets} onClick={() => { set("grommets", false); }}>No</SegButton>
+                      <SegButton active={form.grommets} onClick={() => { set("grommets", true); set("meshRopeMode", "none"); }}>Yes</SegButton>
+                    </div>
+                    {form.grommets && (
+                      <>
+                        <div>
+                          <label className="text-[9px] font-semibold uppercase tracking-[0.1em] text-zinc-500">Placement</label>
+                          <select
+                            value={form.grommetPlacement}
+                            onChange={(e) => set("grommetPlacement", e.target.value as GrommetPlacement)}
+                            className="mt-1 w-full h-7 rounded border border-zinc-300 bg-white px-2 text-[11px] font-semibold text-zinc-700"
+                          >
+                            <option value="all-sides">All Sides</option>
+                            <option value="top-left-right">Top/Left/Right</option>
+                            <option value="top-left-bottom">Top/Left/Bottom</option>
+                            <option value="top-right-bottom">Top/Right/Bottom</option>
+                            <option value="left-right-bottom">Left/Right/Bottom</option>
+                            <option value="top-left">Top &amp; Left</option>
+                            <option value="top-right">Top &amp; Right</option>
+                            <option value="top-bottom">Top &amp; Bottom</option>
+                            <option value="left-right">Left &amp; Right</option>
+                            <option value="left-bottom">Left &amp; Bottom</option>
+                            <option value="right-bottom">Right &amp; Bottom</option>
+                            <option value="top-only">Top Only</option>
+                            <option value="left-only">Left Only</option>
+                            <option value="right-only">Right Only</option>
+                            <option value="bottom-only">Bottom Only</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="text-[9px] font-semibold uppercase tracking-[0.1em] text-zinc-500">Spacing</label>
+                          <select
+                            value={form.meshGrommetSpacing}
+                            onChange={(e) => set("meshGrommetSpacing", e.target.value as MeshGrommetSpacing)}
+                            className="mt-1 w-full h-7 rounded border border-zinc-300 bg-white px-2 text-[11px] font-semibold text-zinc-700"
+                          >
+                            <option value="every-2-3-feet">Every 2-3 Feet</option>
+                            <option value="every-1-2-feet">Every 1-2 Feet</option>
+                            <option value="every-6-12-inches">Every 6-12 Inches</option>
+                            <option value="corners-only">Corners Only</option>
+                            <option value="custom-inches">Custom Inches</option>
+                          </select>
+                          {form.meshGrommetSpacing === "custom-inches" && (
+                            <input
+                              type="number"
+                              min={1}
+                              max={240}
+                              value={form.meshGrommetSpacingCustom}
+                              onChange={(e) => set("meshGrommetSpacingCustom", e.target.value)}
+                              placeholder="Spacing in inches"
+                              className="mt-1 w-full h-7 rounded border border-zinc-300 px-2 text-[11px] text-zinc-700"
+                            />
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </SubControlGroup>
+              </div>
+            )}
+
+            {activePanel === "meshRope" && isMeshProduct && (
+              <div>
+                {!form.grommets ? (
+                  <SubControlGroup title="Rope">
+                    <div className="grid grid-cols-2 gap-1">
+                      <SegButton active={form.meshRopeMode === "none"} onClick={() => set("meshRopeMode", "none")}>None</SegButton>
+                      <SegButton active={form.meshRopeMode === "top-only"} onClick={() => set("meshRopeMode", "top-only")}>Top Only</SegButton>
+                      <SegButton active={form.meshRopeMode === "bottom-only"} onClick={() => set("meshRopeMode", "bottom-only")}>Bottom Only</SegButton>
+                      <SegButton active={form.meshRopeMode === "top-bottom"} onClick={() => set("meshRopeMode", "top-bottom")}>Top &amp; Bottom</SegButton>
+                    </div>
+                  </SubControlGroup>
+                ) : (
+                  <div className="rounded border border-zinc-200 bg-zinc-50 p-2 text-[11px] text-zinc-600">
+                    Rope is available only when Grommets is set to No.
+                  </div>
                 )}
+              </div>
+            )}
+
+            {activePanel === "meshPolePockets" && isMeshProduct && (
+              <div>
+                <SubControlGroup title="Pole Pockets">
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-2 gap-1">
+                      <SegButton active={form.meshPolePocketMode === "none"} onClick={() => set("meshPolePocketMode", "none")}>None</SegButton>
+                      <SegButton active={form.meshPolePocketMode === "top-only"} onClick={() => set("meshPolePocketMode", "top-only")}>Top Only</SegButton>
+                      <SegButton active={form.meshPolePocketMode === "bottom-only"} onClick={() => set("meshPolePocketMode", "bottom-only")}>Bottom Only</SegButton>
+                      <SegButton active={form.meshPolePocketMode === "left-only"} onClick={() => set("meshPolePocketMode", "left-only")}>Left Only</SegButton>
+                      <SegButton active={form.meshPolePocketMode === "right-only"} onClick={() => set("meshPolePocketMode", "right-only")}>Right Only</SegButton>
+                      <SegButton active={form.meshPolePocketMode === "top-bottom"} onClick={() => set("meshPolePocketMode", "top-bottom")}>Top &amp; Bottom</SegButton>
+                      <SegButton active={form.meshPolePocketMode === "left-right"} onClick={() => set("meshPolePocketMode", "left-right")}>Left &amp; Right</SegButton>
+                    </div>
+                    {form.meshPolePocketMode !== "none" && (
+                      <div>
+                        <label className="text-[9px] font-semibold uppercase tracking-[0.1em] text-zinc-500">Pocket Size</label>
+                        <div className="mt-1 grid grid-cols-4 gap-1">
+                          {([1, 2, 3, 4] as const).map((size) => (
+                            <SegButton key={size} active={form.meshPolePocketSize === size} onClick={() => set("meshPolePocketSize", size)}>{size}&quot;</SegButton>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </SubControlGroup>
               </div>
             )}
 
