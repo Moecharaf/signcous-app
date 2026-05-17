@@ -395,6 +395,7 @@ export default function VinylBannerBuilder({
   const isEconomicalStandProduct = pricingMode === "economical-stand";
   const effectiveQtyNum = isPosterProduct ? 1 : qtyNum;
   const isMeshMaterial  = isMeshProduct || form.material === "Mesh Banner";
+  const canEnableDoubleSided = !isCanvasProduct && !isMeshProduct && !isHdpeProduct && !isPosterProduct && !isNoCurlProduct && !isEconomicalStandProduct && !isMeshMaterial && form.material === "18oz Vinyl";
   const posterBillableSqFt = Math.max(1, Math.ceil((widthIn / 12) * (heightIn / 12)));
   const meshBillableSqFt = Math.max(1, Math.ceil((widthIn / 12) * (heightIn / 12)));
   const perimeterFt = 2 * ((widthIn / 12) + (heightIn / 12));
@@ -585,7 +586,7 @@ export default function VinylBannerBuilder({
         heightIn,
         quantity: effectiveQtyNum,
         material: form.material,
-        doubleSided: form.doubleSided,
+        doubleSided: canEnableDoubleSided && form.doubleSided,
         grommets: form.grommets,
         grommetPlacement: form.grommetPlacement,
         grommetSpacingIn: form.grommetSpacingIn,
@@ -610,6 +611,7 @@ export default function VinylBannerBuilder({
       heightIn,
       qtyNum,
       form.material,
+      canEnableDoubleSided,
       form.doubleSided,
       form.grommets,
       form.grommetPlacement,
@@ -744,7 +746,7 @@ export default function VinylBannerBuilder({
                 : isMeshProduct
                   ? "Mesh Banner"
                   : form.material,
-      doubleSided: (isCanvasProduct || isMeshProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct || isEconomicalStandProduct) ? false : form.doubleSided,
+      doubleSided: canEnableDoubleSided ? form.doubleSided : false,
       grommets: isNoCurlProduct
         ? true
         : (isCanvasProduct || isHdpeProduct || isPosterProduct || isEconomicalStandProduct)
@@ -960,7 +962,7 @@ export default function VinylBannerBuilder({
   }, [activePanel, closePanel]);
 
   useEffect(() => {
-    if (!isMeshMaterial) return;
+    if (!isMeshMaterial && canEnableDoubleSided) return;
 
     setForm((prev) => {
       if (!prev.doubleSided && !prev.windSlits && !prev.hemming) {
@@ -974,7 +976,7 @@ export default function VinylBannerBuilder({
         hemming: false,
       };
     });
-  }, [isMeshMaterial]);
+  }, [isMeshMaterial, canEnableDoubleSided]);
 
   useEffect(() => {
     if (!isMeshProduct) return;
@@ -1712,8 +1714,11 @@ export default function VinylBannerBuilder({
               <div>
                 <div className="grid gap-2 sm:grid-cols-2">
                   <SegButton active={!form.doubleSided} onClick={() => set("doubleSided", false)}>Single-Sided</SegButton>
-                  <SegButton active={form.doubleSided} onClick={() => set("doubleSided", true)} disabled={isMeshMaterial}>Double-Sided</SegButton>
+                  <SegButton active={form.doubleSided} onClick={() => set("doubleSided", true)} disabled={!canEnableDoubleSided}>Double-Sided</SegButton>
                 </div>
+                {!canEnableDoubleSided && (
+                  <div className="mt-2 text-[10px] font-semibold text-zinc-500">Double-sided is available only with 18oz Vinyl.</div>
+                )}
               </div>
             )}
 
