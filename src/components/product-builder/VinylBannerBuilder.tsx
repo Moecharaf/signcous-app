@@ -1279,94 +1279,46 @@ export default function VinylBannerBuilder({
               transform: `translate(calc(-50% + ${artPos.x}px), calc(-50% + ${artPos.y}px))`,
             }}
           >
-            {isMeshProduct && (
+            {!isEconomicalStandProduct && (
               <>
-                {/* Top dimension line */}
-                <div className="pointer-events-none absolute left-0 right-0 flex flex-col gap-1" style={{ bottom: "calc(100% + 4px)" }}>
-                  <div className="text-center text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500">↓ TOP OF IMAGE ↓</div>
-                  <div className="relative flex h-3 items-center">
-                    <div className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-zinc-400" />
-                    <div className="absolute left-0 h-full w-px bg-zinc-400" />
-                    <div className="absolute right-0 h-full w-px bg-zinc-400" />
-                    <div className="relative w-full text-center leading-none">
-                      <span className="bg-[#f6f6f4] px-1 text-[11px] font-medium text-zinc-700">{widthLabelInches}</span>
-                    </div>
-                  </div>
-                </div>
-                {/* Bottom dimension line */}
-                <div className="pointer-events-none absolute left-0 right-0" style={{ top: "calc(100% + 4px)" }}>
-                  <div className="relative flex h-3 items-center">
-                    <div className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-zinc-400" />
-                    <div className="absolute left-0 h-full w-px bg-zinc-400" />
-                    <div className="absolute right-0 h-full w-px bg-zinc-400" />
-                    <div className="relative w-full text-center leading-none">
-                      <span className="bg-[#f6f6f4] px-1 text-[11px] font-medium text-zinc-700">{widthLabelInches}</span>
-                    </div>
-                  </div>
-                </div>
-                {/* Left dimension line */}
-                <div className="pointer-events-none absolute top-0 bottom-0 flex flex-col items-center" style={{ right: "calc(100% + 8px)", width: "20px" }}>
-                  <div className="h-px w-full flex-none bg-zinc-400" />
-                  <div className="relative flex flex-1 items-center justify-center">
-                    <div className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-zinc-400" />
-                    <span className="relative -rotate-90 whitespace-nowrap bg-[#f6f6f4] py-0.5 text-[11px] font-medium text-zinc-700">{heightLabelInches}</span>
-                  </div>
-                  <div className="h-px w-full flex-none bg-zinc-400" />
-                </div>
-                {/* Right dimension line */}
-                <div className="pointer-events-none absolute top-0 bottom-0 flex flex-col items-center" style={{ left: "calc(100% + 8px)", width: "20px" }}>
-                  <div className="h-px w-full flex-none bg-zinc-400" />
-                  <div className="relative flex flex-1 items-center justify-center">
-                    <div className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-zinc-400" />
-                    <span className="relative rotate-90 whitespace-nowrap bg-[#f6f6f4] py-0.5 text-[11px] font-medium text-zinc-700">{heightLabelInches}</span>
-                  </div>
-                  <div className="h-px w-full flex-none bg-zinc-400" />
-                </div>
-              </>
-            )}
+                {/* Signs365-style outer bleed guide */}
+                <div className="pointer-events-none absolute -inset-3 border border-dashed border-zinc-300" />
 
-            {!isMeshProduct && !isEconomicalStandProduct && (
-              <>
-                {/* Top dimension line with TOP OF IMAGE label */}
-                <div className="pointer-events-none absolute left-0 right-0 flex flex-col gap-1" style={{ bottom: "calc(100% + 4px)" }}>
-                  <div className="text-center text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500">↓ TOP OF IMAGE ↓</div>
-                  <div className="relative flex h-3 items-center">
-                    <div className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-zinc-400" />
-                    <div className="absolute left-0 h-full w-px bg-zinc-400" />
-                    <div className="absolute right-0 h-full w-px bg-zinc-400" />
+                {/* Top dimension line */}
+                <div className="pointer-events-none absolute left-0 right-0 flex flex-col gap-0.5" style={{ bottom: "calc(100% + 6px)" }}>
+                  <div className="text-center text-[10px] font-semibold uppercase tracking-[0.08em] text-zinc-500">v TOP OF IMAGE v</div>
+                  <div className="relative flex h-2.5 items-center">
+                    <div className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-zinc-300" />
+                    <div className="absolute left-0 h-full w-px bg-zinc-300" />
+                    <div className="absolute right-0 h-full w-px bg-zinc-300" />
                     <div className="relative w-full text-center leading-none">
-                      <span className="bg-[#f9f9f9] px-1 text-[11px] font-medium text-zinc-700">{widthLabelInches}</span>
+                      <span className={`px-1 text-[10px] font-medium text-zinc-700 ${isMeshProduct ? "bg-[#f6f6f4]" : "bg-[#f9f9f9]"}`}>{widthLabelInches}</span>
                     </div>
                   </div>
                 </div>
-                {/* Bottom dimension line */}
-                <div className="pointer-events-none absolute left-0 right-0" style={{ top: "calc(100% + 4px)" }}>
-                  <div className="relative flex h-3 items-center">
-                    <div className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-zinc-400" />
-                    <div className="absolute left-0 h-full w-px bg-zinc-400" />
-                    <div className="absolute right-0 h-full w-px bg-zinc-400" />
-                    <div className="relative w-full text-center leading-none">
-                      <span className="bg-[#f9f9f9] px-1 text-[11px] font-medium text-zinc-700">{widthLabelInches}</span>
-                    </div>
-                  </div>
-                </div>
+
+                {/* Top corner extension lines */}
+                <div className="pointer-events-none absolute left-0 w-px bg-zinc-300" style={{ bottom: "100%", height: "6px" }} />
+                <div className="pointer-events-none absolute right-0 w-px bg-zinc-300" style={{ bottom: "100%", height: "6px" }} />
+
                 {/* Left dimension line */}
-                <div className="pointer-events-none absolute top-0 bottom-0 flex flex-col items-center" style={{ right: "calc(100% + 8px)", width: "20px" }}>
-                  <div className="h-px w-full flex-none bg-zinc-400" />
+                <div className="pointer-events-none absolute top-0 bottom-0 flex flex-col items-center" style={{ right: "calc(100% + 2px)", width: "12px" }}>
+                  <div className="h-px w-full flex-none bg-zinc-300" />
                   <div className="relative flex flex-1 items-center justify-center">
-                    <div className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-zinc-400" />
-                    <span className="relative -rotate-90 whitespace-nowrap bg-[#f9f9f9] py-0.5 text-[11px] font-medium text-zinc-700">{heightLabelInches}</span>
+                    <div className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-zinc-300" />
+                    <span className={`relative -rotate-90 whitespace-nowrap py-0.5 text-[10px] font-medium text-zinc-700 ${isMeshProduct ? "bg-[#f6f6f4]" : "bg-[#f9f9f9]"}`}>{heightLabelInches}</span>
                   </div>
-                  <div className="h-px w-full flex-none bg-zinc-400" />
+                  <div className="h-px w-full flex-none bg-zinc-300" />
                 </div>
+
                 {/* Right dimension line */}
-                <div className="pointer-events-none absolute top-0 bottom-0 flex flex-col items-center" style={{ left: "calc(100% + 8px)", width: "20px" }}>
-                  <div className="h-px w-full flex-none bg-zinc-400" />
+                <div className="pointer-events-none absolute top-0 bottom-0 flex flex-col items-center" style={{ left: "calc(100% + 2px)", width: "12px" }}>
+                  <div className="h-px w-full flex-none bg-zinc-300" />
                   <div className="relative flex flex-1 items-center justify-center">
-                    <div className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-zinc-400" />
-                    <span className="relative rotate-90 whitespace-nowrap bg-[#f9f9f9] py-0.5 text-[11px] font-medium text-zinc-700">{heightLabelInches}</span>
+                    <div className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-zinc-300" />
+                    <span className={`relative rotate-90 whitespace-nowrap py-0.5 text-[10px] font-medium text-zinc-700 ${isMeshProduct ? "bg-[#f6f6f4]" : "bg-[#f9f9f9]"}`}>{heightLabelInches}</span>
                   </div>
-                  <div className="h-px w-full flex-none bg-zinc-400" />
+                  <div className="h-px w-full flex-none bg-zinc-300" />
                 </div>
               </>
             )}
