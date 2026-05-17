@@ -133,7 +133,7 @@ export const PRICING_CONFIG: PricingConfig = {
     polePocketsSetupFee: 10.00 * BANNER_MARKUP,
     windSlitsPerSqFt: 0.50 * BANNER_MARKUP,
     ropePerLinearFt: 1.00 * BANNER_MARKUP,
-    hemmingPerLinearFt: 0.5,
+    hemmingPerLinearFt: 0.5 * BANNER_MARKUP,
     hemmingIncluded: false,
     doubleSided: 1.6,
   },
