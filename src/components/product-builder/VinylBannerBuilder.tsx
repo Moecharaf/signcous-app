@@ -665,6 +665,15 @@ export default function VinylBannerBuilder({
           return prev;
         }
 
+        if (!prev.meshWelding) {
+          if (key === "meshWebbing" && value === true) {
+            return prev;
+          }
+          if (key === "meshRopeMode" && value !== "none") {
+            return prev;
+          }
+        }
+
         const next = { ...prev, [key]: value } as FormState;
 
         if (key === "meshRopeMode" && value !== "none") {
@@ -674,6 +683,11 @@ export default function VinylBannerBuilder({
         }
 
         if (key === "meshWebbing" && value === true) {
+          next.meshRopeMode = "none";
+        }
+
+        if (key === "meshWelding" && value === false) {
+          next.meshWebbing = false;
           next.meshRopeMode = "none";
         }
 
@@ -1867,8 +1881,13 @@ export default function VinylBannerBuilder({
                 <SubControlGroup title="Webbing">
                   <div className="grid grid-cols-2 gap-1">
                     <SegButton active={!form.meshWebbing} onClick={() => set("meshWebbing", false)}>No</SegButton>
-                    <SegButton active={form.meshWebbing} onClick={() => set("meshWebbing", true)}>Yes</SegButton>
+                    <SegButton active={form.meshWebbing} disabled={!form.meshWelding} onClick={() => set("meshWebbing", true)}>Yes</SegButton>
                   </div>
+                  {!form.meshWelding && (
+                    <div className="mt-2 rounded border border-zinc-200 bg-zinc-50 p-2 text-[11px] text-zinc-600">
+                      Enable Welding first to turn on Webbing.
+                    </div>
+                  )}
                 </SubControlGroup>
               </div>
             )}
@@ -1946,7 +1965,7 @@ export default function VinylBannerBuilder({
 
             {activePanel === "meshRope" && isMeshProduct && (
               <div>
-                {!form.grommets && !form.meshWebbing ? (
+                {form.meshWelding && !form.grommets && !form.meshWebbing ? (
                   <SubControlGroup title="Rope">
                     <div className="grid grid-cols-2 gap-1">
                       <SegButton active={form.meshRopeMode === "none"} onClick={() => set("meshRopeMode", "none")}>None</SegButton>
@@ -1955,6 +1974,10 @@ export default function VinylBannerBuilder({
                       <SegButton active={form.meshRopeMode === "top-bottom"} disabled={form.meshWebbing} onClick={() => set("meshRopeMode", "top-bottom")}>Top &amp; Bottom</SegButton>
                     </div>
                   </SubControlGroup>
+                ) : !form.meshWelding ? (
+                  <div className="rounded border border-zinc-200 bg-zinc-50 p-2 text-[11px] text-zinc-600">
+                    Enable Welding first to turn on Rope.
+                  </div>
                 ) : form.meshWebbing ? (
                   <div className="rounded border border-zinc-200 bg-zinc-50 p-2 text-[11px] text-zinc-600">
                     Rope cannot be enabled while Webbing is selected.
