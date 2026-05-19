@@ -27,6 +27,11 @@ interface BlockUpload {
   blobUrl: string | null;
 }
 
+interface BlockUploadPair {
+  front?: BlockUpload;
+  back?: BlockUpload;
+}
+
 type ImageFitMode = "fit" | "stretch";
 
 const SLOT_COLORS = [
@@ -58,10 +63,11 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
   const [rush, setRush] = useState(false);
 
   const [imageCount, setImageCount] = useState(12);
-  const [blockUploads, setBlockUploads] = useState<Record<number, BlockUpload>>({});
+  const [blockUploads, setBlockUploads] = useState<Record<number, BlockUploadPair>>({});
   const [uploadingBlock, setUploadingBlock] = useState<string | null>(null);
   const [blockUploadErrors, setBlockUploadErrors] = useState<Record<string, string>>({});
   const [blockImageModes, setBlockImageModes] = useState<Record<string, ImageFitMode>>();
+  const [previewSide, setPreviewSide] = useState<"front" | "back">("front");
   const [isArtworkModalOpen, setIsArtworkModalOpen] = useState(false);
   const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const fileInputBackRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -149,7 +155,7 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
       const newUpload = { fileUrl: data.fileUrl!, fileName: data.originalName ?? file.name, blobUrl };
       setBlockUploads((prev) => ({
         ...prev,
-        [blockIndex]: newUpload,
+        [blockIndex]: { ...prev[blockIndex], [side]: newUpload },
       }));
     } catch {
       setBlockUploadErrors((prev) => ({ ...prev, [uploadKey]: "Upload failed. Please try again." }));
@@ -172,19 +178,27 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
     return blockImageModes?.[`${blockIndex}:${side}`] ?? "fit";
   }
 
-  function removeBlockUpload(blockIndex: number, _side: "front" | "back" = "front") {
+  function removeBlockUpload(blockIndex: number, side: "front" | "back" = "front") {
     setBlockUploads((prev) => {
-      const n = { ...prev };
-      if (n[blockIndex]?.blobUrl) URL.revokeObjectURL(n[blockIndex].blobUrl!);
-      delete n[blockIndex];
-      return n;
+      const pair = prev[blockIndex];
+      if (!pair) return prev;
+      if (pair[side]?.blobUrl) URL.revokeObjectURL(pair[side]!.blobUrl!);
+      const updated = { ...pair };
+      delete updated[side];
+      if (Object.keys(updated).length === 0) {
+        const n = { ...prev };
+        delete n[blockIndex];
+        return n;
+      }
+      return { ...prev, [blockIndex]: updated };
     });
   }
 
   function addToCart() {
     const safeQty = Math.max(1, Math.floor(quantity));
     const materialLabel = `PVC ${material} ${printMode === "single" ? "Single-Sided" : "Double-Sided"}`;
-    const uploadedFileUrls = Array.from({ length: safeImageCount }, (_, i) => blockUploads[i]?.fileUrl ?? "").filter(Boolean);
+    const uploadedFileUrls = Array.from({ length: safeImageCount }, (_, i) => blockUploads[i]?.front?.fileUrl ?? "").filter(Boolean);
+    const uploadedBackUrls = printMode === "double" ? Array.from({ length: safeImageCount }, (_, i) => blockUploads[i]?.back?.fileUrl ?? "").filter(Boolean) : [];
 
     cart.addItem({
       productId,
@@ -202,7 +216,7 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
       hemming: false,
       rush,
       uploadedFileUrl: uploadedFileUrls[0] ?? null,
-      uploadedFileName: blockUploads[0]?.fileName ?? null,
+      uploadedFileName: blockUploads[0]?.front?.fileName ?? null,
       uploadedFileUrls: uploadedFileUrls.length > 0 ? uploadedFileUrls : undefined,
       customOptions: {
         custom_sheet_size: `${PVC_SHEET.width}" x ${PVC_SHEET.height}"`,
@@ -211,6 +225,9 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
         custom_sheets_required: String(pricing.sheetsRequired),
         custom_material_thickness: `PVC ${material}`,
         custom_print_mode: printMode === "single" ? "Single-Sided" : "Double-Sided",
+        custom_front_images: String(uploadedFileUrls.length),
+        custom_back_images: printMode === "double" ? String(uploadedBackUrls.length) : "0",
+        custom_back_image_urls: uploadedBackUrls.length > 0 ? uploadedBackUrls.join(",") : "none",
         custom_step_stakes: String(stepStakes),
         custom_heavy_duty_stakes: String(heavyDutyStakes),
         custom_grommet_count: grommetsEnabled ? String(grommetCount) : "0",
@@ -227,7 +244,8 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
     window.setTimeout(() => setAdded(false), 1800);
   }
 
-  const uploadedCount = Object.keys(blockUploads).filter((k) => Number(k) < safeImageCount).length;
+  const uploadedCount = Object.keys(blockUploads).filter((k) => Number(k) < safeImageCount && blockUploads[Number(k)]?.front).length;
+  const uploadedBackCount = printMode === "double" ? Object.keys(blockUploads).filter((k) => Number(k) < safeImageCount && blockUploads[Number(k)]?.back).length : 0;
   const toolbarPanels: BuilderBottomToolbarPanel[] = [
     {
       id: "layout",
@@ -370,15 +388,27 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
     {
       id: "artwork",
       title: "Artwork",
-      value: `${uploadedCount}/${safeImageCount} uploaded`,
+      value:
+        printMode === "double"
+          ? `${uploadedCount}/${safeImageCount} front, ${uploadedBackCount}/${safeImageCount} back`
+          : `${uploadedCount}/${safeImageCount} uploaded`,
       width: 280,
-      status: uploadedCount === safeImageCount && safeImageCount > 0 ? "ok" : "neutral",
+      status:
+        printMode === "double"
+          ? uploadedCount === safeImageCount && uploadedBackCount === safeImageCount && safeImageCount > 0
+            ? "ok"
+            : "neutral"
+          : uploadedCount === safeImageCount && safeImageCount > 0
+            ? "ok"
+            : "neutral",
       content: (
         <div className="space-y-3">
           <p className="text-[11px] leading-4 text-zinc-500">
-            {safeImageCount === 1
-              ? "Upload 1 artwork for all signs."
-              : `Upload artworks for up to ${safeImageCount} blocks.`}
+            {printMode === "double"
+              ? "Upload front and back artworks for each block."
+              : safeImageCount === 1
+                ? "Upload 1 artwork for all signs."
+                : `Upload artworks for up to ${safeImageCount} blocks.`}
           </p>
           <button
             type="button"
@@ -441,7 +471,7 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
               >
                 {sheetLayout.placements.map((placement, index) => {
                   const slotIndex = index < safeImageCount ? index : null;
-                  const upload = slotIndex !== null ? blockUploads[slotIndex] : null;
+                  const upload = slotIndex !== null ? blockUploads[slotIndex]?.[previewSide] : null;
                   const colorClass = slotIndex !== null ? SLOT_COLORS[slotIndex % SLOT_COLORS.length] : "";
 
                   return (
@@ -467,7 +497,7 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
                       ) : slotIndex !== null ? (
                         <div className={`flex h-full w-full items-center justify-center ${colorClass} opacity-30`}>
                           <span className="text-[7px] font-bold text-zinc-700">
-                            {uploadingBlock?.startsWith(slotIndex + ':') ? "…" : slotIndex + 1}
+                            {uploadingBlock?.startsWith(`${slotIndex}:`) ? "…" : slotIndex + 1}
                           </span>
                         </div>
                       ) : null}
@@ -479,9 +509,36 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
               <div className="pointer-events-none absolute left-1/2 top-[calc(50%-236px)] -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
                 Top of Sheet
               </div>
-              <div className="pointer-events-none absolute left-1/2 top-[calc(50%+232px)] -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
-                Front Side
-              </div>
+              {printMode === "double" ? (
+                <div className="absolute left-1/2 top-[calc(50%+232px)] -translate-x-1/2 flex gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setPreviewSide("front")}
+                    className={`rounded px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.15em] transition ${
+                      previewSide === "front"
+                        ? "bg-blue-600 text-white"
+                        : "text-zinc-500 hover:text-zinc-800"
+                    }`}
+                  >
+                    Front
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPreviewSide("back")}
+                    className={`rounded px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.15em] transition ${
+                      previewSide === "back"
+                        ? "bg-orange-500 text-white"
+                        : "text-zinc-500 hover:text-zinc-800"
+                    }`}
+                  >
+                    Back
+                  </button>
+                </div>
+              ) : (
+                <div className="pointer-events-none absolute left-1/2 top-[calc(50%+232px)] -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+                  Front Side
+                </div>
+              )}
               <div className="pointer-events-none absolute left-[calc(50%-128px)] top-1/2 -translate-y-1/2 -rotate-90 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
                 Left
               </div>
@@ -527,15 +584,13 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
             isOpen={isArtworkModalOpen}
             onClose={() => setIsArtworkModalOpen(false)}
             safeImageCount={safeImageCount}
-            blockUploads={Object.fromEntries(
-              Object.entries(blockUploads).map(([k, v]) => [k, { front: v }])
-            )}
+            blockUploads={blockUploads}
             blockUploadErrors={blockUploadErrors}
             uploadingBlock={uploadingBlock}
-            printMode="single"
+            printMode={printMode}
             fileInputRefs={fileInputRefs}
             fileInputBackRefs={fileInputBackRefs}
-            onRemoveUpload={(i) => removeBlockUpload(i, "front")}
+            onRemoveUpload={removeBlockUpload}
             onSetImageMode={setBlockImageMode}
             onGetImageMode={getBlockImageMode}
           />
