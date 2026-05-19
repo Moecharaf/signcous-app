@@ -499,88 +499,9 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
             onGetImageMode={getBlockImageMode}
           />
 
-          <aside className="space-y-3">
-            <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-              <div className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">Pricing Breakdown</div>
-              <div className="mt-3 space-y-2 text-sm">
-                <Row label="Signs / Sheet" value={String(pricing.signsPerSheet)} />
-                <Row label="Sheets Needed" value={String(pricing.sheetsRequired)} />
-                <Row label="Price / Sheet" value={formatPrice(pricing.sheetPrice)} />
-                <Row label="Base Subtotal" value={formatPrice(pricing.baseSubtotal)} />
-                <Row label="Contour Cut" value={formatPrice(pricing.contourCutFee)} />
-                <Row label="Rush (+120%)" value={formatPrice(pricing.rushFee)} />
-                <div className="my-2 border-t border-zinc-200" />
-                <Row label="Unit Price" value={formatPrice(pricing.unitPrice)} strong />
-                <Row label="Order Total" value={formatPrice(pricing.totalPrice)} strong className="text-[var(--brand-primary)]" />
-              </div>
-            </div>
 
-          </aside>
         </div>
       </div>
     </div>
-  );
-}
-
-function Row({
-  label,
-  value,
-  strong,
-  className,
-}: {
-  label: string;
-  value: string;
-  strong?: boolean;
-  className?: string;
-}) {
-  return (
-    <div className={`flex items-center justify-between ${strong ? "font-semibold text-zinc-900" : "text-zinc-700"} ${className ?? ""}`}>
-      <span>{label}</span>
-      <span>{value}</span>
-    </div>
-  );
-}
-
-function NumberField({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: number;
-  onChange: (value: number) => void;
-}) {
-  return (
-    <div>
-      <label className="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">{label}</label>
-      <input
-        type="number"
-        min={0}
-        value={value}
-        onChange={(event) => onChange(Math.max(0, Number(event.target.value) || 0))}
-        className="h-9 w-full rounded border border-zinc-300 px-2 text-sm"
-      />
-    </div>
-  );
-}
-
-function ToggleField({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: boolean;
-  onChange: (value: boolean) => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={() => onChange(!value)}
-      className="flex h-9 w-full items-center justify-between rounded border border-zinc-300 bg-white px-3 text-sm"
-    >
-      <span>{label}</span>
-      <span className={value ? "text-emerald-600" : "text-zinc-500"}>{value ? "Yes" : "No"}</span>
-    </button>
   );
 }
