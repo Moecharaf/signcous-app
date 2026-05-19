@@ -648,28 +648,6 @@ export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE
               onGetImageMode={getBlockImageMode}
             />
           </section>
-
-          <aside className="space-y-3">
-            <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-              <div className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">Pricing Breakdown</div>
-              <div className="mt-3 space-y-2 text-sm">
-                <Row label="Signs / Sheet" value={String(pricing.signsPerSheet)} />
-                <Row label="Sheets Needed" value={String(pricing.sheetsRequired)} />
-                <Row label="Price / Sheet" value={formatPrice(pricing.sheetPrice)} />
-                <Row label="Base Subtotal" value={formatPrice(pricing.baseSubtotal)} />
-                <Row label="Step Stakes" value={formatPrice(pricing.stepStakesFee)} />
-                <Row label="Heavy Stakes" value={formatPrice(pricing.heavyDutyStakesFee)} />
-                <Row label="Grommets" value={formatPrice(pricing.grommetFee)} />
-                <Row label="Gloss" value={formatPrice(pricing.glossFee)} />
-                <Row label="Contour Cut" value={formatPrice(pricing.contourCutFee)} />
-                <Row label="Rush (+120%)" value={formatPrice(pricing.rushFee)} />
-                <div className="my-2 border-t border-zinc-200" />
-                <Row label="Unit Price" value={formatPrice(pricing.unitPrice)} strong />
-                <Row label="Order Total" value={formatPrice(pricing.totalPrice)} strong className="text-[var(--brand-primary)]" />
-              </div>
-            </div>
-
-          </aside>
         </div>
       </div>
     </div>
@@ -698,25 +676,6 @@ function estimateGrommetCount(
   if (position === "left-right") return leftRightEach * 2;
 
   return Math.max(4, topBottomEach * 2 + Math.max(0, leftRightEach - 2) * 2);
-}
-
-function Row({
-  label,
-  value,
-  strong,
-  className,
-}: {
-  label: string;
-  value: string;
-  strong?: boolean;
-  className?: string;
-}) {
-  return (
-    <div className={`flex items-center justify-between ${strong ? "font-semibold text-zinc-900" : "text-zinc-700"} ${className ?? ""}`}>
-      <span>{label}</span>
-      <span>{value}</span>
-    </div>
-  );
 }
 
 function NumberField({
