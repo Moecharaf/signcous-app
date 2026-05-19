@@ -115,7 +115,6 @@ export default function PolystyreneBuilder({
   const maxImages = sheetLayout.count;
   const safeImageCount = Math.min(imageCount, maxImages);
 
-  async function uploadArtworkForBlock(blockIndex: number, file: File) {
   async function uploadArtworkForBlock(blockIndex: number, file: File, side: "front" | "back" = "front") {
     const uploadKey = `${blockIndex}:${side}`;
     setUploadingBlock(uploadKey);
@@ -160,8 +159,6 @@ export default function PolystyreneBuilder({
     }
   }
 
-  async function uploadArtworkForAllBlocks(file: File) {
-    const targetCount = safeImageCount;
   async function uploadArtworkForAllBlocks(file: File, side: "front" | "back" = "front") {
     const targetCount = safeImageCount;
     setUploadingBlock(`all:${side}`);
@@ -251,9 +248,8 @@ export default function PolystyreneBuilder({
   function addToCart() {
     const safeQty = Math.max(1, Math.floor(quantity));
     const materialLabel = `Polystyrene .03" ${printMode === "single" ? "Single-Sided" : "Double-Sided"}`;
-    const uploadedFileUrls = Array.from({ length: safeImageCount }, (_, i) => blockUploads[i]?.fileUrl ?? "").filter(Boolean);
-  const uploadedFileUrls = Array.from({ length: safeImageCount }, (_, i) => blockUploads[i]?.front?.fileUrl ?? "").filter(Boolean);
-  const uploadedBackUrls = printMode === "double" ? Array.from({ length: safeImageCount }, (_, i) => blockUploads[i]?.back?.fileUrl ?? "").filter(Boolean) : [];
+    const uploadedFileUrls = Array.from({ length: safeImageCount }, (_, i) => blockUploads[i]?.front?.fileUrl ?? "").filter(Boolean);
+    const uploadedBackUrls = printMode === "double" ? Array.from({ length: safeImageCount }, (_, i) => blockUploads[i]?.back?.fileUrl ?? "").filter(Boolean) : [];
 
     cart.addItem({
       productId,
@@ -271,8 +267,7 @@ export default function PolystyreneBuilder({
       hemming: false,
       rush,
       uploadedFileUrl: uploadedFileUrls[0] ?? null,
-      uploadedFileName: blockUploads[0]?.fileName ?? null,
-        uploadedFileName: blockUploads[0]?.front?.fileName ?? null,
+      uploadedFileName: blockUploads[0]?.front?.fileName ?? null,
       uploadedFileUrls: uploadedFileUrls.length > 0 ? uploadedFileUrls : undefined,
       customOptions: {
         custom_sheet_size: `${POLYSTYRENE_SHEET.width}" x ${POLYSTYRENE_SHEET.height}"`,
@@ -299,9 +294,8 @@ export default function PolystyreneBuilder({
     window.setTimeout(() => setAdded(false), 1800);
   }
 
-  const uploadedCount = Object.keys(blockUploads).filter((k) => Number(k) < safeImageCount).length;
-    const uploadedCount = Object.keys(blockUploads).filter((k) => Number(k) < safeImageCount && blockUploads[Number(k)]?.front).length;
-    const uploadedBackCount = printMode === "double" ? Object.keys(blockUploads).filter((k) => Number(k) < safeImageCount && blockUploads[Number(k)]?.back).length : 0;
+  const uploadedCount = Object.keys(blockUploads).filter((k) => Number(k) < safeImageCount && blockUploads[Number(k)]?.front).length;
+  const uploadedBackCount = printMode === "double" ? Object.keys(blockUploads).filter((k) => Number(k) < safeImageCount && blockUploads[Number(k)]?.back).length : 0;
   const toolbarPanels: BuilderBottomToolbarPanel[] = [
     {
       id: "artwork",
@@ -450,8 +444,7 @@ export default function PolystyreneBuilder({
               >
                 {sheetLayout.placements.map((placement, index) => {
                   const slotIndex = index < safeImageCount ? index : null;
-                  const upload = slotIndex !== null ? blockUploads[slotIndex] : null;
-                                    const upload = slotIndex !== null ? blockUploads[slotIndex]?.[previewSide] : null;
+                  const upload = slotIndex !== null ? blockUploads[slotIndex]?.[previewSide] : null;
                   const colorClass = slotIndex !== null ? SLOT_COLORS[slotIndex % SLOT_COLORS.length] : "";
 
                   return (
@@ -459,16 +452,15 @@ export default function PolystyreneBuilder({
                       key={`cell-${index}`}
                       type="button"
                       disabled={slotIndex === null}
-                      onClick={() => { if (slotIndex !== null) fileInputRefs.current[slotIndex]?.click(); }}
-                                            onClick={() => {
-                                              if (slotIndex !== null) {
-                                                if (printMode === "double" && previewSide === "back") {
-                                                  fileInputBackRefs.current[slotIndex]?.click();
-                                                } else {
-                                                  fileInputRefs.current[slotIndex]?.click();
-                                                }
-                                              }
-                                            }}
+                      onClick={() => {
+                        if (slotIndex !== null) {
+                          if (printMode === "double" && previewSide === "back") {
+                            fileInputBackRefs.current[slotIndex]?.click();
+                          } else {
+                            fileInputRefs.current[slotIndex]?.click();
+                          }
+                        }
+                      }}
                       className={`absolute overflow-hidden border ${
                         slotIndex !== null ? "cursor-pointer hover:opacity-85" : "cursor-default"
                       } ${upload ? "border-emerald-500" : "border-blue-400 bg-zinc-50"}`}
@@ -486,8 +478,7 @@ export default function PolystyreneBuilder({
                       ) : slotIndex !== null ? (
                         <div className={`flex h-full w-full items-center justify-center ${colorClass} opacity-30`}>
                           <span className="text-[7px] font-bold text-zinc-700">
-                            {uploadingBlock === "all" || uploadingBlock === String(slotIndex) ? "\u2026" : slotIndex + 1}
-                                                      {uploadingBlock === `all:${previewSide}` || uploadingBlock?.startsWith(`${slotIndex}:`) ? "…" : slotIndex + 1}
+                            {uploadingBlock === `all:${previewSide}` || uploadingBlock?.startsWith(`${slotIndex}:`) ? "..." : slotIndex + 1}
                           </span>
                         </div>
                       ) : null}
