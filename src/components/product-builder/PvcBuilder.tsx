@@ -160,6 +160,57 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
     event.target.value = "";
   }
 
+  async function uploadArtworkForAllBlocks(file: File, side: "front" | "back" = "front") {
+    const targetCount = safeImageCount;
+    const uploadKey = `all:${side}`;
+    setUploadingBlock(uploadKey);
+    setBlockUploadErrors({});
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await fetch("/api/upload-artwork", { method: "POST", body: formData });
+      const contentType = response.headers.get("content-type") ?? "";
+      let data: { fileUrl?: string; originalName?: string; error?: string } = {};
+      if (contentType.includes("application/json")) {
+        data = await response.json();
+      } else {
+        const raw = await response.text();
+        data = {
+          error:
+            response.status === 413
+              ? "Upload rejected: file too large."
+              : `Upload failed (${response.status}). ${raw.slice(0, 120)}`,
+        };
+      }
+      if (!response.ok || !data.fileUrl) {
+        setBlockUploadErrors({ [uploadKey]: data.error ?? "Upload failed." });
+        return;
+      }
+      let blobUrl: string | null = null;
+      if (file.type.startsWith("image/")) {
+        blobUrl = URL.createObjectURL(file);
+      }
+      const newUpload = { fileUrl: data.fileUrl!, fileName: data.originalName ?? file.name, blobUrl };
+      setBlockUploads((prev) => {
+        const updated = { ...prev };
+        for (let i = 0; i < targetCount; i++) {
+          updated[i] = { ...updated[i], [side]: newUpload };
+        }
+        return updated;
+      });
+    } catch {
+      setBlockUploadErrors({ [uploadKey]: "Upload failed. Please try again." });
+    } finally {
+      setUploadingBlock(null);
+    }
+  }
+
+  function handleCanvasFileChange(event: React.ChangeEvent<HTMLInputElement>, side: "front" | "back" = "front") {
+    const file = event.target.files?.[0];
+    if (file) void uploadArtworkForAllBlocks(file, side);
+    event.target.value = "";
+  }
+
   function setBlockImageMode(blockIndex: number, side: "front" | "back", mode: ImageFitMode) {
     setBlockImageModes((prev) => ({ ...prev, [`${blockIndex}:${side}`]: mode }));
   }
@@ -409,7 +460,7 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
                       ) : slotIndex !== null ? (
                         <div className={`flex h-full w-full items-center justify-center ${colorClass} opacity-30`}>
                           <span className="text-[7px] font-bold text-zinc-700">
-                            {uploadingBlock?.startsWith(`${slotIndex}:`) ? "…" : slotIndex + 1}
+                            {uploadingBlock === `all:${previewSide}` || uploadingBlock?.startsWith(`${slotIndex}:`) ? "\u2026" : slotIndex + 1}
                           </span>
                         </div>
                       ) : null}
@@ -466,7 +517,7 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
                 type="file"
                 accept=".pdf,.ai,.eps,.png,.jpg,.jpeg,.tif,.tiff,.psd"
                 className="hidden"
-                onChange={(e) => handleFileChange(i, e, "front")}
+                onChange={(e) => handleCanvasFileChange(e, "front")}
                 disabled={uploadingBlock !== null}
               />
             ))}
@@ -477,7 +528,7 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
                 type="file"
                 accept=".pdf,.ai,.eps,.png,.jpg,.jpeg,.tif,.tiff,.psd"
                 className="hidden"
-                onChange={(e) => handleFileChange(i, e, "back")}
+                onChange={(e) => handleCanvasFileChange(e, "back")}
                 disabled={uploadingBlock !== null}
               />
             ))}
