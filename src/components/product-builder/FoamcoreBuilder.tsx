@@ -52,17 +52,19 @@ export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE
 
   const [sizeId, setSizeId] = useState(FOAMCORE_SIZE_OPTIONS[0].id);
   const [printMode, setPrintMode] = useState<FoamcorePrintMode>("single");
-  const [quantity, setQuantity] = useState(1);
 
-  const [stepStakes, setStepStakes] = useState(0);
-  const [heavyDutyStakes, setHeavyDutyStakes] = useState(0);
+  // Simplified defaults - no longer adjustable via UI
+  const quantity = 1;
+  const stepStakes = 0;
+  const heavyDutyStakes = 0;
+  const contourCut = false;
+  const rush = false;
+
   const [grommetsEnabled, setGrommetsEnabled] = useState(false);
   const [grommetPosition, setGrommetPosition] = useState<GrommetPosition>("top-bottom");
   const [grommetSpacingMode, setGrommetSpacingMode] = useState<GrommetSpacingMode>("every-2-3-feet");
   const [grommetSpacing, setGrommetSpacing] = useState(24);
   const [gloss, setGloss] = useState(false);
-  const [contourCut, setContourCut] = useState(false);
-  const [rush, setRush] = useState(false);
 
   // Per-block upload state
   const [imageCount, setImageCount] = useState(1);
@@ -440,30 +442,38 @@ export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE
       ),
     },
     {
-      id: "addons",
-      title: "Add-ons",
-      value: [grommetsEnabled ? `Grommets ${estimatedGrommetCount}` : "No grommets", gloss ? "Gloss" : "Matte", rush ? "Rush" : "Standard"].join(" / "),
-      width: 360,
+      id: "gloss",
+      title: "Gloss",
+      value: gloss ? "Yes" : "No",
+      width: 200,
       content: (
-        <>
-          <NumberField label="Step Stakes ($2.50 ea)" value={stepStakes} onChange={setStepStakes} />
-          <NumberField label="Heavy Duty Stakes ($4.00 ea)" value={heavyDutyStakes} onChange={setHeavyDutyStakes} />
-          <ToggleField label="Gloss (+$6 / sign)" value={gloss} onChange={setGloss} />
-          <ToggleField label="Contour Cut (+20%)" value={contourCut} onChange={setContourCut} />
-          <ToggleField label="Rush (+120%)" value={rush} onChange={setRush} />
-        </>
-      ),
-    },
-    {
-      id: "quantity",
-      title: "Quantity",
-      value: String(quantity),
-      width: 260,
-      content: (
-        <>
-          <input type="number" min={1} value={quantity} onChange={(event) => setQuantity(Math.max(1, Number(event.target.value) || 1))} className="h-9 w-full rounded border border-zinc-300 px-2 text-sm" />
-          <div className="text-[11px] leading-4 text-zinc-500">Set the number of signs in this order.</div>
-        </>
+        <div className="space-y-2">
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => setGloss(false)}
+              className={`rounded border-2 px-3 py-2 text-sm font-semibold transition ${
+                !gloss
+                  ? "border-[var(--brand-primary)] bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]"
+                  : "border-zinc-300 bg-white text-zinc-600 hover:border-zinc-400"
+              }`}
+            >
+              No
+            </button>
+            <button
+              type="button"
+              onClick={() => setGloss(true)}
+              className={`rounded border-2 px-3 py-2 text-sm font-semibold transition ${
+                gloss
+                  ? "border-[var(--brand-primary)] bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]"
+                  : "border-zinc-300 bg-white text-zinc-600 hover:border-zinc-400"
+              }`}
+            >
+              Yes
+            </button>
+          </div>
+          <div className="text-[11px] text-zinc-500">Gloss finish adds $6 per sign</div>
+        </div>
       ),
     },
   ];
@@ -676,49 +686,5 @@ function estimateGrommetCount(
   if (position === "left-right") return leftRightEach * 2;
 
   return Math.max(4, topBottomEach * 2 + Math.max(0, leftRightEach - 2) * 2);
-}
-
-function NumberField({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: number;
-  onChange: (value: number) => void;
-}) {
-  return (
-    <div>
-      <label className="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">{label}</label>
-      <input
-        type="number"
-        min={0}
-        value={value}
-        onChange={(event) => onChange(Math.max(0, Number(event.target.value) || 0))}
-        className="h-9 w-full rounded border border-zinc-300 px-2 text-sm"
-      />
-    </div>
-  );
-}
-
-function ToggleField({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: boolean;
-  onChange: (value: boolean) => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={() => onChange(!value)}
-      className="flex h-9 w-full items-center justify-between rounded border border-zinc-300 bg-white px-3 text-sm"
-    >
-      <span>{label}</span>
-      <span className={value ? "text-emerald-600" : "text-zinc-500"}>{value ? "Yes" : "No"}</span>
-    </button>
-  );
 }
 
