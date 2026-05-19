@@ -54,8 +54,8 @@ export default function PolystyreneBuilder({
 
   const [imageCount, setImageCount] = useState(1);
   const [blockUploads, setBlockUploads] = useState<Record<number, BlockUpload>>({});
-  const [uploadingBlock, setUploadingBlock] = useState<number | null>(null);
-  const [blockUploadErrors, setBlockUploadErrors] = useState<Record<number, string>>({});
+  const [uploadingBlock, setUploadingBlock] = useState<string | null>(null);
+  const [blockUploadErrors, setBlockUploadErrors] = useState<Record<string, string>>({});
   const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const [added, setAdded] = useState(false);
@@ -104,10 +104,11 @@ export default function PolystyreneBuilder({
   const safeImageCount = Math.min(imageCount, maxImages);
 
   async function uploadArtworkForBlock(blockIndex: number, file: File) {
-    setUploadingBlock(blockIndex);
+    const uploadKey = String(blockIndex);
+    setUploadingBlock(uploadKey);
     setBlockUploadErrors((prev) => {
       const n = { ...prev };
-      delete n[blockIndex];
+      delete n[uploadKey];
       return n;
     });
     try {
@@ -128,7 +129,7 @@ export default function PolystyreneBuilder({
         };
       }
       if (!response.ok || !data.fileUrl) {
-        setBlockUploadErrors((prev) => ({ ...prev, [blockIndex]: data.error ?? "Upload failed." }));
+        setBlockUploadErrors((prev) => ({ ...prev, [uploadKey]: data.error ?? "Upload failed." }));
         return;
       }
       let blobUrl: string | null = null;
@@ -140,7 +141,51 @@ export default function PolystyreneBuilder({
         [blockIndex]: { fileUrl: data.fileUrl!, fileName: data.originalName ?? file.name, blobUrl },
       }));
     } catch {
-      setBlockUploadErrors((prev) => ({ ...prev, [blockIndex]: "Upload failed. Please try again." }));
+      setBlockUploadErrors((prev) => ({ ...prev, [uploadKey]: "Upload failed. Please try again." }));
+    } finally {
+      setUploadingBlock(null);
+    }
+  }
+
+  async function uploadArtworkForAllBlocks(file: File) {
+    const targetCount = safeImageCount;
+    setUploadingBlock("all");
+    setBlockUploadErrors({});
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await fetch("/api/upload-artwork", { method: "POST", body: formData });
+      const contentType = response.headers.get("content-type") ?? "";
+      let data: { fileUrl?: string; originalName?: string; error?: string } = {};
+      if (contentType.includes("application/json")) {
+        data = await response.json();
+      } else {
+        const raw = await response.text();
+        data = {
+          error:
+            response.status === 413
+              ? "Upload rejected: file too large."
+              : `Upload failed (${response.status}). ${raw.slice(0, 120)}`,
+        };
+      }
+      if (!response.ok || !data.fileUrl) {
+        setBlockUploadErrors({ all: data.error ?? "Upload failed." });
+        return;
+      }
+      let blobUrl: string | null = null;
+      if (file.type.startsWith("image/")) {
+        blobUrl = URL.createObjectURL(file);
+      }
+      const newUpload = { fileUrl: data.fileUrl!, fileName: data.originalName ?? file.name, blobUrl };
+      setBlockUploads((prev) => {
+        const updated = { ...prev };
+        for (let i = 0; i < targetCount; i++) {
+          updated[i] = newUpload;
+        }
+        return updated;
+      });
+    } catch {
+      setBlockUploadErrors({ all: "Upload failed. Please try again." });
     } finally {
       setUploadingBlock(null);
     }
@@ -149,6 +194,12 @@ export default function PolystyreneBuilder({
   function handleFileChange(blockIndex: number, event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (file) void uploadArtworkForBlock(blockIndex, file);
+    event.target.value = "";
+  }
+
+  function handleCanvasFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (file) void uploadArtworkForAllBlocks(file);
     event.target.value = "";
   }
 
@@ -226,7 +277,7 @@ export default function PolystyreneBuilder({
             {Array.from({ length: safeImageCount }).map((_, i) => {
               const upload = blockUploads[i];
               const error = blockUploadErrors[i];
-              const isUploading = uploadingBlock === i;
+              const isUploading = uploadingBlock === String(i) || uploadingBlock === "all";
               const color = SLOT_COLORS[i % SLOT_COLORS.length];
               return (
                 <div key={`slot-${i}`} className="rounded-lg border border-zinc-200 bg-zinc-50 p-2">
@@ -405,7 +456,7 @@ export default function PolystyreneBuilder({
                       ) : slotIndex !== null ? (
                         <div className={`flex h-full w-full items-center justify-center ${colorClass} opacity-30`}>
                           <span className="text-[7px] font-bold text-zinc-700">
-                            {uploadingBlock === slotIndex ? "…" : slotIndex + 1}
+                            {uploadingBlock === "all" || uploadingBlock === String(slotIndex) ? "\u2026" : slotIndex + 1}
                           </span>
                         </div>
                       ) : null}
@@ -435,7 +486,7 @@ export default function PolystyreneBuilder({
                 type="file"
                 accept=".pdf,.ai,.eps,.png,.jpg,.jpeg,.tif,.tiff,.psd"
                 className="hidden"
-                onChange={(e) => handleFileChange(i, e)}
+                onChange={(e) => handleCanvasFileChange(e)}
                 disabled={uploadingBlock !== null}
               />
             ))}
