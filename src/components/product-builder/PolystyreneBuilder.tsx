@@ -159,62 +159,6 @@ export default function PolystyreneBuilder({
     }
   }
 
-  async function uploadArtworkForAllBlocks(file: File, side: "front" | "back" = "front") {
-    const targetCount = safeImageCount;
-    setUploadingBlock(`all:${side}`);
-    setBlockUploadErrors({});
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const response = await fetch("/api/upload-artwork", { method: "POST", body: formData });
-      const contentType = response.headers.get("content-type") ?? "";
-      let data: { fileUrl?: string; originalName?: string; error?: string } = {};
-      if (contentType.includes("application/json")) {
-        data = await response.json();
-      } else {
-        const raw = await response.text();
-        data = {
-          error:
-            response.status === 413
-              ? "Upload rejected: file too large."
-              : `Upload failed (${response.status}). ${raw.slice(0, 120)}`,
-        };
-      }
-      if (!response.ok || !data.fileUrl) {
-        setBlockUploadErrors({ all: data.error ?? "Upload failed." });
-        return;
-      }
-      let blobUrl: string | null = null;
-      if (file.type.startsWith("image/")) {
-        blobUrl = URL.createObjectURL(file);
-      }
-      const newUpload = { fileUrl: data.fileUrl!, fileName: data.originalName ?? file.name, blobUrl };
-      setBlockUploads((prev) => {
-        const updated = { ...prev };
-        for (let i = 0; i < targetCount; i++) {
-          updated[i] = { ...updated[i], [side]: newUpload };
-        }
-        return updated;
-      });
-    } catch {
-      setBlockUploadErrors({ all: "Upload failed. Please try again." });
-    } finally {
-      setUploadingBlock(null);
-    }
-  }
-
-  function handleFileChange(blockIndex: number, event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (file) void uploadArtworkForBlock(blockIndex, file, "front");
-    event.target.value = "";
-  }
-
-  function handleCanvasFileChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (file) void uploadArtworkForAllBlocks(file, previewSide);
-    event.target.value = "";
-  }
-
   function handleFileChangeSided(blockIndex: number, event: React.ChangeEvent<HTMLInputElement>, side: "front" | "back") {
     const file = event.target.files?.[0];
     if (file) void uploadArtworkForBlock(blockIndex, file, side);
@@ -535,7 +479,7 @@ export default function PolystyreneBuilder({
                 type="file"
                 accept=".pdf,.ai,.eps,.png,.jpg,.jpeg,.tif,.tiff,.psd"
                 className="hidden"
-                onChange={(e) => handleCanvasFileChange(e)}
+                onChange={(e) => handleFileChangeSided(i, e, "front")}
                 disabled={uploadingBlock !== null}
               />
             ))}
@@ -547,7 +491,7 @@ export default function PolystyreneBuilder({
                 type="file"
                 accept=".pdf,.ai,.eps,.png,.jpg,.jpeg,.tif,.tiff,.psd"
                 className="hidden"
-                onChange={(e) => handleCanvasFileChange(e)}
+                onChange={(e) => handleFileChangeSided(i, e, "back")}
                 disabled={uploadingBlock !== null}
               />
             ))}
