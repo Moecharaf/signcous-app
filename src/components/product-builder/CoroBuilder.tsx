@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
+import ArtworkUploadModal from "@/components/product-builder/ArtworkUploadModal";
 import Button from "@/components/ui/Button";
 import RigidPricingHeader from "@/components/product-builder/RigidPricingHeader";
 import { useCart } from "@/context/CartContext";
@@ -74,7 +75,9 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
   const [blockUploads, setBlockUploads] = useState<Record<number, BlockUploadPair>>({});
   const [uploadingBlock, setUploadingBlock] = useState<string | null>(null); // format: "blockIndex:side"
   const [blockUploadErrors, setBlockUploadErrors] = useState<Record<string, string>>({});
+  const [blockImageModes, setBlockImageModes] = useState<Record<string, "fit" | "stretch">>();
   const [previewSide, setPreviewSide] = useState<"front" | "back">("front"); // New: toggle for double-sided preview
+  const [isArtworkModalOpen, setIsArtworkModalOpen] = useState(false);
   const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const fileInputBackRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -248,6 +251,17 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
       const file = event.target.files?.[0];
       if (file) void uploadArtworkForBlock(blockIndex, file, side);
       event.target.value = "";
+    }
+
+    function setBlockImageMode(blockIndex: number, side: "front" | "back", mode: "fit" | "stretch") {
+      setBlockImageModes((prev) => ({
+        ...prev,
+        [`${blockIndex}:${side}`]: mode,
+      }));
+    }
+
+    function getBlockImageMode(blockIndex: number, side: "front" | "back"): "fit" | "stretch" {
+      return blockImageModes?.[`${blockIndex}:${side}`] ?? "fit";
     }
 
     function removeBlockUpload(blockIndex: number, side: "front" | "back" = "front") {
@@ -607,133 +621,37 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
     {
       id: "artwork",
       title: "Artwork",
-      value: printMode === "double" ? `${uploadedCount}/${safeImageCount} front, ${uploadedBackCount}/${safeImageCount} back` : `${uploadedCount}/${safeImageCount} uploaded`,
-      width: 480,
-      status: printMode === "double"
-        ? uploadedCount === safeImageCount && uploadedBackCount === safeImageCount && safeImageCount > 0 ? "ok" : "neutral"
-        : uploadedCount === safeImageCount && safeImageCount > 0 ? "ok" : "neutral",
+      value:
+        printMode === "double"
+          ? `${uploadedCount}/${safeImageCount} front, ${uploadedBackCount}/${safeImageCount} back`
+          : `${uploadedCount}/${safeImageCount} uploaded`,
+      width: 280,
+      status:
+        printMode === "double"
+          ? uploadedCount === safeImageCount && uploadedBackCount === safeImageCount && safeImageCount > 0
+            ? "ok"
+            : "neutral"
+          : uploadedCount === safeImageCount && safeImageCount > 0
+            ? "ok"
+            : "neutral",
       content: (
-        <>
-          <div className="text-[11px] leading-4 text-zinc-500 mb-3">
+        <div className="space-y-3">
+          <p className="text-[11px] leading-4 text-zinc-500">
             {printMode === "double"
-              ? "Upload front and back artworks. Click a block on the sheet or use the slots below."
+              ? "Upload front and back artworks for each block."
               : safeImageCount === 1
                 ? "Upload 1 artwork for all signs."
-                : `Upload up to ${safeImageCount} artworks. Click a block on the sheet or use the slots below.`}
-          </div>
-          <div className="space-y-2">
-            {Array.from({ length: safeImageCount }).map((_, i) => {
-              const uploadPair = blockUploads[i];
-              const frontUpload = uploadPair?.front;
-              const backUpload = uploadPair?.back;
-              const frontError = blockUploadErrors[`${i}:front`];
-              const backError = blockUploadErrors[`${i}:back`];
-              const isFrontUploading = uploadingBlock === `${i}:front`;
-              const isBackUploading = uploadingBlock === `${i}:back`;
-              const color = SLOT_COLORS[i % SLOT_COLORS.length];
-              return (
-                <div key={`slot-${i}`} className="rounded-lg border border-zinc-200 bg-zinc-50 p-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <div className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-sm ${color} text-[10px] font-bold text-white`}>
-                        {i + 1}
-                      </div>
-                      <div className="min-w-0 flex-1 text-xs font-medium text-zinc-700">Block {i + 1}</div>
-                    </div>
-                    {printMode === "double" && (
-                      <div className="text-[10px] font-semibold text-zinc-500">
-                        {frontUpload && backUpload ? "✓ Both" : frontUpload ? "Front" : backUpload ? "Back" : "Empty"}
-                      </div>
-                    )}
-                  </div>
-                  {printMode === "double" ? (
-                    <div className="mt-2 grid grid-cols-2 gap-2">
-                      <div className="space-y-1 rounded border border-blue-200 bg-blue-50/50 p-2">
-                        <div className="text-[10px] font-semibold text-blue-700">🔵 FRONT</div>
-                        {frontUpload ? (
-                          <div className="flex items-center gap-1">
-                            <span className="max-w-[70px] truncate text-[10px] text-emerald-700">{frontUpload.fileName}</span>
-                            <button
-                              type="button"
-                              onClick={() => removeBlockUpload(i, "front")}
-                              className="rounded px-1 text-[10px] text-zinc-400 hover:text-rose-500"
-                            >
-                              ✕
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => fileInputRefs.current[i]?.click()}
-                            disabled={isFrontUploading}
-                            className="w-full shrink-0 rounded border border-dashed border-blue-300 px-2 py-1 text-[10px] text-blue-600 hover:border-blue-500 hover:text-blue-700 disabled:opacity-50"
-                          >
-                            {isFrontUploading ? "Uploading..." : "+ Upload"}
-                          </button>
-                        )}
-                        {frontUpload?.blobUrl && <img src={frontUpload.blobUrl} alt={frontUpload.fileName} className="mt-1 h-12 w-full rounded object-contain" />}
-                        {frontError && <div className="mt-1 rounded bg-rose-50 px-2 py-1 text-[10px] text-rose-700">{frontError}</div>}
-                      </div>
-                      <div className="space-y-1 rounded border border-orange-200 bg-orange-50/50 p-2">
-                        <div className="text-[10px] font-semibold text-orange-700">🟠 BACK</div>
-                        {backUpload ? (
-                          <div className="flex items-center gap-1">
-                            <span className="max-w-[70px] truncate text-[10px] text-emerald-700">{backUpload.fileName}</span>
-                            <button
-                              type="button"
-                              onClick={() => removeBlockUpload(i, "back")}
-                              className="rounded px-1 text-[10px] text-zinc-400 hover:text-rose-500"
-                            >
-                              ✕
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => fileInputBackRefs.current[i]?.click()}
-                            disabled={isBackUploading}
-                            className="w-full shrink-0 rounded border border-dashed border-orange-300 px-2 py-1 text-[10px] text-orange-600 hover:border-orange-500 hover:text-orange-700 disabled:opacity-50"
-                          >
-                            {isBackUploading ? "Uploading..." : "+ Upload"}
-                          </button>
-                        )}
-                        {backUpload?.blobUrl && <img src={backUpload.blobUrl} alt={backUpload.fileName} className="mt-1 h-12 w-full rounded object-contain" />}
-                        {backError && <div className="mt-1 rounded bg-rose-50 px-2 py-1 text-[10px] text-rose-700">{backError}</div>}
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      {frontUpload ? (
-                        <div className="flex items-center gap-1 mt-2">
-                          <span className="max-w-[100px] truncate text-[10px] text-emerald-700">{frontUpload.fileName}</span>
-                          <button
-                            type="button"
-                            onClick={() => removeBlockUpload(i, "front")}
-                            className="rounded px-1 text-[10px] text-zinc-400 hover:text-rose-500"
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => fileInputRefs.current[i]?.click()}
-                          disabled={isFrontUploading}
-                          className="shrink-0 mt-2 rounded border border-dashed border-zinc-300 px-2 py-1 text-[10px] text-zinc-500 hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)] disabled:opacity-50"
-                        >
-                          {isFrontUploading ? "Uploading..." : "+ Upload"}
-                        </button>
-                      )}
-                      {frontUpload?.blobUrl && <img src={frontUpload.blobUrl} alt={frontUpload.fileName} className="mt-2 h-16 w-full rounded object-contain" />}
-                      {frontError && <div className="mt-1 rounded bg-rose-50 px-2 py-1 text-[10px] text-rose-700">{frontError}</div>}
-                    </>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+                : `Upload artworks for up to ${safeImageCount} blocks.`}
+          </p>
+          <button
+            type="button"
+            onClick={() => setIsArtworkModalOpen(true)}
+            className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition-colors shadow-sm"
+          >
+            🎨 Open Upload Panel
+          </button>
           <div className="text-[10px] text-zinc-400">Accepted: PDF, AI, EPS, PNG, JPG, TIFF, PSD (up to 100MB)</div>
-        </>
+        </div>
       ),
     },
   ];
@@ -917,6 +835,21 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
                   {added ? "✓ Added to Cart" : "Add to Cart"}
                 </Button>
               }
+            />
+
+            <ArtworkUploadModal
+              isOpen={isArtworkModalOpen}
+              onClose={() => setIsArtworkModalOpen(false)}
+              safeImageCount={safeImageCount}
+              blockUploads={blockUploads}
+              blockUploadErrors={blockUploadErrors}
+              uploadingBlock={uploadingBlock}
+              printMode={printMode}
+              fileInputRefs={fileInputRefs}
+              fileInputBackRefs={fileInputBackRefs}
+              onRemoveUpload={removeBlockUpload}
+              onSetImageMode={setBlockImageMode}
+              onGetImageMode={getBlockImageMode}
             />
           </section>
         </div>
