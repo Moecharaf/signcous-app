@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
 import Button from "@/components/ui/Button";
 import RigidPricingHeader from "@/components/product-builder/RigidPricingHeader";
@@ -121,6 +121,14 @@ export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE
     const maxImages = sheetLayout.count;
     const safeImageCount = Math.min(imageCount, maxImages);
 
+    useEffect(() => {
+      // Signs365-style default: all available sheet blocks start active.
+      setImageCount((prev) => {
+        if (prev <= 1) return maxImages;
+        return Math.min(Math.max(1, prev), maxImages);
+      });
+    }, [maxImages]);
+
     async function uploadArtworkForBlock(blockIndex: number, file: File) {
       setUploadingBlock(blockIndex);
       setBlockUploadErrors((prev) => {
@@ -163,7 +171,9 @@ export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE
           }
 
           const next = { ...prev };
-          for (let i = 0; i < safeImageCount; i += 1) {
+          const autoFillCount = maxImages;
+          setImageCount(autoFillCount);
+          for (let i = 0; i < autoFillCount; i += 1) {
             if (!next[i]) {
               next[i] = newUpload;
             }
