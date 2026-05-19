@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
+import ArtworkUploadModal from "@/components/product-builder/ArtworkUploadModal";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
 import Button from "@/components/ui/Button";
 import RigidPricingHeader from "@/components/product-builder/RigidPricingHeader";
@@ -24,6 +25,13 @@ interface BlockUpload {
   fileName: string;
   blobUrl: string | null;
 }
+
+interface BlockUploadPair {
+  front?: BlockUpload;
+  back?: BlockUpload;
+}
+
+type ImageFitMode = "fit" | "stretch";
 
 const SLOT_COLORS = [
   "bg-blue-400", "bg-emerald-400", "bg-violet-400", "bg-amber-400",
@@ -53,10 +61,14 @@ export default function PolystyreneBuilder({
   const [rush, setRush] = useState(false);
 
   const [imageCount, setImageCount] = useState(12);
-  const [blockUploads, setBlockUploads] = useState<Record<number, BlockUpload>>({});
+  const [blockUploads, setBlockUploads] = useState<Record<number, BlockUploadPair>>({});
   const [uploadingBlock, setUploadingBlock] = useState<string | null>(null);
   const [blockUploadErrors, setBlockUploadErrors] = useState<Record<string, string>>({});
+  const [blockImageModes, setBlockImageModes] = useState<Record<string, ImageFitMode>>();
+  const [previewSide, setPreviewSide] = useState<"front" | "back">("front");
+  const [isArtworkModalOpen, setIsArtworkModalOpen] = useState(false);
   const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const fileInputBackRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const [added, setAdded] = useState(false);
 
@@ -104,7 +116,8 @@ export default function PolystyreneBuilder({
   const safeImageCount = Math.min(imageCount, maxImages);
 
   async function uploadArtworkForBlock(blockIndex: number, file: File) {
-    const uploadKey = String(blockIndex);
+  async function uploadArtworkForBlock(blockIndex: number, file: File, side: "front" | "back" = "front") {
+    const uploadKey = `${blockIndex}:${side}`;
     setUploadingBlock(uploadKey);
     setBlockUploadErrors((prev) => {
       const n = { ...prev };
@@ -138,7 +151,7 @@ export default function PolystyreneBuilder({
       }
       setBlockUploads((prev) => ({
         ...prev,
-        [blockIndex]: { fileUrl: data.fileUrl!, fileName: data.originalName ?? file.name, blobUrl },
+        [blockIndex]: { ...prev[blockIndex], [side]: { fileUrl: data.fileUrl!, fileName: data.originalName ?? file.name, blobUrl } },
       }));
     } catch {
       setBlockUploadErrors((prev) => ({ ...prev, [uploadKey]: "Upload failed. Please try again." }));
@@ -149,7 +162,9 @@ export default function PolystyreneBuilder({
 
   async function uploadArtworkForAllBlocks(file: File) {
     const targetCount = safeImageCount;
-    setUploadingBlock("all");
+  async function uploadArtworkForAllBlocks(file: File, side: "front" | "back" = "front") {
+    const targetCount = safeImageCount;
+    setUploadingBlock(`all:${side}`);
     setBlockUploadErrors({});
     try {
       const formData = new FormData();
@@ -180,7 +195,7 @@ export default function PolystyreneBuilder({
       setBlockUploads((prev) => {
         const updated = { ...prev };
         for (let i = 0; i < targetCount; i++) {
-          updated[i] = newUpload;
+          updated[i] = { ...updated[i], [side]: newUpload };
         }
         return updated;
       });
@@ -193,22 +208,43 @@ export default function PolystyreneBuilder({
 
   function handleFileChange(blockIndex: number, event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
-    if (file) void uploadArtworkForBlock(blockIndex, file);
+    if (file) void uploadArtworkForBlock(blockIndex, file, "front");
     event.target.value = "";
   }
 
   function handleCanvasFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
-    if (file) void uploadArtworkForAllBlocks(file);
+    if (file) void uploadArtworkForAllBlocks(file, previewSide);
     event.target.value = "";
   }
 
-  function removeBlockUpload(blockIndex: number) {
+  function handleFileChangeSided(blockIndex: number, event: React.ChangeEvent<HTMLInputElement>, side: "front" | "back") {
+    const file = event.target.files?.[0];
+    if (file) void uploadArtworkForBlock(blockIndex, file, side);
+    event.target.value = "";
+  }
+
+  function setBlockImageMode(blockIndex: number, side: "front" | "back", mode: ImageFitMode) {
+    setBlockImageModes((prev) => ({ ...prev, [`${blockIndex}:${side}`]: mode }));
+  }
+
+  function getBlockImageMode(blockIndex: number, side: "front" | "back"): ImageFitMode {
+    return blockImageModes?.[`${blockIndex}:${side}`] ?? "fit";
+  }
+
+  function removeBlockUpload(blockIndex: number, side: "front" | "back" = "front") {
     setBlockUploads((prev) => {
-      const n = { ...prev };
-      if (n[blockIndex]?.blobUrl) URL.revokeObjectURL(n[blockIndex].blobUrl!);
-      delete n[blockIndex];
-      return n;
+      const pair = prev[blockIndex];
+      if (!pair) return prev;
+      if (pair[side]?.blobUrl) URL.revokeObjectURL(pair[side]!.blobUrl!);
+      const updated = { ...pair };
+      delete updated[side];
+      if (Object.keys(updated).length === 0) {
+        const n = { ...prev };
+        delete n[blockIndex];
+        return n;
+      }
+      return { ...prev, [blockIndex]: updated };
     });
   }
 
@@ -216,6 +252,8 @@ export default function PolystyreneBuilder({
     const safeQty = Math.max(1, Math.floor(quantity));
     const materialLabel = `Polystyrene .03" ${printMode === "single" ? "Single-Sided" : "Double-Sided"}`;
     const uploadedFileUrls = Array.from({ length: safeImageCount }, (_, i) => blockUploads[i]?.fileUrl ?? "").filter(Boolean);
+  const uploadedFileUrls = Array.from({ length: safeImageCount }, (_, i) => blockUploads[i]?.front?.fileUrl ?? "").filter(Boolean);
+  const uploadedBackUrls = printMode === "double" ? Array.from({ length: safeImageCount }, (_, i) => blockUploads[i]?.back?.fileUrl ?? "").filter(Boolean) : [];
 
     cart.addItem({
       productId,
@@ -234,6 +272,7 @@ export default function PolystyreneBuilder({
       rush,
       uploadedFileUrl: uploadedFileUrls[0] ?? null,
       uploadedFileName: blockUploads[0]?.fileName ?? null,
+        uploadedFileName: blockUploads[0]?.front?.fileName ?? null,
       uploadedFileUrls: uploadedFileUrls.length > 0 ? uploadedFileUrls : undefined,
       customOptions: {
         custom_sheet_size: `${POLYSTYRENE_SHEET.width}" x ${POLYSTYRENE_SHEET.height}"`,
@@ -249,6 +288,8 @@ export default function PolystyreneBuilder({
         custom_contour_cut: contourCut ? "yes" : "no",
         custom_rush_surcharge_mode: rush ? "+120%" : "none",
         custom_image_count: String(safeImageCount),
+        custom_back_images: printMode === "double" ? String(uploadedBackUrls.length) : "0",
+        custom_back_image_urls: uploadedBackUrls.length > 0 ? uploadedBackUrls.join(",") : "none",
       },
       unitPrice: pricing.unitPrice,
       totalPrice: pricing.totalPrice,
@@ -259,58 +300,37 @@ export default function PolystyreneBuilder({
   }
 
   const uploadedCount = Object.keys(blockUploads).filter((k) => Number(k) < safeImageCount).length;
+    const uploadedCount = Object.keys(blockUploads).filter((k) => Number(k) < safeImageCount && blockUploads[Number(k)]?.front).length;
+    const uploadedBackCount = printMode === "double" ? Object.keys(blockUploads).filter((k) => Number(k) < safeImageCount && blockUploads[Number(k)]?.back).length : 0;
   const toolbarPanels: BuilderBottomToolbarPanel[] = [
     {
       id: "artwork",
       title: "Artwork",
-      value: `${uploadedCount}/${safeImageCount} uploaded`,
-      width: 420,
-      status: uploadedCount === safeImageCount && safeImageCount > 0 ? "ok" : "neutral",
+      value: printMode === "double"
+        ? `${uploadedCount}/${safeImageCount} front, ${uploadedBackCount}/${safeImageCount} back`
+        : `${uploadedCount}/${safeImageCount} uploaded`,
+      width: 280,
+      status: printMode === "double"
+        ? uploadedCount === safeImageCount && uploadedBackCount === safeImageCount && safeImageCount > 0 ? "ok" : "neutral"
+        : uploadedCount === safeImageCount && safeImageCount > 0 ? "ok" : "neutral",
       content: (
-        <>
-          <div className="text-[11px] leading-4 text-zinc-500">
-            {safeImageCount === 1
-              ? "Upload 1 artwork for all signs."
-              : `Upload up to ${safeImageCount} artworks. Click a block on the sheet or use the slots below.`}
-          </div>
-          <div className="space-y-2">
-            {Array.from({ length: safeImageCount }).map((_, i) => {
-              const upload = blockUploads[i];
-              const error = blockUploadErrors[i];
-              const isUploading = uploadingBlock === String(i) || uploadingBlock === "all";
-              const color = SLOT_COLORS[i % SLOT_COLORS.length];
-              return (
-                <div key={`slot-${i}`} className="rounded-lg border border-zinc-200 bg-zinc-50 p-2">
-                  <div className="flex items-center gap-2">
-                    <div className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-sm ${color} text-[10px] font-bold text-white`}>
-                      {i + 1}
-                    </div>
-                    <div className="min-w-0 flex-1 text-xs font-medium text-zinc-700">Block {i + 1}</div>
-                    {upload ? (
-                      <div className="flex items-center gap-1">
-                        <span className="max-w-[100px] truncate text-[10px] text-emerald-700">{upload.fileName}</span>
-                        <button type="button" onClick={() => removeBlockUpload(i)} className="rounded px-1 text-[10px] text-zinc-400 hover:text-rose-500">✕</button>
-                      </div>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => fileInputRefs.current[i]?.click()}
-                        disabled={isUploading}
-                        className="shrink-0 rounded border border-dashed border-zinc-300 px-2 py-1 text-[10px] text-zinc-500 hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)] disabled:opacity-50"
-                      >
-                        {isUploading ? "Uploading..." : "+ Upload"}
-                      </button>
-                    )}
-                  </div>
-                  {upload?.blobUrl && <img src={upload.blobUrl} alt={upload.fileName} className="mt-2 h-16 w-full rounded object-contain" />}
-                  {upload && !upload.blobUrl && <div className="mt-1 rounded bg-emerald-50 px-2 py-1 text-[10px] text-emerald-700">✓ {upload.fileName}</div>}
-                  {error && <div className="mt-1 rounded bg-rose-50 px-2 py-1 text-[10px] text-rose-700">{error}</div>}
-                </div>
-              );
-            })}
-          </div>
+        <div className="space-y-3">
+          <p className="text-[11px] leading-4 text-zinc-500">
+            {printMode === "double"
+              ? "Upload front and back artworks for each block."
+              : safeImageCount === 1
+                ? "Upload 1 artwork for all signs."
+                : `Upload artworks for up to ${safeImageCount} blocks.`}
+          </p>
+          <button
+            type="button"
+            onClick={() => setIsArtworkModalOpen(true)}
+            className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition-colors shadow-sm"
+          >
+            🎨 Open Upload Panel
+          </button>
           <div className="text-[10px] text-zinc-400">Accepted: PDF, AI, EPS, PNG, JPG, TIFF, PSD (up to 100MB)</div>
-        </>
+        </div>
       ),
     },
     {
@@ -431,6 +451,7 @@ export default function PolystyreneBuilder({
                 {sheetLayout.placements.map((placement, index) => {
                   const slotIndex = index < safeImageCount ? index : null;
                   const upload = slotIndex !== null ? blockUploads[slotIndex] : null;
+                                    const upload = slotIndex !== null ? blockUploads[slotIndex]?.[previewSide] : null;
                   const colorClass = slotIndex !== null ? SLOT_COLORS[slotIndex % SLOT_COLORS.length] : "";
 
                   return (
@@ -439,6 +460,15 @@ export default function PolystyreneBuilder({
                       type="button"
                       disabled={slotIndex === null}
                       onClick={() => { if (slotIndex !== null) fileInputRefs.current[slotIndex]?.click(); }}
+                                            onClick={() => {
+                                              if (slotIndex !== null) {
+                                                if (printMode === "double" && previewSide === "back") {
+                                                  fileInputBackRefs.current[slotIndex]?.click();
+                                                } else {
+                                                  fileInputRefs.current[slotIndex]?.click();
+                                                }
+                                              }
+                                            }}
                       className={`absolute overflow-hidden border ${
                         slotIndex !== null ? "cursor-pointer hover:opacity-85" : "cursor-default"
                       } ${upload ? "border-emerald-500" : "border-blue-400 bg-zinc-50"}`}
@@ -457,6 +487,7 @@ export default function PolystyreneBuilder({
                         <div className={`flex h-full w-full items-center justify-center ${colorClass} opacity-30`}>
                           <span className="text-[7px] font-bold text-zinc-700">
                             {uploadingBlock === "all" || uploadingBlock === String(slotIndex) ? "\u2026" : slotIndex + 1}
+                                                      {uploadingBlock === `all:${previewSide}` || uploadingBlock?.startsWith(`${slotIndex}:`) ? "…" : slotIndex + 1}
                           </span>
                         </div>
                       ) : null}
@@ -469,8 +500,35 @@ export default function PolystyreneBuilder({
                 Top of Sheet
               </div>
               <div className="pointer-events-none absolute left-1/2 top-[calc(50%+232px)] -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
-                Front Side
+                {previewSide === "front" ? "Front Side" : "Back Side"}
               </div>
+
+              {printMode === "double" && (
+                <div className="pointer-events-auto absolute right-4 top-4 flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setPreviewSide("front")}
+                    className={`rounded-lg px-3 py-1 text-xs font-semibold transition-colors ${
+                      previewSide === "front"
+                        ? "bg-blue-500 text-white"
+                        : "border border-zinc-300 bg-white text-zinc-600 hover:border-blue-400 hover:text-blue-600"
+                    }`}
+                  >
+                    Front
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPreviewSide("back")}
+                    className={`rounded-lg px-3 py-1 text-xs font-semibold transition-colors ${
+                      previewSide === "back"
+                        ? "bg-orange-500 text-white"
+                        : "border border-zinc-300 bg-white text-zinc-600 hover:border-orange-400 hover:text-orange-600"
+                    }`}
+                  >
+                    Back
+                  </button>
+                </div>
+              )}
               <div className="pointer-events-none absolute left-[calc(50%-128px)] top-1/2 -translate-y-1/2 -rotate-90 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
                 Left
               </div>
@@ -491,6 +549,18 @@ export default function PolystyreneBuilder({
               />
             ))}
 
+            {Array.from({ length: safeImageCount }).map((_, i) => (
+              <input
+                key={`file-input-back-${i}`}
+                ref={(el) => { fileInputBackRefs.current[i] = el; }}
+                type="file"
+                accept=".pdf,.ai,.eps,.png,.jpg,.jpeg,.tif,.tiff,.psd"
+                className="hidden"
+                onChange={(e) => handleCanvasFileChange(e)}
+                disabled={uploadingBlock !== null}
+              />
+            ))}
+
             <BuilderBottomToolbar
               panels={toolbarPanels}
               action={
@@ -500,6 +570,21 @@ export default function PolystyreneBuilder({
               }
             />
           </section>
+
+          <ArtworkUploadModal
+            isOpen={isArtworkModalOpen}
+            onClose={() => setIsArtworkModalOpen(false)}
+            safeImageCount={safeImageCount}
+            blockUploads={blockUploads}
+            blockUploadErrors={blockUploadErrors}
+            uploadingBlock={uploadingBlock}
+            printMode={printMode}
+            fileInputRefs={fileInputRefs}
+            fileInputBackRefs={fileInputBackRefs}
+            onRemoveUpload={removeBlockUpload}
+            onSetImageMode={setBlockImageMode}
+            onGetImageMode={getBlockImageMode}
+          />
 
           <aside className="space-y-3">
             {/* Pricing breakdown */}
