@@ -21,6 +21,7 @@ interface FoamcoreBuilderProps {
 
 type GrommetPosition = "all-sides" | "top-bottom" | "left-right";
 type GrommetSpacingMode = "every-2-3-feet" | "corners-only" | "custom";
+type ImageFitMode = "fit" | "stretch";
 
   interface BlockUpload {
     fileUrl: string;
@@ -67,6 +68,7 @@ export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE
   const [blockUploads, setBlockUploads] = useState<Record<number, BlockUploadPair>>({});
   const [uploadingBlock, setUploadingBlock] = useState<string | null>(null);
   const [blockUploadErrors, setBlockUploadErrors] = useState<Record<string, string>>({});
+  const [blockImageModes, setBlockImageModes] = useState<Record<string, ImageFitMode>>({});
   const [previewSide, setPreviewSide] = useState<"front" | "back">("front");
   const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const fileInputBackRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -208,6 +210,7 @@ export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE
     }
 
     function removeBlockUpload(blockIndex: number, side: "front" | "back" = "front") {
+      const modeKey = `${blockIndex}:${side}`;
       setBlockUploads((prev) => {
         const pair = prev[blockIndex];
         if (!pair) return prev;
@@ -221,6 +224,21 @@ export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE
         }
         return { ...prev, [blockIndex]: updated };
       });
+      setBlockImageModes((prev) => {
+        if (!(modeKey in prev)) return prev;
+        const next = { ...prev };
+        delete next[modeKey];
+        return next;
+      });
+    }
+
+    function setBlockImageMode(blockIndex: number, side: "front" | "back", mode: ImageFitMode) {
+      const modeKey = `${blockIndex}:${side}`;
+      setBlockImageModes((prev) => ({ ...prev, [modeKey]: mode }));
+    }
+
+    function getBlockImageMode(blockIndex: number, side: "front" | "back"): ImageFitMode {
+      return blockImageModes[`${blockIndex}:${side}`] ?? "fit";
     }
 
   function addToCart() {
@@ -414,6 +432,32 @@ export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE
                           </button>
                         )}
                         {frontUpload?.blobUrl && <img src={frontUpload.blobUrl} alt={frontUpload.fileName} className="mt-1 h-12 w-full rounded object-contain" />}
+                        {frontUpload && (
+                          <div className="mt-1 grid grid-cols-2 gap-1">
+                            <button
+                              type="button"
+                              onClick={() => setBlockImageMode(i, "front", "fit")}
+                              className={`rounded border px-1 py-1 text-[10px] ${
+                                getBlockImageMode(i, "front") === "fit"
+                                  ? "border-blue-400 bg-blue-100 text-blue-700"
+                                  : "border-zinc-300 bg-white text-zinc-600"
+                              }`}
+                            >
+                              Fit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setBlockImageMode(i, "front", "stretch")}
+                              className={`rounded border px-1 py-1 text-[10px] ${
+                                getBlockImageMode(i, "front") === "stretch"
+                                  ? "border-blue-400 bg-blue-100 text-blue-700"
+                                  : "border-zinc-300 bg-white text-zinc-600"
+                              }`}
+                            >
+                              Stretch
+                            </button>
+                          </div>
+                        )}
                         {frontError && <div className="mt-1 rounded bg-rose-50 px-2 py-1 text-[10px] text-rose-700">{frontError}</div>}
                       </div>
 
@@ -441,6 +485,32 @@ export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE
                           </button>
                         )}
                         {backUpload?.blobUrl && <img src={backUpload.blobUrl} alt={backUpload.fileName} className="mt-1 h-12 w-full rounded object-contain" />}
+                        {backUpload && (
+                          <div className="mt-1 grid grid-cols-2 gap-1">
+                            <button
+                              type="button"
+                              onClick={() => setBlockImageMode(i, "back", "fit")}
+                              className={`rounded border px-1 py-1 text-[10px] ${
+                                getBlockImageMode(i, "back") === "fit"
+                                  ? "border-orange-400 bg-orange-100 text-orange-700"
+                                  : "border-zinc-300 bg-white text-zinc-600"
+                              }`}
+                            >
+                              Fit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setBlockImageMode(i, "back", "stretch")}
+                              className={`rounded border px-1 py-1 text-[10px] ${
+                                getBlockImageMode(i, "back") === "stretch"
+                                  ? "border-orange-400 bg-orange-100 text-orange-700"
+                                  : "border-zinc-300 bg-white text-zinc-600"
+                              }`}
+                            >
+                              Stretch
+                            </button>
+                          </div>
+                        )}
                         {backError && <div className="mt-1 rounded bg-rose-50 px-2 py-1 text-[10px] text-rose-700">{backError}</div>}
                       </div>
                     </div>
@@ -468,6 +538,32 @@ export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE
                         </button>
                       )}
                       {frontUpload?.blobUrl && <img src={frontUpload.blobUrl} alt={frontUpload.fileName} className="mt-2 h-16 w-full rounded object-contain" />}
+                      {frontUpload && (
+                        <div className="mt-1 grid grid-cols-2 gap-1">
+                          <button
+                            type="button"
+                            onClick={() => setBlockImageMode(i, "front", "fit")}
+                            className={`rounded border px-1 py-1 text-[10px] ${
+                              getBlockImageMode(i, "front") === "fit"
+                                ? "border-[var(--brand-primary)] bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]"
+                                : "border-zinc-300 bg-white text-zinc-600"
+                            }`}
+                          >
+                            Fit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setBlockImageMode(i, "front", "stretch")}
+                            className={`rounded border px-1 py-1 text-[10px] ${
+                              getBlockImageMode(i, "front") === "stretch"
+                                ? "border-[var(--brand-primary)] bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]"
+                                : "border-zinc-300 bg-white text-zinc-600"
+                            }`}
+                          >
+                            Stretch
+                          </button>
+                        </div>
+                      )}
                       {frontError && <div className="mt-1 rounded bg-rose-50 px-2 py-1 text-[10px] text-rose-700">{frontError}</div>}
                     </>
                   )}
@@ -601,6 +697,7 @@ export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE
                 {sheetLayout.placements.map((placement, index) => {
                   const slotIndex = index < safeImageCount ? index : null;
                   const upload = slotIndex !== null ? blockUploads[slotIndex]?.[previewSide] : null;
+                  const imageMode = slotIndex !== null ? getBlockImageMode(slotIndex, previewSide) : "fit";
                   const colorClass = slotIndex !== null ? SLOT_COLORS[slotIndex % SLOT_COLORS.length] : "";
 
                   return (
@@ -629,7 +726,7 @@ export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE
                     >
                       {upload?.blobUrl ? (
                         <div className="flex h-full w-full items-center justify-center bg-white p-[1px]">
-                          <img src={upload.blobUrl} alt="" className="h-full w-full object-contain" />
+                          <img src={upload.blobUrl} alt="" className={`h-full w-full ${imageMode === "stretch" ? "object-fill" : "object-contain"}`} />
                         </div>
                       ) : slotIndex !== null ? (
                         <div className={`flex h-full w-full items-center justify-center ${colorClass} opacity-30`}>
