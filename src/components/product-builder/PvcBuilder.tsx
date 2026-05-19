@@ -54,11 +54,6 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
   const [printMode, setPrintMode] = useState<PvcPrintMode>("single");
   const [quantity, setQuantity] = useState(1);
 
-  const [stepStakes, setStepStakes] = useState(0);
-  const [heavyDutyStakes, setHeavyDutyStakes] = useState(0);
-  const [grommetsEnabled, setGrommetsEnabled] = useState(false);
-  const [grommetCount, setGrommetCount] = useState(4);
-  const [gloss, setGloss] = useState(false);
   const [contourCut, setContourCut] = useState(false);
   const [rush, setRush] = useState(false);
 
@@ -87,11 +82,11 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
         quantity,
         material,
         printMode,
-        stepStakes,
-        heavyDutyStakes,
-        grommetsEnabled,
-        grommetCount,
-        gloss,
+        stepStakes: 0,
+        heavyDutyStakes: 0,
+        grommetsEnabled: false,
+        grommetCount: 0,
+        gloss: false,
         contourCut,
         rush,
       }),
@@ -101,11 +96,6 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
       quantity,
       material,
       printMode,
-      stepStakes,
-      heavyDutyStakes,
-      grommetsEnabled,
-      grommetCount,
-      gloss,
       contourCut,
       rush,
     ]
@@ -209,7 +199,7 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
       quantity: safeQty,
       material: materialLabel,
       doubleSided: printMode === "double",
-      grommets: grommetsEnabled,
+      grommets: false,
       edgeFinish: "none",
       polePockets: false,
       windSlits: false,
@@ -228,10 +218,6 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
         custom_front_images: String(uploadedFileUrls.length),
         custom_back_images: printMode === "double" ? String(uploadedBackUrls.length) : "0",
         custom_back_image_urls: uploadedBackUrls.length > 0 ? uploadedBackUrls.join(",") : "none",
-        custom_step_stakes: String(stepStakes),
-        custom_heavy_duty_stakes: String(heavyDutyStakes),
-        custom_grommet_count: grommetsEnabled ? String(grommetCount) : "0",
-        custom_gloss: gloss ? "yes" : "no",
         custom_contour_cut: contourCut ? "yes" : "no",
         custom_rush_surcharge_mode: rush ? "+120%" : "none",
         custom_image_count: String(safeImageCount),
@@ -301,88 +287,6 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
           <option value="single">Single</option>
           <option value="double">Double</option>
         </select>
-      ),
-    },
-    {
-      id: "grommets",
-      title: "Grommets",
-      value: grommetsEnabled ? "Yes" : "No",
-      width: 200,
-      content: (
-        <>
-          <button
-            type="button"
-            onClick={() => setGrommetsEnabled((prev) => !prev)}
-            className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-left text-sm font-semibold mb-2"
-          >
-            {grommetsEnabled ? "✓ Enabled" : "Disabled"}
-          </button>
-          {grommetsEnabled && (
-            <div>
-              <label className="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">Grommet Count</label>
-              <input
-                type="number"
-                min={1}
-                value={grommetCount}
-                onChange={(event) => setGrommetCount(Math.max(1, Number(event.target.value) || 1))}
-                className="h-9 w-full rounded border border-zinc-300 px-2 text-sm"
-              />
-            </div>
-          )}
-        </>
-      ),
-    },
-    {
-      id: "stakes",
-      title: "Step Stakes",
-      value: stepStakes > 0 ? String(stepStakes) : "0",
-      width: 200,
-      content: (
-        <div>
-          <label className="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">Step Stakes ($2.50 ea)</label>
-          <input
-            type="number"
-            min={0}
-            value={stepStakes}
-            onChange={(event) => setStepStakes(Math.max(0, Number(event.target.value) || 0))}
-            className="h-9 w-full rounded border border-zinc-300 px-2 text-sm"
-          />
-        </div>
-      ),
-    },
-    {
-      id: "gloss",
-      title: "Gloss",
-      value: gloss ? "Yes" : "No",
-      width: 200,
-      content: (
-        <div className="space-y-2">
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => setGloss(false)}
-              className={`rounded border-2 px-3 py-2 text-sm font-semibold transition ${
-                !gloss
-                  ? "border-[var(--brand-primary)] bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]"
-                  : "border-zinc-300 bg-white text-zinc-600 hover:border-zinc-400"
-              }`}
-            >
-              No
-            </button>
-            <button
-              type="button"
-              onClick={() => setGloss(true)}
-              className={`rounded border-2 px-3 py-2 text-sm font-semibold transition ${
-                gloss
-                  ? "border-[var(--brand-primary)] bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]"
-                  : "border-zinc-300 bg-white text-zinc-600 hover:border-zinc-400"
-              }`}
-            >
-              Yes
-            </button>
-          </div>
-          <div className="text-[11px] text-zinc-500">Gloss finish adds $6 per sign</div>
-        </div>
       ),
     },
     {
@@ -603,10 +507,6 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
                 <Row label="Sheets Needed" value={String(pricing.sheetsRequired)} />
                 <Row label="Price / Sheet" value={formatPrice(pricing.sheetPrice)} />
                 <Row label="Base Subtotal" value={formatPrice(pricing.baseSubtotal)} />
-                <Row label="Step Stakes" value={formatPrice(pricing.stepStakesFee)} />
-                <Row label="Heavy Stakes" value={formatPrice(pricing.heavyDutyStakesFee)} />
-                <Row label="Grommets" value={formatPrice(pricing.grommetFee)} />
-                <Row label="Gloss" value={formatPrice(pricing.glossFee)} />
                 <Row label="Contour Cut" value={formatPrice(pricing.contourCutFee)} />
                 <Row label="Rush (+120%)" value={formatPrice(pricing.rushFee)} />
                 <div className="my-2 border-t border-zinc-200" />
