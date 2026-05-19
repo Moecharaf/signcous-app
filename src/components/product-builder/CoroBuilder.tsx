@@ -1,3 +1,54 @@
+        {
+          id: "grommet-presets",
+          title: "Grommets",
+          value: grommetsEnabled ? "Yes" : "No",
+          width: 200,
+          content: (
+            <>
+                    className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"
+                    Approx: {estimateGrommetCount(activeSize.width, activeSize.height, grommetPosition, grommetSpacingMode, grommetSpacing)} per sign
+              {
+                  </div>
+                </div>
+              )}
+            </>
+          ),
+        },
+    {
+      id: "gloss",
+      title: "Gloss",
+      value: gloss ? "Yes" : "No",
+      width: 200,
+      content: (
+        <div className="space-y-2">
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => setGloss(false)}
+              className={`rounded border-2 px-3 py-2 text-sm font-semibold transition ${
+                !gloss
+                  ? "border-[var(--brand-primary)] bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]"
+                  : "border-zinc-300 bg-white text-zinc-600 hover:border-zinc-400"
+              }`}
+            >
+              No
+            </button>
+            <button
+              type="button"
+              onClick={() => setGloss(true)}
+              className={`rounded border-2 px-3 py-2 text-sm font-semibold transition ${
+                gloss
+                  ? "border-[var(--brand-primary)] bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]"
+                  : "border-zinc-300 bg-white text-zinc-600 hover:border-zinc-400"
+              }`}
+            >
+              Yes
+            </button>
+          </div>
+          <div className="text-[11px] text-zinc-500">Gloss finish adds $6 per sign</div>
+        </div>
+      ),
+    },
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -345,57 +396,21 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
     const uploadedBackCount = printMode === "double" ? Object.keys(blockUploads).filter((k) => Number(k) < safeImageCount && blockUploads[Number(k)]?.back).length : 0;
   const toolbarPanels: BuilderBottomToolbarPanel[] = [
     {
-      id: "grommet-presets",
-      title: "Grommet Presets",
-      value: grommetsEnabled
-        ? `${grommetPosition.replace("-", " ")} / ${grommetSpacingMode === "every-2-3-feet" ? "Every 2-3 Ft" : grommetSpacingMode === "corners-only" ? "Corners Only" : "Custom"}`
-        : "Disabled",
-      width: 360,
+      id: "layout",
+      title: "Images",
+      value: `${safeImageCount}/${maxImages} active`,
+      width: 200,
       content: (
         <>
-          <button
-            type="button"
-            onClick={() => setGrommetsEnabled((prev) => !prev)}
-            className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-left text-sm font-semibold mb-2"
-          >
-            {grommetsEnabled ? "✓ Enabled" : "Disabled"}
-          </button>
-          {grommetsEnabled && (
-            <div className="space-y-2">
-              <select
-                value={grommetPosition}
-                onChange={(event) => setGrommetPosition(event.target.value as GrommetPosition)}
-                className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"
-              >
-                <option value="all-sides">All Sides</option>
-                <option value="top-bottom">Top and Bottom</option>
-                <option value="left-right">Left and Right</option>
-              </select>
-              <select
-                value={grommetSpacingMode}
-                onChange={(event) => setGrommetSpacingMode(event.target.value as GrommetSpacingMode)}
-                className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"
-              >
-                <option value="every-2-3-feet">Every 2-3 Feet</option>
-                <option value="corners-only">Corners Only</option>
-                <option value="custom">Custom Spacing</option>
-              </select>
-              {grommetSpacingMode === "custom" && (
-                <input
-                  type="number"
-                  min={6}
-                  max={48}
-                  step={1}
-                  value={grommetSpacing}
-                  onChange={(event) => setGrommetSpacing(Math.min(48, Math.max(6, Number(event.target.value) || 24)))}
-                  className="h-9 w-full rounded border border-zinc-300 px-2 text-sm"
-                />
-              )}
-              <div className="text-[11px] leading-4 text-zinc-500">
-                Approx: {estimateGrommetCount(activeSize.width, activeSize.height, grommetPosition, grommetSpacingMode, grommetSpacing)} per sign
-              </div>
-            </div>
-          )}
+          <input
+            type="number"
+            min={1}
+            max={maxImages}
+            value={safeImageCount}
+            onChange={(e) => setImageCount(Math.min(maxImages, Math.max(1, Number(e.target.value) || 1)))}
+            className="h-9 w-full rounded border border-zinc-300 px-2 text-sm"
+          />
+          <div className="text-[11px] leading-4 text-zinc-500">Adjust how many artwork blocks are active on the sheet.</div>
         </>
       ),
     },
@@ -403,7 +418,7 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
       id: "size",
       title: "Size",
       value: `${formatCoroSize(activeSize)}${sizeMode === "custom" ? " (Custom)" : ""}`,
-      width: 360,
+      width: 280,
       content: (
         <>
           <div className="mb-2 grid grid-cols-2 gap-1">
@@ -514,96 +529,119 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
     },
     {
       id: "material",
-      title: "Material / Print",
-      value: `${material} / ${printMode === "single" ? "Single" : "Double"}`,
-      width: 320,
+      title: "Material",
+      value: material,
+      width: 200,
       content: (
-        <div>
-          <div className="grid grid-cols-2 gap-1">
-            <select
-              value={material}
-              onChange={(event) => setMaterial(event.target.value as CoroMaterial)}
-              className="h-9 rounded border border-zinc-300 bg-white px-2 text-sm"
-            >
-              <option value="4mm">4mm</option>
-              <option value="10mm">10mm</option>
-            </select>
-            <select
-              value={printMode}
-              onChange={(event) => setPrintMode(event.target.value as CoroPrintMode)}
-              className="h-9 rounded border border-zinc-300 bg-white px-2 text-sm"
-            >
-              <option value="single">Single</option>
-              <option value="double" disabled={!doubleSidedAllowed}>Double</option>
-            </select>
-          </div>
+        <select
+          value={material}
+          onChange={(event) => setMaterial(event.target.value as CoroMaterial)}
+          className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"
+        >
+          <option value="4mm">4mm</option>
+          <option value="10mm">10mm</option>
+        </select>
+      ),
+    },
+    {
+      id: "print",
+      title: "Print Sides",
+      value: printMode === "single" ? "Single" : "Double",
+      width: 220,
+      content: (
+        <>
+          <select
+            value={printMode}
+            onChange={(event) => setPrintMode(event.target.value as CoroPrintMode)}
+            className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"
+          >
+            <option value="single">Single</option>
+            <option value="double" disabled={!doubleSidedAllowed}>Double</option>
+          </select>
           {!doubleSidedAllowed && (
             <div className="mt-2 rounded border border-amber-200 bg-amber-50 px-2 py-1 text-[11px] leading-4 text-amber-700">
               Double-sided is only available for 10mm material.
             </div>
           )}
-        </div>
+        </>
       ),
     },
     {
-      id: "quantity",
-      title: "Quantity",
-      value: String(quantity),
-      width: 260,
+      id: "grommet-presets",
+      title: "Grommets",
+      value: grommetsEnabled ? "Yes" : "No",
+      width: 200,
       content: (
         <>
-          <input
-            type="number"
-            min={1}
-            value={quantity}
-            onChange={(event) => setQuantity(Math.max(1, Number(event.target.value) || 1))}
-            className="h-9 w-full rounded border border-zinc-300 px-2 text-sm"
-          />
-          <div className="text-[11px] leading-4 text-zinc-500">Set the number of signs in this order.</div>
+          <button
+            type="button"
+            onClick={() => setGrommetsEnabled((prev) => !prev)}
+            className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-left text-sm font-semibold mb-2"
+          >
+            {grommetsEnabled ? "✓ Enabled" : "Disabled"}
+          </button>
+          {grommetsEnabled && (
+            <div className="space-y-2">
+              <select
+                value={grommetPosition}
+                onChange={(event) => setGrommetPosition(event.target.value as GrommetPosition)}
+                className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"
+              >
+                <option value="all-sides">All Sides</option>
+                <option value="top-bottom">Top and Bottom</option>
+                <option value="left-right">Left and Right</option>
+              </select>
+              <select
+                value={grommetSpacingMode}
+                onChange={(event) => setGrommetSpacingMode(event.target.value as GrommetSpacingMode)}
+                className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"
+              >
+                <option value="every-2-3-feet">Every 2-3 Feet</option>
+                <option value="corners-only">Corners Only</option>
+                <option value="custom">Custom Spacing</option>
+              </select>
+              {grommetSpacingMode === "custom" && (
+                <input
+                  type="number"
+                  min={6}
+                  max={48}
+                  step={1}
+                  value={grommetSpacing}
+                  onChange={(event) => setGrommetSpacing(Math.min(48, Math.max(6, Number(event.target.value) || 24)))}
+                  className="h-9 w-full rounded border border-zinc-300 px-2 text-sm"
+                />
+              )}
+              <div className="text-[11px] leading-4 text-zinc-500">
+                Approx: {estimateGrommetCount(activeSize.width, activeSize.height, grommetPosition, grommetSpacingMode, grommetSpacing)} per sign
+              </div>
+            </div>
+          )}
         </>
       ),
     },
     {
       id: "stakes",
-      title: "Stakes",
-      value: [stepStakes > 0 ? `Step ${stepStakes}` : "None", heavyDutyStakes > 0 ? `Heavy ${heavyDutyStakes}` : "None"]
-        .filter((v) => v !== "None")
-        .join(" + ") || "None",
-      width: 320,
+      title: "Step Stakes",
+      value: stepStakes > 0 ? String(stepStakes) : "0",
+      width: 200,
       content: (
-        <div className="space-y-2">
-          <NumberField label="Step Stakes ($2.50 ea)" value={stepStakes} onChange={setStepStakes} />
-          <NumberField label="Heavy Duty Stakes ($4.00 ea)" value={heavyDutyStakes} onChange={setHeavyDutyStakes} />
-        </div>
-      ),
-    },
-    {
-      id: "quality-addons",
-      title: "Quality Add-ons",
-      value: [gloss ? "Gloss" : "Matte", colorMatching ? "Color Match" : "None", contourCut && contourCutAllowed ? "Contour" : "None"]
-        .filter((v) => v !== "None")
-        .join(" + ") || "Standard",
-      width: 360,
-      content: (
-        <>
-          <ToggleField label="Gloss (+$6 / sign)" value={gloss} onChange={setGloss} />
-          <ToggleField label="Color Matching (+$75 / sheet)" value={colorMatching} onChange={setColorMatching} />
-          <ToggleField
-            label="Contour Cut (+20%)"
-            value={contourCut}
-            onChange={setContourCut}
-            disabled={!contourCutAllowed}
-            helperText={!contourCutAllowed ? "Contour cutting is only available for full sheet 48\" x 96\" jobs." : undefined}
+        <div>
+          <label className="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">Step Stakes ($2.50 ea)</label>
+          <input
+            type="number"
+            min={0}
+            value={stepStakes}
+            onChange={(event) => setStepStakes(Math.max(0, Number(event.target.value) || 0))}
+            className="h-9 w-full rounded border border-zinc-300 px-2 text-sm"
           />
-          <ToggleField label="Rush (+120%)" value={rush} onChange={setRush} />
-        </>
+        </div>
       ),
     },
     {
       id: "layout",
       title: "Images",
       value: `${safeImageCount}/${maxImages} active`,
-      width: 260,
+      width: 200,
       content: (
         <>
           <input
@@ -616,6 +654,41 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
           />
           <div className="text-[11px] leading-4 text-zinc-500">Adjust how many artwork blocks are active on the sheet.</div>
         </>
+      ),
+    },
+    {
+      id: "gloss",
+      title: "Gloss",
+      value: gloss ? "Yes" : "No",
+      width: 200,
+      content: (
+        <div className="space-y-2">
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => setGloss(false)}
+              className={`rounded border-2 px-3 py-2 text-sm font-semibold transition ${
+                !gloss
+                  ? "border-[var(--brand-primary)] bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]"
+                  : "border-zinc-300 bg-white text-zinc-600 hover:border-zinc-400"
+              }`}
+            >
+              No
+            </button>
+            <button
+              type="button"
+              onClick={() => setGloss(true)}
+              className={`rounded border-2 px-3 py-2 text-sm font-semibold transition ${
+                gloss
+                  ? "border-[var(--brand-primary)] bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]"
+                  : "border-zinc-300 bg-white text-zinc-600 hover:border-zinc-400"
+              }`}
+            >
+              Yes
+            </button>
+          </div>
+          <div className="text-[11px] text-zinc-500">Gloss finish adds $6 per sign</div>
+        </div>
       ),
     },
     {
