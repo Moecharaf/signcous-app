@@ -67,7 +67,7 @@ export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE
   const [gloss, setGloss] = useState(false);
 
   // Per-block upload state
-  const [imageCount, setImageCount] = useState(1);
+  const [imageCount, setImageCount] = useState(12);
   const [blockUploads, setBlockUploads] = useState<Record<number, BlockUploadPair>>({});
   const [uploadingBlock, setUploadingBlock] = useState<string | null>(null);
   const [blockUploadErrors, setBlockUploadErrors] = useState<Record<string, string>>({});

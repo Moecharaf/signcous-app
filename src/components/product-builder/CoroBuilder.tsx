@@ -71,7 +71,7 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
   const [colorMatching, setColorMatching] = useState(false);
 
   // Per-block upload state (supports front/back for double-sided)
-  const [imageCount, setImageCount] = useState(1);
+  const [imageCount, setImageCount] = useState(12);
   const [blockUploads, setBlockUploads] = useState<Record<number, BlockUploadPair>>({});
   const [uploadingBlock, setUploadingBlock] = useState<string | null>(null); // format: "blockIndex:side"
   const [blockUploadErrors, setBlockUploadErrors] = useState<Record<string, string>>({});
