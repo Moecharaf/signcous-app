@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
+import ArtworkUploadModal from "@/components/product-builder/ArtworkUploadModal";
 import Button from "@/components/ui/Button";
 import RigidPricingHeader from "@/components/product-builder/RigidPricingHeader";
 import { useCart } from "@/context/CartContext";
@@ -25,6 +26,8 @@ interface BlockUpload {
   fileName: string;
   blobUrl: string | null;
 }
+
+type ImageFitMode = "fit" | "stretch";
 
 const SLOT_COLORS = [
   "bg-blue-400", "bg-emerald-400", "bg-violet-400", "bg-amber-400",
@@ -54,11 +57,14 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
   const [contourCut, setContourCut] = useState(false);
   const [rush, setRush] = useState(false);
 
-  const [imageCount, setImageCount] = useState(1);
+  const [imageCount, setImageCount] = useState(12);
   const [blockUploads, setBlockUploads] = useState<Record<number, BlockUpload>>({});
-  const [uploadingBlock, setUploadingBlock] = useState<number | null>(null);
-  const [blockUploadErrors, setBlockUploadErrors] = useState<Record<number, string>>({});
+  const [uploadingBlock, setUploadingBlock] = useState<string | null>(null);
+  const [blockUploadErrors, setBlockUploadErrors] = useState<Record<string, string>>({});
+  const [blockImageModes, setBlockImageModes] = useState<Record<string, ImageFitMode>>();
+  const [isArtworkModalOpen, setIsArtworkModalOpen] = useState(false);
   const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const fileInputBackRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const [added, setAdded] = useState(false);
 
@@ -107,11 +113,12 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
   const maxImages = sheetLayout.count;
   const safeImageCount = Math.min(imageCount, maxImages);
 
-  async function uploadArtworkForBlock(blockIndex: number, file: File) {
-    setUploadingBlock(blockIndex);
+  async function uploadArtworkForBlock(blockIndex: number, file: File, side: "front" | "back" = "front") {
+    const uploadKey = `${blockIndex}:${side}`;
+    setUploadingBlock(uploadKey);
     setBlockUploadErrors((prev) => {
       const n = { ...prev };
-      delete n[blockIndex];
+      delete n[uploadKey];
       return n;
     });
     try {
@@ -132,31 +139,40 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
         };
       }
       if (!response.ok || !data.fileUrl) {
-        setBlockUploadErrors((prev) => ({ ...prev, [blockIndex]: data.error ?? "Upload failed." }));
+        setBlockUploadErrors((prev) => ({ ...prev, [uploadKey]: data.error ?? "Upload failed." }));
         return;
       }
       let blobUrl: string | null = null;
       if (file.type.startsWith("image/")) {
         blobUrl = URL.createObjectURL(file);
       }
+      const newUpload = { fileUrl: data.fileUrl!, fileName: data.originalName ?? file.name, blobUrl };
       setBlockUploads((prev) => ({
         ...prev,
-        [blockIndex]: { fileUrl: data.fileUrl!, fileName: data.originalName ?? file.name, blobUrl },
+        [blockIndex]: newUpload,
       }));
     } catch {
-      setBlockUploadErrors((prev) => ({ ...prev, [blockIndex]: "Upload failed. Please try again." }));
+      setBlockUploadErrors((prev) => ({ ...prev, [uploadKey]: "Upload failed. Please try again." }));
     } finally {
       setUploadingBlock(null);
     }
   }
 
-  function handleFileChange(blockIndex: number, event: React.ChangeEvent<HTMLInputElement>) {
+  function handleFileChange(blockIndex: number, event: React.ChangeEvent<HTMLInputElement>, side: "front" | "back" = "front") {
     const file = event.target.files?.[0];
-    if (file) void uploadArtworkForBlock(blockIndex, file);
+    if (file) void uploadArtworkForBlock(blockIndex, file, side);
     event.target.value = "";
   }
 
-  function removeBlockUpload(blockIndex: number) {
+  function setBlockImageMode(blockIndex: number, side: "front" | "back", mode: ImageFitMode) {
+    setBlockImageModes((prev) => ({ ...prev, [`${blockIndex}:${side}`]: mode }));
+  }
+
+  function getBlockImageMode(blockIndex: number, side: "front" | "back"): ImageFitMode {
+    return blockImageModes?.[`${blockIndex}:${side}`] ?? "fit";
+  }
+
+  function removeBlockUpload(blockIndex: number, _side: "front" | "back" = "front") {
     setBlockUploads((prev) => {
       const n = { ...prev };
       if (n[blockIndex]?.blobUrl) URL.revokeObjectURL(n[blockIndex].blobUrl!);
@@ -214,66 +230,20 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
   const uploadedCount = Object.keys(blockUploads).filter((k) => Number(k) < safeImageCount).length;
   const toolbarPanels: BuilderBottomToolbarPanel[] = [
     {
-      id: "artwork",
-      title: "Artwork",
-      value: `${uploadedCount}/${safeImageCount} uploaded`,
-      width: 420,
-      status: uploadedCount === safeImageCount && safeImageCount > 0 ? "ok" : "neutral",
-      content: (
-        <>
-          <div className="text-[11px] leading-4 text-zinc-500">
-            {safeImageCount === 1
-              ? "Upload 1 artwork for all signs."
-              : `Upload up to ${safeImageCount} artworks. Click a block on the sheet or use the slots below.`}
-          </div>
-          <div className="space-y-2">
-            {Array.from({ length: safeImageCount }).map((_, i) => {
-              const upload = blockUploads[i];
-              const error = blockUploadErrors[i];
-              const isUploading = uploadingBlock === i;
-              const color = SLOT_COLORS[i % SLOT_COLORS.length];
-              return (
-                <div key={`slot-${i}`} className="rounded-lg border border-zinc-200 bg-zinc-50 p-2">
-                  <div className="flex items-center gap-2">
-                    <div className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-sm ${color} text-[10px] font-bold text-white`}>
-                      {i + 1}
-                    </div>
-                    <div className="min-w-0 flex-1 text-xs font-medium text-zinc-700">Block {i + 1}</div>
-                    {upload ? (
-                      <div className="flex items-center gap-1">
-                        <span className="max-w-[100px] truncate text-[10px] text-emerald-700">{upload.fileName}</span>
-                        <button type="button" onClick={() => removeBlockUpload(i)} className="rounded px-1 text-[10px] text-zinc-400 hover:text-rose-500">✕</button>
-                      </div>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => fileInputRefs.current[i]?.click()}
-                        disabled={isUploading}
-                        className="shrink-0 rounded border border-dashed border-zinc-300 px-2 py-1 text-[10px] text-zinc-500 hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)] disabled:opacity-50"
-                      >
-                        {isUploading ? "Uploading..." : "+ Upload"}
-                      </button>
-                    )}
-                  </div>
-                  {upload?.blobUrl && <img src={upload.blobUrl} alt={upload.fileName} className="mt-2 h-16 w-full rounded object-contain" />}
-                  {upload && !upload.blobUrl && <div className="mt-1 rounded bg-emerald-50 px-2 py-1 text-[10px] text-emerald-700">✓ {upload.fileName}</div>}
-                  {error && <div className="mt-1 rounded bg-rose-50 px-2 py-1 text-[10px] text-rose-700">{error}</div>}
-                </div>
-              );
-            })}
-          </div>
-          <div className="text-[10px] text-zinc-400">Accepted: PDF, AI, EPS, PNG, JPG, TIFF, PSD (up to 100MB)</div>
-        </>
-      ),
-    },
-    {
       id: "layout",
       title: "Images",
       value: `${safeImageCount}/${maxImages} active`,
-      width: 260,
+      width: 200,
       content: (
         <>
-          <input type="number" min={1} max={maxImages} value={safeImageCount} onChange={(e) => setImageCount(Math.min(maxImages, Math.max(1, Number(e.target.value) || 1)))} className="h-9 w-full rounded border border-zinc-300 px-2 text-sm" />
+          <input
+            type="number"
+            min={1}
+            max={maxImages}
+            value={safeImageCount}
+            onChange={(e) => setImageCount(Math.min(maxImages, Math.max(1, Number(e.target.value) || 1)))}
+            className="h-9 w-full rounded border border-zinc-300 px-2 text-sm"
+          />
           <div className="text-[11px] leading-4 text-zinc-500">Adjust how many artwork blocks are active on the sheet.</div>
         </>
       ),
@@ -282,7 +252,7 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
       id: "size",
       title: "Size",
       value: formatPvcSize(activeSize),
-      width: 300,
+      width: 260,
       content: (
         <select value={sizeId} onChange={(event) => setSizeId(event.target.value)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm">
           {PVC_SIZE_OPTIONS.map((size) => (
@@ -293,56 +263,132 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
     },
     {
       id: "material",
-      title: "Material / Print",
-      value: `${material} / ${printMode === "single" ? "Single" : "Double"}`,
-      width: 320,
+      title: "Material",
+      value: material,
+      width: 200,
       content: (
-        <div className="grid grid-cols-2 gap-1">
-          <select value={material} onChange={(event) => setMaterial(event.target.value as PvcMaterial)} className="h-9 rounded border border-zinc-300 bg-white px-2 text-sm">
-            <option value="3mm">3mm</option>
-            <option value="6mm">6mm</option>
-          </select>
-          <select value={printMode} onChange={(event) => setPrintMode(event.target.value as PvcPrintMode)} className="h-9 rounded border border-zinc-300 bg-white px-2 text-sm">
-            <option value="single">Single</option>
-            <option value="double">Double</option>
-          </select>
+        <select value={material} onChange={(event) => setMaterial(event.target.value as PvcMaterial)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm">
+          <option value="3mm">3mm</option>
+          <option value="6mm">6mm</option>
+        </select>
+      ),
+    },
+    {
+      id: "print",
+      title: "Print Sides",
+      value: printMode === "single" ? "Single" : "Double",
+      width: 220,
+      content: (
+        <select value={printMode} onChange={(event) => setPrintMode(event.target.value as PvcPrintMode)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm">
+          <option value="single">Single</option>
+          <option value="double">Double</option>
+        </select>
+      ),
+    },
+    {
+      id: "grommets",
+      title: "Grommets",
+      value: grommetsEnabled ? "Yes" : "No",
+      width: 200,
+      content: (
+        <>
+          <button
+            type="button"
+            onClick={() => setGrommetsEnabled((prev) => !prev)}
+            className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-left text-sm font-semibold mb-2"
+          >
+            {grommetsEnabled ? "✓ Enabled" : "Disabled"}
+          </button>
+          {grommetsEnabled && (
+            <div>
+              <label className="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">Grommet Count</label>
+              <input
+                type="number"
+                min={1}
+                value={grommetCount}
+                onChange={(event) => setGrommetCount(Math.max(1, Number(event.target.value) || 1))}
+                className="h-9 w-full rounded border border-zinc-300 px-2 text-sm"
+              />
+            </div>
+          )}
+        </>
+      ),
+    },
+    {
+      id: "stakes",
+      title: "Step Stakes",
+      value: stepStakes > 0 ? String(stepStakes) : "0",
+      width: 200,
+      content: (
+        <div>
+          <label className="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">Step Stakes ($2.50 ea)</label>
+          <input
+            type="number"
+            min={0}
+            value={stepStakes}
+            onChange={(event) => setStepStakes(Math.max(0, Number(event.target.value) || 0))}
+            className="h-9 w-full rounded border border-zinc-300 px-2 text-sm"
+          />
         </div>
       ),
     },
     {
-      id: "addons",
-      title: "Add-ons",
-      value: [grommetsEnabled ? `Grommets ${grommetCount}` : "No grommets", gloss ? "Gloss" : "Matte", rush ? "Rush" : "Standard"].join(" / "),
-      width: 360,
+      id: "gloss",
+      title: "Gloss",
+      value: gloss ? "Yes" : "No",
+      width: 200,
       content: (
-        <>
-          <NumberField label="Step Stakes ($2.50 ea)" value={stepStakes} onChange={setStepStakes} />
-          <NumberField label="Heavy Duty Stakes ($4.00 ea)" value={heavyDutyStakes} onChange={setHeavyDutyStakes} />
-          <div>
-            <label className="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">Grommets</label>
-            <button type="button" onClick={() => setGrommetsEnabled((prev) => !prev)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-left text-sm">
-              {grommetsEnabled ? "Enabled" : "Disabled"}
+        <div className="space-y-2">
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => setGloss(false)}
+              className={`rounded border-2 px-3 py-2 text-sm font-semibold transition ${
+                !gloss
+                  ? "border-[var(--brand-primary)] bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]"
+                  : "border-zinc-300 bg-white text-zinc-600 hover:border-zinc-400"
+              }`}
+            >
+              No
             </button>
-            {grommetsEnabled && (
-              <input type="number" min={1} value={grommetCount} onChange={(event) => setGrommetCount(Math.max(1, Number(event.target.value) || 1))} className="mt-2 h-9 w-full rounded border border-zinc-300 px-2 text-sm" />
-            )}
+            <button
+              type="button"
+              onClick={() => setGloss(true)}
+              className={`rounded border-2 px-3 py-2 text-sm font-semibold transition ${
+                gloss
+                  ? "border-[var(--brand-primary)] bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]"
+                  : "border-zinc-300 bg-white text-zinc-600 hover:border-zinc-400"
+              }`}
+            >
+              Yes
+            </button>
           </div>
-          <ToggleField label="Gloss (+$6 / sign)" value={gloss} onChange={setGloss} />
-          <ToggleField label="Contour Cut (+20%)" value={contourCut} onChange={setContourCut} />
-          <ToggleField label="Rush (+120%)" value={rush} onChange={setRush} />
-        </>
+          <div className="text-[11px] text-zinc-500">Gloss finish adds $6 per sign</div>
+        </div>
       ),
     },
     {
-      id: "quantity",
-      title: "Quantity",
-      value: String(quantity),
-      width: 260,
+      id: "artwork",
+      title: "Artwork",
+      value: `${uploadedCount}/${safeImageCount} uploaded`,
+      width: 280,
+      status: uploadedCount === safeImageCount && safeImageCount > 0 ? "ok" : "neutral",
       content: (
-        <>
-          <input type="number" min={1} value={quantity} onChange={(event) => setQuantity(Math.max(1, Number(event.target.value) || 1))} className="h-9 w-full rounded border border-zinc-300 px-2 text-sm" />
-          <div className="text-[11px] leading-4 text-zinc-500">Set the number of signs in this order.</div>
-        </>
+        <div className="space-y-3">
+          <p className="text-[11px] leading-4 text-zinc-500">
+            {safeImageCount === 1
+              ? "Upload 1 artwork for all signs."
+              : `Upload artworks for up to ${safeImageCount} blocks.`}
+          </p>
+          <button
+            type="button"
+            onClick={() => setIsArtworkModalOpen(true)}
+            className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition-colors shadow-sm"
+          >
+            🎨 Open Upload Panel
+          </button>
+          <div className="text-[10px] text-zinc-400">Accepted: PDF, AI, EPS, PNG, JPG, TIFF, PSD (up to 100MB)</div>
+        </div>
       ),
     },
   ];
@@ -403,7 +449,7 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
                       key={`cell-${index}`}
                       type="button"
                       disabled={slotIndex === null}
-                      onClick={() => { if (slotIndex !== null) fileInputRefs.current[slotIndex]?.click(); }}
+                      onClick={() => { if (slotIndex !== null) setIsArtworkModalOpen(true); }}
                       className={`absolute overflow-hidden border ${
                         slotIndex !== null ? "cursor-pointer hover:opacity-85" : "cursor-default"
                       } ${upload ? "border-emerald-500" : "border-blue-400 bg-zinc-50"}`}
@@ -421,7 +467,7 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
                       ) : slotIndex !== null ? (
                         <div className={`flex h-full w-full items-center justify-center ${colorClass} opacity-30`}>
                           <span className="text-[7px] font-bold text-zinc-700">
-                            {uploadingBlock === slotIndex ? "…" : slotIndex + 1}
+                            {uploadingBlock?.startsWith(slotIndex + ':') ? "…" : slotIndex + 1}
                           </span>
                         </div>
                       ) : null}
@@ -451,7 +497,18 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
                 type="file"
                 accept=".pdf,.ai,.eps,.png,.jpg,.jpeg,.tif,.tiff,.psd"
                 className="hidden"
-                onChange={(e) => handleFileChange(i, e)}
+                onChange={(e) => handleFileChange(i, e, "front")}
+                disabled={uploadingBlock !== null}
+              />
+            ))}
+            {Array.from({ length: safeImageCount }).map((_, i) => (
+              <input
+                key={`file-input-back-${i}`}
+                ref={(el) => { fileInputBackRefs.current[i] = el; }}
+                type="file"
+                accept=".pdf,.ai,.eps,.png,.jpg,.jpeg,.tif,.tiff,.psd"
+                className="hidden"
+                onChange={(e) => handleFileChange(i, e, "back")}
                 disabled={uploadingBlock !== null}
               />
             ))}
@@ -465,6 +522,23 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
               }
             />
           </section>
+
+          <ArtworkUploadModal
+            isOpen={isArtworkModalOpen}
+            onClose={() => setIsArtworkModalOpen(false)}
+            safeImageCount={safeImageCount}
+            blockUploads={Object.fromEntries(
+              Object.entries(blockUploads).map(([k, v]) => [k, { front: v }])
+            )}
+            blockUploadErrors={blockUploadErrors}
+            uploadingBlock={uploadingBlock}
+            printMode="single"
+            fileInputRefs={fileInputRefs}
+            fileInputBackRefs={fileInputBackRefs}
+            onRemoveUpload={(i) => removeBlockUpload(i, "front")}
+            onSetImageMode={setBlockImageMode}
+            onGetImageMode={getBlockImageMode}
+          />
 
           <aside className="space-y-3">
             <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
