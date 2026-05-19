@@ -19,6 +19,9 @@ interface FoamcoreBuilderProps {
   productName?: string;
 }
 
+type GrommetPosition = "all-sides" | "top-bottom" | "left-right";
+type GrommetSpacingMode = "every-2-3-feet" | "corners-only" | "custom";
+
   interface BlockUpload {
     fileUrl: string;
     fileName: string;
@@ -47,7 +50,9 @@ export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE
   const [stepStakes, setStepStakes] = useState(0);
   const [heavyDutyStakes, setHeavyDutyStakes] = useState(0);
   const [grommetsEnabled, setGrommetsEnabled] = useState(false);
-  const [grommetCount, setGrommetCount] = useState(4);
+  const [grommetPosition, setGrommetPosition] = useState<GrommetPosition>("top-bottom");
+  const [grommetSpacingMode, setGrommetSpacingMode] = useState<GrommetSpacingMode>("every-2-3-feet");
+  const [grommetSpacing, setGrommetSpacing] = useState(24);
   const [gloss, setGloss] = useState(false);
   const [contourCut, setContourCut] = useState(false);
   const [rush, setRush] = useState(false);
@@ -66,6 +71,18 @@ export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE
     [sizeId]
   );
 
+  const estimatedGrommetCount = useMemo(
+    () =>
+      estimateGrommetCount(
+        activeSize.width,
+        activeSize.height,
+        grommetPosition,
+        grommetSpacingMode,
+        grommetSpacing
+      ),
+    [activeSize.width, activeSize.height, grommetPosition, grommetSpacingMode, grommetSpacing]
+  );
+
   const pricing = useMemo(
     () =>
       calculateFoamcorePricing({
@@ -76,7 +93,7 @@ export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE
         stepStakes,
         heavyDutyStakes,
         grommetsEnabled,
-        grommetCount,
+        grommetCount: grommetsEnabled ? estimatedGrommetCount : 0,
         gloss,
         contourCut,
         rush,
@@ -89,7 +106,7 @@ export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE
       stepStakes,
       heavyDutyStakes,
       grommetsEnabled,
-      grommetCount,
+      estimatedGrommetCount,
       gloss,
       contourCut,
       rush,
@@ -136,10 +153,23 @@ export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE
         if (file.type.startsWith("image/")) {
           blobUrl = URL.createObjectURL(file);
         }
-        setBlockUploads((prev) => ({
-          ...prev,
-          [blockIndex]: { fileUrl: data.fileUrl!, fileName: data.originalName ?? file.name, blobUrl },
-        }));
+        const newUpload = { fileUrl: data.fileUrl!, fileName: data.originalName ?? file.name, blobUrl };
+
+        // Signs365 behavior: first upload auto-fills all active blocks.
+        setBlockUploads((prev) => {
+          const isFirstUpload = !Object.values(prev).some((upload) => Boolean(upload?.fileUrl));
+          if (!isFirstUpload) {
+            return { ...prev, [blockIndex]: newUpload };
+          }
+
+          const next = { ...prev };
+          for (let i = 0; i < safeImageCount; i += 1) {
+            if (!next[i]) {
+              next[i] = newUpload;
+            }
+          }
+          return next;
+        });
       } catch {
         setBlockUploadErrors((prev) => ({ ...prev, [blockIndex]: "Upload failed. Please try again." }));
       } finally {
@@ -194,7 +224,15 @@ export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE
         custom_print_mode: printMode === "single" ? "Single-Sided" : "Double-Sided",
         custom_step_stakes: String(stepStakes),
         custom_heavy_duty_stakes: String(heavyDutyStakes),
-        custom_grommet_count: grommetsEnabled ? String(grommetCount) : "0",
+        custom_grommet_count: grommetsEnabled ? String(estimatedGrommetCount) : "0",
+        custom_grommet_position: grommetsEnabled ? grommetPosition : "none",
+        custom_grommet_spacing: grommetsEnabled
+          ? grommetSpacingMode === "every-2-3-feet"
+            ? "Every 2-3 Feet"
+            : grommetSpacingMode === "corners-only"
+              ? "Corners Only"
+              : `${grommetSpacing} in`
+          : "n/a",
         custom_gloss: gloss ? "yes" : "no",
         custom_contour_cut: contourCut ? "yes" : "no",
         custom_rush_surcharge_mode: rush ? "+120%" : "none",
@@ -210,6 +248,59 @@ export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE
 
     const uploadedCount = Object.keys(blockUploads).filter((k) => Number(k) < safeImageCount).length;
   const toolbarPanels: BuilderBottomToolbarPanel[] = [
+    {
+      id: "grommet-presets",
+      title: "Grommet Presets",
+      value: grommetsEnabled
+        ? `${grommetPosition.replace("-", " ")} / ${grommetSpacingMode === "every-2-3-feet" ? "Every 2-3 Ft" : grommetSpacingMode === "corners-only" ? "Corners Only" : "Custom"}`
+        : "Disabled",
+      width: 360,
+      content: (
+        <>
+          <button
+            type="button"
+            onClick={() => setGrommetsEnabled((prev) => !prev)}
+            className="mb-2 h-9 w-full rounded border border-zinc-300 bg-white px-2 text-left text-sm font-semibold"
+          >
+            {grommetsEnabled ? "Enabled" : "Disabled"}
+          </button>
+          {grommetsEnabled && (
+            <div className="space-y-2">
+              <select
+                value={grommetPosition}
+                onChange={(event) => setGrommetPosition(event.target.value as GrommetPosition)}
+                className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"
+              >
+                <option value="all-sides">All Sides</option>
+                <option value="top-bottom">Top and Bottom</option>
+                <option value="left-right">Left and Right</option>
+              </select>
+              <select
+                value={grommetSpacingMode}
+                onChange={(event) => setGrommetSpacingMode(event.target.value as GrommetSpacingMode)}
+                className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"
+              >
+                <option value="every-2-3-feet">Every 2-3 Feet</option>
+                <option value="corners-only">Corners Only</option>
+                <option value="custom">Custom Spacing</option>
+              </select>
+              {grommetSpacingMode === "custom" && (
+                <input
+                  type="number"
+                  min={6}
+                  max={48}
+                  step={1}
+                  value={grommetSpacing}
+                  onChange={(event) => setGrommetSpacing(Math.min(48, Math.max(6, Number(event.target.value) || 24)))}
+                  className="h-9 w-full rounded border border-zinc-300 px-2 text-sm"
+                />
+              )}
+              <div className="text-[11px] leading-4 text-zinc-500">Approx: {estimatedGrommetCount} per sign</div>
+            </div>
+          )}
+        </>
+      ),
+    },
     {
       id: "artwork",
       title: "Artwork",
@@ -310,21 +401,12 @@ export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE
     {
       id: "addons",
       title: "Add-ons",
-      value: [grommetsEnabled ? `Grommets ${grommetCount}` : "No grommets", gloss ? "Gloss" : "Matte", rush ? "Rush" : "Standard"].join(" / "),
+      value: [grommetsEnabled ? `Grommets ${estimatedGrommetCount}` : "No grommets", gloss ? "Gloss" : "Matte", rush ? "Rush" : "Standard"].join(" / "),
       width: 360,
       content: (
         <>
           <NumberField label="Step Stakes ($2.50 ea)" value={stepStakes} onChange={setStepStakes} />
           <NumberField label="Heavy Duty Stakes ($4.00 ea)" value={heavyDutyStakes} onChange={setHeavyDutyStakes} />
-          <div>
-            <label className="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">Grommets</label>
-            <button type="button" onClick={() => setGrommetsEnabled((prev) => !prev)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-left text-sm">
-              {grommetsEnabled ? "Enabled" : "Disabled"}
-            </button>
-            {grommetsEnabled && (
-              <input type="number" min={1} value={grommetCount} onChange={(event) => setGrommetCount(Math.max(1, Number(event.target.value) || 1))} className="mt-2 h-9 w-full rounded border border-zinc-300 px-2 text-sm" />
-            )}
-          </div>
           <ToggleField label="Gloss (+$6 / sign)" value={gloss} onChange={setGloss} />
           <ToggleField label="Contour Cut (+20%)" value={contourCut} onChange={setContourCut} />
           <ToggleField label="Rush (+120%)" value={rush} onChange={setRush} />
@@ -489,6 +571,30 @@ export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE
       </div>
     </div>
   );
+}
+
+function estimateGrommetCount(
+  width: number,
+  height: number,
+  position: GrommetPosition,
+  spacingMode: GrommetSpacingMode,
+  spacing: number
+): number {
+  const safeWidth = Math.max(1, width);
+  const safeHeight = Math.max(1, height);
+  const safeSpacing = spacingMode === "every-2-3-feet" ? 30 : Math.max(1, spacing);
+
+  if (spacingMode === "corners-only") {
+    return 4;
+  }
+
+  const topBottomEach = Math.max(2, Math.floor(safeWidth / safeSpacing) + 1);
+  const leftRightEach = Math.max(2, Math.floor(safeHeight / safeSpacing) + 1);
+
+  if (position === "top-bottom") return topBottomEach * 2;
+  if (position === "left-right") return leftRightEach * 2;
+
+  return Math.max(4, topBottomEach * 2 + Math.max(0, leftRightEach - 2) * 2);
 }
 
 function Row({
