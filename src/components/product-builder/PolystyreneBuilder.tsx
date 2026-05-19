@@ -52,7 +52,7 @@ export default function PolystyreneBuilder({
   const [contourCut, setContourCut] = useState(false);
   const [rush, setRush] = useState(false);
 
-  const [imageCount, setImageCount] = useState(1);
+  const [imageCount, setImageCount] = useState(12);
   const [blockUploads, setBlockUploads] = useState<Record<number, BlockUpload>>({});
   const [uploadingBlock, setUploadingBlock] = useState<string | null>(null);
   const [blockUploadErrors, setBlockUploadErrors] = useState<Record<string, string>>({});
