@@ -383,7 +383,15 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
                       key={`cell-${index}`}
                       type="button"
                       disabled={slotIndex === null}
-                      onClick={() => { if (slotIndex !== null) setIsArtworkModalOpen(true); }}
+                      onClick={() => {
+                        if (slotIndex !== null) {
+                          if (printMode === "double" && previewSide === "back") {
+                            fileInputBackRefs.current[slotIndex]?.click();
+                          } else {
+                            fileInputRefs.current[slotIndex]?.click();
+                          }
+                        }
+                      }}
                       className={`absolute overflow-hidden border ${
                         slotIndex !== null ? "cursor-pointer hover:opacity-85" : "cursor-default"
                       } ${upload ? "border-emerald-500" : "border-blue-400 bg-zinc-50"}`}
@@ -413,15 +421,19 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
               <div className="pointer-events-none absolute left-1/2 top-[calc(50%-236px)] -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
                 Top of Sheet
               </div>
-              {printMode === "double" ? (
-                <div className="absolute left-1/2 top-[calc(50%+232px)] -translate-x-1/2 flex gap-1">
+              <div className="pointer-events-none absolute left-1/2 top-[calc(50%+232px)] -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+                {previewSide === "front" ? "Front Side" : "Back Side"}
+              </div>
+
+              {printMode === "double" && (
+                <div className="pointer-events-auto absolute right-4 top-4 flex gap-2">
                   <button
                     type="button"
                     onClick={() => setPreviewSide("front")}
-                    className={`rounded px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.15em] transition ${
+                    className={`rounded-lg px-3 py-1 text-xs font-semibold transition-colors ${
                       previewSide === "front"
-                        ? "bg-blue-600 text-white"
-                        : "text-zinc-500 hover:text-zinc-800"
+                        ? "bg-blue-500 text-white"
+                        : "border border-zinc-300 bg-white text-zinc-600 hover:border-blue-400 hover:text-blue-600"
                     }`}
                   >
                     Front
@@ -429,18 +441,14 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
                   <button
                     type="button"
                     onClick={() => setPreviewSide("back")}
-                    className={`rounded px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.15em] transition ${
+                    className={`rounded-lg px-3 py-1 text-xs font-semibold transition-colors ${
                       previewSide === "back"
                         ? "bg-orange-500 text-white"
-                        : "text-zinc-500 hover:text-zinc-800"
+                        : "border border-zinc-300 bg-white text-zinc-600 hover:border-orange-400 hover:text-orange-600"
                     }`}
                   >
                     Back
                   </button>
-                </div>
-              ) : (
-                <div className="pointer-events-none absolute left-1/2 top-[calc(50%+232px)] -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
-                  Front Side
                 </div>
               )}
               <div className="pointer-events-none absolute left-[calc(50%-128px)] top-1/2 -translate-y-1/2 -rotate-90 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
