@@ -148,10 +148,25 @@ export default function PolystyreneBuilder({
       if (file.type.startsWith("image/")) {
         blobUrl = URL.createObjectURL(file);
       }
-      setBlockUploads((prev) => ({
-        ...prev,
-        [blockIndex]: { ...prev[blockIndex], [side]: { fileUrl: data.fileUrl!, fileName: data.originalName ?? file.name, blobUrl } },
-      }));
+      const newUpload = { fileUrl: data.fileUrl!, fileName: data.originalName ?? file.name, blobUrl };
+
+      // Match other rigid builders: first upload on a side fills active blocks.
+      setBlockUploads((prev) => {
+        const updated = { ...prev };
+        const isFirstUpload = !Object.values(prev).some((pair) => Boolean(pair?.[side]?.fileUrl));
+
+        if (isFirstUpload) {
+          for (let i = 0; i < safeImageCount; i += 1) {
+            if (!updated[i]?.[side]) {
+              updated[i] = { ...updated[i], [side]: newUpload };
+            }
+          }
+        } else {
+          updated[blockIndex] = { ...updated[blockIndex], [side]: newUpload };
+        }
+
+        return updated;
+      });
     } catch {
       setBlockUploadErrors((prev) => ({ ...prev, [uploadKey]: "Upload failed. Please try again." }));
     } finally {
