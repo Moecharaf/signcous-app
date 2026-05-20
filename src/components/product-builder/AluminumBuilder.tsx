@@ -57,7 +57,7 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
 
   // ── sheet mode state ──
   const [sizeId, setSizeId] = useState(ALUMINUM_SIZE_OPTIONS[0].id);
-  const [imageCount, setImageCount] = useState(1);
+  const [imageCount, setImageCount] = useState(12);
   const [blockUploads, setBlockUploads] = useState<Record<number, BlockUploadPair>>({});
   const [uploadingBlock, setUploadingBlock] = useState<string | null>(null);
   const [blockUploadErrors, setBlockUploadErrors] = useState<Record<string, string>>({});
@@ -157,7 +157,7 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
         const newUpload = result;
         setBlockUploads(prev => {
           const updated = { ...prev };
-          for (let i = 0; i < safeImageCount; i++) {
+          for (let i = 0; i < maxImages; i++) {
             updated[i] = { ...updated[i], [side]: newUpload };
           }
           return updated;
