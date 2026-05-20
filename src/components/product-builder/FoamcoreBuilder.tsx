@@ -488,7 +488,7 @@ export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE
             />
 
             <div
-              className="relative h-[calc(100vh-330px)] min-h-[520px] overflow-hidden rounded-b-2xl bg-[#fafaf9]"
+              className="relative h-[calc(100vh-320px)] min-h-[540px] overflow-hidden rounded-b-2xl bg-[#fafaf9]"
               style={{
                 backgroundImage:
                   "linear-gradient(to right, rgba(63,63,70,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(63,63,70,0.08) 1px, transparent 1px)",
@@ -498,8 +498,8 @@ export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE
               <div
                 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 border border-zinc-500 bg-white"
                 style={{
-                  width: 236,
-                  height: 472,
+                  width: 248,
+                  height: 496,
                 }}
               >
                 {sheetLayout.placements.map((placement, index) => {
@@ -548,10 +548,10 @@ export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE
                 })}
               </div>
 
-              <div className="pointer-events-none absolute left-1/2 top-[calc(50%-252px)] -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+              <div className="pointer-events-none absolute left-1/2 top-[calc(50%-264px)] -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
                 Top of Sheet
               </div>
-              <div className="pointer-events-none absolute left-1/2 top-[calc(50%+248px)] -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+              <div className="pointer-events-none absolute left-1/2 top-[calc(50%+260px)] -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
                 {previewSide === "front" ? "Front Side" : "Back Side"}
               </div>
               {printMode === "double" && (
@@ -580,10 +580,10 @@ export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE
                   </button>
                 </div>
               )}
-              <div className="pointer-events-none absolute left-[calc(50%-142px)] top-1/2 -translate-y-1/2 -rotate-90 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+              <div className="pointer-events-none absolute left-[calc(50%-148px)] top-1/2 -translate-y-1/2 -rotate-90 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
                 Left
               </div>
-              <div className="pointer-events-none absolute left-[calc(50%+110px)] top-1/2 -translate-y-1/2 rotate-90 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+              <div className="pointer-events-none absolute left-[calc(50%+116px)] top-1/2 -translate-y-1/2 rotate-90 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
                 Right
               </div>
             </div>
