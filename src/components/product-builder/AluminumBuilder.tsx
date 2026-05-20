@@ -775,50 +775,8 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
             </section>
           )}
 
-          {/* ── Aside: breakdown + add-ons + artwork ─────────────────────────── */}
-          <aside className="space-y-3">
-            {/* Pricing breakdown */}
-            <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-              <div className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">Pricing Breakdown</div>
-              <div className="mt-3 space-y-2 text-sm">
-                {pricingMode === "sheet" ? (
-                  <>
-                    <Row label="Signs / Sheet" value={String(pricing.signsPerSheet)} />
-                    <Row label="Sheets Needed" value={String(pricing.sheetsRequired)} />
-                    <Row label="Price / Sheet" value={formatPrice(pricing.sheetPrice)} />
-                  </>
-                ) : (
-                  <>
-                    <Row label="Dimensions" value={`${formatFeetAndInchesLabel(customWidth)} × ${formatFeetAndInchesLabel(customHeight)}`} />
-                    <Row label="Sq. Inches" value={`${pricing.sqInches} sq.in`} />
-                    <Row label={`Rate`} value={`$${pricing.ratePerSqIn}/sq.in (min $${pricing.minPrice})`} />
-                    <Row label="Price / Sign" value={formatPrice(pricing.pricePerSign)} />
-                  </>
-                )}
-                <Row label="Base Subtotal" value={formatPrice(pricing.baseSubtotal)} />
-                <Row label="Contour Cut (+10%)" value={formatPrice(pricing.contourCutFee)} />
-                <Row label="Rounded Corners" value={formatPrice(pricing.roundedCornersFee)} />
-                <Row label="Rush (+100%)" value={formatPrice(pricing.rushFee)} />
-                <div className="my-2 border-t border-zinc-200" />
-                <Row label="Unit Price" value={formatPrice(pricing.unitPrice)} strong />
-                <Row label="Order Total" value={formatPrice(pricing.totalPrice)} strong className="text-[var(--brand-primary)]" />
-              </div>
-            </div>
-
-          </aside>
         </div>
       </div>
-    </div>
-  );
-}
-
-// ── Helper components ─────────────────────────────────────────────────────────
-
-function Row({ label, value, strong, className }: { label: string; value: string; strong?: boolean; className?: string }) {
-  return (
-    <div className={`flex items-center justify-between ${strong ? "font-semibold text-zinc-900" : "text-zinc-700"} ${className ?? ""}`}>
-      <span>{label}</span>
-      <span>{value}</span>
     </div>
   );
 }
