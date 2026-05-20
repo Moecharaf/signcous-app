@@ -443,7 +443,7 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
                       }}
                       className={`absolute overflow-hidden border ${
                         slotIndex !== null ? "cursor-pointer hover:opacity-85" : "cursor-default"
-                      } ${upload ? "border-emerald-500" : "border-blue-400 bg-zinc-50"}`}
+                      } ${upload ? "border-emerald-500" : "border-[#8ea4bb] bg-[#edf1f4]"}`}
                       style={{
                         left: `${(placement.x / PVC_SHEET.width) * 100}%`,
                         top: `${(placement.y / PVC_SHEET.height) * 100}%`,
@@ -456,7 +456,7 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
                           <img src={upload.blobUrl} alt="" className="h-full w-full object-contain" />
                         </div>
                       ) : slotIndex !== null ? (
-                        <div className="sc-panel-dotted-guides flex h-full w-full items-center justify-center bg-zinc-100">
+                        <div className="sc-panel-dotted-guides flex h-full w-full items-center justify-center">
                           <span className="text-[7px] font-semibold text-zinc-500">
                             {uploadingBlock === `all:${previewSide}` || uploadingBlock?.startsWith(`${slotIndex}:`) ? "\u2026" : slotIndex + 1}
                           </span>

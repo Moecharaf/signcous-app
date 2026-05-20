@@ -719,7 +719,7 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
                       }}
                       className={`absolute overflow-hidden border ${
                         slotIndex !== null ? "cursor-pointer hover:opacity-85" : "cursor-default"
-                      } ${upload ? "border-emerald-500" : "border-blue-400 bg-zinc-50"}`}
+                      } ${upload ? "border-emerald-500" : "border-[#8ea4bb] bg-[#edf1f4]"}`}
                       style={{
                         left: `${(placement.x / CORO_SHEET.width) * 100}%`,
                         top: `${(placement.y / CORO_SHEET.height) * 100}%`,
@@ -737,7 +737,7 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
                           title={`Uploaded Coro PDF preview ${slotIndex !== null ? slotIndex + 1 : ""}`}
                         />
                       ) : slotIndex !== null ? (
-                        <div className="sc-panel-dotted-guides flex h-full w-full items-center justify-center bg-zinc-100">
+                        <div className="sc-panel-dotted-guides flex h-full w-full items-center justify-center">
                           <span className="text-[7px] font-semibold text-zinc-500">
                             {uploadingBlock === `${slotIndex}:${previewSide}` ? "…" : slotIndex + 1}
                           </span>

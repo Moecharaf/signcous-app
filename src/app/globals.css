@@ -87,22 +87,23 @@ body {
 
 .sc-panel-dotted-guides {
   position: relative;
+  background: #f6f7f5;
 }
 
 .sc-panel-dotted-guides::after {
   content: "";
   position: absolute;
-  inset: 3px;
+  inset: 4px;
   pointer-events: none;
   background-image:
-    radial-gradient(circle, rgba(99, 102, 241, 0.95) 1.1px, transparent 1.2px),
-    radial-gradient(circle, rgba(99, 102, 241, 0.95) 1.1px, transparent 1.2px),
-    radial-gradient(circle, rgba(99, 102, 241, 0.95) 1.1px, transparent 1.2px),
-    radial-gradient(circle, rgba(99, 102, 241, 0.95) 1.1px, transparent 1.2px);
+    radial-gradient(circle, rgba(95, 131, 171, 0.82) 1.05px, transparent 1.2px),
+    radial-gradient(circle, rgba(95, 131, 171, 0.82) 1.05px, transparent 1.2px),
+    radial-gradient(circle, rgba(95, 131, 171, 0.82) 1.05px, transparent 1.2px),
+    radial-gradient(circle, rgba(95, 131, 171, 0.82) 1.05px, transparent 1.2px);
   background-size: 8px 2px, 8px 2px, 2px 8px, 2px 8px;
   background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
   background-position: left top, left bottom, left top, right top;
-  opacity: 0.9;
+  opacity: 0.82;
 }
 
 @media (prefers-reduced-motion: reduce) {

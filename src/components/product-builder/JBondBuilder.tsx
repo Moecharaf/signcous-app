@@ -642,7 +642,7 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
                         }}
                         className={`absolute overflow-hidden border ${
                           slotIndex !== null ? "cursor-pointer hover:opacity-85" : "cursor-default"
-                        } ${upload ? "border-emerald-500" : "border-zinc-400 bg-[#f0f0ee]"}`}
+                        } ${upload ? "border-emerald-500" : "border-[#8ea4bb] bg-[#edf1f4]"}`}
                         style={{
                           left: `${(placement.x / JBOND_SHEET.width) * 100}%`,
                           top: `${(placement.y / JBOND_SHEET.height) * 100}%`,
@@ -655,7 +655,7 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
                             <img src={upload.blobUrl} alt="" className={`h-full w-full ${imageMode === "stretch" ? "object-fill" : "object-contain"}`} />
                           </div>
                         ) : slotIndex !== null ? (
-                          <div className="sc-panel-dotted-guides flex h-full w-full items-center justify-center bg-zinc-100">
+                          <div className="sc-panel-dotted-guides flex h-full w-full items-center justify-center">
                             <span className="text-[7px] font-semibold text-zinc-500">
                               {uploadingBlock === `${slotIndex}:${previewSide}` ? "..." : slotIndex + 1}
                             </span>
