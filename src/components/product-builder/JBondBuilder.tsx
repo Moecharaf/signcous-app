@@ -611,7 +611,7 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
               />
 
               <div
-                className="relative h-[calc(100vh-320px)] min-h-[520px] overflow-hidden rounded-b-2xl bg-[#fafaf9]"
+                className="relative h-[calc(100vh-360px)] min-h-[460px] overflow-hidden rounded-b-2xl bg-[#fafaf9]"
                 style={{
                   backgroundImage:
                     "linear-gradient(to right, rgba(63,63,70,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(63,63,70,0.08) 1px, transparent 1px)",
@@ -620,7 +620,7 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
               >
                 <div
                   className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 border border-zinc-500 bg-[#f8f8f6]"
-                  style={{ width: 220, height: 440 }}
+                  style={{ width: 200, height: 400 }}
                 >
                   {sheetLayout.placements.map((placement, index) => {
                     const slotIndex = index < safeImageCount ? index : null;
@@ -665,8 +665,8 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
                     );
                   })}
                 </div>
-                <div className="pointer-events-none absolute left-1/2 top-[calc(50%-236px)] -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">Top of Sheet</div>
-                <div className="pointer-events-none absolute left-1/2 top-[calc(50%+232px)] -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">{previewSide === "front" ? "Front Side" : "Back Side"}</div>
+                <div className="pointer-events-none absolute left-1/2 top-[calc(50%-216px)] -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">Top of Sheet</div>
+                <div className="pointer-events-none absolute left-1/2 top-[calc(50%+212px)] -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">{previewSide === "front" ? "Front Side" : "Back Side"}</div>
                 {printMode === "double" && (
                   <div className="pointer-events-auto absolute right-4 top-4 flex gap-2">
                     <button
@@ -693,8 +693,8 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
                     </button>
                   </div>
                 )}
-                <div className="pointer-events-none absolute left-[calc(50%-128px)] top-1/2 -translate-y-1/2 -rotate-90 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">Left</div>
-                <div className="pointer-events-none absolute left-[calc(50%+128px)] top-1/2 -translate-y-1/2 rotate-90 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">Right</div>
+                <div className="pointer-events-none absolute left-[calc(50%-118px)] top-1/2 -translate-y-1/2 -rotate-90 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">Left</div>
+                <div className="pointer-events-none absolute left-[calc(50%+118px)] top-1/2 -translate-y-1/2 rotate-90 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">Right</div>
               </div>
 
               {Array.from({ length: safeImageCount }).map((_, i) => (
