@@ -718,6 +718,7 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
                 {sheetLayout.placements.map((placement, index) => {
                   const slotIndex = index < safeImageCount ? index : null;
                   const upload = slotIndex !== null ? blockUploads[slotIndex]?.[previewSide] : null;
+                  const imageMode = slotIndex !== null ? getBlockImageMode(slotIndex, previewSide) : "fit";
                   const colorClass = slotIndex !== null ? SLOT_COLORS[slotIndex % SLOT_COLORS.length] : "";
                   const markerPoints = grommetsEnabled
                     ? getGrommetMarkers(placement.width, placement.height, grommetPosition, grommetSpacingMode, grommetSpacing)
@@ -749,7 +750,7 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
                     >
                       {upload?.blobUrl ? (
                         <div className="h-full w-full bg-white p-[1px]">
-                          <img src={upload.blobUrl} alt="" className="h-full w-full object-fill" />
+                          <img src={upload.blobUrl} alt="" className={`h-full w-full ${imageMode === "stretch" ? "object-fill" : "object-contain"}`} />
                         </div>
                       ) : upload && upload.fileName.toLowerCase().endsWith(".pdf") ? (
                         <CoroPdfStretchPreview

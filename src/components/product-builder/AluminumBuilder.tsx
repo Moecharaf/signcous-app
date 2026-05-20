@@ -568,6 +568,7 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
                   {sheetLayout.placements.map((placement, index) => {
                     const slotIndex = index < safeImageCount ? index : null;
                     const upload = slotIndex !== null ? blockUploads[slotIndex]?.[previewSide] : null;
+                    const imageMode = slotIndex !== null ? getBlockImageMode(slotIndex, previewSide) : "fit";
                     const colorClass = slotIndex !== null ? SLOT_COLORS[slotIndex % SLOT_COLORS.length] : "";
                     return (
                       <button
@@ -595,7 +596,7 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
                       >
                         {upload?.blobUrl ? (
                           <div className="flex h-full w-full items-center justify-center bg-white p-[1px]">
-                            <img src={upload.blobUrl} alt="" className="h-full w-full object-contain" />
+                            <img src={upload.blobUrl} alt="" className={`h-full w-full ${imageMode === "stretch" ? "object-fill" : "object-contain"}`} />
                           </div>
                         ) : slotIndex !== null ? (
                           <div className={`flex h-full w-full items-center justify-center ${colorClass} opacity-30`}>
