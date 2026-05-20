@@ -50,15 +50,14 @@ export default function PolystyreneBuilder({
 
   const [sizeId, setSizeId] = useState(POLYSTYRENE_SIZE_OPTIONS[0].id);
   const [printMode, setPrintMode] = useState<PolystyrenePrintMode>("single");
-  const [quantity, setQuantity] = useState(1);
-
-  const [stepStakes, setStepStakes] = useState(0);
-  const [heavyDutyStakes, setHeavyDutyStakes] = useState(0);
-  const [grommetsEnabled, setGrommetsEnabled] = useState(false);
-  const [grommetCount, setGrommetCount] = useState(4);
+  const quantity = 1;
+  const stepStakes = 0;
+  const heavyDutyStakes = 0;
+  const grommetsEnabled = false;
+  const grommetCount = 0;
   const [gloss, setGloss] = useState(false);
-  const [contourCut, setContourCut] = useState(false);
-  const [rush, setRush] = useState(false);
+  const contourCut = false;
+  const rush = false;
 
   const [imageCount, setImageCount] = useState(12);
   const [blockUploads, setBlockUploads] = useState<Record<number, BlockUploadPair>>({});
@@ -82,28 +81,21 @@ export default function PolystyreneBuilder({
       calculatePolystyrenePricing({
         width: activeSize.width,
         height: activeSize.height,
-        quantity,
         printMode,
+        gloss,
+        quantity,
         stepStakes,
         heavyDutyStakes,
         grommetsEnabled,
         grommetCount,
-        gloss,
         contourCut,
         rush,
       }),
     [
       activeSize.width,
       activeSize.height,
-      quantity,
       printMode,
-      stepStakes,
-      heavyDutyStakes,
-      grommetsEnabled,
-      grommetCount,
       gloss,
-      contourCut,
-      rush,
     ]
   );
 
@@ -324,39 +316,12 @@ export default function PolystyreneBuilder({
       ),
     },
     {
-      id: "addons",
-      title: "Add-ons",
-      value: [grommetsEnabled ? `Grommets ${grommetCount}` : "No grommets", gloss ? "Gloss" : "Matte", rush ? "Rush" : "Standard"].join(" / "),
-      width: 360,
+      id: "glossy",
+      title: "Glossy",
+      value: gloss ? "Yes" : "No",
+      width: 240,
       content: (
-        <>
-          <NumberField label="Step Stakes ($2.50 ea)" value={stepStakes} onChange={setStepStakes} />
-          <NumberField label="Heavy Duty Stakes ($4.00 ea)" value={heavyDutyStakes} onChange={setHeavyDutyStakes} />
-          <div>
-            <label className="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">Grommets</label>
-            <button type="button" onClick={() => setGrommetsEnabled((prev) => !prev)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-left text-sm">
-              {grommetsEnabled ? "Enabled" : "Disabled"}
-            </button>
-            {grommetsEnabled && (
-              <input type="number" min={1} value={grommetCount} onChange={(e) => setGrommetCount(Math.max(1, Number(e.target.value) || 1))} className="mt-2 h-9 w-full rounded border border-zinc-300 px-2 text-sm" />
-            )}
-          </div>
-          <ToggleField label="Gloss (+$6 / sign)" value={gloss} onChange={setGloss} />
-          <ToggleField label="Contour Cut (+20%)" value={contourCut} onChange={setContourCut} />
-          <ToggleField label="Rush (+120%)" value={rush} onChange={setRush} />
-        </>
-      ),
-    },
-    {
-      id: "quantity",
-      title: "Quantity",
-      value: String(quantity),
-      width: 260,
-      content: (
-        <>
-          <input type="number" min={1} value={quantity} onChange={(e) => setQuantity(Math.max(1, Number(e.target.value) || 1))} className="h-9 w-full rounded border border-zinc-300 px-2 text-sm" />
-          <div className="text-[11px] leading-4 text-zinc-500">Set the number of signs in this order.</div>
-        </>
+        <ToggleField label="Glossy (+$6 / sign)" value={gloss} onChange={setGloss} />
       ),
     },
   ];
@@ -579,29 +544,6 @@ function Row({
     <div className={`flex items-center justify-between ${strong ? "font-semibold text-zinc-900" : "text-zinc-700"} ${className ?? ""}`}>
       <span>{label}</span>
       <span>{value}</span>
-    </div>
-  );
-}
-
-function NumberField({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: number;
-  onChange: (value: number) => void;
-}) {
-  return (
-    <div>
-      <label className="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">{label}</label>
-      <input
-        type="number"
-        min={0}
-        value={value}
-        onChange={(e) => onChange(Math.max(0, Number(e.target.value) || 0))}
-        className="h-9 w-full rounded border border-zinc-300 px-2 text-sm"
-      />
     </div>
   );
 }
