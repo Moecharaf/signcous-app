@@ -35,6 +35,8 @@ interface BlockUploadPair {
   back?: BlockUpload;
 }
 
+type JBondRoundedCornerOption = "none" | "half" | "one";
+
 const SLOT_COLORS = [
   "bg-blue-400", "bg-emerald-400", "bg-violet-400", "bg-amber-400",
   "bg-pink-400", "bg-cyan-400", "bg-orange-400", "bg-teal-400",
@@ -82,7 +84,7 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
   const [printMode, setPrintMode] = useState<JBondPrintMode>("single");
   const [quantity, setQuantity] = useState(1);
   const [contourCut, setContourCut] = useState(false);
-  const [roundedCorners, setRoundedCorners] = useState(false);
+  const [roundedCornersOption, setRoundedCornersOption] = useState<JBondRoundedCornerOption>("none");
   const [rush, setRush] = useState(false);
   const [added, setAdded] = useState(false);
 
@@ -94,6 +96,8 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
 
   const customWidth = Math.max(0.5, composeDimensionInches(customWidthFeet, customWidthInches));
   const customHeight = Math.max(0.5, composeDimensionInches(customHeightFeet, customHeightInches));
+  const roundedCorners = roundedCornersOption !== "none";
+  const roundedCornersLabel = roundedCornersOption === "one" ? '1"' : roundedCornersOption === "half" ? '1/2"' : "None";
 
   const pricing = useMemo(() => {
     if (pricingMode === "sheet") {
@@ -288,7 +292,7 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
           custom_back_images: printMode === "double" ? String(uploadedBackUrls.length) : "0",
           custom_back_image_urls: uploadedBackUrls.length > 0 ? uploadedBackUrls.join(",") : "none",
           custom_contour_cut: contourCut ? "yes" : "no",
-          custom_rounded_corners: roundedCorners ? "yes ($15 setup)" : "no",
+          custom_rounded_corners: roundedCorners ? `${roundedCornersLabel} ($15 setup)` : "none",
           custom_rush_surcharge_mode: rush ? "+100%" : "none",
           custom_image_count: String(safeImageCount),
         },
@@ -327,7 +331,7 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
           custom_sq_inches: String(pricing.sqInches),
           custom_rate_per_sqin: `$${pricing.ratePerSqIn}/sq.in`,
           custom_contour_cut: contourCut ? "yes" : "no",
-          custom_rounded_corners: roundedCorners ? "yes ($15 setup)" : "no",
+          custom_rounded_corners: roundedCorners ? `${roundedCornersLabel} ($15 setup)` : "none",
           custom_rush_surcharge_mode: rush ? "+100%" : "none",
         },
         unitPrice: pricing.unitPrice,
@@ -401,51 +405,57 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
         },
         {
           id: "material",
-          title: "Material / Print",
-          value: `${material} / ${printMode === "single" ? "Single" : "Double"}`,
+          title: "Material",
+          value: material,
+          width: 200,
+          content: (
+            <select value={material} onChange={e => setMaterial(e.target.value as JBondMaterial)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm">
+              <option value="3mm">3mm</option>
+              <option value="6mm">6mm</option>
+            </select>
+          ),
+        },
+        {
+          id: "print",
+          title: "Print Sides",
+          value: printMode === "single" ? "Single" : "Double",
+          width: 200,
+          content: (
+            <select value={printMode} onChange={e => setPrintMode(e.target.value as JBondPrintMode)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm">
+              <option value="single">Single</option>
+              <option value="double">Double</option>
+            </select>
+          ),
+        },
+        {
+          id: "rounded-corners",
+          title: "Rounded Corners",
+          value: roundedCornersLabel,
           width: 320,
           content: (
-            <div className="grid grid-cols-2 gap-1">
-              <select value={material} onChange={e => setMaterial(e.target.value as JBondMaterial)} className="h-9 rounded border border-zinc-300 bg-white px-2 text-sm">
-                <option value="3mm">3mm</option>
-                <option value="6mm">6mm</option>
-              </select>
-              <select value={printMode} onChange={e => setPrintMode(e.target.value as JBondPrintMode)} className="h-9 rounded border border-zinc-300 bg-white px-2 text-sm">
-                <option value="single">Single</option>
-                <option value="double">Double</option>
-              </select>
-            </div>
-          ),
-        },
-        {
-          id: "finish",
-          title: "Finish Options",
-          value: [roundedCorners ? "Rounded" : "Square", contourCut ? "Contour" : "No contour", rush ? "Rush" : "Standard"].join(" / "),
-          width: 340,
-          content: (
             <div className="grid grid-cols-3 gap-1">
-              <button type="button" onClick={() => setRoundedCorners(p => !p)} className={`h-9 rounded border px-2 text-xs font-semibold transition ${roundedCorners ? "border-sky-300 bg-sky-50 text-sky-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>
-                Rounded
+              <button
+                type="button"
+                onClick={() => setRoundedCornersOption("none")}
+                className={`h-9 rounded border px-2 text-xs font-semibold transition ${roundedCornersOption === "none" ? "border-sky-300 bg-sky-50 text-sky-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}
+              >
+                None
               </button>
-              <button type="button" onClick={() => setContourCut(p => !p)} className={`h-9 rounded border px-2 text-xs font-semibold transition ${contourCut ? "border-sky-300 bg-sky-50 text-sky-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>
-                Contour
+              <button
+                type="button"
+                onClick={() => setRoundedCornersOption("half")}
+                className={`h-9 rounded border px-2 text-xs font-semibold transition ${roundedCornersOption === "half" ? "border-sky-300 bg-sky-50 text-sky-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}
+              >
+                1/2&quot;
               </button>
-              <button type="button" onClick={() => setRush(p => !p)} className={`h-9 rounded border px-2 text-xs font-semibold transition ${rush ? "border-sky-300 bg-sky-50 text-sky-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>
-                Rush
+              <button
+                type="button"
+                onClick={() => setRoundedCornersOption("one")}
+                className={`h-9 rounded border px-2 text-xs font-semibold transition ${roundedCornersOption === "one" ? "border-sky-300 bg-sky-50 text-sky-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}
+              >
+                1&quot;
               </button>
             </div>
-          ),
-        },
-        {
-          id: "quantity",
-          title: "Quantity",
-          value: String(quantity),
-          width: 260,
-          content: (
-            <>
-              <input type="number" min={1} value={quantity} onChange={e => setQuantity(Math.max(1, Number(e.target.value) || 1))} className="h-9 w-full rounded border border-zinc-300 px-2 text-sm" />
-              <div className="text-[11px] leading-4 text-zinc-500">Set the number of signs in this order.</div>
-            </>
           ),
         },
       ]
@@ -500,51 +510,57 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
         },
         {
           id: "material",
-          title: "Material / Print",
-          value: `${material} / ${printMode === "single" ? "Single" : "Double"}`,
+          title: "Material",
+          value: material,
+          width: 200,
+          content: (
+            <select value={material} onChange={e => setMaterial(e.target.value as JBondMaterial)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm">
+              <option value="3mm">3mm</option>
+              <option value="6mm">6mm</option>
+            </select>
+          ),
+        },
+        {
+          id: "print",
+          title: "Print Sides",
+          value: printMode === "single" ? "Single" : "Double",
+          width: 200,
+          content: (
+            <select value={printMode} onChange={e => setPrintMode(e.target.value as JBondPrintMode)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm">
+              <option value="single">Single</option>
+              <option value="double">Double</option>
+            </select>
+          ),
+        },
+        {
+          id: "rounded-corners",
+          title: "Rounded Corners",
+          value: roundedCornersLabel,
           width: 320,
           content: (
-            <div className="grid grid-cols-2 gap-1">
-              <select value={material} onChange={e => setMaterial(e.target.value as JBondMaterial)} className="h-9 rounded border border-zinc-300 bg-white px-2 text-sm">
-                <option value="3mm">3mm</option>
-                <option value="6mm">6mm</option>
-              </select>
-              <select value={printMode} onChange={e => setPrintMode(e.target.value as JBondPrintMode)} className="h-9 rounded border border-zinc-300 bg-white px-2 text-sm">
-                <option value="single">Single</option>
-                <option value="double">Double</option>
-              </select>
-            </div>
-          ),
-        },
-        {
-          id: "finish",
-          title: "Finish Options",
-          value: [roundedCorners ? "Rounded" : "Square", contourCut ? "Contour" : "No contour", rush ? "Rush" : "Standard"].join(" / "),
-          width: 340,
-          content: (
             <div className="grid grid-cols-3 gap-1">
-              <button type="button" onClick={() => setRoundedCorners(p => !p)} className={`h-9 rounded border px-2 text-xs font-semibold transition ${roundedCorners ? "border-sky-300 bg-sky-50 text-sky-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>
-                Rounded
+              <button
+                type="button"
+                onClick={() => setRoundedCornersOption("none")}
+                className={`h-9 rounded border px-2 text-xs font-semibold transition ${roundedCornersOption === "none" ? "border-sky-300 bg-sky-50 text-sky-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}
+              >
+                None
               </button>
-              <button type="button" onClick={() => setContourCut(p => !p)} className={`h-9 rounded border px-2 text-xs font-semibold transition ${contourCut ? "border-sky-300 bg-sky-50 text-sky-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>
-                Contour
+              <button
+                type="button"
+                onClick={() => setRoundedCornersOption("half")}
+                className={`h-9 rounded border px-2 text-xs font-semibold transition ${roundedCornersOption === "half" ? "border-sky-300 bg-sky-50 text-sky-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}
+              >
+                1/2&quot;
               </button>
-              <button type="button" onClick={() => setRush(p => !p)} className={`h-9 rounded border px-2 text-xs font-semibold transition ${rush ? "border-sky-300 bg-sky-50 text-sky-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>
-                Rush
+              <button
+                type="button"
+                onClick={() => setRoundedCornersOption("one")}
+                className={`h-9 rounded border px-2 text-xs font-semibold transition ${roundedCornersOption === "one" ? "border-sky-300 bg-sky-50 text-sky-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}
+              >
+                1&quot;
               </button>
             </div>
-          ),
-        },
-        {
-          id: "quantity",
-          title: "Quantity",
-          value: String(quantity),
-          width: 260,
-          content: (
-            <>
-              <input type="number" min={1} value={quantity} onChange={e => setQuantity(Math.max(1, Number(e.target.value) || 1))} className="h-9 w-full rounded border border-zinc-300 px-2 text-sm" />
-              <div className="text-[11px] leading-4 text-zinc-500">Set the number of signs in this order.</div>
-            </>
           ),
         },
       ];
