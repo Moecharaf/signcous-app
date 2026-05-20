@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import ArtworkUploadModal from "@/components/product-builder/ArtworkUploadModal";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
 import Button from "@/components/ui/Button";
@@ -106,6 +106,10 @@ export default function PolystyreneBuilder({
 
   const maxImages = sheetLayout.count;
   const safeImageCount = Math.min(imageCount, maxImages);
+
+  useEffect(() => {
+    setImageCount(maxImages);
+  }, [maxImages]);
 
   async function uploadArtworkForBlock(blockIndex: number, file: File, side: "front" | "back" = "front") {
     const uploadKey = `${blockIndex}:${side}`;

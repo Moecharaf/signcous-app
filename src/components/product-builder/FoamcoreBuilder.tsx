@@ -133,11 +133,8 @@ export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE
     const safeImageCount = Math.min(imageCount, maxImages);
 
     useEffect(() => {
-      // Signs365-style default: all available sheet blocks start active.
-      setImageCount((prev) => {
-        if (prev <= 1) return maxImages;
-        return Math.min(Math.max(1, prev), maxImages);
-      });
+      // Keep active upload slots in sync with current sheet capacity.
+      setImageCount(maxImages);
     }, [maxImages]);
 
     useEffect(() => {

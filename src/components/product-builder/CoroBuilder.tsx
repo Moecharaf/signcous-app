@@ -186,6 +186,10 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
     const maxImages = sheetLayout.count;
     const safeImageCount = Math.min(imageCount, maxImages);
 
+    useEffect(() => {
+      setImageCount(maxImages);
+    }, [maxImages]);
+
     async function uploadArtworkForBlock(blockIndex: number, file: File, side: "front" | "back" = "front") {
       const uploadKey = `${blockIndex}:${side}`;
       setUploadingBlock(uploadKey);
