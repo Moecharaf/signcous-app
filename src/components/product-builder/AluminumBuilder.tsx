@@ -35,6 +35,8 @@ interface BlockUploadPair {
   back?: BlockUpload;
 }
 
+type AluminumRoundedCornerOption = "none" | "half" | "one";
+
 const SLOT_COLORS = [
   "bg-blue-400", "bg-emerald-400", "bg-violet-400", "bg-amber-400",
   "bg-pink-400", "bg-cyan-400", "bg-orange-400", "bg-teal-400",
@@ -81,9 +83,9 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
   const [material, setMaterial] = useState<AluminumMaterial>("040");
   const [printMode, setPrintMode] = useState<AluminumPrintMode>("single");
   const [quantity, setQuantity] = useState(1);
-  const [contourCut, setContourCut] = useState(false);
-  const [roundedCorners, setRoundedCorners] = useState(false);
-  const [rush, setRush] = useState(false);
+  const [roundedCornersOption, setRoundedCornersOption] = useState<AluminumRoundedCornerOption>("none");
+  const contourCut = false;
+  const rush = false;
   const [added, setAdded] = useState(false);
 
   // ── derived ──
@@ -94,6 +96,9 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
 
   const customWidth = Math.max(0.5, composeDimensionInches(customWidthFeet, customWidthInches));
   const customHeight = Math.max(0.5, composeDimensionInches(customHeightFeet, customHeightInches));
+  const roundedCorners = roundedCornersOption !== "none";
+  const roundedCornersLabel =
+    roundedCornersOption === "one" ? '1"' : roundedCornersOption === "half" ? '1/2"' : "None";
 
   const pricing = useMemo(() => {
     if (pricingMode === "sheet") {
@@ -282,7 +287,7 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
               custom_rate_per_sqin: `$${pricing.ratePerSqIn}/sq.in`,
             }),
         custom_contour_cut: contourCut ? "yes" : "no",
-        custom_rounded_corners: roundedCorners ? "yes ($20 setup)" : "no",
+        custom_rounded_corners: roundedCorners ? `${roundedCornersLabel} ($20 setup)` : "none",
         custom_rush_surcharge_mode: rush ? "+100%" : "none",
       },
       unitPrice: pricing.unitPrice,
@@ -372,20 +377,44 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
           ),
         },
         {
-          id: "finish",
-          title: "Finish Options",
-          value: [roundedCorners ? "Rounded" : "Square", contourCut ? "Contour" : "No contour", rush ? "Rush" : "Standard"].join(" / "),
-          width: 340,
+          id: "rounded-corners",
+          title: "Rounded Corners",
+          value: roundedCornersLabel,
+          width: 320,
           content: (
             <div className="grid grid-cols-3 gap-1">
-              <button type="button" onClick={() => setRoundedCorners(p => !p)} className={`h-9 rounded border px-2 text-xs font-semibold transition ${roundedCorners ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>
-                Rounded
+              <button
+                type="button"
+                onClick={() => setRoundedCornersOption("none")}
+                className={`h-9 rounded border px-2 text-xs font-semibold transition ${
+                  roundedCornersOption === "none"
+                    ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]"
+                    : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"
+                }`}
+              >
+                None
               </button>
-              <button type="button" onClick={() => setContourCut(p => !p)} className={`h-9 rounded border px-2 text-xs font-semibold transition ${contourCut ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>
-                Contour
+              <button
+                type="button"
+                onClick={() => setRoundedCornersOption("half")}
+                className={`h-9 rounded border px-2 text-xs font-semibold transition ${
+                  roundedCornersOption === "half"
+                    ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]"
+                    : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"
+                }`}
+              >
+                1/2&quot;
               </button>
-              <button type="button" onClick={() => setRush(p => !p)} className={`h-9 rounded border px-2 text-xs font-semibold transition ${rush ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>
-                Rush
+              <button
+                type="button"
+                onClick={() => setRoundedCornersOption("one")}
+                className={`h-9 rounded border px-2 text-xs font-semibold transition ${
+                  roundedCornersOption === "one"
+                    ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]"
+                    : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"
+                }`}
+              >
+                1&quot;
               </button>
             </div>
           ),
@@ -471,20 +500,44 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
           ),
         },
         {
-          id: "finish",
-          title: "Finish Options",
-          value: [roundedCorners ? "Rounded" : "Square", contourCut ? "Contour" : "No contour", rush ? "Rush" : "Standard"].join(" / "),
-          width: 340,
+          id: "rounded-corners",
+          title: "Rounded Corners",
+          value: roundedCornersLabel,
+          width: 320,
           content: (
             <div className="grid grid-cols-3 gap-1">
-              <button type="button" onClick={() => setRoundedCorners(p => !p)} className={`h-9 rounded border px-2 text-xs font-semibold transition ${roundedCorners ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>
-                Rounded
+              <button
+                type="button"
+                onClick={() => setRoundedCornersOption("none")}
+                className={`h-9 rounded border px-2 text-xs font-semibold transition ${
+                  roundedCornersOption === "none"
+                    ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]"
+                    : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"
+                }`}
+              >
+                None
               </button>
-              <button type="button" onClick={() => setContourCut(p => !p)} className={`h-9 rounded border px-2 text-xs font-semibold transition ${contourCut ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>
-                Contour
+              <button
+                type="button"
+                onClick={() => setRoundedCornersOption("half")}
+                className={`h-9 rounded border px-2 text-xs font-semibold transition ${
+                  roundedCornersOption === "half"
+                    ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]"
+                    : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"
+                }`}
+              >
+                1/2&quot;
               </button>
-              <button type="button" onClick={() => setRush(p => !p)} className={`h-9 rounded border px-2 text-xs font-semibold transition ${rush ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>
-                Rush
+              <button
+                type="button"
+                onClick={() => setRoundedCornersOption("one")}
+                className={`h-9 rounded border px-2 text-xs font-semibold transition ${
+                  roundedCornersOption === "one"
+                    ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]"
+                    : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"
+                }`}
+              >
+                1&quot;
               </button>
             </div>
           ),
