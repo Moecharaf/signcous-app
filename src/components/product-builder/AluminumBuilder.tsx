@@ -692,8 +692,8 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
                     </button>
                   </div>
                 )}
-                <div className="pointer-events-none absolute left-[calc(50%-118px)] top-1/2 -translate-y-1/2 -rotate-90 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">Left</div>
-                <div className="pointer-events-none absolute left-[calc(50%+118px)] top-1/2 -translate-y-1/2 rotate-90 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">Right</div>
+                <div className="pointer-events-none absolute left-[calc(50%-108px)] top-1/2 -translate-y-1/2 -rotate-90 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">Left</div>
+                <div className="pointer-events-none absolute left-[calc(50%+108px)] top-1/2 -translate-y-1/2 rotate-90 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">Right</div>
               </div>
 
               {Array.from({ length: safeImageCount }).map((_, i) => (
