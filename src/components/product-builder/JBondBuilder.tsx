@@ -361,14 +361,17 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
                   : safeImageCount === 1
                     ? "Upload 1 artwork for all signs."
                     : `Upload artworks for up to ${safeImageCount} blocks.`}
-              </p>
-              <button
+                <div
+                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white"
                 type="button"
                 onClick={() => setIsArtworkModalOpen(true)}
                 className="w-full rounded-lg bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors shadow-sm hover:bg-sky-500"
               >
                 Open Upload Panel
               </button>
+                    const isTopEdge = Math.abs(placement.y) < 0.01;
+                    const isLeftEdge = Math.abs(placement.x) < 0.01;
+                    const emptyCellBorderClass = `${isTopEdge ? "border-t" : ""} ${isLeftEdge ? "border-l" : ""} border-r border-b border-[#6d7378] bg-[#f6f5ef]`;
               <div className="text-[10px] text-zinc-400">Accepted: PDF, AI, EPS, PNG, JPG, TIFF, PSD (up to 100MB)</div>
             </div>
           ),
@@ -640,9 +643,9 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
                             }
                           }
                         }}
-                        className={`absolute overflow-hidden border ${
+                        className={`absolute overflow-hidden ${
                           slotIndex !== null ? "cursor-pointer hover:opacity-85" : "cursor-default"
-                        } ${upload ? "border-emerald-500" : "border-[#8ea4bb] bg-[#edf1f4]"}`}
+                        } ${upload ? "border border-emerald-500" : emptyCellBorderClass}`}
                         style={{
                           left: `${(placement.x / JBOND_SHEET.width) * 100}%`,
                           top: `${(placement.y / JBOND_SHEET.height) * 100}%`,
@@ -655,7 +658,7 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
                             <img src={upload.blobUrl} alt="" className={`h-full w-full ${imageMode === "stretch" ? "object-fill" : "object-contain"}`} />
                           </div>
                         ) : slotIndex !== null ? (
-                          <div className="sc-panel-dotted-guides flex h-full w-full items-center justify-center">
+                          <div className="flex h-full w-full items-center justify-center bg-[#fbfbf7]">
                             <span className="text-[7px] font-semibold text-zinc-500">
                               {uploadingBlock === `${slotIndex}:${previewSide}` ? "..." : slotIndex + 1}
                             </span>

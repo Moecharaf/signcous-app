@@ -362,12 +362,15 @@ export default function PolystyreneBuilder({
               </div>
 
               <div
-                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 border border-zinc-500 bg-white"
+                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white"
                 style={{ width: 220, height: 440 }}
               >
                 {sheetLayout.placements.map((placement, index) => {
                   const slotIndex = index < safeImageCount ? index : null;
                   const upload = slotIndex !== null ? blockUploads[slotIndex]?.[previewSide] : null;
+                  const isTopEdge = Math.abs(placement.y) < 0.01;
+                  const isLeftEdge = Math.abs(placement.x) < 0.01;
+                  const emptyCellBorderClass = `${isTopEdge ? "border-t" : ""} ${isLeftEdge ? "border-l" : ""} border-r border-b border-[#6d7378] bg-[#f6f5ef]`;
 
                   return (
                     <button
@@ -383,9 +386,9 @@ export default function PolystyreneBuilder({
                           }
                         }
                       }}
-                      className={`absolute overflow-hidden border ${
+                      className={`absolute overflow-hidden ${
                         slotIndex !== null ? "cursor-pointer hover:opacity-85" : "cursor-default"
-                      } ${upload ? "border-emerald-500" : "border-[#8ea4bb] bg-[#edf1f4]"}`}
+                      } ${upload ? "border border-emerald-500" : emptyCellBorderClass}`}
                       style={{
                         left: `${(placement.x / POLYSTYRENE_SHEET.width) * 100}%`,
                         top: `${(placement.y / POLYSTYRENE_SHEET.height) * 100}%`,
@@ -398,7 +401,7 @@ export default function PolystyreneBuilder({
                           <img src={upload.blobUrl} alt="" className="h-full w-full object-contain" />
                         </div>
                       ) : slotIndex !== null ? (
-                        <div className="sc-panel-dotted-guides flex h-full w-full items-center justify-center">
+                        <div className="flex h-full w-full items-center justify-center bg-[#fbfbf7]">
                           <span className="text-[7px] font-semibold text-zinc-500">
                             {uploadingBlock === `all:${previewSide}` || uploadingBlock?.startsWith(`${slotIndex}:`) ? "..." : slotIndex + 1}
                           </span>
