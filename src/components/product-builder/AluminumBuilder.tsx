@@ -3,6 +3,7 @@
 import { useMemo, useRef, useState } from "react";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
 import SizeInputPanel, { composeDimensionInches, toFeetAndInches } from "@/components/product-builder/SizeInputPanel";
+import ArtworkUploadModal from "@/components/product-builder/ArtworkUploadModal";
 import Button from "@/components/ui/Button";
 import RigidPricingHeader from "@/components/product-builder/RigidPricingHeader";
 import { useCart } from "@/context/CartContext";
@@ -29,6 +30,11 @@ interface BlockUpload {
   blobUrl: string | null;
 }
 
+interface BlockUploadPair {
+  front?: BlockUpload;
+  back?: BlockUpload;
+}
+
 const SLOT_COLORS = [
   "bg-blue-400", "bg-emerald-400", "bg-violet-400", "bg-amber-400",
   "bg-pink-400", "bg-cyan-400", "bg-orange-400", "bg-teal-400",
@@ -52,10 +58,14 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
   // ── sheet mode state ──
   const [sizeId, setSizeId] = useState(ALUMINUM_SIZE_OPTIONS[0].id);
   const [imageCount, setImageCount] = useState(1);
-  const [blockUploads, setBlockUploads] = useState<Record<number, BlockUpload>>({});
-  const [uploadingBlock, setUploadingBlock] = useState<number | null>(null);
-  const [blockUploadErrors, setBlockUploadErrors] = useState<Record<number, string>>({});
+  const [blockUploads, setBlockUploads] = useState<Record<number, BlockUploadPair>>({});
+  const [uploadingBlock, setUploadingBlock] = useState<string | null>(null);
+  const [blockUploadErrors, setBlockUploadErrors] = useState<Record<string, string>>({});
+  const [blockImageModes, setBlockImageModes] = useState<Record<string, "fit" | "stretch">>();
+  const [previewSide, setPreviewSide] = useState<"front" | "back">("front");
+  const [isArtworkModalOpen, setIsArtworkModalOpen] = useState(false);
   const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const fileInputBackRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   // ── sqin mode state ──
   const [customWidthFeet, setCustomWidthFeet] = useState("2");
@@ -135,18 +145,33 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
     return { fileUrl: data.fileUrl!, fileName: data.originalName ?? file.name, blobUrl };
   }
 
-  async function uploadBlock(blockIndex: number, file: File) {
-    setUploadingBlock(blockIndex);
-    setBlockUploadErrors(p => { const n = { ...p }; delete n[blockIndex]; return n; });
+  async function uploadArtworkForBlock(blockIndex: number, file: File, side: "front" | "back" = "front") {
+    const uploadKey = `${blockIndex}:${side}`;
+    setUploadingBlock(uploadKey);
+    setBlockUploadErrors(p => { const n = { ...p }; delete n[uploadKey]; return n; });
     try {
       const result = await uploadFile(file);
       if (typeof result === "string") {
-        setBlockUploadErrors(p => ({ ...p, [blockIndex]: result }));
+        setBlockUploadErrors(p => ({ ...p, [uploadKey]: result }));
       } else {
-        setBlockUploads(p => ({ ...p, [blockIndex]: result }));
+        const newUpload = result;
+        setBlockUploads(prev => {
+          const updated = { ...prev };
+          const isFirstUpload = !Object.values(prev).some(pair => pair?.[side]);
+          if (isFirstUpload) {
+            for (let i = 0; i < safeImageCount; i++) {
+              if (!updated[i]?.[side]) {
+                updated[i] = { ...updated[i], [side]: newUpload };
+              }
+            }
+          } else {
+            updated[blockIndex] = { ...updated[blockIndex], [side]: newUpload };
+          }
+          return updated;
+        });
       }
     } catch {
-      setBlockUploadErrors(p => ({ ...p, [blockIndex]: "Upload failed. Please try again." }));
+      setBlockUploadErrors(p => ({ ...p, [uploadKey]: "Upload failed. Please try again." }));
     } finally {
       setUploadingBlock(null);
     }
@@ -166,10 +191,18 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
     }
   }
 
-  function handleBlockFileChange(i: number, e: React.ChangeEvent<HTMLInputElement>) {
+  function handleFileChange(blockIndex: number, e: React.ChangeEvent<HTMLInputElement>, side: "front" | "back" = "front") {
     const f = e.target.files?.[0];
-    if (f) void uploadBlock(i, f);
+    if (f) void uploadArtworkForBlock(blockIndex, f, side);
     e.target.value = "";
+  }
+
+  function setBlockImageMode(blockIndex: number, side: "front" | "back", mode: "fit" | "stretch") {
+    setBlockImageModes(prev => ({ ...prev, [`${blockIndex}:${side}`]: mode }));
+  }
+
+  function getBlockImageMode(blockIndex: number, side: "front" | "back"): "fit" | "stretch" {
+    return blockImageModes?.[`${blockIndex}:${side}`] ?? "fit";
   }
 
   function handleSqinFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -178,11 +211,19 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
     e.target.value = "";
   }
 
-  function removeBlock(i: number) {
-    setBlockUploads(p => {
-      const n = { ...p };
-      if (n[i]?.blobUrl) URL.revokeObjectURL(n[i].blobUrl!);
-      delete n[i]; return n;
+  function removeBlockUpload(blockIndex: number, side: "front" | "back" = "front") {
+    setBlockUploads(prev => {
+      const pair = prev[blockIndex];
+      if (!pair) return prev;
+      if (pair[side]?.blobUrl) URL.revokeObjectURL(pair[side]!.blobUrl!);
+      const updated = { ...pair };
+      delete updated[side];
+      if (Object.keys(updated).length === 0) {
+        const n = { ...prev };
+        delete n[blockIndex];
+        return n;
+      }
+      return { ...prev, [blockIndex]: updated };
     });
   }
 
@@ -201,9 +242,9 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
     let uploadedFileName: string | null = null;
 
     if (pricingMode === "sheet") {
-      uploadedFileUrls = Array.from({ length: safeImageCount }, (_, i) => blockUploads[i]?.fileUrl ?? "").filter(Boolean);
+      uploadedFileUrls = Array.from({ length: safeImageCount }, (_, i) => blockUploads[i]?.front?.fileUrl ?? "").filter(Boolean);
       uploadedFileUrl = uploadedFileUrls[0] ?? null;
-      uploadedFileName = blockUploads[0]?.fileName ?? null;
+      uploadedFileName = blockUploads[0]?.front?.fileName ?? null;
     } else {
       uploadedFileUrl = sqinUpload?.fileUrl ?? null;
       uploadedFileName = sqinUpload?.fileName ?? null;
@@ -259,60 +300,39 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
     window.setTimeout(() => setAdded(false), 1800);
   }
 
-  const uploadedBlockCount = Object.keys(blockUploads).filter(k => Number(k) < safeImageCount).length;
+  const uploadedBlockCount = Object.keys(blockUploads).filter(k => Number(k) < safeImageCount && blockUploads[Number(k)]?.front).length;
+  const uploadedBackCount = printMode === "double" ? Object.keys(blockUploads).filter(k => Number(k) < safeImageCount && blockUploads[Number(k)]?.back).length : 0;
   const toolbarPanels: BuilderBottomToolbarPanel[] = pricingMode === "sheet"
     ? [
         {
           id: "artwork",
           title: "Artwork",
-          value: `${uploadedBlockCount}/${safeImageCount} uploaded`,
-          width: 420,
-          status: uploadedBlockCount === safeImageCount && safeImageCount > 0 ? "ok" : "neutral",
+          value: printMode === "double"
+            ? `${uploadedBlockCount}/${safeImageCount} front, ${uploadedBackCount}/${safeImageCount} back`
+            : `${uploadedBlockCount}/${safeImageCount} uploaded`,
+          width: 280,
+          status:
+            printMode === "double"
+              ? uploadedBlockCount === safeImageCount && uploadedBackCount === safeImageCount && safeImageCount > 0 ? "ok" : "neutral"
+              : uploadedBlockCount === safeImageCount && safeImageCount > 0 ? "ok" : "neutral",
           content: (
-            <>
-              <div className="text-[11px] leading-4 text-zinc-500">
-                {safeImageCount === 1
-                  ? "Upload 1 artwork for all signs."
-                  : `Upload up to ${safeImageCount} artworks. Click a block on the sheet or use the slots below.`}
-              </div>
-              <div className="space-y-2">
-                {Array.from({ length: safeImageCount }).map((_, i) => {
-                  const upload = blockUploads[i];
-                  const error = blockUploadErrors[i];
-                  const isUploading = uploadingBlock === i;
-                  const color = SLOT_COLORS[i % SLOT_COLORS.length];
-                  return (
-                    <div key={`slot-${i}`} className="rounded-lg border border-zinc-200 bg-zinc-50 p-2">
-                      <div className="flex items-center gap-2">
-                        <div className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-sm ${color} text-[10px] font-bold text-white`}>
-                          {i + 1}
-                        </div>
-                        <div className="min-w-0 flex-1 text-xs font-medium text-zinc-700">Block {i + 1}</div>
-                        {upload ? (
-                          <div className="flex items-center gap-1">
-                            <span className="max-w-[100px] truncate text-[10px] text-emerald-700">{upload.fileName}</span>
-                            <button type="button" onClick={() => removeBlock(i)} className="rounded px-1 text-[10px] text-zinc-400 hover:text-rose-500">✕</button>
-                          </div>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => fileInputRefs.current[i]?.click()}
-                            disabled={isUploading}
-                            className="shrink-0 rounded border border-dashed border-zinc-300 px-2 py-1 text-[10px] text-zinc-500 hover:border-[var(--brand-primary)] hover:text-[var(--brand-primary)] disabled:opacity-50"
-                          >
-                            {isUploading ? "Uploading..." : "+ Upload"}
-                          </button>
-                        )}
-                      </div>
-                      {upload?.blobUrl && <img src={upload.blobUrl} alt={upload.fileName} className="mt-2 h-16 w-full rounded object-contain" />}
-                      {upload && !upload.blobUrl && <div className="mt-1 rounded bg-emerald-50 px-2 py-1 text-[10px] text-emerald-700">✓ {upload.fileName}</div>}
-                      {error && <div className="mt-1 rounded bg-rose-50 px-2 py-1 text-[10px] text-rose-700">{error}</div>}
-                    </div>
-                  );
-                })}
-              </div>
+            <div className="space-y-3">
+              <p className="text-[11px] leading-4 text-zinc-500">
+                {printMode === "double"
+                  ? "Upload front and back artworks for each block."
+                  : safeImageCount === 1
+                    ? "Upload 1 artwork for all signs."
+                    : `Upload artworks for up to ${safeImageCount} blocks.`}
+              </p>
+              <button
+                type="button"
+                onClick={() => setIsArtworkModalOpen(true)}
+                className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition-colors shadow-sm"
+              >
+                🎨 Open Upload Panel
+              </button>
               <div className="text-[10px] text-zinc-400">Accepted: PDF, AI, EPS, PNG, JPG, TIFF, PSD (up to 100MB)</div>
-            </>
+            </div>
           ),
         },
         {
@@ -554,14 +574,22 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
                 >
                   {sheetLayout.placements.map((placement, index) => {
                     const slotIndex = index < safeImageCount ? index : null;
-                    const upload = slotIndex !== null ? blockUploads[slotIndex] : null;
+                    const upload = slotIndex !== null ? blockUploads[slotIndex]?.[previewSide] : null;
                     const colorClass = slotIndex !== null ? SLOT_COLORS[slotIndex % SLOT_COLORS.length] : "";
                     return (
                       <button
                         key={`cell-${index}`}
                         type="button"
                         disabled={slotIndex === null}
-                        onClick={() => { if (slotIndex !== null) fileInputRefs.current[slotIndex]?.click(); }}
+                        onClick={() => {
+                          if (slotIndex !== null) {
+                            if (printMode === "double" && previewSide === "back") {
+                              fileInputBackRefs.current[slotIndex]?.click();
+                            } else {
+                              fileInputRefs.current[slotIndex]?.click();
+                            }
+                          }
+                        }}
                         className={`absolute overflow-hidden border ${
                           slotIndex !== null ? "cursor-pointer hover:opacity-85" : "cursor-default"
                         } ${upload ? "border-emerald-500" : "border-zinc-400 bg-[#f0f0ee]"}`}
@@ -579,7 +607,7 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
                         ) : slotIndex !== null ? (
                           <div className={`flex h-full w-full items-center justify-center ${colorClass} opacity-30`}>
                             <span className="text-[7px] font-bold text-zinc-700">
-                              {uploadingBlock === slotIndex ? "…" : slotIndex + 1}
+                              {uploadingBlock === `${slotIndex}:${previewSide}` ? "…" : slotIndex + 1}
                             </span>
                           </div>
                         ) : null}
@@ -588,7 +616,35 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
                   })}
                 </div>
                 <div className="pointer-events-none absolute left-1/2 top-[calc(50%-236px)] -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">Top of Sheet</div>
-                <div className="pointer-events-none absolute left-1/2 top-[calc(50%+232px)] -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">Front Side</div>
+                <div className="pointer-events-none absolute left-1/2 top-[calc(50%+232px)] -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+                  {previewSide === "front" ? "Front Side" : "Back Side"}
+                </div>
+                {printMode === "double" && (
+                  <div className="pointer-events-auto absolute right-4 top-4 flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setPreviewSide("front")}
+                      className={`rounded-lg px-3 py-1 text-xs font-semibold transition-colors ${
+                        previewSide === "front"
+                          ? "bg-blue-500 text-white"
+                          : "border border-zinc-300 bg-white text-zinc-600 hover:border-blue-400 hover:text-blue-600"
+                      }`}
+                    >
+                      Front
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPreviewSide("back")}
+                      className={`rounded-lg px-3 py-1 text-xs font-semibold transition-colors ${
+                        previewSide === "back"
+                          ? "bg-orange-500 text-white"
+                          : "border border-zinc-300 bg-white text-zinc-600 hover:border-orange-400 hover:text-orange-600"
+                      }`}
+                    >
+                      Back
+                    </button>
+                  </div>
+                )}
                 <div className="pointer-events-none absolute left-[calc(50%-128px)] top-1/2 -translate-y-1/2 -rotate-90 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">Left</div>
                 <div className="pointer-events-none absolute left-[calc(50%+128px)] top-1/2 -translate-y-1/2 rotate-90 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">Right</div>
               </div>
@@ -600,7 +656,18 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
                   type="file"
                   accept=".pdf,.ai,.eps,.png,.jpg,.jpeg,.tif,.tiff,.psd"
                   className="hidden"
-                  onChange={e => handleBlockFileChange(i, e)}
+                  onChange={e => handleFileChange(i, e, "front")}
+                  disabled={uploadingBlock !== null}
+                />
+              ))}
+              {printMode === "double" && Array.from({ length: safeImageCount }).map((_, i) => (
+                <input
+                  key={`file-input-back-${i}`}
+                  ref={el => { fileInputBackRefs.current[i] = el; }}
+                  type="file"
+                  accept=".pdf,.ai,.eps,.png,.jpg,.jpeg,.tif,.tiff,.psd"
+                  className="hidden"
+                  onChange={e => handleFileChange(i, e, "back")}
                   disabled={uploadingBlock !== null}
                 />
               ))}
@@ -612,6 +679,21 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
                     {added ? "Added" : "Add"}
                   </Button>
                 }
+              />
+
+              <ArtworkUploadModal
+                isOpen={isArtworkModalOpen}
+                onClose={() => setIsArtworkModalOpen(false)}
+                safeImageCount={safeImageCount}
+                blockUploads={blockUploads}
+                blockUploadErrors={blockUploadErrors}
+                uploadingBlock={uploadingBlock}
+                printMode={printMode}
+                fileInputRefs={fileInputRefs}
+                fileInputBackRefs={fileInputBackRefs}
+                onRemoveUpload={removeBlockUpload}
+                onSetImageMode={setBlockImageMode}
+                onGetImageMode={getBlockImageMode}
               />
             </section>
           )}
