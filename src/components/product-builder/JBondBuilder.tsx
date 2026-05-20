@@ -361,17 +361,14 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
                   : safeImageCount === 1
                     ? "Upload 1 artwork for all signs."
                     : `Upload artworks for up to ${safeImageCount} blocks.`}
-                <div
-                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white"
+              </p>
+              <button
                 type="button"
                 onClick={() => setIsArtworkModalOpen(true)}
                 className="w-full rounded-lg bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors shadow-sm hover:bg-sky-500"
               >
                 Open Upload Panel
               </button>
-                    const isTopEdge = Math.abs(placement.y) < 0.01;
-                    const isLeftEdge = Math.abs(placement.x) < 0.01;
-                    const emptyCellBorderClass = `${isTopEdge ? "border-t" : ""} ${isLeftEdge ? "border-l" : ""} border-r border-b border-[#6d7378] bg-[#f6f5ef]`;
               <div className="text-[10px] text-zinc-400">Accepted: PDF, AI, EPS, PNG, JPG, TIFF, PSD (up to 100MB)</div>
             </div>
           ),
@@ -629,6 +626,9 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
                     const slotIndex = index < safeImageCount ? index : null;
                     const upload = slotIndex !== null ? blockUploads[slotIndex]?.[previewSide] : null;
                     const imageMode = slotIndex !== null ? getBlockImageMode(slotIndex, previewSide) : "fit";
+                    const isTopEdge = Math.abs(placement.y) < 0.01;
+                    const isLeftEdge = Math.abs(placement.x) < 0.01;
+                    const emptyCellBorderClass = `${isTopEdge ? "border-t" : ""} ${isLeftEdge ? "border-l" : ""} border-r border-b border-[#6d7378] bg-[#f6f5ef]`;
                     return (
                       <button
                         key={`cell-${index}`}
