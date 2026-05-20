@@ -641,7 +641,7 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
                           }
                         }}
                         className={`absolute overflow-hidden border ${
-                          slotIndex !== null ? "cursor-pointer hover:opacity-85" : "cursor-default"
+                          slotIndex !== null ? "sc-panel-glow cursor-pointer hover:opacity-85" : "cursor-default"
                         } ${upload ? "border-emerald-500" : "border-zinc-400 bg-[#f0f0ee]"}`}
                         style={{
                           left: `${(placement.x / JBOND_SHEET.width) * 100}%`,
