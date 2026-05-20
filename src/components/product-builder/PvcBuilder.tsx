@@ -34,11 +34,6 @@ interface BlockUploadPair {
 
 type ImageFitMode = "fit" | "stretch";
 
-const SLOT_COLORS = [
-  "bg-blue-400", "bg-emerald-400", "bg-violet-400", "bg-amber-400",
-  "bg-pink-400", "bg-cyan-400", "bg-orange-400", "bg-teal-400",
-];
-
 function formatPrice(value: number): string {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -431,7 +426,6 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
                 {sheetLayout.placements.map((placement, index) => {
                   const slotIndex = index < safeImageCount ? index : null;
                   const upload = slotIndex !== null ? blockUploads[slotIndex]?.[previewSide] : null;
-                  const colorClass = slotIndex !== null ? SLOT_COLORS[slotIndex % SLOT_COLORS.length] : "";
 
                   return (
                     <button
@@ -462,8 +456,8 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
                           <img src={upload.blobUrl} alt="" className="h-full w-full object-contain" />
                         </div>
                       ) : slotIndex !== null ? (
-                        <div className={`flex h-full w-full items-center justify-center ${colorClass} opacity-30`}>
-                          <span className="text-[7px] font-bold text-zinc-700">
+                        <div className="sc-panel-dotted-guides flex h-full w-full items-center justify-center bg-zinc-100">
+                          <span className="text-[7px] font-semibold text-zinc-500">
                             {uploadingBlock === `all:${previewSide}` || uploadingBlock?.startsWith(`${slotIndex}:`) ? "\u2026" : slotIndex + 1}
                           </span>
                         </div>
