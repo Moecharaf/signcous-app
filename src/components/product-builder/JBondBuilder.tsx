@@ -1,8 +1,9 @@
 ﻿"use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
 import SizeInputPanel, { composeDimensionInches, toFeetAndInches } from "@/components/product-builder/SizeInputPanel";
+import ArtworkUploadModal from "@/components/product-builder/ArtworkUploadModal";
 import Button from "@/components/ui/Button";
 import RigidPricingHeader from "@/components/product-builder/RigidPricingHeader";
 import { useCart } from "@/context/CartContext";
@@ -29,6 +30,11 @@ interface BlockUpload {
   blobUrl: string | null;
 }
 
+interface BlockUploadPair {
+  front?: BlockUpload;
+  back?: BlockUpload;
+}
+
 const SLOT_COLORS = [
   "bg-blue-400", "bg-emerald-400", "bg-violet-400", "bg-amber-400",
   "bg-pink-400", "bg-cyan-400", "bg-orange-400", "bg-teal-400",
@@ -51,11 +57,15 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
 
   // ΓöÇΓöÇ sheet mode state ΓöÇΓöÇ
   const [sizeId, setSizeId] = useState(JBOND_SIZE_OPTIONS[0].id);
-  const [imageCount, setImageCount] = useState(1);
-  const [blockUploads, setBlockUploads] = useState<Record<number, BlockUpload>>({});
-  const [uploadingBlock, setUploadingBlock] = useState<number | null>(null);
-  const [blockUploadErrors, setBlockUploadErrors] = useState<Record<number, string>>({});
+  const [imageCount, setImageCount] = useState(12);
+  const [blockUploads, setBlockUploads] = useState<Record<number, BlockUploadPair>>({});
+  const [uploadingBlock, setUploadingBlock] = useState<string | null>(null);
+  const [blockUploadErrors, setBlockUploadErrors] = useState<Record<string, string>>({});
+  const [blockImageModes, setBlockImageModes] = useState<Record<string, "fit" | "stretch">>();
+  const [previewSide, setPreviewSide] = useState<"front" | "back">("front");
+  const [isArtworkModalOpen, setIsArtworkModalOpen] = useState(false);
   const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const fileInputBackRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   // ΓöÇΓöÇ sqin mode state ΓöÇΓöÇ
   const [customWidthFeet, setCustomWidthFeet] = useState("2");
@@ -119,6 +129,18 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
   const maxImages = sheetLayout?.count ?? 1;
   const safeImageCount = pricingMode === "sheet" ? Math.min(imageCount, maxImages) : 1;
 
+  useEffect(() => {
+    if (pricingMode === "sheet") {
+      setImageCount(maxImages);
+    }
+  }, [maxImages, pricingMode]);
+
+  useEffect(() => {
+    if (printMode === "single" && previewSide === "back") {
+      setPreviewSide("front");
+    }
+  }, [previewSide, printMode]);
+
   // ΓöÇΓöÇ artwork upload helpers ΓöÇΓöÇ
   async function uploadFile(file: File): Promise<{ fileUrl: string; fileName: string; blobUrl: string | null } | string> {
     const formData = new FormData();
@@ -137,18 +159,26 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
     return { fileUrl: data.fileUrl!, fileName: data.originalName ?? file.name, blobUrl };
   }
 
-  async function uploadBlock(blockIndex: number, file: File) {
-    setUploadingBlock(blockIndex);
-    setBlockUploadErrors(p => { const n = { ...p }; delete n[blockIndex]; return n; });
+  async function uploadArtworkForBlock(blockIndex: number, file: File, side: "front" | "back" = "front") {
+    const uploadKey = `${blockIndex}:${side}`;
+    setUploadingBlock(uploadKey);
+    setBlockUploadErrors(p => { const n = { ...p }; delete n[uploadKey]; return n; });
     try {
       const result = await uploadFile(file);
       if (typeof result === "string") {
-        setBlockUploadErrors(p => ({ ...p, [blockIndex]: result }));
+        setBlockUploadErrors(p => ({ ...p, [uploadKey]: result }));
       } else {
-        setBlockUploads(p => ({ ...p, [blockIndex]: result }));
+        const newUpload = result;
+        setBlockUploads(prev => {
+          const updated = { ...prev };
+          for (let i = 0; i < maxImages; i++) {
+            updated[i] = { ...updated[i], [side]: newUpload };
+          }
+          return updated;
+        });
       }
     } catch {
-      setBlockUploadErrors(p => ({ ...p, [blockIndex]: "Upload failed. Please try again." }));
+      setBlockUploadErrors(p => ({ ...p, [uploadKey]: "Upload failed. Please try again." }));
     } finally {
       setUploadingBlock(null);
     }
@@ -168,10 +198,18 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
     }
   }
 
-  function handleBlockFileChange(i: number, e: React.ChangeEvent<HTMLInputElement>) {
+  function handleFileChange(blockIndex: number, e: React.ChangeEvent<HTMLInputElement>, side: "front" | "back" = "front") {
     const f = e.target.files?.[0];
-    if (f) void uploadBlock(i, f);
+    if (f) void uploadArtworkForBlock(blockIndex, f, side);
     e.target.value = "";
+  }
+
+  function setBlockImageMode(blockIndex: number, side: "front" | "back", mode: "fit" | "stretch") {
+    setBlockImageModes(prev => ({ ...prev, [`${blockIndex}:${side}`]: mode }));
+  }
+
+  function getBlockImageMode(blockIndex: number, side: "front" | "back"): "fit" | "stretch" {
+    return blockImageModes?.[`${blockIndex}:${side}`] ?? "fit";
   }
 
   function handleSqinFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -180,11 +218,19 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
     e.target.value = "";
   }
 
-  function removeBlock(i: number) {
-    setBlockUploads(p => {
-      const n = { ...p };
-      if (n[i]?.blobUrl) URL.revokeObjectURL(n[i].blobUrl!);
-      delete n[i]; return n;
+  function removeBlockUpload(blockIndex: number, side: "front" | "back" = "front") {
+    setBlockUploads(prev => {
+      const pair = prev[blockIndex];
+      if (!pair) return prev;
+      if (pair[side]?.blobUrl) URL.revokeObjectURL(pair[side]!.blobUrl!);
+      const updated = { ...pair };
+      delete updated[side];
+      if (Object.keys(updated).length === 0) {
+        const n = { ...prev };
+        delete n[blockIndex];
+        return n;
+      }
+      return { ...prev, [blockIndex]: updated };
     });
   }
 
@@ -197,124 +243,135 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
   function addToCart() {
     const qty = Math.max(1, Math.floor(quantity));
     const materialLabel = `JBond ${material} ${printMode === "single" ? "Single-Sided" : "Double-Sided"}`;
+    const w = pricingMode === "sheet" ? activeSize.width : customWidth;
+    const h = pricingMode === "sheet" ? activeSize.height : customHeight;
 
     let uploadedFileUrls: string[] = [];
     let uploadedFileUrl: string | null = null;
     let uploadedFileName: string | null = null;
 
     if (pricingMode === "sheet") {
-      uploadedFileUrls = Array.from({ length: safeImageCount }, (_, i) => blockUploads[i]?.fileUrl ?? "").filter(Boolean);
+      const uploadedBackUrls = printMode === "double"
+        ? Array.from({ length: safeImageCount }, (_, i) => blockUploads[i]?.back?.fileUrl ?? "").filter(Boolean)
+        : [];
+      uploadedFileUrls = Array.from({ length: safeImageCount }, (_, i) => blockUploads[i]?.front?.fileUrl ?? "").filter(Boolean);
       uploadedFileUrl = uploadedFileUrls[0] ?? null;
-      uploadedFileName = blockUploads[0]?.fileName ?? null;
+      uploadedFileName = blockUploads[0]?.front?.fileName ?? null;
+
+      cart.addItem({
+        productId,
+        productName,
+        width: w,
+        height: h,
+        unit: "inches",
+        quantity: qty,
+        material: materialLabel,
+        doubleSided: printMode === "double",
+        grommets: false,
+        edgeFinish: "none",
+        polePockets: false,
+        windSlits: false,
+        hemming: false,
+        rush,
+        uploadedFileUrl,
+        uploadedFileName,
+        uploadedFileUrls: uploadedFileUrls.length > 0 ? uploadedFileUrls : undefined,
+        customOptions: {
+          custom_pricing_mode: "Sheet Pricing",
+          custom_sheet_size: `${JBOND_SHEET.width}" x ${JBOND_SHEET.height}"`,
+          custom_sign_size: formatJBondSize(activeSize),
+          custom_material_thickness: `JBond ${material}`,
+          custom_print_mode: printMode === "single" ? "Single-Sided" : "Double-Sided",
+          custom_signs_per_sheet: String(pricing.signsPerSheet),
+          custom_sheets_required: String(pricing.sheetsRequired),
+          custom_front_images: String(uploadedFileUrls.length),
+          custom_back_images: printMode === "double" ? String(uploadedBackUrls.length) : "0",
+          custom_back_image_urls: uploadedBackUrls.length > 0 ? uploadedBackUrls.join(",") : "none",
+          custom_contour_cut: contourCut ? "yes" : "no",
+          custom_rounded_corners: roundedCorners ? "yes ($15 setup)" : "no",
+          custom_rush_surcharge_mode: rush ? "+100%" : "none",
+          custom_image_count: String(safeImageCount),
+        },
+        unitPrice: pricing.unitPrice,
+        totalPrice: pricing.totalPrice,
+      });
     } else {
       uploadedFileUrl = sqinUpload?.fileUrl ?? null;
       uploadedFileName = sqinUpload?.fileName ?? null;
       if (uploadedFileUrl) uploadedFileUrls = [uploadedFileUrl];
+
+      cart.addItem({
+        productId,
+        productName,
+        width: w,
+        height: h,
+        unit: "inches",
+        quantity: qty,
+        material: materialLabel,
+        doubleSided: printMode === "double",
+        grommets: false,
+        edgeFinish: "none",
+        polePockets: false,
+        windSlits: false,
+        hemming: false,
+        rush,
+        uploadedFileUrl,
+        uploadedFileName,
+        uploadedFileUrls: uploadedFileUrls.length > 0 ? uploadedFileUrls : undefined,
+        customOptions: {
+          custom_pricing_mode: "Custom Size (Sq.In)",
+          custom_sheet_size: `${JBOND_SHEET.width}" x ${JBOND_SHEET.height}"`,
+          custom_sign_size: `${formatFeetAndInchesLabel(customWidth)} x ${formatFeetAndInchesLabel(customHeight)}`,
+          custom_material_thickness: `JBond ${material}`,
+          custom_print_mode: printMode === "single" ? "Single-Sided" : "Double-Sided",
+          custom_sq_inches: String(pricing.sqInches),
+          custom_rate_per_sqin: `$${pricing.ratePerSqIn}/sq.in`,
+          custom_contour_cut: contourCut ? "yes" : "no",
+          custom_rounded_corners: roundedCorners ? "yes ($15 setup)" : "no",
+          custom_rush_surcharge_mode: rush ? "+100%" : "none",
+        },
+        unitPrice: pricing.unitPrice,
+        totalPrice: pricing.totalPrice,
+      });
     }
-
-    const w = pricingMode === "sheet" ? activeSize.width : customWidth;
-    const h = pricingMode === "sheet" ? activeSize.height : customHeight;
-
-    cart.addItem({
-      productId,
-      productName,
-      width: w,
-      height: h,
-      unit: "inches",
-      quantity: qty,
-      material: materialLabel,
-      doubleSided: printMode === "double",
-      grommets: false,
-      edgeFinish: "none",
-      polePockets: false,
-      windSlits: false,
-      hemming: false,
-      rush,
-      uploadedFileUrl,
-      uploadedFileName,
-      uploadedFileUrls: uploadedFileUrls.length > 0 ? uploadedFileUrls : undefined,
-      customOptions: {
-        custom_pricing_mode: pricingMode === "sheet" ? "Sheet Pricing" : "Custom Size (Sq.In)",
-        custom_sheet_size: `${JBOND_SHEET.width}" x ${JBOND_SHEET.height}"`,
-        custom_sign_size: pricingMode === "sheet" ? formatJBondSize(activeSize) : `${formatFeetAndInchesLabel(customWidth)} x ${formatFeetAndInchesLabel(customHeight)}`,
-        custom_material_thickness: `JBond ${material}`,
-        custom_print_mode: printMode === "single" ? "Single-Sided" : "Double-Sided",
-        ...(pricingMode === "sheet"
-          ? {
-              custom_signs_per_sheet: String(pricing.signsPerSheet),
-              custom_sheets_required: String(pricing.sheetsRequired),
-              custom_image_count: String(safeImageCount),
-            }
-          : {
-              custom_sq_inches: String(pricing.sqInches),
-              custom_rate_per_sqin: `$${pricing.ratePerSqIn}/sq.in`,
-            }),
-        custom_contour_cut: contourCut ? "yes" : "no",
-        custom_rounded_corners: roundedCorners ? "yes ($15 setup)" : "no",
-        custom_rush_surcharge_mode: rush ? "+100%" : "none",
-      },
-      unitPrice: pricing.unitPrice,
-      totalPrice: pricing.totalPrice,
-    });
 
     setAdded(true);
     window.setTimeout(() => setAdded(false), 1800);
   }
 
-  const uploadedBlockCount = Object.keys(blockUploads).filter(k => Number(k) < safeImageCount).length;
+  const uploadedBlockCount = Object.keys(blockUploads).filter(k => Number(k) < safeImageCount && blockUploads[Number(k)]?.front).length;
+  const uploadedBackCount = printMode === "double" ? Object.keys(blockUploads).filter(k => Number(k) < safeImageCount && blockUploads[Number(k)]?.back).length : 0;
   const toolbarPanels: BuilderBottomToolbarPanel[] = pricingMode === "sheet"
     ? [
         {
           id: "artwork",
           title: "Artwork",
-          value: `${uploadedBlockCount}/${safeImageCount} uploaded`,
-          width: 420,
-          status: uploadedBlockCount === safeImageCount && safeImageCount > 0 ? "ok" : "neutral",
+          value: printMode === "double"
+            ? `${uploadedBlockCount}/${safeImageCount} front, ${uploadedBackCount}/${safeImageCount} back`
+            : `${uploadedBlockCount}/${safeImageCount} uploaded`,
+          width: 280,
+          status:
+            printMode === "double"
+              ? uploadedBlockCount === safeImageCount && uploadedBackCount === safeImageCount && safeImageCount > 0 ? "ok" : "neutral"
+              : uploadedBlockCount === safeImageCount && safeImageCount > 0 ? "ok" : "neutral",
           content: (
-            <>
-              <div className="text-[11px] leading-4 text-zinc-500">
-                {safeImageCount === 1
-                  ? "Upload 1 artwork for all signs."
-                  : `Upload up to ${safeImageCount} artworks. Click a block on the sheet or use the slots below.`}
-              </div>
-              <div className="space-y-2">
-                {Array.from({ length: safeImageCount }).map((_, i) => {
-                  const upload = blockUploads[i];
-                  const error = blockUploadErrors[i];
-                  const isUploading = uploadingBlock === i;
-                  const color = SLOT_COLORS[i % SLOT_COLORS.length];
-                  return (
-                    <div key={`slot-${i}`} className="rounded-lg border border-zinc-200 bg-zinc-50 p-2">
-                      <div className="flex items-center gap-2">
-                        <div className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-sm ${color} text-[10px] font-bold text-white`}>
-                          {i + 1}
-                        </div>
-                        <div className="min-w-0 flex-1 text-xs font-medium text-zinc-700">Block {i + 1}</div>
-                        {upload ? (
-                          <div className="flex items-center gap-1">
-                            <span className="max-w-[100px] truncate text-[10px] text-emerald-700">{upload.fileName}</span>
-                            <button type="button" onClick={() => removeBlock(i)} className="rounded px-1 text-[10px] text-zinc-400 hover:text-rose-500">Γ£ò</button>
-                          </div>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => fileInputRefs.current[i]?.click()}
-                            disabled={isUploading}
-                            className="shrink-0 rounded border border-dashed border-zinc-300 px-2 py-1 text-[10px] text-zinc-500 hover:border-sky-400 hover:text-sky-500 disabled:opacity-50"
-                          >
-                            {isUploading ? "Uploading..." : "+ Upload"}
-                          </button>
-                        )}
-                      </div>
-                      {upload?.blobUrl && <img src={upload.blobUrl} alt={upload.fileName} className="mt-2 h-16 w-full rounded object-contain" />}
-                      {upload && !upload.blobUrl && <div className="mt-1 rounded bg-emerald-50 px-2 py-1 text-[10px] text-emerald-700">Γ£ô {upload.fileName}</div>}
-                      {error && <div className="mt-1 rounded bg-rose-50 px-2 py-1 text-[10px] text-rose-700">{error}</div>}
-                    </div>
-                  );
-                })}
-              </div>
+            <div className="space-y-3">
+              <p className="text-[11px] leading-4 text-zinc-500">
+                {printMode === "double"
+                  ? "Upload front and back artworks for each block."
+                  : safeImageCount === 1
+                    ? "Upload 1 artwork for all signs."
+                    : `Upload artworks for up to ${safeImageCount} blocks.`}
+              </p>
+              <button
+                type="button"
+                onClick={() => setIsArtworkModalOpen(true)}
+                className="w-full rounded-lg bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors shadow-sm hover:bg-sky-500"
+              >
+                Open Upload Panel
+              </button>
               <div className="text-[10px] text-zinc-400">Accepted: PDF, AI, EPS, PNG, JPG, TIFF, PSD (up to 100MB)</div>
-            </>
+            </div>
           ),
         },
         {
@@ -556,14 +613,23 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
                 >
                   {sheetLayout.placements.map((placement, index) => {
                     const slotIndex = index < safeImageCount ? index : null;
-                    const upload = slotIndex !== null ? blockUploads[slotIndex] : null;
+                    const upload = slotIndex !== null ? blockUploads[slotIndex]?.[previewSide] : null;
+                    const imageMode = slotIndex !== null ? getBlockImageMode(slotIndex, previewSide) : "fit";
                     const colorClass = slotIndex !== null ? SLOT_COLORS[slotIndex % SLOT_COLORS.length] : "";
                     return (
                       <button
                         key={`cell-${index}`}
                         type="button"
                         disabled={slotIndex === null}
-                        onClick={() => { if (slotIndex !== null) fileInputRefs.current[slotIndex]?.click(); }}
+                        onClick={() => {
+                          if (slotIndex !== null) {
+                            if (printMode === "double" && previewSide === "back") {
+                              fileInputBackRefs.current[slotIndex]?.click();
+                            } else {
+                              fileInputRefs.current[slotIndex]?.click();
+                            }
+                          }
+                        }}
                         className={`absolute overflow-hidden border ${
                           slotIndex !== null ? "cursor-pointer hover:opacity-85" : "cursor-default"
                         } ${upload ? "border-emerald-500" : "border-zinc-400 bg-[#f0f0ee]"}`}
@@ -576,12 +642,12 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
                       >
                         {upload?.blobUrl ? (
                           <div className="flex h-full w-full items-center justify-center bg-white p-[1px]">
-                            <img src={upload.blobUrl} alt="" className="h-full w-full object-contain" />
+                            <img src={upload.blobUrl} alt="" className={`h-full w-full ${imageMode === "stretch" ? "object-fill" : "object-contain"}`} />
                           </div>
                         ) : slotIndex !== null ? (
                           <div className={`flex h-full w-full items-center justify-center ${colorClass} opacity-30`}>
                             <span className="text-[7px] font-bold text-zinc-700">
-                              {uploadingBlock === slotIndex ? "..." : slotIndex + 1}
+                              {uploadingBlock === `${slotIndex}:${previewSide}` ? "..." : slotIndex + 1}
                             </span>
                           </div>
                         ) : null}
@@ -590,7 +656,33 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
                   })}
                 </div>
                 <div className="pointer-events-none absolute left-1/2 top-[calc(50%-236px)] -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">Top of Sheet</div>
-                <div className="pointer-events-none absolute left-1/2 top-[calc(50%+232px)] -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">Front Side</div>
+                <div className="pointer-events-none absolute left-1/2 top-[calc(50%+232px)] -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">{previewSide === "front" ? "Front Side" : "Back Side"}</div>
+                {printMode === "double" && (
+                  <div className="pointer-events-auto absolute right-4 top-4 flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setPreviewSide("front")}
+                      className={`rounded-lg px-3 py-1 text-xs font-semibold transition-colors ${
+                        previewSide === "front"
+                          ? "bg-sky-500 text-white"
+                          : "border border-zinc-300 bg-white text-zinc-600 hover:border-sky-400 hover:text-sky-600"
+                      }`}
+                    >
+                      Front
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPreviewSide("back")}
+                      className={`rounded-lg px-3 py-1 text-xs font-semibold transition-colors ${
+                        previewSide === "back"
+                          ? "bg-orange-500 text-white"
+                          : "border border-zinc-300 bg-white text-zinc-600 hover:border-orange-400 hover:text-orange-600"
+                      }`}
+                    >
+                      Back
+                    </button>
+                  </div>
+                )}
                 <div className="pointer-events-none absolute left-[calc(50%-128px)] top-1/2 -translate-y-1/2 -rotate-90 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">Left</div>
                 <div className="pointer-events-none absolute left-[calc(50%+128px)] top-1/2 -translate-y-1/2 rotate-90 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">Right</div>
               </div>
@@ -602,7 +694,18 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
                   type="file"
                   accept=".pdf,.ai,.eps,.png,.jpg,.jpeg,.tif,.tiff,.psd"
                   className="hidden"
-                  onChange={e => handleBlockFileChange(i, e)}
+                  onChange={e => handleFileChange(i, e, "front")}
+                  disabled={uploadingBlock !== null}
+                />
+              ))}
+              {printMode === "double" && Array.from({ length: safeImageCount }).map((_, i) => (
+                <input
+                  key={`file-input-back-${i}`}
+                  ref={el => { fileInputBackRefs.current[i] = el; }}
+                  type="file"
+                  accept=".pdf,.ai,.eps,.png,.jpg,.jpeg,.tif,.tiff,.psd"
+                  className="hidden"
+                  onChange={e => handleFileChange(i, e, "back")}
                   disabled={uploadingBlock !== null}
                 />
               ))}
@@ -614,6 +717,21 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
                     {added ? "Added" : "Add"}
                   </Button>
                 }
+              />
+
+              <ArtworkUploadModal
+                isOpen={isArtworkModalOpen}
+                onClose={() => setIsArtworkModalOpen(false)}
+                safeImageCount={safeImageCount}
+                blockUploads={blockUploads}
+                blockUploadErrors={blockUploadErrors}
+                uploadingBlock={uploadingBlock}
+                printMode={printMode}
+                fileInputRefs={fileInputRefs}
+                fileInputBackRefs={fileInputBackRefs}
+                onRemoveUpload={removeBlockUpload}
+                onSetImageMode={setBlockImageMode}
+                onGetImageMode={getBlockImageMode}
               />
             </section>
           )}
@@ -700,50 +818,8 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
             </section>
           )}
 
-          {/* ΓöÇΓöÇ Aside: breakdown + add-ons + artwork ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
-          <aside className="space-y-3">
-            {/* Pricing breakdown */}
-            <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-              <div className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">Pricing Breakdown</div>
-              <div className="mt-3 space-y-2 text-sm">
-                {pricingMode === "sheet" ? (
-                  <>
-                    <Row label="Signs / Sheet" value={String(pricing.signsPerSheet)} />
-                    <Row label="Sheets Needed" value={String(pricing.sheetsRequired)} />
-                    <Row label="Price / Sheet" value={formatPrice(pricing.sheetPrice)} />
-                  </>
-                ) : (
-                  <>
-                    <Row label="Dimensions" value={`${formatFeetAndInchesLabel(customWidth)} x ${formatFeetAndInchesLabel(customHeight)}`} />
-                    <Row label="Sq. Inches" value={`${pricing.sqInches} sq.in`} />
-                    <Row label="Rate" value={`$${pricing.ratePerSqIn}/sq.in (min $${pricing.minPrice})`} />
-                    <Row label="Price / Sign" value={formatPrice(pricing.pricePerSign)} />
-                  </>
-                )}
-                <Row label="Base Subtotal" value={formatPrice(pricing.baseSubtotal)} />
-                <Row label="Contour Cut (+10%)" value={formatPrice(pricing.contourCutFee)} />
-                <Row label="Rounded Corners" value={formatPrice(pricing.roundedCornersFee)} />
-                <Row label="Rush (+100%)" value={formatPrice(pricing.rushFee)} />
-                <div className="my-2 border-t border-zinc-200" />
-                <Row label="Unit Price" value={formatPrice(pricing.unitPrice)} strong />
-                <Row label="Order Total" value={formatPrice(pricing.totalPrice)} strong className="text-sky-700" />
-              </div>
-            </div>
-
-          </aside>
         </div>
       </div>
-    </div>
-  );
-}
-
-// ΓöÇΓöÇ Helper components ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
-
-function Row({ label, value, strong, className }: { label: string; value: string; strong?: boolean; className?: string }) {
-  return (
-    <div className={`flex items-center justify-between ${strong ? "font-semibold text-zinc-900" : "text-zinc-700"} ${className ?? ""}`}>
-      <span>{label}</span>
-      <span>{value}</span>
     </div>
   );
 }
