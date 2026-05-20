@@ -157,15 +157,8 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
         const newUpload = result;
         setBlockUploads(prev => {
           const updated = { ...prev };
-          const isFirstUpload = !Object.values(prev).some(pair => pair?.[side]);
-          if (isFirstUpload) {
-            for (let i = 0; i < safeImageCount; i++) {
-              if (!updated[i]?.[side]) {
-                updated[i] = { ...updated[i], [side]: newUpload };
-              }
-            }
-          } else {
-            updated[blockIndex] = { ...updated[blockIndex], [side]: newUpload };
+          for (let i = 0; i < safeImageCount; i++) {
+            updated[i] = { ...updated[i], [side]: newUpload };
           }
           return updated;
         });

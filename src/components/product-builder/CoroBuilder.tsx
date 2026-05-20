@@ -225,18 +225,8 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
         // If so, fill all empty blocks with the same image (Signs365 behavior)
         setBlockUploads((prev) => {
           const updated = { ...prev };
-          const isFirstUpload = !Object.values(prev).some(pair => pair?.[side]);
-          
-          if (isFirstUpload) {
-            // Fill all blocks with this image if they're empty on this side
-            for (let i = 0; i < safeImageCount; i++) {
-              if (!updated[i]?.[side]) {
-                updated[i] = { ...updated[i], [side]: newUpload };
-              }
-            }
-          } else {
-            // If not the first upload, only fill the clicked block
-            updated[blockIndex] = { ...updated[blockIndex], [side]: newUpload };
+          for (let i = 0; i < safeImageCount; i++) {
+            updated[i] = { ...updated[i], [side]: newUpload };
           }
           return updated;
         });
