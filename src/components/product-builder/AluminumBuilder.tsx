@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
 import SizeInputPanel, { composeDimensionInches, toFeetAndInches } from "@/components/product-builder/SizeInputPanel";
 import ArtworkUploadModal from "@/components/product-builder/ArtworkUploadModal";
@@ -131,6 +131,12 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
   );
   const maxImages = sheetLayout?.count ?? 1;
   const safeImageCount = pricingMode === "sheet" ? Math.min(imageCount, maxImages) : 1;
+
+  useEffect(() => {
+    if (pricingMode === "sheet") {
+      setImageCount(maxImages);
+    }
+  }, [maxImages, pricingMode]);
 
   // ── artwork upload helpers ──
   async function uploadFile(file: File): Promise<{ fileUrl: string; fileName: string; blobUrl: string | null } | string> {
