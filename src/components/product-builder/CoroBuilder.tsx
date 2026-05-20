@@ -577,25 +577,6 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
       ),
     },
     {
-      id: "layout",
-      title: "Images",
-      value: `${safeImageCount}/${maxImages} active`,
-      width: 200,
-      content: (
-        <>
-          <input
-            type="number"
-            min={1}
-            max={maxImages}
-            value={safeImageCount}
-            onChange={(e) => setImageCount(Math.min(maxImages, Math.max(1, Number(e.target.value) || 1)))}
-            className="h-9 w-full rounded border border-zinc-300 px-2 text-sm"
-          />
-          <div className="text-[11px] leading-4 text-zinc-500">Adjust how many artwork blocks are active on the sheet.</div>
-        </>
-      ),
-    },
-    {
       id: "gloss",
       title: "Gloss",
       value: gloss ? "Yes" : "No",
