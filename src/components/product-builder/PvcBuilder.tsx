@@ -403,20 +403,6 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
               }}
             >
               <div
-                className="pointer-events-none absolute left-1/2 top-1/2"
-                style={{
-                  width: 200 + 18,
-                  height: 400 + 18,
-                  transform: "translate(-50%, -50%)",
-                }}
-              >
-                <div className="pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 text-xs font-semibold text-zinc-500">48&quot;</div>
-                <div className="pointer-events-none absolute -bottom-7 left-1/2 -translate-x-1/2 text-xs font-semibold text-zinc-500">48&quot;</div>
-                <div className="pointer-events-none absolute -left-9 top-1/2 -translate-y-1/2 -rotate-90 text-xs font-semibold text-zinc-500">96&quot;</div>
-                <div className="pointer-events-none absolute -right-9 top-1/2 -translate-y-1/2 rotate-90 text-xs font-semibold text-zinc-500">96&quot;</div>
-              </div>
-
-              <div
                 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 border border-zinc-500 bg-white"
                 style={{
                   width: 200,
