@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState, type ChangeEvent, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
 import SizeInputPanel, { composeDimensionInches } from "@/components/product-builder/SizeInputPanel";
 import Button from "@/components/ui/Button";
@@ -31,64 +31,6 @@ function formatInches(value: number): string {
   const rounded = parseFloat(value.toFixed(2));
   const text = Number.isInteger(rounded) ? rounded.toFixed(0) : rounded.toString();
   return `${text.replace(/\.0+$/, "")}"`;
-}
-
-function formatCharge(value: number): string {
-  return value <= 0 ? formatCurrency(0) : `+${formatCurrency(value)}`;
-}
-
-function PanelCard({
-  eyebrow,
-  title,
-  children,
-}: {
-  eyebrow: string;
-  title: string;
-  children: ReactNode;
-}) {
-  return (
-    <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-      <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-500">{eyebrow}</div>
-      <div className="mt-1 text-lg font-semibold text-zinc-900">{title}</div>
-      <div className="mt-3">{children}</div>
-    </div>
-  );
-}
-
-function BreakdownRow({
-  label,
-  value,
-  strong,
-  accent,
-  muted,
-}: {
-  label: string;
-  value: string;
-  strong?: boolean;
-  accent?: boolean;
-  muted?: boolean;
-}) {
-  return (
-    <div className="flex items-center justify-between gap-4 py-1.5 text-sm">
-      <span className={muted ? "text-zinc-400" : strong ? "font-semibold text-zinc-900" : "text-zinc-600"}>{label}</span>
-      <span
-        className={`tabular-nums ${
-          muted ? "text-zinc-400" : accent ? "font-semibold text-[var(--brand-primary)]" : strong ? "font-semibold text-zinc-900" : "text-zinc-700"
-        }`}
-      >
-        {value}
-      </span>
-    </div>
-  );
-}
-
-function SummaryItem({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5">
-      <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-500">{label}</div>
-      <div className="mt-1.5 text-sm font-semibold text-zinc-900">{value}</div>
-    </div>
-  );
 }
 
 function SplitLinePreview({
@@ -174,8 +116,6 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
         : null,
     [width, height, safeQuantity, contourCut, rush, splitDirection, isValid]
   );
-
-  const showPanelOverlapWarning = Boolean(pricing && pricing.panelOverlap);
 
   const selectedLaminate = IJ35C_LAMINATE_OPTIONS.find((option) => option.value === laminate)!;
 
@@ -565,51 +505,6 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
               }
             />
           </div>
-
-          <aside className="space-y-3">
-            <PanelCard eyebrow="Pricing" title="3M IJ-35C Breakdown">
-              <div className="space-y-1">
-                <BreakdownRow label="Area" value={pricing ? `${pricing.areaSqFt.toFixed(2)} sq ft` : "--"} muted={!pricing} />
-                <BreakdownRow label="Base rate" value={pricing ? `${formatCurrency(pricing.baseRate)}/sq ft` : "--"} muted={!pricing} />
-                <BreakdownRow label="Raw base" value={pricing ? formatCurrency(pricing.rawBase) : formatCurrency(0)} muted={!pricing} />
-                <BreakdownRow label="Contour cut" value={pricing ? formatCharge(pricing.contourCutCharge) : formatCurrency(0)} muted={!pricing || !contourCut} />
-                <BreakdownRow label="Rush" value={pricing ? formatCharge(pricing.rushCharge) : formatCurrency(0)} muted={!pricing || !rush} />
-                <BreakdownRow label="Minimum floor" value={formatCurrency(25)} muted={!pricing} />
-                <div className="my-2 border-t border-zinc-200" />
-                <BreakdownRow label="Per-item total" value={pricing ? formatCurrency(pricing.perItemTotal) : formatCurrency(0)} strong />
-                <BreakdownRow label="Quantity" value={String(pricing?.quantity ?? safeQuantity)} strong />
-                <BreakdownRow label="Grand total" value={pricing ? formatCurrency(pricing.grandTotal) : formatCurrency(0)} strong accent />
-              </div>
-              <div className="mt-3 text-xs leading-5 text-zinc-500">
-
-              </div>
-            </PanelCard>
-
-            <PanelCard eyebrow="Split Logic" title="Panel Planning">
-              <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
-                <SummaryItem label="Roll Width" value={`${IJ35C_MAX_ROLL_WIDTH}"`} />
-                <SummaryItem label="Requested Direction" value={splitDirection} />
-                <SummaryItem label="Applied Direction" value={pricing ? pricing.resolvedSplitDirection : "--"} />
-                <SummaryItem label="Panel Count" value={pricing ? String(pricing.panelCount) : "--"} />
-                <SummaryItem
-                  label="Panel Size"
-                  value={pricing ? `${formatInches(pricing.panelWidthIn)} x ${formatInches(pricing.panelHeightIn)}` : "--"}
-                />
-                <SummaryItem label="Laminate" value={selectedLaminate.label} />
-              </div>
-            </PanelCard>
-
-            <PanelCard eyebrow="Usage" title="Laminate Notes">
-              <div className="space-y-2 text-sm text-zinc-600">
-                {IJ35C_LAMINATE_OPTIONS.map((option) => (
-                  <div key={option.value} className="rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2">
-                    <div className="font-semibold text-zinc-800">{option.label}</div>
-                    <div className="text-xs text-zinc-600">{option.note}</div>
-                  </div>
-                ))}
-              </div>
-            </PanelCard>
-          </aside>
         </div>
       </div>
     </div>
