@@ -307,27 +307,48 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
                 {pricing ? (
                   <>
                     <div
-                      className="absolute pointer-events-none"
-                      style={{ width: previewWidth + 18, height: previewHeight + 18 }}
-                    >
-                      <div className="absolute -top-7 left-1/2 -translate-x-1/2 text-xs font-semibold text-zinc-500">
-                        {formatInches(pricing.widthIn)}
-                      </div>
-                      <div className="absolute -bottom-7 left-1/2 -translate-x-1/2 text-xs font-semibold text-zinc-500">
-                        {formatInches(pricing.widthIn)}
-                      </div>
-                      <div className="absolute -left-9 top-1/2 -translate-y-1/2 -rotate-90 text-xs font-semibold text-zinc-500">
-                        {formatInches(pricing.heightIn)}
-                      </div>
-                      <div className="absolute -right-9 top-1/2 -translate-y-1/2 rotate-90 text-xs font-semibold text-zinc-500">
-                        {formatInches(pricing.heightIn)}
-                      </div>
-                    </div>
-
-                    <div
-                      className="relative overflow-hidden border border-sky-200 bg-white shadow-[0_26px_70px_rgba(15,23,42,0.10)] transition-[width,height] duration-150"
+                      className="relative border border-sky-200 bg-white shadow-[0_26px_70px_rgba(15,23,42,0.10)] transition-[width,height] duration-150"
                       style={{ width: previewWidth, height: previewHeight }}
                     >
+                      <div className="pointer-events-none absolute left-0 right-0 flex flex-col gap-1" style={{ bottom: "calc(100% + 4px)" }}>
+                        <div className="text-center text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500">↓ TOP OF IMAGE ↓</div>
+                        <div className="relative flex h-3 items-center">
+                          <div className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-zinc-400" />
+                          <div className="absolute left-0 h-full w-px bg-zinc-400" />
+                          <div className="absolute right-0 h-full w-px bg-zinc-400" />
+                          <div className="relative w-full text-center leading-none">
+                            <span className="bg-[#fafaf9] px-1 text-[11px] font-medium text-zinc-700">{formatInches(pricing.widthIn)}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="pointer-events-none absolute left-0 right-0" style={{ top: "calc(100% + 4px)" }}>
+                        <div className="relative flex h-3 items-center">
+                          <div className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-zinc-400" />
+                          <div className="absolute left-0 h-full w-px bg-zinc-400" />
+                          <div className="absolute right-0 h-full w-px bg-zinc-400" />
+                          <div className="relative w-full text-center leading-none">
+                            <span className="bg-[#fafaf9] px-1 text-[11px] font-medium text-zinc-700">{formatInches(pricing.widthIn)}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="pointer-events-none absolute bottom-0 top-0 flex flex-col items-center" style={{ right: "calc(100% + 8px)", width: "20px" }}>
+                        <div className="h-px w-full flex-none bg-zinc-400" />
+                        <div className="relative flex flex-1 items-center justify-center">
+                          <div className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-zinc-400" />
+                          <span className="relative -rotate-90 whitespace-nowrap bg-[#fafaf9] py-0.5 text-[11px] font-medium text-zinc-700">{formatInches(pricing.heightIn)}</span>
+                        </div>
+                        <div className="h-px w-full flex-none bg-zinc-400" />
+                      </div>
+                      <div className="pointer-events-none absolute bottom-0 top-0 flex flex-col items-center" style={{ left: "calc(100% + 8px)", width: "20px" }}>
+                        <div className="h-px w-full flex-none bg-zinc-400" />
+                        <div className="relative flex flex-1 items-center justify-center">
+                          <div className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-zinc-400" />
+                          <span className="relative rotate-90 whitespace-nowrap bg-[#fafaf9] py-0.5 text-[11px] font-medium text-zinc-700">{formatInches(pricing.heightIn)}</span>
+                        </div>
+                        <div className="h-px w-full flex-none bg-zinc-400" />
+                      </div>
+
+                      <div className="absolute inset-0 overflow-hidden">
                       {/* Perforation pattern overlay */}
                       <div
                         className="absolute inset-0 opacity-20"
@@ -371,6 +392,7 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
                         </div>
                       )}
                       <PanelSplitPreview panelCount={pricing.panelCount} />
+                      </div>
                     </div>
                   </>
                 ) : (

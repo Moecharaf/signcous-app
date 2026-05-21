@@ -424,68 +424,90 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
                       .
                     </div>
                     <div className="mt-3 text-sm text-red-400">
-                      {side === "single" ? "Single-Sided" : "Double-Sided"} · {constraints.maxWidth}" W × {constraints.maxHeight}" H
+                      {side === "single" ? "Single-Sided" : "Double-Sided"} · {constraints.maxWidth}&quot; W × {constraints.maxHeight}&quot; H
                     </div>
                   </div>
                 ) : pricing ? (
                   <>
                     <div
-                      className="absolute pointer-events-none"
-                      style={{ width: previewWidth + 18, height: previewHeight + 18 }}
-                    >
-                      <div className="absolute -top-7 left-1/2 -translate-x-1/2 text-xs font-semibold text-zinc-500">
-                        {formatInches(pricing.widthIn)}
-                      </div>
-                      <div className="absolute -bottom-7 left-1/2 -translate-x-1/2 text-xs font-semibold text-zinc-500">
-                        {formatInches(pricing.widthIn)}
-                      </div>
-                      <div className="absolute -left-9 top-1/2 -translate-y-1/2 -rotate-90 text-xs font-semibold text-zinc-500">
-                        {formatInches(pricing.heightIn)}
-                      </div>
-                      <div className="absolute -right-9 top-1/2 -translate-y-1/2 rotate-90 text-xs font-semibold text-zinc-500">
-                        {formatInches(pricing.heightIn)}
-                      </div>
-                    </div>
-
-                    <div
-                      className="relative overflow-hidden border border-zinc-300 bg-white shadow-[0_26px_70px_rgba(15,23,42,0.13)] transition-[width,height] duration-150"
+                      className="relative border border-zinc-300 bg-white shadow-[0_26px_70px_rgba(15,23,42,0.13)] transition-[width,height] duration-150"
                       style={{ width: previewWidth, height: previewHeight }}
                     >
-                      <div className="absolute inset-0 bg-[#fdfbff]" />
-                      {/* Double-sided mirror effect overlay */}
-                      {side === "double" && (
-                        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-sky-100/20 to-sky-100/40" />
-                      )}
-                      {uploadedImage ? (
-                        <Image
-                          src={uploadedImage}
-                          alt="Uploaded Dual View artwork preview"
-                          fill
-                          unoptimized
-                          className="object-fill"
-                        />
-                      ) : uploadedFileUrl && uploadedFileName?.toLowerCase().endsWith(".pdf") ? (
-                        <div className="relative h-full w-full">
-                          <iframe
-                            src={`${uploadedFileUrl}#toolbar=0&navpanes=0&scrollbar=0&page=1&view=FitH`}
-                            title="Uploaded PDF artwork preview"
-                            className="absolute -left-3 top-0 h-full w-[calc(100%+32px)] pointer-events-none"
-                            scrolling="no" style={{ clipPath: "inset(0 20px 0 0)" }}
-                          />
-                        </div>
-                      ) : (
-                        <div className="absolute inset-0 flex items-center justify-center text-center text-zinc-400">
-                          <div>
-                            <div className="text-xs font-semibold uppercase tracking-[0.2em]">
-                              Artwork Preview Area
-                            </div>
-                            <div className="mt-2 text-xs">
-                              {uploadingArtwork ? "Uploading artwork..." : "No artwork uploaded yet"}
-                            </div>
+                      <div className="pointer-events-none absolute left-0 right-0 flex flex-col gap-1" style={{ bottom: "calc(100% + 4px)" }}>
+                        <div className="text-center text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500">↓ TOP OF IMAGE ↓</div>
+                        <div className="relative flex h-3 items-center">
+                          <div className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-zinc-400" />
+                          <div className="absolute left-0 h-full w-px bg-zinc-400" />
+                          <div className="absolute right-0 h-full w-px bg-zinc-400" />
+                          <div className="relative w-full text-center leading-none">
+                            <span className="bg-[#fafaf9] px-1 text-[11px] font-medium text-zinc-700">{formatInches(pricing.widthIn)}</span>
                           </div>
                         </div>
-                      )}
-                      <PanelSplitPreview panelCount={pricing.panelCount} />
+                      </div>
+                      <div className="pointer-events-none absolute left-0 right-0" style={{ top: "calc(100% + 4px)" }}>
+                        <div className="relative flex h-3 items-center">
+                          <div className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-zinc-400" />
+                          <div className="absolute left-0 h-full w-px bg-zinc-400" />
+                          <div className="absolute right-0 h-full w-px bg-zinc-400" />
+                          <div className="relative w-full text-center leading-none">
+                            <span className="bg-[#fafaf9] px-1 text-[11px] font-medium text-zinc-700">{formatInches(pricing.widthIn)}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="pointer-events-none absolute bottom-0 top-0 flex flex-col items-center" style={{ right: "calc(100% + 8px)", width: "20px" }}>
+                        <div className="h-px w-full flex-none bg-zinc-400" />
+                        <div className="relative flex flex-1 items-center justify-center">
+                          <div className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-zinc-400" />
+                          <span className="relative -rotate-90 whitespace-nowrap bg-[#fafaf9] py-0.5 text-[11px] font-medium text-zinc-700">{formatInches(pricing.heightIn)}</span>
+                        </div>
+                        <div className="h-px w-full flex-none bg-zinc-400" />
+                      </div>
+                      <div className="pointer-events-none absolute bottom-0 top-0 flex flex-col items-center" style={{ left: "calc(100% + 8px)", width: "20px" }}>
+                        <div className="h-px w-full flex-none bg-zinc-400" />
+                        <div className="relative flex flex-1 items-center justify-center">
+                          <div className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-zinc-400" />
+                          <span className="relative rotate-90 whitespace-nowrap bg-[#fafaf9] py-0.5 text-[11px] font-medium text-zinc-700">{formatInches(pricing.heightIn)}</span>
+                        </div>
+                        <div className="h-px w-full flex-none bg-zinc-400" />
+                      </div>
+
+                      <div className="absolute inset-0 overflow-hidden">
+                        <div className="absolute inset-0 bg-[#fdfbff]" />
+                        {/* Double-sided mirror effect overlay */}
+                        {side === "double" && (
+                          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-sky-100/20 to-sky-100/40" />
+                        )}
+                        {uploadedImage ? (
+                          <Image
+                            src={uploadedImage}
+                            alt="Uploaded Dual View artwork preview"
+                            fill
+                            unoptimized
+                            className="object-fill"
+                          />
+                        ) : uploadedFileUrl && uploadedFileName?.toLowerCase().endsWith(".pdf") ? (
+                          <div className="relative h-full w-full">
+                            <iframe
+                              src={`${uploadedFileUrl}#toolbar=0&navpanes=0&scrollbar=0&page=1&view=FitH`}
+                              title="Uploaded PDF artwork preview"
+                              className="absolute -left-3 top-0 h-full w-[calc(100%+32px)] pointer-events-none"
+                              scrolling="no" style={{ clipPath: "inset(0 20px 0 0)" }}
+                            />
+                          </div>
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center text-center text-zinc-400">
+                            <div>
+                              <div className="text-xs font-semibold uppercase tracking-[0.2em]">
+                                Artwork Preview Area
+                              </div>
+                              <div className="mt-2 text-xs">
+                                {uploadingArtwork ? "Uploading artwork..." : "No artwork uploaded yet"}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        <PanelSplitPreview panelCount={pricing.panelCount} />
+                      </div>
                     </div>
                   </>
                 ) : (
@@ -670,7 +692,7 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
                         {isActive ? " ← selected" : ""}
                       </div>
                       <div className="text-xs text-zinc-600">
-                        Max {c.maxWidth}" W × {c.maxHeight}" H
+                        Max {c.maxWidth}&quot; W × {c.maxHeight}&quot; H
                         {s === "double" ? " · Rotation supported" : ""}
                       </div>
                     </div>
