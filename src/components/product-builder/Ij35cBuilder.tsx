@@ -430,7 +430,7 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
                 {pricing ? (
                   <>
                     <div
-                      className="relative overflow-hidden border border-zinc-300 bg-white shadow-[0_26px_70px_rgba(15,23,42,0.13)]"
+                      className="relative border border-zinc-300 bg-white shadow-[0_26px_70px_rgba(15,23,42,0.13)]"
                       style={{ width: previewWidth, height: previewHeight }}
                     >
                       <div className="pointer-events-none absolute left-0 right-0 flex flex-col gap-1" style={{ bottom: "calc(100% + 4px)" }}>
@@ -471,33 +471,35 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
                         <div className="h-px w-full flex-none bg-zinc-400" />
                       </div>
 
-                      <div className="absolute inset-0 bg-[#f6f6f6]" />
-                      {uploadedImage ? (
-                        <Image src={uploadedImage} alt="Uploaded IJ-35C artwork preview" fill unoptimized className="object-contain" />
-                      ) : uploadedFileUrl && uploadedFileName?.toLowerCase().endsWith(".pdf") ? (
-                        <div className="relative h-full w-full">
-                          <iframe
-                            src={`${uploadedFileUrl}#toolbar=0&navpanes=0&scrollbar=0&page=1&view=FitH`}
-                            title="Uploaded PDF artwork preview"
-                            className="absolute -left-3 top-0 h-full w-[calc(100%+32px)] pointer-events-none"
-                            scrolling="no" style={{ clipPath: "inset(0 20px 0 0)" }}
-                          />
-                        </div>
-                      ) : (
-                        <div className="absolute inset-0 flex items-center justify-center text-center text-zinc-400">
-                          <div>
-                            <div className="text-xs font-semibold uppercase tracking-[0.2em]">Artwork Preview Area</div>
-                            <div className="mt-2 text-xs">
-                              {uploadingArtwork ? "Uploading artwork..." : "No artwork uploaded yet"}
+                      <div className="absolute inset-0 overflow-hidden">
+                        <div className="absolute inset-0 bg-[#f6f6f6]" />
+                        {uploadedImage ? (
+                          <Image src={uploadedImage} alt="Uploaded IJ-35C artwork preview" fill unoptimized className="object-contain" />
+                        ) : uploadedFileUrl && uploadedFileName?.toLowerCase().endsWith(".pdf") ? (
+                          <div className="relative h-full w-full">
+                            <iframe
+                              src={`${uploadedFileUrl}#toolbar=0&navpanes=0&scrollbar=0&page=1&view=FitH`}
+                              title="Uploaded PDF artwork preview"
+                              className="absolute -left-3 top-0 h-full w-[calc(100%+32px)] pointer-events-none"
+                              scrolling="no" style={{ clipPath: "inset(0 20px 0 0)" }}
+                            />
+                          </div>
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center text-center text-zinc-400">
+                            <div>
+                              <div className="text-xs font-semibold uppercase tracking-[0.2em]">Artwork Preview Area</div>
+                              <div className="mt-2 text-xs">
+                                {uploadingArtwork ? "Uploading artwork..." : "No artwork uploaded yet"}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      )}
+                        )}
 
-                      <SplitLinePreview
-                        resolvedDirection={pricing.resolvedSplitDirection}
-                        panelCount={pricing.panelCount}
-                      />
+                        <SplitLinePreview
+                          resolvedDirection={pricing.resolvedSplitDirection}
+                          panelCount={pricing.panelCount}
+                        />
+                      </div>
                     </div>
                   </>
                 ) : (
