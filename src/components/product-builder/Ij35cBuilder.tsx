@@ -240,6 +240,8 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
 
   const previewWidth = pricing ? Math.max(240, Math.min(640, pricing.widthIn * 2.8)) : 320;
   const previewHeight = pricing ? Math.max(180, Math.min(460, pricing.heightIn * 2.8)) : 220;
+  const topGuideLineWidth = Math.max(32, Math.min(48, previewWidth / 5));
+  const sideGuideLineHeight = Math.max(40, Math.min(64, previewHeight / 3.5));
   const toolbarPanels: BuilderBottomToolbarPanel[] = [
     {
       id: "artwork",
@@ -433,17 +435,30 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
                       className="absolute pointer-events-none"
                       style={{ width: previewWidth + 18, height: previewHeight + 18 }}
                     >
-                      <div className="absolute -top-7 left-1/2 -translate-x-1/2 text-xs font-semibold text-zinc-500">
-                        {formatInches(pricing.widthIn)}
+                      <div className="absolute -top-11 left-1/2 flex -translate-x-1/2 flex-col items-center text-[11px] font-semibold text-zinc-700">
+                        <span className="text-[10px] uppercase tracking-[0.25em] text-zinc-500">Top Of Image</span>
+                        <div className="mt-1 flex items-center gap-2 text-zinc-700">
+                          <span className="h-px bg-zinc-400" style={{ width: topGuideLineWidth }} />
+                          <span>{formatInches(pricing.widthIn)}</span>
+                          <span className="h-px bg-zinc-400" style={{ width: topGuideLineWidth }} />
+                        </div>
                       </div>
-                      <div className="absolute -bottom-7 left-1/2 -translate-x-1/2 text-xs font-semibold text-zinc-500">
-                        {formatInches(pricing.widthIn)}
+                      <div className="absolute -bottom-11 left-1/2 flex -translate-x-1/2 flex-col items-center text-[11px] font-semibold text-zinc-700">
+                        <div className="flex items-center gap-2 text-zinc-700">
+                          <span className="h-px bg-zinc-400" style={{ width: topGuideLineWidth }} />
+                          <span>{formatInches(pricing.widthIn)}</span>
+                          <span className="h-px bg-zinc-400" style={{ width: topGuideLineWidth }} />
+                        </div>
                       </div>
-                      <div className="absolute -left-9 top-1/2 -translate-y-1/2 -rotate-90 text-xs font-semibold text-zinc-500">
-                        {formatInches(pricing.heightIn)}
+                      <div className="absolute -left-14 top-1/2 flex -translate-y-1/2 flex-col items-center text-[11px] font-semibold text-zinc-700">
+                        <span className="w-px bg-zinc-400" style={{ height: sideGuideLineHeight }} />
+                        <span className="my-2 rotate-90">{formatInches(pricing.heightIn)}</span>
+                        <span className="w-px bg-zinc-400" style={{ height: sideGuideLineHeight }} />
                       </div>
-                      <div className="absolute -right-9 top-1/2 -translate-y-1/2 rotate-90 text-xs font-semibold text-zinc-500">
-                        {formatInches(pricing.heightIn)}
+                      <div className="absolute -right-14 top-1/2 flex -translate-y-1/2 flex-col items-center text-[11px] font-semibold text-zinc-700">
+                        <span className="w-px bg-zinc-400" style={{ height: sideGuideLineHeight }} />
+                        <span className="my-2 -rotate-90">{formatInches(pricing.heightIn)}</span>
+                        <span className="w-px bg-zinc-400" style={{ height: sideGuideLineHeight }} />
                       </div>
                     </div>
 
