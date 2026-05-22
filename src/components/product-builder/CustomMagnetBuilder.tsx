@@ -344,17 +344,6 @@ export default function CustomMagnetBuilder() {
   return (
     <div className="flex min-h-[calc(100dvh-64px)] flex-col bg-[linear-gradient(145deg,#f4f4f5_0%,#ececef_55%,#e4e4e7_100%)] text-zinc-800 md:min-h-[calc(100dvh-88px)] md:h-[calc(100vh-88px)]">
       <div className="mx-3 mt-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
-        <div className="border-b border-zinc-200 bg-white px-3 py-2 md:px-4 md:py-3">
-          <div className="mb-1 inline-flex items-center gap-2 rounded-full border border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--brand-primary)]">
-            <span className="rounded bg-zinc-900 px-1.5 py-0.5 text-[10px] tracking-normal text-[var(--brand-primary)]">SC</span>
-            Signcous Studio
-          </div>
-          <h1 className="mt-1 text-[24px] font-semibold tracking-tight text-zinc-900 md:text-3xl">Custom Magnets Builder</h1>
-          <p className="mt-1 text-sm text-zinc-600">
-            Custom-size single-sided magnets with contour cut, rush production, and artwork upload.
-          </p>
-        </div>
-
         <div
           className="relative flex min-h-0 flex-1 overflow-hidden bg-[#fafaf9]"
           style={{
