@@ -303,38 +303,43 @@ export default function VehicleMagnetBuilder() {
   ];
 
   return (
-    <div className="min-h-[calc(100vh-96px)] bg-[linear-gradient(145deg,#f4f4f5_0%,#ececef_55%,#e4e4e7_100%)] text-zinc-800">
-      <div className="w-full px-3 py-3 md:px-4">
-        <div className="grid gap-4">
-          <section className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
-            <div className="border-b border-zinc-200 px-4 py-3">
-              <div className="text-sm font-medium text-zinc-700">Visual Preview</div>
-            </div>
-
-            <div
-              className="relative min-h-[440px] overflow-hidden rounded-b-2xl bg-[#fafaf9]"
+    <div className="flex min-h-[calc(100dvh-64px)] flex-col bg-[linear-gradient(145deg,#f4f4f5_0%,#ececef_55%,#e4e4e7_100%)] text-zinc-800 md:min-h-[calc(100dvh-88px)] md:h-[calc(100vh-88px)]">
+      <div className="mx-3 mt-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
+        <div
+          className="relative flex min-h-0 flex-1 overflow-hidden bg-[#fafaf9]"
               style={{
                 backgroundImage:
                   "linear-gradient(to right, rgba(63,63,70,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(63,63,70,0.08) 1px, transparent 1px)",
                 backgroundSize: "26px 26px",
               }}
-            >
-              <div className="absolute right-4 top-4 z-20 max-w-[220px] rounded-lg border border-zinc-200 bg-zinc-50/95 px-3 py-2 shadow-sm backdrop-blur">
-                <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">Quick Rate Reference</div>
-                <div className="space-y-1 text-[11px] leading-5 text-zinc-600">
-                  <div className="flex items-center justify-between gap-3"><span>Price / unit</span><span className="font-semibold text-zinc-800">{quantity > 0 ? formatCurrency(pricing.total / quantity) : formatCurrency(0)}</span></div>
-                  <div className="flex items-center justify-between gap-3"><span>Size</span><span className="font-semibold text-zinc-800">{selectedSize.label}</span></div>
-                  <div className="flex items-center justify-between gap-3"><span>Quantity</span><span className="font-semibold text-zinc-800">{quantity}</span></div>
+        >
+          <div className="pointer-events-none absolute left-1/2 top-4 z-20 w-[min(940px,calc(100%-24px))] -translate-x-1/2 px-2 md:px-3">
+            <div className="grid w-full max-w-[940px] grid-cols-1 gap-2 px-1 md:grid-cols-[0.85fr_1.4fr_0.85fr] md:items-start md:gap-8">
+              <div>
+                <div className="text-[27px] font-medium leading-[0.98] tracking-tight text-zinc-900 md:whitespace-nowrap md:text-[36px]">Vehicle Magnet</div>
+                <div className="mt-1 text-[11px] text-zinc-600 md:text-[12px]">Single-sided magnet builder, {selectedSize.label}</div>
+              </div>
+
+              <div className="text-[10px] text-zinc-600 md:pt-1 md:text-center">
+                <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500">Quick Rate Reference</div>
+                <div className="grid grid-cols-[56px_1fr] gap-x-2 gap-y-0.5 text-[10px] md:text-center md:grid-cols-2 md:justify-center md:inline-grid">
+                  <span className="text-zinc-500">Price / unit</span>
+                  <span>{quantity > 0 ? formatCurrency(pricing.total / quantity) : formatCurrency(0)}</span>
+                  <span className="text-zinc-500">Size</span>
+                  <span>{selectedSize.label}</span>
+                  <span className="text-zinc-500">Quantity</span>
+                  <span>{quantity}</span>
                 </div>
               </div>
 
-              <div className="absolute right-4 top-[132px] z-20 rounded-lg border border-zinc-800 bg-zinc-900/95 px-4 py-2 text-right shadow-sm backdrop-blur">
-                <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--brand-primary)]">Live Total</div>
-                <div className="text-2xl font-semibold text-white">{formatCurrency(pricing.total)}</div>
-                <div className="text-[11px] text-zinc-300">
+              <div className="text-left md:pt-1 md:text-right">
+                <div className="text-[38px] leading-none font-semibold text-[var(--brand-primary)] md:text-[44px]">{formatCurrency(pricing.total)}</div>
+                <div className="mt-1 text-[11px] text-zinc-500">
                   {quantity > 0 ? `${quantity} magnet${quantity !== 1 ? "s" : ""} · ${selectedSize.label}` : "Set quantity to calculate"}
                 </div>
               </div>
+            </div>
+          </div>
 
               <div className="absolute left-1/2 top-1/2" style={{ transform: "translate(-50%, -50%)" }}>
                 <div className="pointer-events-none absolute -top-12 left-1/2 flex -translate-x-1/2 flex-col items-center text-[11px] font-semibold text-zinc-700">
@@ -392,17 +397,16 @@ export default function VehicleMagnetBuilder() {
                 </div>
               </div>
             </div>
-
-            <BuilderBottomToolbar
-              panels={toolbarPanels}
-              action={
-                <Button onClick={handleAddToCart} className="h-10 w-full rounded bg-[var(--brand-primary)] px-6 text-sm hover:bg-[var(--brand-primary-hover)]" disabled={uploadingArtwork}>
-                  {addedToCart ? "Added to Cart" : "Add to Cart"}
-                </Button>
-              }
-            />
-          </section>
         </div>
+
+        <BuilderBottomToolbar
+          panels={toolbarPanels}
+          action={
+            <Button onClick={handleAddToCart} className="h-10 w-full rounded bg-[var(--brand-primary)] px-6 text-sm hover:bg-[var(--brand-primary-hover)]" disabled={uploadingArtwork}>
+              {addedToCart ? "Added to Cart" : "Add to Cart"}
+            </Button>
+          }
+        />
       </div>
     </div>
   );
