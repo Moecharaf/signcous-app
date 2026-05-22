@@ -89,20 +89,6 @@ export default function VehicleMagnetBuilder() {
     };
   }, [selectedSize.price, quantity, rush]);
 
-  const shippingInfo = useMemo(() => {
-    if (quantity < 1) {
-      return "Enter a quantity to see shipping guidance.";
-    }
-
-    if (quantity >= 191) {
-      return "Estimated shipping tier: $199 freight for 191+ magnets.";
-    }
-
-    const packsOfTen = Math.ceil(quantity / 10);
-    const shippingEstimate = packsOfTen * 10;
-    return `Estimated shipping tier: ${formatCurrency(shippingEstimate)} (${packsOfTen} x $10 per 10 magnets).`;
-  }, [quantity]);
-
   const previewScale = Math.min(
     PREVIEW_MAX_WIDTH / selectedSize.width,
     PREVIEW_MAX_HEIGHT / selectedSize.height
@@ -319,22 +305,7 @@ export default function VehicleMagnetBuilder() {
   return (
     <div className="min-h-[calc(100vh-96px)] bg-[linear-gradient(145deg,#f4f4f5_0%,#ececef_55%,#e4e4e7_100%)] text-zinc-800">
       <div className="w-full px-3 py-3 md:px-4">
-        <div className="mb-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-          <div className="grid items-end gap-4 lg:grid-cols-1">
-            <div>
-              <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--brand-primary)]">
-                <span className="rounded bg-zinc-900 px-1.5 py-0.5 text-[10px] tracking-normal text-[var(--brand-primary)]">SC</span>
-                Signcous Studio
-              </div>
-              <h1 className="mt-1 text-3xl font-semibold tracking-tight text-zinc-900">Vehicle Magnet Builder</h1>
-              <p className="mt-1 text-sm text-zinc-600">
-                Fixed-size, single-sided vehicle magnets with rush pricing and artwork upload.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="grid gap-4">
           <section className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
             <div className="border-b border-zinc-200 px-4 py-3">
               <div className="text-sm font-medium text-zinc-700">Visual Preview</div>
@@ -431,61 +402,8 @@ export default function VehicleMagnetBuilder() {
               }
             />
           </section>
-
-          <aside className="space-y-3">
-            <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-              <div className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">Price Summary</div>
-              <div className="mt-3 space-y-2 text-sm">
-                <PriceRow label="Product" value="Vehicle Magnet" />
-                <PriceRow label="Print" value="Single-Sided" />
-                <PriceRow label="Selected Size" value={selectedSize.label} />
-                <PriceRow label="Rounded Corners" value={cornerOption.label} />
-                <PriceRow label="Quantity" value={quantity > 0 ? String(quantity) : "-"} />
-                <div className="my-2 border-t border-zinc-200" />
-                <PriceRow label="Base Price (each)" value={formatCurrency(pricing.basePrice)} />
-                <PriceRow label="Subtotal" value={formatCurrency(pricing.subtotal)} />
-                <PriceRow label="Rush Fee" value={formatCurrency(pricing.rushFee)} muted={!rush} />
-                <PriceRow label="Total" value={formatCurrency(pricing.total)} strong className="text-[var(--brand-primary)]" />
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-              <div className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">Shipping Info (Informational)</div>
-              <div className="mt-2 space-y-2 text-xs leading-5 text-zinc-600">
-                <p>1-190 magnets: $10 per 10 magnets.</p>
-                <p>191+ magnets: $199 freight.</p>
-                <p className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-zinc-700">{shippingInfo}</p>
-                <p className="text-zinc-500">Shipping is shown for guidance only and is not included in product price.</p>
-              </div>
-            </div>
-          </aside>
         </div>
       </div>
-    </div>
-  );
-}
-
-function PriceRow({
-  label,
-  value,
-  strong,
-  muted,
-  className,
-}: {
-  label: string;
-  value: string;
-  strong?: boolean;
-  muted?: boolean;
-  className?: string;
-}) {
-  return (
-    <div
-      className={`flex items-center justify-between ${
-        strong ? "font-semibold text-zinc-900" : muted ? "text-zinc-400" : "text-zinc-700"
-      } ${className ?? ""}`}
-    >
-      <span>{label}</span>
-      <span>{value}</span>
     </div>
   );
 }
