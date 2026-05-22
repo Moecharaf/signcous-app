@@ -464,48 +464,6 @@ export default function PrintWrapFilmBuilder({ productId = 136 }: PrintWrapFilmB
             />
           </div>
 
-          <aside className="space-y-3">
-            <PanelCard eyebrow="Pricing" title="3M Print Wrap Film Breakdown">
-              <div className="space-y-1">
-                <BreakdownRow label="Area" value={pricing ? `${pricing.areaSqFt.toFixed(2)} sq ft` : "--"} muted={!pricing} />
-                <BreakdownRow label="Base rate" value={pricing ? `${formatCurrency(pricing.baseRate)}/sq ft` : "--"} muted={!pricing} />
-                <BreakdownRow label="Raw base" value={pricing ? formatCurrency(pricing.rawBase) : formatCurrency(0)} muted={!pricing} />
-                <BreakdownRow label="Contour cut" value={pricing ? formatCharge(pricing.contourCutCharge) : formatCurrency(0)} muted={!pricing || !contourCut} />
-                <BreakdownRow label="Rush" value={pricing ? formatCharge(pricing.rushCharge) : formatCurrency(0)} muted={!pricing || !rush} />
-                <BreakdownRow label="Minimum floor" value={formatCurrency(PRINT_WRAP_MINIMUM_PRICE)} muted={!pricing} />
-                <div className="my-2 border-t border-zinc-200" />
-                <BreakdownRow label="Per-item total" value={pricing ? formatCurrency(pricing.perItemTotal) : formatCurrency(0)} strong />
-                <BreakdownRow label="Quantity" value={String(pricing?.quantity ?? safeQuantity)} strong />
-                <BreakdownRow label="Grand total" value={pricing ? formatCurrency(pricing.grandTotal) : formatCurrency(0)} strong accent />
-              </div>
-
-            </PanelCard>
-
-            <PanelCard eyebrow="Split Logic" title="Panel Planning">
-              <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
-                <SummaryItem label="Roll Width" value={`${PRINT_WRAP_MAX_ROLL_WIDTH}"`} />
-                <SummaryItem label="Requested Direction" value={splitDirection} />
-                <SummaryItem label="Applied Direction" value={pricing ? appliedSplitDirection : "--"} />
-                <SummaryItem label="Panel Count" value={pricing ? String(pricing.panelCount) : "--"} />
-                <SummaryItem
-                  label="Panel Size"
-                  value={pricing ? `${formatInches(pricing.panelWidthIn)} x ${formatInches(pricing.panelHeightIn)}` : "--"}
-                />
-                <SummaryItem label="Laminate" value={selectedLaminate.label} />
-              </div>
-            </PanelCard>
-
-            <PanelCard eyebrow="Usage" title="Laminate Notes">
-              <div className="space-y-2 text-sm text-zinc-600">
-                {PRINT_WRAP_LAMINATE_OPTIONS.map((option) => (
-                  <div key={option.value} className="rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2">
-                    <div className="font-semibold text-zinc-800">{option.label}</div>
-                    <div className="text-xs text-zinc-600">{option.note}</div>
-                  </div>
-                ))}
-              </div>
-            </PanelCard>
-          </aside>
         </div>
       </div>
     </div>
