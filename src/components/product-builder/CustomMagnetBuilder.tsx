@@ -9,9 +9,9 @@ import { useCart } from "@/context/CartContext";
 type RoundedCornerOption = "none" | "half-inch" | "one-inch";
 
 const RATE_PER_SQ_IN = 0.1;
-const PREVIEW_MAX_WIDTH = 720;
-const PREVIEW_MAX_HEIGHT = 420;
-const PREVIEW_SIDE_GUTTER = 96;
+const PREVIEW_MAX_WIDTH = 880;
+const PREVIEW_MAX_HEIGHT = 540;
+const PREVIEW_SIDE_GUTTER = 88;
 const PREVIEW_TOP_GUTTER = 72;
 const PREVIEW_BOTTOM_GUTTER = 44;
 const MAX_SIZE_ERROR =
@@ -76,8 +76,8 @@ export default function CustomMagnetBuilder() {
     previewUsableWidth / Math.max(width, 1),
     previewUsableHeight / Math.max(height, 1)
   );
-  const previewWidth = Math.max(120, width > 0 ? width * previewScale : 180);
-  const previewHeight = Math.max(90, height > 0 ? height * previewScale : 140);
+  const previewWidth = Math.max(160, width > 0 ? width * previewScale : 220);
+  const previewHeight = Math.max(120, height > 0 ? height * previewScale : 180);
   const topGuideLineWidth = Math.max(24, previewWidth / 2 - 32);
   const sideGuideLineHeight = Math.max(24, previewHeight / 2 - 20);
 
@@ -342,121 +342,118 @@ export default function CustomMagnetBuilder() {
   ];
 
   return (
-    <div className="min-h-[calc(100vh-96px)] bg-[linear-gradient(145deg,#f4f4f5_0%,#ececef_55%,#e4e4e7_100%)] text-zinc-800">
-      <div className="w-full px-3 py-3 md:px-4">
-        <div className="mb-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-          <div className="grid items-end gap-4 lg:grid-cols-1">
-            <div>
-              <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--brand-primary)]">
-                <span className="rounded bg-zinc-900 px-1.5 py-0.5 text-[10px] tracking-normal text-[var(--brand-primary)]">SC</span>
-                Signcous Studio
-              </div>
-              <h1 className="mt-1 text-3xl font-semibold tracking-tight text-zinc-900">Custom Magnets Builder</h1>
-              <p className="mt-1 text-sm text-zinc-600">
-                Custom-size single-sided magnets with contour cut, rush production, and artwork upload.
-              </p>
-            </div>
+    <div className="flex min-h-[calc(100dvh-64px)] flex-col bg-[linear-gradient(145deg,#f4f4f5_0%,#ececef_55%,#e4e4e7_100%)] text-zinc-800 md:min-h-[calc(100dvh-88px)] md:h-[calc(100vh-88px)]">
+      <div className="mx-3 mt-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
+        <div className="border-b border-zinc-200 bg-white px-3 py-2 md:px-4 md:py-3">
+          <div className="mb-1 inline-flex items-center gap-2 rounded-full border border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--brand-primary)]">
+            <span className="rounded bg-zinc-900 px-1.5 py-0.5 text-[10px] tracking-normal text-[var(--brand-primary)]">SC</span>
+            Signcous Studio
           </div>
+          <h1 className="mt-1 text-[24px] font-semibold tracking-tight text-zinc-900 md:text-3xl">Custom Magnets Builder</h1>
+          <p className="mt-1 text-sm text-zinc-600">
+            Custom-size single-sided magnets with contour cut, rush production, and artwork upload.
+          </p>
         </div>
 
-        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
-          <section className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
-            <div className="border-b border-zinc-200 px-4 py-3">
-              <div className="text-sm font-medium text-zinc-700">Visual Preview</div>
-            </div>
+        <div
+          className="relative flex min-h-0 flex-1 overflow-hidden bg-[#fafaf9]"
+          style={{
+            backgroundImage:
+              "linear-gradient(to right, rgba(63,63,70,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(63,63,70,0.08) 1px, transparent 1px)",
+            backgroundSize: "26px 26px",
+          }}
+        >
+          <div className="pointer-events-none absolute left-1/2 top-4 z-20 w-[min(940px,calc(100%-24px))] -translate-x-1/2 px-2 md:px-3">
+            <div className="grid w-full max-w-[940px] grid-cols-1 gap-2 px-1 md:grid-cols-[0.85fr_1.4fr_0.85fr] md:items-start md:gap-8">
+              <div>
+                <div className="text-[27px] font-medium leading-[0.98] tracking-tight text-zinc-900 md:whitespace-nowrap md:text-[36px]">Custom Magnets</div>
+                <div className="mt-1 text-[11px] text-zinc-600 md:text-[12px]">Single-sided magnet builder, {dimensionLabel(width)} x {dimensionLabel(height)}</div>
+              </div>
 
-            <div
-              className="relative min-h-[440px] overflow-hidden rounded-b-2xl bg-[#fafaf9]"
-              style={{
-                backgroundImage:
-                  "linear-gradient(to right, rgba(63,63,70,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(63,63,70,0.08) 1px, transparent 1px)",
-                backgroundSize: "26px 26px",
-              }}
-            >
-              <div className="absolute right-4 top-4 z-20 max-w-[220px] rounded-lg border border-zinc-200 bg-zinc-50/95 px-3 py-2 shadow-sm backdrop-blur">
-                <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">Quick Rate Reference</div>
-                <div className="space-y-1 text-[11px] leading-5 text-zinc-600">
-                  <div className="flex items-center justify-between gap-3"><span>Base / sq in</span><span className="font-semibold text-zinc-800">{pricing && pricing.sqIn > 0 ? formatCurrency(pricing.base / pricing.sqIn) : formatCurrency(0)}</span></div>
-                  <div className="flex items-center justify-between gap-3"><span>Unit Price</span><span className="font-semibold text-zinc-800">{formatCurrency(pricing.unitPrice)}</span></div>
-                  <div className="flex items-center justify-between gap-3"><span>Sq in</span><span className="font-semibold text-zinc-800">{pricing.sqIn.toFixed(2)}</span></div>
+              <div className="text-[10px] text-zinc-600 md:pt-1 md:text-center">
+                <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500">Quick Rate Reference</div>
+                <div className="grid grid-cols-[56px_1fr] gap-x-2 gap-y-0.5 text-[10px] md:text-center md:grid-cols-2 md:justify-center md:inline-grid">
+                  <span className="text-zinc-500">Base / sq in</span>
+                  <span>{pricing && pricing.sqIn > 0 ? formatCurrency(pricing.base / pricing.sqIn) : formatCurrency(0)}</span>
+                  <span className="text-zinc-500">Unit Price</span>
+                  <span>{formatCurrency(pricing.unitPrice)}</span>
+                  <span className="text-zinc-500">Sq in</span>
+                  <span>{pricing.sqIn.toFixed(2)}</span>
                 </div>
               </div>
 
-              <div className="absolute right-4 top-[132px] z-20 rounded-lg border border-zinc-800 bg-zinc-900/95 px-4 py-2 text-right shadow-sm backdrop-blur">
-                <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--brand-primary)]">Live Total</div>
-                <div className="text-2xl font-semibold text-white">{formatCurrency(pricing.total)}</div>
-                <div className="text-[11px] text-zinc-300">
+              <div className="text-left md:pt-1 md:text-right">
+                <div className="text-[38px] leading-none font-semibold text-[var(--brand-primary)] md:text-[44px]">{formatCurrency(pricing.total)}</div>
+                <div className="mt-1 text-[11px] text-zinc-500">
                   {isQuantityValid ? `${quantity} magnet${quantity !== 1 ? "s" : ""} · ${dimensionLabel(width)} x ${dimensionLabel(height)}` : "Set quantity to calculate"}
                 </div>
               </div>
+            </div>
+          </div>
 
-              <div className="absolute left-1/2 top-1/2" style={{ transform: "translate(-50%, -50%)" }}>
-                <div className="pointer-events-none absolute -top-12 left-1/2 flex -translate-x-1/2 flex-col items-center text-[11px] font-semibold text-zinc-700">
-                  <span className="text-[10px] uppercase tracking-[0.2em] text-zinc-500">Top Of Image</span>
-                  <div className="mt-1 flex items-center gap-2">
-                    <span className="h-px bg-zinc-400" style={{ width: topGuideLineWidth }} />
-                    <span>{dimensionLabel(width)}</span>
-                    <span className="h-px bg-zinc-400" style={{ width: topGuideLineWidth }} />
-                  </div>
-                </div>
-
-                <div className="pointer-events-none absolute -left-14 top-1/2 flex -translate-y-1/2 flex-col items-center text-[11px] font-semibold text-zinc-700">
-                  <span className="w-px bg-zinc-400" style={{ height: sideGuideLineHeight }} />
-                  <span className="my-2 -rotate-90">{dimensionLabel(height)}</span>
-                  <span className="w-px bg-zinc-400" style={{ height: sideGuideLineHeight }} />
-                </div>
-
-                <div className="pointer-events-none absolute -bottom-7 left-1/2 -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
-                  Front Side
-                </div>
-
-                <div
-                  className={`relative overflow-hidden border-2 bg-white/80 shadow-lg ${
-                    isSizeValid
-                      ? "border-dashed border-[var(--brand-primary)]"
-                      : "border-solid border-red-500"
-                  }`}
-                  style={{
-                    width: previewWidth,
-                    height: previewHeight,
-                    borderRadius: roundedCorners === "none" ? 6 : roundedCorners === "half-inch" ? 12 : 18,
-                  }}
-                >
-                  {!isSizeValid ? (
-                    <div className="flex h-full items-center justify-center px-6 text-center">
-                      <div className="text-sm font-semibold text-red-600">{MAX_SIZE_ERROR}</div>
-                    </div>
-                  ) : uploadedImage ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={uploadedImage}
-                      alt="Custom magnet artwork preview"
-                      className="h-full w-full object-cover"
-                      draggable={false}
-                    />
-                  ) : (
-                    <div className="flex h-full items-center justify-center px-6 text-center text-zinc-500">
-                      <div>
-                        <div className="text-lg font-medium">Upload Artwork</div>
-                        <div className="mt-1 text-xs">Your custom magnet preview appears here</div>
-                      </div>
-                    </div>
-                  )}
-                </div>
+          <div className="absolute left-1/2 top-1/2" style={{ transform: "translate(-50%, -50%)" }}>
+            <div className="pointer-events-none absolute -top-12 left-1/2 flex -translate-x-1/2 flex-col items-center text-[11px] font-semibold text-zinc-700">
+              <span className="text-[10px] uppercase tracking-[0.2em] text-zinc-500">Top Of Image</span>
+              <div className="mt-1 flex items-center gap-2">
+                <span className="h-px bg-zinc-400" style={{ width: topGuideLineWidth }} />
+                <span>{dimensionLabel(width)}</span>
+                <span className="h-px bg-zinc-400" style={{ width: topGuideLineWidth }} />
               </div>
             </div>
 
-            <BuilderBottomToolbar
-              panels={toolbarPanels}
-              action={
-                <Button onClick={addToCart} className="h-10 w-full rounded bg-[var(--brand-primary)] px-6 text-sm hover:bg-[var(--brand-primary-hover)]" disabled={uploadingArtwork}>
-                  {addedToCart ? "Added to Cart" : "Add to Cart"}
-                </Button>
-              }
-            />
-          </section>
+            <div className="pointer-events-none absolute -left-14 top-1/2 flex -translate-y-1/2 flex-col items-center text-[11px] font-semibold text-zinc-700">
+              <span className="w-px bg-zinc-400" style={{ height: sideGuideLineHeight }} />
+              <span className="my-2 -rotate-90">{dimensionLabel(height)}</span>
+              <span className="w-px bg-zinc-400" style={{ height: sideGuideLineHeight }} />
+            </div>
 
-        </div>
+            <div className="pointer-events-none absolute -bottom-7 left-1/2 -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+              Front Side
+            </div>
+
+            <div
+              className={`relative overflow-hidden border-2 bg-white/80 shadow-lg ${
+                isSizeValid
+                  ? "border-dashed border-[var(--brand-primary)]"
+                  : "border-solid border-red-500"
+              }`}
+              style={{
+                width: previewWidth,
+                height: previewHeight,
+                borderRadius: roundedCorners === "none" ? 6 : roundedCorners === "half-inch" ? 12 : 18,
+              }}
+            >
+              {!isSizeValid ? (
+                <div className="flex h-full items-center justify-center px-6 text-center">
+                  <div className="text-sm font-semibold text-red-600">{MAX_SIZE_ERROR}</div>
+                </div>
+              ) : uploadedImage ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={uploadedImage}
+                  alt="Custom magnet artwork preview"
+                  className="h-full w-full object-cover"
+                  draggable={false}
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center px-6 text-center text-zinc-500">
+                  <div>
+                    <div className="text-lg font-medium">Upload Artwork</div>
+                    <div className="mt-1 text-xs">Your custom magnet preview appears here</div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+        <BuilderBottomToolbar
+          panels={toolbarPanels}
+          action={
+            <Button onClick={addToCart} className="h-10 w-full rounded bg-[var(--brand-primary)] px-6 text-sm hover:bg-[var(--brand-primary-hover)]" disabled={uploadingArtwork}>
+              {addedToCart ? "Added to Cart" : "Add to Cart"}
+            </Button>
+          }
+        />
       </div>
     </div>
   );
