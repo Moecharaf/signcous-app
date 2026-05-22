@@ -316,29 +316,6 @@ export default function CustomMagnetBuilder() {
         </>
       ),
     },
-    {
-      id: "quantity",
-      title: "Quantity",
-      value: isQuantityValid ? String(quantity) : "Set qty",
-      width: 260,
-      status: quantityError ? "alert" : isQuantityValid ? "ok" : "neutral",
-      content: (
-        <>
-          <input
-            type="number"
-            min={1}
-            value={quantityInput}
-            onChange={(event) => {
-              setQuantityInput(event.target.value);
-              if (quantityError) setQuantityError(null);
-            }}
-            onBlur={onBlurQuantity}
-            className="h-9 w-full rounded border border-zinc-300 px-2 text-sm"
-          />
-          {quantityError && <div className="text-xs font-medium text-rose-600">{quantityError}</div>}
-        </>
-      ),
-    },
   ];
 
   return (
