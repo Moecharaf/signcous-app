@@ -446,6 +446,8 @@ export default function CustomMagnetBuilder() {
             </div>
           </div>
 
+        </div>
+
         <BuilderBottomToolbar
           panels={toolbarPanels}
           action={
