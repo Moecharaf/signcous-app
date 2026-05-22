@@ -607,56 +607,6 @@ export default function GF2030Builder({ productId = 138 }: GF2030BuilderProps) {
             />
           </div>
 
-          <aside className="space-y-3">
-            <PanelCard eyebrow="Pricing" title="GF 2030APAE Breakdown">
-              <div className="space-y-1">
-                <BreakdownRow label="Area" value={pricing ? `${pricing.areaSqFt.toFixed(2)} sq ft` : "--"} muted={!pricing} />
-                <BreakdownRow label="Base rate" value={pricing ? `${formatCurrency(pricing.baseRate)}/sq ft` : "--"} muted={!pricing} />
-                <BreakdownRow label="Raw base" value={pricing ? formatCurrency(pricing.rawBase) : formatCurrency(0)} muted={!pricing} />
-                <BreakdownRow label="Contour cut" value={pricing ? formatCharge(pricing.contourCutCharge) : formatCurrency(0)} muted={!pricing || !contourCut} />
-                <BreakdownRow label="Rush" value={pricing ? formatCharge(pricing.rushCharge) : formatCurrency(0)} muted={!pricing || !rush} />
-                <BreakdownRow label="Minimum floor" value={formatCurrency(30)} muted={!pricing} />
-                <div className="my-2 border-t border-zinc-200" />
-                <BreakdownRow label="Per-item total" value={pricing ? formatCurrency(pricing.perItemTotal) : formatCurrency(0)} strong />
-                <BreakdownRow label="Quantity" value={String(pricing?.quantity ?? safeQuantity)} strong />
-                <BreakdownRow label="Grand total" value={pricing ? formatCurrency(pricing.grandTotal) : formatCurrency(0)} strong accent />
-              </div>
-              <div className="mt-3 text-xs leading-5 text-zinc-500">
-                GF 2030APAE intermediate film: $2.95/sq ft base, +15% contour cut, +100% rush, and $30 minimum. 52&quot; roll split logic optimizes large formats.
-              </div>
-            </PanelCard>
-
-            <PanelCard eyebrow="Split Logic" title="Panel Planning">
-              <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
-                <SummaryItem label="Roll Width" value={`${GF2030_MAX_ROLL_WIDTH}"`} />
-                <SummaryItem label="Requested Direction" value={splitDirection} />
-                <SummaryItem label="Applied Direction" value={pricing ? pricing.resolvedSplitDirection : "--"} />
-                <SummaryItem label="Panel Count" value={pricing ? String(pricing.panelCount) : "--"} />
-                <SummaryItem
-                  label="Panel Size"
-                  value={pricing ? `${formatInches(pricing.panelWidthIn)} x ${formatInches(pricing.panelHeightIn)}` : "--"}
-                />
-                <SummaryItem label="Laminate" value={selectedLaminate.label} />
-              </div>
-            </PanelCard>
-
-            <PanelCard eyebrow="Product Info" title="Adhesive Notes">
-              <div className="space-y-2 text-sm text-zinc-600">
-                <div className="rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2">
-                  <div className="font-semibold text-zinc-800">3.4 mil Polymeric Calendered Vinyl</div>
-                  <div className="text-xs text-zinc-600">Air-egress adhesive for bubble-free installation</div>
-                </div>
-                <div className="rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2">
-                  <div className="font-semibold text-zinc-800">5-Year Outdoor Durability</div>
-                  <div className="text-xs text-zinc-600">Vehicle graphics, wall graphics, window graphics, decals</div>
-                </div>
-                <div className="rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2">
-                  <div className="font-semibold text-zinc-800">Intermediate Film</div>
-                  <div className="text-xs text-zinc-600">Better than economy vinyl, more affordable than wrap film</div>
-                </div>
-              </div>
-            </PanelCard>
-          </aside>
         </div>
       </div>
     </div>
