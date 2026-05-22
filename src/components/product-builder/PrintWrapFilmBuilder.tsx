@@ -161,7 +161,6 @@ export default function PrintWrapFilmBuilder({ productId = 136 }: PrintWrapFilmB
   const [widthInches, setWidthInches] = useState("3");
   const [heightFeet, setHeightFeet] = useState("3");
   const [heightInches, setHeightInches] = useState("0");
-  const [quantity, setQuantity] = useState(1);
   const [laminate, setLaminate] = useState<PrintWrapLaminate>("gloss");
   const [contourCut, setContourCut] = useState(false);
   const [rush, setRush] = useState(false);
@@ -175,7 +174,7 @@ export default function PrintWrapFilmBuilder({ productId = 136 }: PrintWrapFilmB
 
   const width = composeDimensionInches(widthFeet, widthInches);
   const height = composeDimensionInches(heightFeet, heightInches);
-  const safeQuantity = Math.max(1, Math.floor(quantity) || 1);
+  const safeQuantity = 1;
 
   const widthError = width <= 0 ? "Width must be greater than 0." : width > 300 ? "Maximum width is 25 ft 0 in." : null;
   const heightError = height <= 0 ? "Height must be greater than 0." : height > 300 ? "Maximum height is 25 ft 0 in." : null;
@@ -194,7 +193,7 @@ export default function PrintWrapFilmBuilder({ productId = 136 }: PrintWrapFilmB
             splitDirection,
           })
         : null,
-    [width, height, safeQuantity, contourCut, rush, splitDirection, isValid]
+    [width, height, contourCut, rush, splitDirection, isValid]
   );
 
   const selectedLaminate = PRINT_WRAP_LAMINATE_OPTIONS.find((option) => option.value === laminate)!;
@@ -455,10 +454,39 @@ export default function PrintWrapFilmBuilder({ productId = 136 }: PrintWrapFilmB
               panels={[
                 { id: "artwork", title: "Artwork", value: uploadedFileName ? "Uploaded" : "No file", width: 420, content: <><label className="inline-flex h-10 w-full cursor-pointer items-center justify-center rounded border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-700 hover:border-zinc-400"><input type="file" accept="image/*,.pdf,.ai,.eps,.psd,.svg" className="hidden" onChange={onUploadArtwork} />{uploadingArtwork ? "Uploading..." : uploadedFileName ? "Replace Artwork" : "Upload Artwork"}</label>{uploadedFileName && <div className="flex items-center justify-between gap-2 rounded border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-600"><span className="truncate">{uploadedFileName}</span><button type="button" onClick={clearArtwork} className="font-semibold text-zinc-500 hover:text-zinc-900">Remove</button></div>}{uploadError && <div className="text-xs font-medium text-red-600">{uploadError}</div>}</> },
                 { id: "size", title: "Size", value: pricing ? `${formatInches(pricing.widthIn)} x ${formatInches(pricing.heightIn)}` : "Set dimensions", status: widthError || heightError ? "alert" : "ok", width: 360, content: (<SizeInputPanel widthFeet={widthFeet} widthInches={widthInches} heightFeet={heightFeet} heightInches={heightInches} onWidthFeetChange={setWidthFeet} onWidthInchesChange={setWidthInches} onHeightFeetChange={setHeightFeet} onHeightInchesChange={setHeightInches} onWidthNormalize={(f, i) => { setWidthFeet(f); setWidthInches(i); }} onHeightNormalize={(f, i) => { setHeightFeet(f); setHeightInches(i); }} error={widthError || heightError} helper="Up to 25 ft 0 in per side." />) },
-                { id: "laminate", title: "Laminate", value: selectedLaminate.label, width: 320, content: <select value={laminate} onChange={(event) => setLaminate(event.target.value as PrintWrapLaminate)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm">{PRINT_WRAP_LAMINATE_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select> },
-                { id: "split", title: "Split Direction", value: splitDirection === "auto" ? "Auto" : splitDirection.charAt(0).toUpperCase() + splitDirection.slice(1), width: 320, content: <select value={splitDirection} onChange={(event) => setSplitDirection(event.target.value as PrintWrapSplitDirection)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"><option value="auto">Auto</option><option value="vertical">Vertical</option><option value="horizontal">Horizontal</option></select> },
-                { id: "finish", title: "Contour / Rush", value: [contourCut ? "Contour" : "No contour", rush ? "Rush" : "Standard"].join(" / "), width: 320, content: <div className="grid grid-cols-2 gap-1"><button type="button" onClick={() => setContourCut((value) => !value)} className={`h-9 rounded border px-3 text-xs font-semibold transition ${contourCut ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Contour</button><button type="button" onClick={() => setRush((value) => !value)} className={`h-9 rounded border px-3 text-xs font-semibold transition ${rush ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Rush</button></div> },
-                { id: "quantity", title: "Quantity", value: String(safeQuantity), width: 260, content: <input type="number" min={1} value={safeQuantity} onChange={(event) => setQuantity(Math.max(1, Math.floor(Number(event.target.value) || 1)))} className="h-9 w-full rounded border border-zinc-300 px-2 text-sm" /> },
+                { id: "split", title: "Split Direction", value: splitDirection === "auto" ? "Auto" : splitDirection.charAt(0).toUpperCase() + splitDirection.slice(1), width: 320, content: <select value={splitDirection} onChange={(event) => setSplitDirection(event.target.value as PrintWrapSplitDirection)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm text-zinc-700 transition hover:border-[var(--brand-accent)] focus:border-[var(--brand-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary-soft)]"><option value="auto">Auto</option><option value="vertical">Vertical</option><option value="horizontal">Horizontal</option></select> },
+                { id: "finish", title: "Contour / Rush", value: [contourCut ? "Contour" : "No contour", rush ? "Rush" : "Standard"].join(" / "), width: 320, content: <div className="grid grid-cols-2 gap-1"><button type="button" onClick={() => setContourCut((value) => !value)} className={`h-9 rounded border px-3 text-xs font-semibold transition ${contourCut ? "border-[var(--brand-primary)] bg-[linear-gradient(90deg,var(--brand-primary-soft),var(--brand-accent-soft))] text-[var(--brand-primary)]" : "border-zinc-300 bg-white text-zinc-700 hover:border-[var(--brand-accent)]"}`}>Contour</button><button type="button" onClick={() => setRush((value) => !value)} className={`h-9 rounded border px-3 text-xs font-semibold transition ${rush ? "border-[var(--brand-primary)] bg-[linear-gradient(90deg,var(--brand-primary-soft),var(--brand-accent-soft))] text-[var(--brand-primary)]" : "border-zinc-300 bg-white text-zinc-700 hover:border-[var(--brand-accent)]"}`}>Rush</button></div> },
+                {
+                  id: "laminate",
+                  title: "Laminate",
+                  value: selectedLaminate.label.toUpperCase(),
+                  width: 320,
+                  content: (
+                    <div className="space-y-1">
+                      {PRINT_WRAP_LAMINATE_OPTIONS.map((option) => {
+                        const active = option.value === laminate;
+                        return (
+                          <button
+                            key={option.value}
+                            type="button"
+                            onClick={() => setLaminate(option.value)}
+                            className={`flex h-9 w-full items-center justify-between rounded border px-3 text-xs font-semibold uppercase tracking-[0.04em] transition ${
+                              active
+                                ? "border-[var(--brand-primary)] bg-[linear-gradient(90deg,var(--brand-primary-soft),var(--brand-accent-soft))] text-[var(--brand-primary)]"
+                                : "border-zinc-300 bg-white text-zinc-700 hover:border-[var(--brand-accent)]"
+                            }`}
+                          >
+                            <span>{option.label}</span>
+                            <span
+                              aria-hidden
+                              className={`h-2 w-2 rounded-full ${active ? "bg-[var(--brand-accent)]" : "bg-zinc-300"}`}
+                            />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ),
+                },
               ] satisfies BuilderBottomToolbarPanel[]}
               action={<Button className="h-10 w-full rounded bg-[var(--brand-primary)] text-xs font-semibold text-white hover:bg-[var(--brand-primary-hover)]" disabled={!isValid} onClick={addToCart}>{added ? "Added" : "Add"}</Button>}
             />
