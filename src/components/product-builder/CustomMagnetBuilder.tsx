@@ -104,16 +104,6 @@ export default function CustomMagnetBuilder() {
     };
   }, [width, height, quantity, contourCut, rush]);
 
-  const shippingInfo = useMemo(() => {
-    const totalSqIn = Math.max(0, width * height * Math.max(quantity, 0));
-    if (!totalSqIn) {
-      return "Enter valid size and quantity to estimate shipping.";
-    }
-
-    const shipping = totalSqIn >= 40500 ? 199 : Math.ceil(totalSqIn / 2025) * 10;
-    return `Estimated shipping tier: ${formatCurrency(shipping)} based on ${Math.round(totalSqIn)} total sq in.`;
-  }, [width, height, quantity]);
-
   function validate(): boolean {
     let valid = true;
 
@@ -466,63 +456,8 @@ export default function CustomMagnetBuilder() {
             />
           </section>
 
-          <aside className="space-y-3">
-            <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-              <div className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">Price Summary</div>
-              <div className="mt-3 space-y-2 text-sm">
-                <PriceRow label="Product" value="Custom Magnets" />
-                <PriceRow label="Print" value="Single-Sided" />
-                <PriceRow label="Width" value={dimensionLabel(width)} />
-                <PriceRow label="Height" value={dimensionLabel(height)} />
-                <PriceRow label="Rounded Corners" value={cornerOption.label} />
-                <PriceRow label="Contour Cut" value={contourCut ? "Yes" : "No"} />
-                <PriceRow label="Quantity" value={isQuantityValid ? String(quantity) : "-"} />
-                <div className="my-2 border-t border-zinc-200" />
-                <PriceRow label="Sq Inches" value={pricing.sqIn.toFixed(2)} />
-                <PriceRow label="Base" value={formatCurrency(pricing.base)} />
-                <PriceRow label="Contour Fee" value={formatCurrency(pricing.contourFee)} muted={!contourCut} />
-                <PriceRow label="Unit Price" value={formatCurrency(pricing.unitPrice)} />
-                <PriceRow label="Subtotal" value={formatCurrency(pricing.subtotal)} />
-                <PriceRow label="Rush Fee" value={formatCurrency(pricing.rushFee)} muted={!rush} />
-                <PriceRow label="Total" value={formatCurrency(pricing.total)} strong className="text-[var(--brand-primary)]" />
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-              <div className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">Shipping Info (Informational)</div>
-              <div className="mt-2 space-y-2 text-xs leading-5 text-zinc-600">
-                <p>Shipping is informational only and not included in product price.</p>
-                <p className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-zinc-700">{shippingInfo}</p>
-              </div>
-            </div>
-          </aside>
         </div>
       </div>
-    </div>
-  );
-}
-
-function PriceRow({
-  label,
-  value,
-  strong,
-  muted,
-  className,
-}: {
-  label: string;
-  value: string;
-  strong?: boolean;
-  muted?: boolean;
-  className?: string;
-}) {
-  return (
-    <div
-      className={`flex items-center justify-between ${
-        strong ? "font-semibold text-zinc-900" : muted ? "text-zinc-400" : "text-zinc-700"
-      } ${className ?? ""}`}
-    >
-      <span>{label}</span>
-      <span>{value}</span>
     </div>
   );
 }
