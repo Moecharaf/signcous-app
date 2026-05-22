@@ -426,37 +426,6 @@ export default function WindowClingBuilder({ productId = 137 }: WindowClingBuild
             />
           </div>
 
-          <aside className="space-y-3">
-            <PanelCard eyebrow="Pricing" title="Window Cling Breakdown">
-              <div className="space-y-1">
-                <BreakdownRow label="Square inches" value={pricing ? pricing.sqIn.toFixed(2) : "--"} muted={!pricing} />
-                <BreakdownRow label="Base rate" value={`${formatCurrency(WINDOW_CLING_RATE)}/sq in`} muted={!pricing} />
-                <BreakdownRow label="Raw base" value={pricing ? formatCurrency(pricing.rawBase) : formatCurrency(0)} muted={!pricing} />
-                <BreakdownRow label="Contour cut" value={pricing ? formatCharge(pricing.contourCutCharge) : formatCurrency(0)} muted={!pricing || !contourCut} />
-                <BreakdownRow label="Minimum floor" value={formatCurrency(WINDOW_CLING_MIN)} muted={!pricing} />
-                <div className="my-2 border-t border-zinc-200" />
-                <BreakdownRow label="Unit total" value={pricing ? formatCurrency(pricing.unitPrice) : formatCurrency(0)} strong />
-                <BreakdownRow label="Quantity" value={String(pricing?.quantity ?? safeQuantity)} strong />
-                <BreakdownRow label="Grand total" value={pricing ? formatCurrency(pricing.totalPrice) : formatCurrency(0)} strong accent />
-              </div>
-            </PanelCard>
-
-            <PanelCard eyebrow="Settings" title="Window Configuration">
-              <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
-                <SummaryItem label="Application" value={application} />
-                <SummaryItem label="Viewable" value={viewable} />
-                <SummaryItem label="Contour Cut" value={contourCut ? "Enabled" : "Disabled"} />
-                <SummaryItem label="Max Width" value={`${WINDOW_CLING_MAX_WIDTH_IN}"`} />
-                <SummaryItem label="Panel Splitting" value="Not available" />
-              </div>
-            </PanelCard>
-
-            <PanelCard eyebrow="Artwork Note" title="Transparent PNG Guidance">
-              <div className="rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-3 text-sm leading-6 text-zinc-600">
-                For best results on clear or spot-white artwork, upload a PNG with a transparent background.
-              </div>
-            </PanelCard>
-          </aside>
         </div>
       </div>
     </div>
