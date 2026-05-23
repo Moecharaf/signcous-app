@@ -1347,16 +1347,17 @@ export default function VinylBannerBuilder({
             </div>
           </div>
 
-          <div
-            className={`absolute left-1/2 top-1/2 select-none border border-zinc-500 bg-white ${isEconomicalStandProduct ? "cursor-pointer rounded-none shadow-none" : "cursor-default shadow"}`}
-            onClick={isEconomicalStandProduct ? openArtworkPicker : undefined}
-            onPointerDown={undefined}
-            style={{
-              width: artWidth,
-              height: artHeight,
-              transform: `translate(calc(-50% + ${artPos.x}px), calc(-50% + ${artPos.y}px))`,
-            }}
-          >
+          {hasSelectedSize ? (
+            <div
+              className={`absolute left-1/2 top-1/2 select-none border border-zinc-500 bg-white ${isEconomicalStandProduct ? "cursor-pointer rounded-none shadow-none" : "cursor-default shadow"}`}
+              onClick={isEconomicalStandProduct ? openArtworkPicker : undefined}
+              onPointerDown={undefined}
+              style={{
+                width: artWidth,
+                height: artHeight,
+                transform: `translate(calc(-50% + ${artPos.x}px), calc(-50% + ${artPos.y}px))`,
+              }}
+            >
             {isMeshProduct && (
               <>
                 {/* Top dimension line */}
@@ -1495,37 +1496,33 @@ export default function VinylBannerBuilder({
               </>
             )}
 
-            {uploadedImage ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={uploadedImage}
-                alt="Artwork preview"
-                className={`h-full w-full object-cover ${isEconomicalStandProduct ? "rounded-none" : ""}`}
-                draggable={false}
-              />
-            ) : uploadedFileUrl && uploadedFileName?.toLowerCase().endsWith(".pdf") ? (
-              <div className="relative h-full w-full overflow-hidden">
-                <iframe
-                  src={`${uploadedFileUrl}#toolbar=0&navpanes=0&scrollbar=0&page=1&view=FitH`}
-                  title="Uploaded PDF artwork preview"
-                  className="absolute -left-3 top-0 h-full w-[calc(100%+32px)] pointer-events-none"
-                  scrolling="no"
-                  style={{ clipPath: "inset(0 20px 0 0)" }}
+              {uploadedImage ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={uploadedImage}
+                  alt="Artwork preview"
+                  className={`h-full w-full object-cover ${isEconomicalStandProduct ? "rounded-none" : ""}`}
+                  draggable={false}
                 />
-                <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-6 bg-white" />
-              </div>
-            ) : (
-              <div className="flex h-full items-center justify-center px-6 text-center text-zinc-400">
-                <div>
-                  <div className="text-base font-medium">
-                    {hasSelectedSize ? "Drop Artwork Here" : "Please specify dimensions"}
-                  </div>
-                  <div className="mt-1 text-xs">
-                    {hasSelectedSize ? "or use Upload Artwork from controls" : "or upload artwork from controls"}
+              ) : uploadedFileUrl && uploadedFileName?.toLowerCase().endsWith(".pdf") ? (
+                <div className="relative h-full w-full overflow-hidden">
+                  <iframe
+                    src={`${uploadedFileUrl}#toolbar=0&navpanes=0&scrollbar=0&page=1&view=FitH`}
+                    title="Uploaded PDF artwork preview"
+                    className="absolute -left-3 top-0 h-full w-[calc(100%+32px)] pointer-events-none"
+                    scrolling="no"
+                    style={{ clipPath: "inset(0 20px 0 0)" }}
+                  />
+                  <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-6 bg-white" />
+                </div>
+              ) : (
+                <div className="flex h-full items-center justify-center px-6 text-center text-zinc-400">
+                  <div>
+                    <div className="text-base font-medium">Drop Artwork Here</div>
+                    <div className="mt-1 text-xs">or use Upload Artwork from controls</div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
             {form.grommets && !isCanvasProduct && !isHdpeProduct && !isPosterProduct && !isNoCurlProduct && meshGrommetPoints.map((point, index) => (
               <span
@@ -1573,7 +1570,16 @@ export default function VinylBannerBuilder({
             })()}
 
 
-          </div>
+            </div>
+          ) : (
+            <div className="absolute left-1/2 top-1/2 w-full max-w-[420px] -translate-x-1/2 -translate-y-1/2 px-6 text-center text-zinc-500">
+              <div className="text-sm font-semibold uppercase tracking-[0.16em] text-zinc-400">Front Side</div>
+              <div className="mt-3 text-base font-medium text-zinc-700">Please specify dimensions</div>
+              <div className="mt-1 text-sm text-zinc-500">
+                {uploadedFileName ? "Artwork uploaded. Enter a size to preview it here." : "Enter a size or upload artwork from controls to start your layout."}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
