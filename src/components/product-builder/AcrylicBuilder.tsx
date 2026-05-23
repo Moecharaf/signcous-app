@@ -349,10 +349,10 @@ function AcrylicCanvas({
 export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
   const cart = useCart();
 
-  const [widthFeet, setWidthFeet] = useState("2");
+  const [widthFeet, setWidthFeet] = useState("0");
   const [widthInches, setWidthInches] = useState("0");
-  const [heightFeet, setHeightFeet] = useState("1");
-  const [heightInches, setHeightInches] = useState("6");
+  const [heightFeet, setHeightFeet] = useState("0");
+  const [heightInches, setHeightInches] = useState("0");
   const [quantity, setQuantity] = useState(1);
   const [thickness, setThickness] = useState<AcrylicThickness>("1/8");
   const [mounting, setMounting] = useState<AcrylicMounting>("none");
