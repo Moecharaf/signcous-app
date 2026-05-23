@@ -146,9 +146,9 @@ function PanelSplitPreview({ panelCount }: { panelCount: number }) {
 export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps) {
   const cart = useCart();
 
-  const [widthFeet, setWidthFeet] = useState("4");
+  const [widthFeet, setWidthFeet] = useState("0");
   const [widthInches, setWidthInches] = useState("0");
-  const [heightFeet, setHeightFeet] = useState("3");
+  const [heightFeet, setHeightFeet] = useState("0");
   const [heightInches, setHeightInches] = useState("0");
   const [quantity, setQuantity] = useState(1);
   const [side, setSide] = useState<DualViewSide>("single");

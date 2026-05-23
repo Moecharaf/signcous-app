@@ -58,9 +58,9 @@ function PanelSplitPreview({ panelCount }: { panelCount: number }) {
 export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuilderProps) {
   const cart = useCart();
 
-  const [widthFeet, setWidthFeet] = useState("4");
-  const [widthInches, setWidthInches] = useState("2");
-  const [heightFeet, setHeightFeet] = useState("3");
+  const [widthFeet, setWidthFeet] = useState("0");
+  const [widthInches, setWidthInches] = useState("0");
+  const [heightFeet, setHeightFeet] = useState("0");
   const [heightInches, setHeightInches] = useState("0");
   const [quantity, setQuantity] = useState(1);
   const [material, setMaterial] = useState<OneWayWindowMaterial>("50/50");

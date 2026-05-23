@@ -155,9 +155,9 @@ function SplitLinePreview({
 export default function GF2030Builder({ productId = 138 }: GF2030BuilderProps) {
   const cart = useCart();
 
-  const [widthFeet, setWidthFeet] = useState("4");
-  const [widthInches, setWidthInches] = useState("3");
-  const [heightFeet, setHeightFeet] = useState("3");
+  const [widthFeet, setWidthFeet] = useState("0");
+  const [widthInches, setWidthInches] = useState("0");
+  const [heightFeet, setHeightFeet] = useState("0");
   const [heightInches, setHeightInches] = useState("0");
   const [quantity, setQuantity] = useState(1);
   const [laminate, setLaminate] = useState<GF2030Laminate>("gloss");

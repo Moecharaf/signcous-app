@@ -116,9 +116,9 @@ function SummaryItem({ label, value }: { label: string; value: string }) {
 export default function WindowClingBuilder({ productId = 137 }: WindowClingBuilderProps) {
   const cart = useCart();
 
-  const [widthFeet, setWidthFeet] = useState("2");
+  const [widthFeet, setWidthFeet] = useState("0");
   const [widthInches, setWidthInches] = useState("0");
-  const [heightFeet, setHeightFeet] = useState("2");
+  const [heightFeet, setHeightFeet] = useState("0");
   const [heightInches, setHeightInches] = useState("0");
   const [quantity, setQuantity] = useState(1);
   const [application, setApplication] = useState<WindowClingApplication>("inside");

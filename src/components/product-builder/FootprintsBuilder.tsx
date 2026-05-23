@@ -114,8 +114,8 @@ function toInches(valueStr: string, unit: DimensionUnit): number {
 export default function FootprintsBuilder({ productId = 0 }: FootprintsBuilderProps) {
   const cart = useCart();
 
-  const [widthStr, setWidthStr] = useState("36");
-  const [heightStr, setHeightStr] = useState("36");
+  const [widthStr, setWidthStr] = useState("0");
+  const [heightStr, setHeightStr] = useState("0");
   const [widthUnit, setWidthUnit] = useState<DimensionUnit>("inches");
   const [heightUnit, setHeightUnit] = useState<DimensionUnit>("inches");
   const [quantity, setQuantity] = useState(1);
