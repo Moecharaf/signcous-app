@@ -40,10 +40,10 @@ function dimensionLabel(value: number): string {
 export default function CustomMagnetBuilder() {
   const cart = useCart();
 
-  const [widthFeet, setWidthFeet] = useState("2");
+  const [widthFeet, setWidthFeet] = useState("0");
   const [widthInches, setWidthInches] = useState("0");
-  const [heightFeet, setHeightFeet] = useState("1");
-  const [heightInches, setHeightInches] = useState("6");
+  const [heightFeet, setHeightFeet] = useState("0");
+  const [heightInches, setHeightInches] = useState("0");
   const [quantityInput, setQuantityInput] = useState("1");
   const [roundedCorners, setRoundedCorners] = useState<RoundedCornerOption>("none");
   const [contourCut, setContourCut] = useState(false);

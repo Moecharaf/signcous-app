@@ -28,7 +28,6 @@ const ROUNDED_CORNER_OPTIONS: Array<{ value: RoundedCornerOption; label: string;
   { value: "one-inch", label: '1"', price: 0 },
 ];
 
-const DEFAULT_SIZE_KEY = "72x24";
 const PREVIEW_MAX_WIDTH = 720;
 const PREVIEW_MAX_HEIGHT = 420;
 
@@ -49,7 +48,7 @@ function getDimensionLabel(value: number): string {
 
 export default function VehicleMagnetBuilder() {
   const cart = useCart();
-  const [selectedSizeKey, setSelectedSizeKey] = useState(DEFAULT_SIZE_KEY);
+  const [selectedSizeKey, setSelectedSizeKey] = useState("");
   const [roundedCorners, setRoundedCorners] = useState<RoundedCornerOption>("none");
   const [quantityInput, setQuantityInput] = useState("1");
   const [rush, setRush] = useState(false);
@@ -62,10 +61,10 @@ export default function VehicleMagnetBuilder() {
   const [uploadingArtwork, setUploadingArtwork] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
-  const selectedSize =
-    SIZE_OPTIONS.find((option) => getSizeKey(option) === selectedSizeKey) ??
-    SIZE_OPTIONS.find((option) => getSizeKey(option) === DEFAULT_SIZE_KEY) ??
-    SIZE_OPTIONS[SIZE_OPTIONS.length - 1];
+  const selectedSize = SIZE_OPTIONS.find((option) => getSizeKey(option) === selectedSizeKey) ?? null;
+  const hasSelectedSize = selectedSize !== null;
+  const selectedWidth = selectedSize?.width ?? 0;
+  const selectedHeight = selectedSize?.height ?? 0;
 
   const quantity = useMemo(() => {
     const parsed = Number.parseInt(quantityInput, 10);
@@ -76,6 +75,15 @@ export default function VehicleMagnetBuilder() {
     ROUNDED_CORNER_OPTIONS.find((option) => option.value === roundedCorners) ?? ROUNDED_CORNER_OPTIONS[0];
 
   const pricing = useMemo(() => {
+    if (!hasSelectedSize) {
+      return {
+        basePrice: 0,
+        subtotal: 0,
+        rushFee: 0,
+        total: 0,
+      };
+    }
+
     const basePrice = selectedSize.price;
     const subtotal = basePrice * quantity;
     const rushFee = rush ? subtotal : 0;
@@ -87,14 +95,13 @@ export default function VehicleMagnetBuilder() {
       rushFee,
       total,
     };
-  }, [selectedSize.price, quantity, rush]);
+  }, [hasSelectedSize, selectedSize, quantity, rush]);
 
-  const previewScale = Math.min(
-    PREVIEW_MAX_WIDTH / selectedSize.width,
-    PREVIEW_MAX_HEIGHT / selectedSize.height
-  );
-  const previewWidth = selectedSize.width * previewScale;
-  const previewHeight = selectedSize.height * previewScale;
+  const previewScale = hasSelectedSize
+    ? Math.min(PREVIEW_MAX_WIDTH / Math.max(selectedWidth, 1), PREVIEW_MAX_HEIGHT / Math.max(selectedHeight, 1))
+    : 1;
+  const previewWidth = hasSelectedSize ? selectedWidth * previewScale : 320;
+  const previewHeight = hasSelectedSize ? selectedHeight * previewScale : 220;
   const topGuideLineWidth = Math.max(24, previewWidth / 2 - 32);
   const sideGuideLineHeight = Math.max(24, previewHeight / 2 - 20);
 
@@ -173,6 +180,7 @@ export default function VehicleMagnetBuilder() {
   }
 
   function handleAddToCart() {
+    if (!hasSelectedSize) return;
     if (!validateQuantity()) return;
 
     if (uploadingArtwork) {
@@ -183,8 +191,8 @@ export default function VehicleMagnetBuilder() {
     cart.addItem({
       productId: 48,
       productName: "Vehicle Magnet",
-      width: selectedSize.width,
-      height: selectedSize.height,
+      width: selectedWidth,
+      height: selectedHeight,
       unit: "inches",
       quantity,
       material: "Vehicle Magnet",
@@ -250,10 +258,11 @@ export default function VehicleMagnetBuilder() {
     {
       id: "size",
       title: "Size",
-      value: selectedSize.label,
+      value: hasSelectedSize ? selectedSize.label : '0" x 0"',
       width: 320,
       content: (
         <select value={selectedSizeKey} onChange={(event) => setSelectedSizeKey(event.target.value)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm">
+          <option value="">Select size</option>
           {SIZE_OPTIONS.map((option) => (
             <option key={getSizeKey(option)} value={getSizeKey(option)}>
               {option.label} - {formatCurrency(option.price)}
@@ -317,7 +326,7 @@ export default function VehicleMagnetBuilder() {
             <div className="grid w-full max-w-[940px] grid-cols-1 gap-2 px-1 md:grid-cols-[0.85fr_1.4fr_0.85fr] md:items-start md:gap-8">
               <div>
                 <div className="text-[27px] font-medium leading-[0.98] tracking-tight text-zinc-900 md:whitespace-nowrap md:text-[36px]">Vehicle Magnet</div>
-                <div className="mt-1 text-[11px] text-zinc-600 md:text-[12px]">Single-sided magnet builder, {selectedSize.label}</div>
+                <div className="mt-1 text-[11px] text-zinc-600 md:text-[12px]">Single-sided magnet builder, {hasSelectedSize ? selectedSize.label : '0" x 0"'}</div>
               </div>
 
               <div className="text-[10px] text-zinc-600 md:pt-1 md:text-center">
@@ -326,7 +335,7 @@ export default function VehicleMagnetBuilder() {
                   <span className="text-zinc-500">Price / unit</span>
                   <span>{quantity > 0 ? formatCurrency(pricing.total / quantity) : formatCurrency(0)}</span>
                   <span className="text-zinc-500">Size</span>
-                  <span>{selectedSize.label}</span>
+                  <span>{hasSelectedSize ? selectedSize.label : '0" x 0"'}</span>
                   <span className="text-zinc-500">Quantity</span>
                   <span>{quantity}</span>
                 </div>
@@ -335,68 +344,78 @@ export default function VehicleMagnetBuilder() {
               <div className="text-left md:pt-1 md:text-right">
                 <div className="text-[38px] leading-none font-semibold text-[var(--brand-primary)] md:text-[44px]">{formatCurrency(pricing.total)}</div>
                 <div className="mt-1 text-[11px] text-zinc-500">
-                  {quantity > 0 ? `${quantity} magnet${quantity !== 1 ? "s" : ""} · ${selectedSize.label}` : "Set quantity to calculate"}
+                  {quantity > 0
+                    ? `${quantity} magnet${quantity !== 1 ? "s" : ""} · ${hasSelectedSize ? selectedSize.label : '0" x 0"'}`
+                    : "Set quantity to calculate"}
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="absolute left-1/2 top-1/2" style={{ transform: "translate(-50%, -50%)" }}>
-            <div className="pointer-events-none absolute -top-12 left-1/2 flex -translate-x-1/2 flex-col items-center text-[11px] font-semibold text-zinc-700">
-              <span className="text-[10px] uppercase tracking-[0.2em] text-zinc-500">Top Of Image</span>
-              <div className="mt-1 flex items-center gap-2">
-                <span className="h-px bg-zinc-400" style={{ width: topGuideLineWidth }} />
-                <span>{getDimensionLabel(selectedSize.width)}</span>
-                <span className="h-px bg-zinc-400" style={{ width: topGuideLineWidth }} />
+          {hasSelectedSize ? (
+            <div className="absolute left-1/2 top-1/2" style={{ transform: "translate(-50%, -50%)" }}>
+              <div className="pointer-events-none absolute -top-12 left-1/2 flex -translate-x-1/2 flex-col items-center text-[11px] font-semibold text-zinc-700">
+                <span className="text-[10px] uppercase tracking-[0.2em] text-zinc-500">Top Of Image</span>
+                <div className="mt-1 flex items-center gap-2">
+                  <span className="h-px bg-zinc-400" style={{ width: topGuideLineWidth }} />
+                  <span>{getDimensionLabel(selectedWidth)}</span>
+                  <span className="h-px bg-zinc-400" style={{ width: topGuideLineWidth }} />
+                </div>
               </div>
-            </div>
 
-            <div className="pointer-events-none absolute -left-14 top-1/2 flex -translate-y-1/2 flex-col items-center text-[11px] font-semibold text-zinc-700">
-              <span className="w-px bg-zinc-400" style={{ height: sideGuideLineHeight }} />
-              <span className="my-2 -rotate-90">{getDimensionLabel(selectedSize.height)}</span>
-              <span className="w-px bg-zinc-400" style={{ height: sideGuideLineHeight }} />
-            </div>
+              <div className="pointer-events-none absolute -left-14 top-1/2 flex -translate-y-1/2 flex-col items-center text-[11px] font-semibold text-zinc-700">
+                <span className="w-px bg-zinc-400" style={{ height: sideGuideLineHeight }} />
+                <span className="my-2 -rotate-90">{getDimensionLabel(selectedHeight)}</span>
+                <span className="w-px bg-zinc-400" style={{ height: sideGuideLineHeight }} />
+              </div>
 
-            <div className="pointer-events-none absolute -bottom-7 left-1/2 -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
-              Front Side
-            </div>
+              <div className="pointer-events-none absolute -bottom-7 left-1/2 -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+                Front Side
+              </div>
 
-            <div
-              className="relative overflow-hidden border-2 border-dashed border-[var(--brand-primary)] bg-[var(--brand-primary-soft)]/60 shadow-lg"
-              style={{
-                width: previewWidth,
-                height: previewHeight,
-                borderRadius: roundedCorners === "none" ? 6 : roundedCorners === "half-inch" ? 12 : 18,
-              }}
-            >
-              {uploadedImage ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={uploadedImage}
-                  alt="Vehicle magnet artwork preview"
-                  className="h-full w-full object-cover"
-                  draggable={false}
-                />
-              ) : uploadedFileUrl && uploadedFileName?.toLowerCase().endsWith(".pdf") ? (
-                <div className="relative h-full w-full">
-                  <iframe
-                    src={`${uploadedFileUrl}#toolbar=0&navpanes=0&scrollbar=0&page=1&view=FitH`}
-                    title="Uploaded PDF artwork preview"
-                    className="absolute -left-3 top-0 h-full w-[calc(100%+32px)] pointer-events-none"
-                    scrolling="no"
-                    style={{ clipPath: "inset(0 20px 0 0)" }}
+              <div
+                className="relative overflow-hidden border-2 border-dashed border-[var(--brand-primary)] bg-[var(--brand-primary-soft)]/60 shadow-lg"
+                style={{
+                  width: previewWidth,
+                  height: previewHeight,
+                  borderRadius: roundedCorners === "none" ? 6 : roundedCorners === "half-inch" ? 12 : 18,
+                }}
+              >
+                {uploadedImage ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={uploadedImage}
+                    alt="Vehicle magnet artwork preview"
+                    className="h-full w-full object-cover"
+                    draggable={false}
                   />
-                </div>
-              ) : (
-                <div className="flex h-full items-center justify-center px-6 text-center text-zinc-500">
-                  <div>
-                    <div className="text-lg font-medium">Upload Artwork</div>
-                    <div className="mt-1 text-xs">Your magnet preview appears here</div>
+                ) : uploadedFileUrl && uploadedFileName?.toLowerCase().endsWith(".pdf") ? (
+                  <div className="relative h-full w-full">
+                    <iframe
+                      src={`${uploadedFileUrl}#toolbar=0&navpanes=0&scrollbar=0&page=1&view=FitH`}
+                      title="Uploaded PDF artwork preview"
+                      className="absolute -left-3 top-0 h-full w-[calc(100%+32px)] pointer-events-none"
+                      scrolling="no"
+                      style={{ clipPath: "inset(0 20px 0 0)" }}
+                    />
                   </div>
-                </div>
-              )}
+                ) : (
+                  <div className="flex h-full items-center justify-center px-6 text-center text-zinc-500">
+                    <div>
+                      <div className="text-lg font-medium">Upload Artwork</div>
+                      <div className="mt-1 text-xs">Your magnet preview appears here</div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="absolute left-1/2 top-1/2 w-full max-w-[420px] -translate-x-1/2 -translate-y-1/2 px-6 text-center text-zinc-500">
+              <div className="text-sm font-semibold uppercase tracking-[0.16em] text-zinc-400">Front Side</div>
+              <div className="mt-3 text-base font-medium text-zinc-700">Please select a size</div>
+              <div className="mt-1 text-sm text-zinc-500">Choose a vehicle magnet size to start your layout and pricing.</div>
+            </div>
+          )}
         </div>
 
         <BuilderBottomToolbar
