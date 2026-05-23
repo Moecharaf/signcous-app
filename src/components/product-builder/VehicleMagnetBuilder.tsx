@@ -307,11 +307,11 @@ export default function VehicleMagnetBuilder() {
       <div className="mx-3 mt-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
         <div
           className="relative flex min-h-0 flex-1 overflow-hidden bg-[#fafaf9]"
-              style={{
-                backgroundImage:
-                  "linear-gradient(to right, rgba(63,63,70,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(63,63,70,0.08) 1px, transparent 1px)",
-                backgroundSize: "26px 26px",
-              }}
+          style={{
+            backgroundImage:
+              "linear-gradient(to right, rgba(63,63,70,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(63,63,70,0.08) 1px, transparent 1px)",
+            backgroundSize: "26px 26px",
+          }}
         >
           <div className="pointer-events-none absolute left-1/2 top-4 z-20 w-[min(940px,calc(100%-24px))] -translate-x-1/2 px-2 md:px-3">
             <div className="grid w-full max-w-[940px] grid-cols-1 gap-2 px-1 md:grid-cols-[0.85fr_1.4fr_0.85fr] md:items-start md:gap-8">
@@ -341,62 +341,62 @@ export default function VehicleMagnetBuilder() {
             </div>
           </div>
 
-              <div className="absolute left-1/2 top-1/2" style={{ transform: "translate(-50%, -50%)" }}>
-                <div className="pointer-events-none absolute -top-12 left-1/2 flex -translate-x-1/2 flex-col items-center text-[11px] font-semibold text-zinc-700">
-                  <span className="text-[10px] uppercase tracking-[0.2em] text-zinc-500">Top Of Image</span>
-                  <div className="mt-1 flex items-center gap-2">
-                    <span className="h-px bg-zinc-400" style={{ width: topGuideLineWidth }} />
-                    <span>{getDimensionLabel(selectedSize.width)}</span>
-                    <span className="h-px bg-zinc-400" style={{ width: topGuideLineWidth }} />
-                  </div>
-                </div>
-
-                <div className="pointer-events-none absolute -left-14 top-1/2 flex -translate-y-1/2 flex-col items-center text-[11px] font-semibold text-zinc-700">
-                  <span className="w-px bg-zinc-400" style={{ height: sideGuideLineHeight }} />
-                  <span className="my-2 -rotate-90">{getDimensionLabel(selectedSize.height)}</span>
-                  <span className="w-px bg-zinc-400" style={{ height: sideGuideLineHeight }} />
-                </div>
-
-                <div className="pointer-events-none absolute -bottom-7 left-1/2 -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
-                  Front Side
-                </div>
-
-                <div
-                  className="relative overflow-hidden border-2 border-dashed border-[var(--brand-primary)] bg-[var(--brand-primary-soft)]/60 shadow-lg"
-                  style={{
-                    width: previewWidth,
-                    height: previewHeight,
-                    borderRadius: roundedCorners === "none" ? 6 : roundedCorners === "half-inch" ? 12 : 18,
-                  }}
-                >
-                  {uploadedImage ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={uploadedImage}
-                      alt="Vehicle magnet artwork preview"
-                      className="h-full w-full object-cover"
-                      draggable={false}
-                    />
-                  ) : uploadedFileUrl && uploadedFileName?.toLowerCase().endsWith(".pdf") ? (
-                        <div className="relative h-full w-full">
-                          <iframe
-                            src={`${uploadedFileUrl}#toolbar=0&navpanes=0&scrollbar=0&page=1&view=FitH`}
-                            title="Uploaded PDF artwork preview"
-                            className="absolute -left-3 top-0 h-full w-[calc(100%+32px)] pointer-events-none"
-                            scrolling="no" style={{ clipPath: "inset(0 20px 0 0)" }}
-                          />
-                        </div>
-                      ) : (
-                    <div className="flex h-full items-center justify-center px-6 text-center text-zinc-500">
-                      <div>
-                        <div className="text-lg font-medium">Upload Artwork</div>
-                        <div className="mt-1 text-xs">Your magnet preview appears here</div>
-                      </div>
-                    </div>
-                  )}
-                </div>
+          <div className="absolute left-1/2 top-1/2" style={{ transform: "translate(-50%, -50%)" }}>
+            <div className="pointer-events-none absolute -top-12 left-1/2 flex -translate-x-1/2 flex-col items-center text-[11px] font-semibold text-zinc-700">
+              <span className="text-[10px] uppercase tracking-[0.2em] text-zinc-500">Top Of Image</span>
+              <div className="mt-1 flex items-center gap-2">
+                <span className="h-px bg-zinc-400" style={{ width: topGuideLineWidth }} />
+                <span>{getDimensionLabel(selectedSize.width)}</span>
+                <span className="h-px bg-zinc-400" style={{ width: topGuideLineWidth }} />
               </div>
             </div>
+
+            <div className="pointer-events-none absolute -left-14 top-1/2 flex -translate-y-1/2 flex-col items-center text-[11px] font-semibold text-zinc-700">
+              <span className="w-px bg-zinc-400" style={{ height: sideGuideLineHeight }} />
+              <span className="my-2 -rotate-90">{getDimensionLabel(selectedSize.height)}</span>
+              <span className="w-px bg-zinc-400" style={{ height: sideGuideLineHeight }} />
+            </div>
+
+            <div className="pointer-events-none absolute -bottom-7 left-1/2 -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+              Front Side
+            </div>
+
+            <div
+              className="relative overflow-hidden border-2 border-dashed border-[var(--brand-primary)] bg-[var(--brand-primary-soft)]/60 shadow-lg"
+              style={{
+                width: previewWidth,
+                height: previewHeight,
+                borderRadius: roundedCorners === "none" ? 6 : roundedCorners === "half-inch" ? 12 : 18,
+              }}
+            >
+              {uploadedImage ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={uploadedImage}
+                  alt="Vehicle magnet artwork preview"
+                  className="h-full w-full object-cover"
+                  draggable={false}
+                />
+              ) : uploadedFileUrl && uploadedFileName?.toLowerCase().endsWith(".pdf") ? (
+                <div className="relative h-full w-full">
+                  <iframe
+                    src={`${uploadedFileUrl}#toolbar=0&navpanes=0&scrollbar=0&page=1&view=FitH`}
+                    title="Uploaded PDF artwork preview"
+                    className="absolute -left-3 top-0 h-full w-[calc(100%+32px)] pointer-events-none"
+                    scrolling="no"
+                    style={{ clipPath: "inset(0 20px 0 0)" }}
+                  />
+                </div>
+              ) : (
+                <div className="flex h-full items-center justify-center px-6 text-center text-zinc-500">
+                  <div>
+                    <div className="text-lg font-medium">Upload Artwork</div>
+                    <div className="mt-1 text-xs">Your magnet preview appears here</div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         <BuilderBottomToolbar
