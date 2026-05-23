@@ -82,8 +82,8 @@ const CONTROL_PANEL_TITLE: Record<ControlPanel, string> = {
 };
 
 const DEFAULTS: FormState = {
-  width: "48",
-  height: "24",
+  width: "0",
+  height: "0",
   unit: "inches",
   quantity: "1",
   material: "13oz Vinyl",
@@ -398,6 +398,7 @@ export default function VinylBannerBuilder({
   const isPosterProduct = pricingMode === "poster";
   const isNoCurlProduct = pricingMode === "nocurl";
   const isEconomicalStandProduct = pricingMode === "economical-stand";
+  const hasSelectedSize = isEconomicalStandProduct || (widthIn > 0 && heightIn > 0);
   const effectiveQtyNum = isPosterProduct ? 1 : qtyNum;
   const isMeshMaterial  = isMeshProduct || form.material === "Mesh Banner";
   const canEnableDoubleSided = !isCanvasProduct && !isMeshProduct && !isHdpeProduct && !isPosterProduct && !isNoCurlProduct && !isEconomicalStandProduct && !isMeshMaterial && form.material === "18oz Vinyl";
@@ -477,6 +478,22 @@ export default function VinylBannerBuilder({
 
   const pricing = useMemo(
     () => {
+      if (!hasSelectedSize) {
+        return {
+          sqFt: 0,
+          basePricePerUnit: 0,
+          grommetCostPerUnit: 0,
+          edgeFinishCostPerUnit: 0,
+          polePocketCostPerUnit: 0,
+          windSlitsCostPerUnit: 0,
+          hemmingCostPerUnit: 0,
+          addOnCostPerUnit: 0,
+          rushSurchargePerUnit: 0,
+          unitPrice: 0,
+          totalPrice: 0,
+        };
+      }
+
       if (isMeshProduct) {
         const m = calculateMeshPrice(
           widthNum, heightNum, form.unit, effectiveQtyNum,
@@ -613,6 +630,7 @@ export default function VinylBannerBuilder({
       isPosterProduct,
       isNoCurlProduct,
       isEconomicalStandProduct,
+      hasSelectedSize,
       widthNum,
       heightNum,
       form.unit,
@@ -1499,8 +1517,12 @@ export default function VinylBannerBuilder({
             ) : (
               <div className="flex h-full items-center justify-center px-6 text-center text-zinc-400">
                 <div>
-                  <div className="text-base font-medium">Drop Artwork Here</div>
-                  <div className="mt-1 text-xs">or use Upload Artwork from controls</div>
+                  <div className="text-base font-medium">
+                    {hasSelectedSize ? "Drop Artwork Here" : "Please specify dimensions"}
+                  </div>
+                  <div className="mt-1 text-xs">
+                    {hasSelectedSize ? "or use Upload Artwork from controls" : "or upload artwork from controls"}
+                  </div>
                 </div>
               </div>
             )}
