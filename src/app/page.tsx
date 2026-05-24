@@ -20,7 +20,7 @@ export default function LandingPage() {
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_24%_16%,rgba(0,122,255,.32),transparent_52%),radial-gradient(circle_at_82%_20%,rgba(255,124,0,.28),transparent_42%),linear-gradient(180deg,rgba(3,7,18,.32),rgba(3,7,18,.88))]"
       />
       <Image
-        src="/uploads/e9801d02-3a0b-476d-a41d-e451f92d3992.png"
+        src="/card-images/landing-hero-signcous.png"
         alt="Signcous banner, rigid signs, and storefront graphics showcase"
         fill
         priority
