@@ -1,15 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const requestedNext = searchParams.get("next") ?? "";
+  const nextPath = requestedNext.startsWith("/") ? requestedNext : "/account";
+  const nextSuffix = nextPath === "/account" ? "" : `?next=${encodeURIComponent(nextPath)}`;
 
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -30,7 +35,7 @@ export default function LoginPage() {
         return;
       }
 
-      router.push("/account");
+      router.push(nextPath);
       router.refresh();
     } catch {
       setError("Could not sign in right now. Please try again.");
@@ -43,7 +48,7 @@ export default function LoginPage() {
     <div className="mx-auto max-w-xl px-6 py-16 text-white">
       <h1 className="text-4xl font-black tracking-tight">Sign In</h1>
       <p className="mt-3 text-zinc-400">
-        Sign in with your WooCommerce/WordPress customer account.
+        Sign in to access your account and portal.
       </p>
 
       <form onSubmit={onSubmit} className="mt-8 rounded-3xl border border-white/10 bg-zinc-950 p-6">
@@ -85,7 +90,7 @@ export default function LoginPage() {
 
         <p className="mt-4 text-center text-sm text-zinc-400">
           New here?{" "}
-            <Link href="/signup" className="text-[var(--brand-primary)] hover:text-[var(--brand-primary-hover)]">
+            <Link href={`/signup${nextSuffix}`} className="text-[var(--brand-primary)] hover:text-[var(--brand-primary-hover)]">
             Create an account
           </Link>
         </p>

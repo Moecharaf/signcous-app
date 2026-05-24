@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 export default function SignupPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -13,6 +14,10 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const requestedNext = searchParams.get("next") ?? "";
+  const nextPath = requestedNext.startsWith("/") ? requestedNext : "/account";
+  const nextSuffix = nextPath === "/account" ? "" : `?next=${encodeURIComponent(nextPath)}`;
 
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -45,7 +50,7 @@ export default function SignupPage() {
         return;
       }
 
-      router.push("/account");
+      router.push(nextPath);
       router.refresh();
     } catch {
       setError("Could not sign up right now. Please try again.");
@@ -58,7 +63,7 @@ export default function SignupPage() {
     <div className="mx-auto max-w-xl px-6 py-16 text-white">
       <h1 className="text-4xl font-black tracking-tight">Create Account</h1>
       <p className="mt-3 text-zinc-400">
-        Create your WooCommerce customer account to track orders and checkout faster.
+        Sign up to create your account, track orders, and check out faster.
       </p>
 
       <form onSubmit={onSubmit} className="mt-8 rounded-3xl border border-white/10 bg-zinc-950 p-6">
@@ -141,7 +146,7 @@ export default function SignupPage() {
 
       <p className="mt-4 text-sm text-zinc-400">
         Already have an account?{" "}
-          <Link href="/login" className="text-[var(--brand-primary)] hover:text-[var(--brand-primary-hover)]">
+          <Link href={`/login${nextSuffix}`} className="text-[var(--brand-primary)] hover:text-[var(--brand-primary-hover)]">
           Sign in
         </Link>
       </p>

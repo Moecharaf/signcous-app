@@ -3,6 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useCart } from "@/context/CartContext";
 import { useTheme } from "@/components/layout/ThemeProvider";
@@ -80,6 +81,7 @@ function ThemeToggle() {
 }
 
 export default function Header() {
+  const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
@@ -109,7 +111,7 @@ export default function Header() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [pathname]);
 
   useEffect(() => {
     lastScrollYRef.current = window.scrollY;
@@ -192,7 +194,7 @@ export default function Header() {
           {categoryNavLinks.map((link) => (
             <a
               key={`${link.hash}-${link.label}`}
-              href={`/#${link.hash}`}
+              href={`/portal#${link.hash}`}
               className="group inline-flex min-w-[72px] flex-col items-center gap-2 px-1 py-1 transition-colors hover:text-[#3a3a3a] dark:hover:text-[#d0d0d0]"
             >
               <span className="leading-none text-[#7c7c7c] transition group-hover:text-[#3b3b3b] dark:text-[#767676] dark:group-hover:text-[#d3d3d3]">
@@ -279,7 +281,7 @@ export default function Header() {
             {categoryNavLinks.map((link) => (
               <a
                 key={`${link.hash}-${link.label}`}
-                href={`/#${link.hash}`}
+                href={`/portal#${link.hash}`}
                 className="inline-flex items-center gap-3 px-1 py-2 text-sm font-semibold uppercase tracking-[0.08em] text-[#646464] transition-colors hover:text-[#2f2f2f] dark:text-[#9d9d9d] dark:hover:text-[#dedede]"
                 onClick={() => setMenuOpen(false)}
               >
