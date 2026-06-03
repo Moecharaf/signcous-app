@@ -3,6 +3,8 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState, type ChangeEvent, type ReactNode } from "react";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
+import AdhesivePricingModal from "@/components/product-builder/AdhesivePricingModal";
+import { ADHESIVE_PRICING_CONFIGS } from "@/components/product-builder/adhesive-pricing-data";
 import Button from "@/components/ui/Button";
 import RigidPricingHeader from "@/components/product-builder/RigidPricingHeader";
 import { useCart } from "@/context/CartContext";
@@ -123,6 +125,7 @@ export default function LowTacWallBuilder({ productId = 0 }: LowTacWallBuilderPr
   const [splitDirection, setSplitDirection] = useState<SplitDirection>("vertical");
   const [selectedSplit, setSelectedSplit] = useState<"all" | number>("all");
   const [splitOffsets, setSplitOffsets] = useState<Record<number, number>>({});
+  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [added, setAdded] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null);
@@ -353,12 +356,19 @@ export default function LowTacWallBuilder({ productId = 0 }: LowTacWallBuilderPr
               section
               productName="LOW TAC WALL"
               detail="Adhesive wall graphic builder"
+              onMiddleTitleClick={() => setIsPricingModalOpen(true)}
               totalPrice={pricing ? formatCurrency(pricing.totalPrice) : formatCurrency(0)}
               middleRows={[
                 { label: "Area", value: pricing ? `${pricing.sqFt} sq ft` : "--" },
                 { label: "Per Item", value: pricing ? formatCurrency(pricing.totalPrice / Math.max(safeQuantity, 1)) : formatCurrency(0) },
                 { label: "Qty", value: String(safeQuantity) },
               ]}
+            />
+
+            <AdhesivePricingModal
+              isOpen={isPricingModalOpen}
+              onClose={() => setIsPricingModalOpen(false)}
+              config={ADHESIVE_PRICING_CONFIGS.lowTacWall}
             />
 
             {/* Canvas */}

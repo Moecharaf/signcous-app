@@ -6,6 +6,8 @@ import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/componen
 import SizeInputPanel, { composeDimensionInches } from "@/components/product-builder/SizeInputPanel";
 import Button from "@/components/ui/Button";
 import RigidPricingHeader from "@/components/product-builder/RigidPricingHeader";
+import AdhesivePricingModal from "@/components/product-builder/AdhesivePricingModal";
+import { ADHESIVE_PRICING_CONFIGS } from "@/components/product-builder/adhesive-pricing-data";
 import { useCart } from "@/context/CartContext";
 import {
   PRINT_WRAP_BASE_RATE,
@@ -165,6 +167,7 @@ export default function PrintWrapFilmBuilder({ productId = 136 }: PrintWrapFilmB
   const [contourCut, setContourCut] = useState(false);
   const [rush, setRush] = useState(false);
   const [splitDirection, setSplitDirection] = useState<PrintWrapSplitDirection>("auto");
+  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [added, setAdded] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null);
@@ -335,12 +338,19 @@ export default function PrintWrapFilmBuilder({ productId = 136 }: PrintWrapFilmB
               section
               productName="3M PRINT WRAP FILM"
               detail="Adhesive vinyl builder"
+              onMiddleTitleClick={() => setIsPricingModalOpen(true)}
               totalPrice={pricing ? formatCurrency(pricing.grandTotal) : formatCurrency(0)}
               middleRows={[
                 { label: "Area", value: pricing ? `${pricing.areaSqFt.toFixed(2)} sq ft` : "--" },
                 { label: "Per Item", value: pricing ? formatCurrency(pricing.perItemTotal) : formatCurrency(0) },
                 { label: "Qty", value: String(safeQuantity) },
               ]}
+            />
+
+            <AdhesivePricingModal
+              isOpen={isPricingModalOpen}
+              onClose={() => setIsPricingModalOpen(false)}
+              config={ADHESIVE_PRICING_CONFIGS.printWrap}
             />
 
             <div

@@ -6,6 +6,8 @@ import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/componen
 import SizeInputPanel, { composeDimensionInches, formatSizeLabel } from "@/components/product-builder/SizeInputPanel";
 import Button from "@/components/ui/Button";
 import RigidPricingHeader from "@/components/product-builder/RigidPricingHeader";
+import AdhesivePricingModal from "@/components/product-builder/AdhesivePricingModal";
+import { ADHESIVE_PRICING_CONFIGS } from "@/components/product-builder/adhesive-pricing-data";
 import { useCart } from "@/context/CartContext";
 import {
   WINDOW_CLING_MAX_HEIGHT_IN,
@@ -124,6 +126,7 @@ export default function WindowClingBuilder({ productId = 137 }: WindowClingBuild
   const [application, setApplication] = useState<WindowClingApplication>("inside");
   const [viewable, setViewable] = useState<WindowClingViewable>("outside");
   const [contourCut, setContourCut] = useState(false);
+  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [added, setAdded] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null);
@@ -299,12 +302,19 @@ export default function WindowClingBuilder({ productId = 137 }: WindowClingBuild
               section
               productName="WINDOW CLING"
               detail="Adhesive window cling builder"
+              onMiddleTitleClick={() => setIsPricingModalOpen(true)}
               totalPrice={pricing ? formatCurrency(pricing.totalPrice) : formatCurrency(0)}
               middleRows={[
                 { label: "Area", value: pricing ? `${pricing.sqIn.toFixed(0)} sq in` : "--" },
                 { label: "Per Item", value: pricing ? formatCurrency(pricing.totalPrice / Math.max(safeQuantity, 1)) : formatCurrency(0) },
                 { label: "Qty", value: String(safeQuantity) },
               ]}
+            />
+
+            <AdhesivePricingModal
+              isOpen={isPricingModalOpen}
+              onClose={() => setIsPricingModalOpen(false)}
+              config={ADHESIVE_PRICING_CONFIGS.windowCling}
             />
 
             <div

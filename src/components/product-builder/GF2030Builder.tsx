@@ -6,6 +6,8 @@ import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/componen
 import SizeInputPanel, { composeDimensionInches } from "@/components/product-builder/SizeInputPanel";
 import Button from "@/components/ui/Button";
 import RigidPricingHeader from "@/components/product-builder/RigidPricingHeader";
+import AdhesivePricingModal from "@/components/product-builder/AdhesivePricingModal";
+import { ADHESIVE_PRICING_CONFIGS } from "@/components/product-builder/adhesive-pricing-data";
 import { useCart } from "@/context/CartContext";
 import {
   GF2030_LAMINATE_OPTIONS,
@@ -164,6 +166,7 @@ export default function GF2030Builder({ productId = 138 }: GF2030BuilderProps) {
   const [contourCut, setContourCut] = useState(false);
   const [rush, setRush] = useState(false);
   const [splitDirection, setSplitDirection] = useState<GF2030SplitDirection>("auto");
+  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [added, setAdded] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null);
@@ -477,6 +480,7 @@ export default function GF2030Builder({ productId = 138 }: GF2030BuilderProps) {
               section
               productName="GF 2030APAE"
               detail="Adhesive vinyl builder"
+              onMiddleTitleClick={() => setIsPricingModalOpen(true)}
               totalPrice={pricing ? formatCurrency(pricing.grandTotal) : formatCurrency(0)}
               middleRows={[
                 { label: "Area", value: pricing ? `${pricing.areaSqFt.toFixed(2)} sq ft` : "--" },
@@ -484,6 +488,12 @@ export default function GF2030Builder({ productId = 138 }: GF2030BuilderProps) {
                 { label: "Qty", value: String(safeQuantity) },
               ]}
               accentClassName="text-blue-400"
+            />
+
+            <AdhesivePricingModal
+              isOpen={isPricingModalOpen}
+              onClose={() => setIsPricingModalOpen(false)}
+              config={ADHESIVE_PRICING_CONFIGS.gf2030}
             />
 
             <div

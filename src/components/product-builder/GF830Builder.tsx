@@ -6,6 +6,8 @@ import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/componen
 import SizeInputPanel, { composeDimensionInches } from "@/components/product-builder/SizeInputPanel";
 import Button from "@/components/ui/Button";
 import RigidPricingHeader from "@/components/product-builder/RigidPricingHeader";
+import AdhesivePricingModal from "@/components/product-builder/AdhesivePricingModal";
+import { ADHESIVE_PRICING_CONFIGS } from "@/components/product-builder/adhesive-pricing-data";
 import { useCart } from "@/context/CartContext";
 import {
   GF830_MAX_PANEL_HEIGHT,
@@ -167,6 +169,7 @@ export default function GF830Builder({ productId = 0 }: GF830BuilderProps) {
   const [contourCut, setContourCut] = useState(false);
   const [rush, setRush] = useState(false);
   const [splitDirection, setSplitDirection] = useState<GF830SplitDirection>("auto");
+  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [added, setAdded] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null);
@@ -340,12 +343,19 @@ export default function GF830Builder({ productId = 0 }: GF830BuilderProps) {
               section
               productName="GF830 AUTOMARK"
               detail="Adhesive vinyl builder"
+              onMiddleTitleClick={() => setIsPricingModalOpen(true)}
               totalPrice={pricing ? formatCurrency(pricing.grandTotal) : formatCurrency(0)}
               middleRows={[
                 { label: "Area", value: pricing ? `${pricing.areaSqFt.toFixed(2)} sq ft` : "--" },
                 { label: "Per Item", value: pricing ? formatCurrency(pricing.grandTotal / Math.max(safeQuantity, 1)) : formatCurrency(0) },
                 { label: "Qty", value: String(safeQuantity) },
               ]}
+            />
+
+            <AdhesivePricingModal
+              isOpen={isPricingModalOpen}
+              onClose={() => setIsPricingModalOpen(false)}
+              config={ADHESIVE_PRICING_CONFIGS.gf830}
             />
 
             <div

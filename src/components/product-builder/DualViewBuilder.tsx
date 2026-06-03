@@ -6,6 +6,8 @@ import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/componen
 import SizeInputPanel, { composeDimensionInches, toFeetAndInches } from "@/components/product-builder/SizeInputPanel";
 import Button from "@/components/ui/Button";
 import RigidPricingHeader from "@/components/product-builder/RigidPricingHeader";
+import AdhesivePricingModal from "@/components/product-builder/AdhesivePricingModal";
+import { ADHESIVE_PRICING_CONFIGS } from "@/components/product-builder/adhesive-pricing-data";
 import { useCart } from "@/context/CartContext";
 import {
   DUAL_VIEW_CONSTRAINTS,
@@ -153,6 +155,7 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
   const [quantity, setQuantity] = useState(1);
   const [side, setSide] = useState<DualViewSide>("single");
   const [contourCut, setContourCut] = useState(false);
+  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [added, setAdded] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null);
@@ -383,6 +386,7 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
               section
               productName="DUAL VIEW"
               detail="Adhesive window film builder"
+              onMiddleTitleClick={() => setIsPricingModalOpen(true)}
               totalPrice={pricing ? formatCurrency(pricing.grandTotal) : formatCurrency(0)}
               middleRows={[
                 { label: "Actual Area", value: actualAreaLabel },
@@ -390,6 +394,12 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
                 { label: "Qty", value: String(safeQuantity) },
               ]}
               accentClassName="text-[var(--brand-primary)]"
+            />
+
+            <AdhesivePricingModal
+              isOpen={isPricingModalOpen}
+              onClose={() => setIsPricingModalOpen(false)}
+              config={ADHESIVE_PRICING_CONFIGS.dualView}
             />
 
             <div

@@ -6,6 +6,8 @@ import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/componen
 import SizeInputPanel, { composeDimensionInches } from "@/components/product-builder/SizeInputPanel";
 import Button from "@/components/ui/Button";
 import RigidPricingHeader from "@/components/product-builder/RigidPricingHeader";
+import AdhesivePricingModal from "@/components/product-builder/AdhesivePricingModal";
+import { ADHESIVE_PRICING_CONFIGS } from "@/components/product-builder/adhesive-pricing-data";
 import { useCart } from "@/context/CartContext";
 import {
   ONE_WAY_MARKUP_MULTIPLIER,
@@ -68,6 +70,7 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
   const [contourCut, setContourCut] = useState(false);
   const [rush, setRush] = useState(false);
   const [added, setAdded] = useState(false);
+  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [uploadedPdf, setUploadedPdf] = useState<string | null>(null);
   const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null);
@@ -288,7 +291,14 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
                 { label: "Per Item", value: pricing ? formatCurrency(pricing.grandTotal / Math.max(safeQuantity, 1)) : formatCurrency(0) },
                 { label: "Qty", value: String(safeQuantity) },
               ]}
+              onMiddleTitleClick={() => setIsPricingModalOpen(true)}
               accentClassName="text-[var(--brand-primary)]"
+            />
+
+            <AdhesivePricingModal
+              isOpen={isPricingModalOpen}
+              onClose={() => setIsPricingModalOpen(false)}
+              config={ADHESIVE_PRICING_CONFIGS.oneWayWindow}
             />
 
             <div
