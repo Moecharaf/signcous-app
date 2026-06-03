@@ -1,8 +1,11 @@
 "use client";
 
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import BannerPricingModal from "@/components/product-builder/BannerPricingModal";
 import Button from "@/components/ui/Button";
 import {
+  BANNER_MARKUP,
+  PRICING_CONFIG,
   calculateBannerPrice,
   calculateCanvasPrice,
   calculateHdpePrice,
@@ -368,7 +371,7 @@ export default function VinylBannerBuilder({
   const [uploadingArtwork, setUploadingArtwork] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [activePanel, setActivePanel] = useState<ControlPanel | null>(null);
-  const [showMobilePricingDetails, setShowMobilePricingDetails] = useState(false);
+  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [showMobileOptions, setShowMobileOptions] = useState(false);
   const [panelAnchor, setPanelAnchor] = useState<{ left: number; top: number; width: number } | null>(null);
   const [dimensionInputs, setDimensionInputs] = useState(() => {
@@ -669,6 +672,66 @@ export default function VinylBannerBuilder({
     { qty: "1-9", rate: getHdpeSqFtRate(1) },
     { qty: "10-99", rate: getHdpeSqFtRate(10) },
     { qty: "100+", rate: getHdpeSqFtRate(100) },
+  ];
+
+  const pricingModalColumns = isEconomicalStandProduct
+    ? ["1+"]
+    : isCanvasProduct
+      ? ["1-999", "1000-4999", "5000+"]
+      : isMeshProduct
+        ? ["1-999", "1000-2499", "2500-4999", "5000+"]
+        : isHdpeProduct
+          ? ["1-9", "10-99", "100+"]
+          : isNoCurlProduct
+            ? ["1-999", "1000+"]
+            : isPosterProduct
+              ? ["1-999", "1000-4999", "5000+"]
+              : ["1+"];
+
+  const pricingModalRows = isEconomicalStandProduct
+    ? [{ label: "Economical Banner Stand", values: ["$135.00 per item"] }]
+    : isCanvasProduct
+      ? [{ label: "Canvas", values: [formatPrice(7.47), formatPrice(5.69), formatPrice(3.74)].map((price) => `${price} per sqft`) }]
+      : isMeshProduct
+        ? [{ label: "Mesh Banner", values: [formatPrice(3.66), formatPrice(2.24), formatPrice(1.64), formatPrice(1.49)].map((price) => `${price} per sqft`) }]
+        : isHdpeProduct
+          ? [{ label: "HDPE Single-Sided", values: hdpeTierRates.map((tier) => `${formatPrice(tier.rate)} per sqft`) }]
+          : isNoCurlProduct
+            ? [{ label: "No-Curl Banner", values: [formatPrice(4.5), formatPrice(3)].map((price) => `${price} per sqft`) }]
+            : isPosterProduct
+              ? [{ label: "Poster", values: [formatPrice(3), formatPrice(2.25), formatPrice(1.5)].map((price) => `${price} per sqft`) }]
+              : [
+                  { label: "13oz Single", values: [`${formatPrice(1.25 * BANNER_MARKUP)} per sqft`] },
+                  { label: "15oz Single", values: [`${formatPrice(1.75 * BANNER_MARKUP)} per sqft`] },
+                  { label: "18oz Single", values: [`${formatPrice(2.25 * BANNER_MARKUP)} per sqft`] },
+                  { label: "18oz Double", values: [`${formatPrice(4.25 * BANNER_MARKUP)} per sqft`] },
+                ];
+
+  const pricingModalAddOnRows = isEconomicalStandProduct || isCanvasProduct || isHdpeProduct || isPosterProduct
+    ? []
+    : isNoCurlProduct
+      ? [{ label: "Rush", value: "100% additional" }]
+      : isMeshProduct
+        ? [
+            { label: "Webbing", value: "$1.75 per linear ft" },
+            { label: "Rope", value: "$1.75 per linear ft" },
+            { label: "Pole Pockets", value: "Calculated by pocket side and size" },
+            { label: "Grommets", value: "Calculated by placement and spacing" },
+            { label: "Rush", value: "100% additional" },
+          ]
+        : [
+            { label: "Pole Pockets", value: `${formatPrice(PRICING_CONFIG.addOns.polePocketsPerLinearFt)} per linear ft + ${formatPrice(PRICING_CONFIG.addOns.polePocketsSetupFee)} setup` },
+            { label: "Wind Slits", value: `${formatPrice(PRICING_CONFIG.addOns.windSlitsPerSqFt)} per sqft` },
+            { label: "Hemming", value: `${formatPrice(PRICING_CONFIG.addOns.hemmingPerLinearFt)} per linear ft` },
+            { label: "Rope", value: `${formatPrice(PRICING_CONFIG.addOns.ropePerLinearFt)} per linear ft` },
+            { label: "Grommets", value: "Calculated by placement and spacing" },
+            { label: "Rush", value: `${Math.round((PRICING_CONFIG.rushMultiplier - 1) * 100)}% additional` },
+          ];
+
+  const pricingModalShippingRows = [
+    { label: "Standard Shipping", value: "Calculated at checkout by size, quantity, and destination" },
+    { label: "Freight", value: "Large-format orders may ship freight" },
+    { label: "Turnaround", value: "Production and delivery estimates are shown at checkout" },
   ];
 
   const set = useCallback(
@@ -1152,87 +1215,11 @@ export default function VinylBannerBuilder({
 
           <button
             type="button"
-            onClick={() => setShowMobilePricingDetails((prev) => !prev)}
+            onClick={() => setIsPricingModalOpen(true)}
             className="mt-2 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500"
           >
             Pricing And Shipping
-            <span className="text-[11px]">{showMobilePricingDetails ? "-" : "+"}</span>
           </button>
-
-          {showMobilePricingDetails && <div className="mt-1 text-[10px] text-zinc-600">
-            {isEconomicalStandProduct ? (
-              <div className="text-[11px] leading-tight text-zinc-700">
-                <div>{formatPrice(ECONOMICAL_STAND_UNIT_PRICE)} per item</div>
-              </div>
-            ) : isCanvasProduct ? (
-              <div className="grid grid-cols-[56px_1fr] gap-x-2 gap-y-0.5">
-                <span className="text-zinc-500">1-999</span>
-                <span>{formatPrice(7.47)} per sqft</span>
-                <span className="text-zinc-500">1000-4999</span>
-                <span>{formatPrice(5.69)} per sqft</span>
-                <span className="text-zinc-500">5000+</span>
-                <span>{formatPrice(3.74)} per sqft</span>
-              </div>
-            ) : isMeshProduct ? (
-              <div className="grid grid-cols-[70px_1fr] gap-x-2 gap-y-0.5">
-                <span className="text-zinc-500">1-999</span>
-                <span>{formatPrice(3.66)} per sqft</span>
-                <span className="text-zinc-500">1000-2499</span>
-                <span>{formatPrice(2.24)} per sqft</span>
-                <span className="text-zinc-500">2500-4999</span>
-                <span>{formatPrice(1.64)} per sqft</span>
-                <span className="text-zinc-500">5000+</span>
-                <span>{formatPrice(1.49)} per sqft</span>
-              </div>
-            ) : isHdpeProduct ? (
-              <div className="grid grid-cols-[56px_1fr] gap-x-2 gap-y-0.5">
-                {hdpeTierRates.map((tier) => (
-                  <Fragment key={`hdpe-tier-mobile-${tier.qty}`}>
-                    <span className="text-zinc-500">{tier.qty}</span>
-                    <span>{formatPrice(tier.rate)} per sqft</span>
-                  </Fragment>
-                ))}
-                <span className="text-zinc-500">Type</span>
-                <span>Single-Sided</span>
-              </div>
-            ) : showVinylRateMatrix ? (
-              <div className="grid grid-cols-[70px_1fr] gap-x-2 gap-y-0.5">
-                <span className="text-zinc-500">13oz Single</span>
-                <span>{formatPrice(1.25 * 1.5)} per sqft</span>
-                <span className="text-zinc-500">15oz Single</span>
-                <span>{formatPrice(1.75 * 1.5)} per sqft</span>
-                <span className="text-zinc-500">18oz Single</span>
-                <span>{formatPrice(2.25 * 1.5)} per sqft</span>
-                <span className="text-zinc-500">18oz Double</span>
-                <span>{formatPrice(4.25 * 1.5)} per sqft</span>
-              </div>
-            ) : isNoCurlProduct ? (
-              <div className="grid grid-cols-[56px_1fr] gap-x-2 gap-y-0.5">
-                <span className="text-zinc-500">1-999</span>
-                <span>{formatPrice(4.50)} per sqft</span>
-                <span className="text-zinc-500">1000+</span>
-                <span>{formatPrice(3.00)} per sqft</span>
-              </div>
-            ) : isPosterProduct ? (
-              <div className="grid grid-cols-[56px_1fr] gap-x-2 gap-y-0.5">
-                <span className="text-zinc-500">1-999</span>
-                <span>{formatPrice(3.00)} per sqft</span>
-                <span className="text-zinc-500">1000-4999</span>
-                <span>{formatPrice(2.25)} per sqft</span>
-                <span className="text-zinc-500">5000+</span>
-                <span>{formatPrice(1.50)} per sqft</span>
-              </div>
-            ) : (
-              <div className="text-[11px] leading-tight text-zinc-500">
-                <div>{canvasHeaderProductName}</div>
-                <div className="mt-0.5 text-zinc-700">{form.doubleSided ? "Double-Sided" : "Single-Sided"}</div>
-                <div>{formatPrice(displaySqFtRate)} per sqft</div>
-              </div>
-            )}
-            <div className="mt-1 text-[10px] text-zinc-500">
-              {!isEconomicalStandProduct && !isCanvasProduct && !isMeshProduct && !isNoCurlProduct && !isPosterProduct && `${pricing.sqFt} sqft / 24 Hours Production`}
-            </div>
-          </div>}
         </div>
 
         <div
@@ -1261,8 +1248,14 @@ export default function VinylBannerBuilder({
               </div>
 
               {/* Pricing Info */}
-              <div className="text-[10px] text-zinc-600 md:pt-1 md:text-center">
-                <div className="mb-1 text-[10px] font-bold underline uppercase tracking-[0.14em] text-zinc-500">Pricing And Shipping</div>
+              <div className="pointer-events-auto text-[10px] text-zinc-600 md:pt-1 md:text-center">
+                <button
+                  type="button"
+                  onClick={() => setIsPricingModalOpen(true)}
+                  className="mb-1 text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500 underline underline-offset-2 hover:text-zinc-700"
+                >
+                  Pricing And Shipping
+                </button>
                 {isEconomicalStandProduct ? (
                   <div className="text-[11px] leading-tight text-zinc-700">
                     <div>{formatPrice(ECONOMICAL_STAND_UNIT_PRICE)} per item</div>
@@ -2073,6 +2066,16 @@ export default function VinylBannerBuilder({
           </div>
         </>
       )}
+
+      <BannerPricingModal
+        isOpen={isPricingModalOpen}
+        onClose={() => setIsPricingModalOpen(false)}
+        pricingColumns={pricingModalColumns}
+        pricingRows={pricingModalRows}
+        addOnRows={pricingModalAddOnRows}
+        shippingRows={pricingModalShippingRows}
+        markup={BANNER_MARKUP}
+      />
     </div>
   );
 }
