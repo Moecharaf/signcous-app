@@ -42,16 +42,7 @@ function renderShippingTable(table: AdhesiveShippingTable) {
       </thead>
       <tbody className="align-top">
         <tr>
-          <td className="py-0.5">Signs365 Base</td>
-          {table.values.map((value, index) => (
-            <td key={`${table.rowLabel}-base-${index}`} className="py-0.5">
-              {formatPrice(value)}
-              {table.freightIndexes?.includes(index) ? " (freight)" : ""}
-            </td>
-          ))}
-        </tr>
-        <tr>
-          <td className="py-0.5">Signcous (+50%)</td>
+          <td className="py-0.5">Shipping</td>
           {table.values.map((value, index) => (
             <td key={`${table.rowLabel}-retail-${index}`} className="py-0.5">
               {formatPrice(value * ADHESIVE_MARKUP)}
