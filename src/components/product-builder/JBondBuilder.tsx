@@ -796,15 +796,15 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
                   { label: "Area", value: `${pricing.sqInches} sq.in` },
                   { label: "Rate / Sq In", value: `$${pricing.ratePerSqIn}` },
                 ]}
+              />
 
-                <RigidSignsPricingModal
-                  isOpen={isPricingModalOpen}
-                  onClose={() => setIsPricingModalOpen(false)}
-                  pricingColumns={pricingColumns}
-                  pricingRows={pricingRows}
-                  addOnRows={addOnRows}
-                  markup={JBOND_MARKUP}
-                />
+              <RigidSignsPricingModal
+                isOpen={isPricingModalOpen}
+                onClose={() => setIsPricingModalOpen(false)}
+                pricingColumns={pricingColumns}
+                pricingRows={pricingRows}
+                addOnRows={addOnRows}
+                markup={JBOND_MARKUP}
               />
 
               <div
