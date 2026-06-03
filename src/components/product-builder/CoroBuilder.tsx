@@ -924,105 +924,105 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
                       </table>
                     </div>
                   ) : (
-                    <div className="space-y-3 py-1 text-[11px] text-zinc-700">
-                      <table className="w-full border-collapse">
+                    <div className="space-y-4 py-1 text-[13px] leading-5 text-zinc-800">
+                      <table className="w-full border-collapse text-left">
                         <thead>
-                          <tr className="text-zinc-600">
-                            <th className="pb-1 text-left font-semibold" />
-                            <th className="pb-1 text-left font-semibold">per 3 sheets</th>
-                            <th className="pb-1 text-left font-semibold">58+ sheets</th>
+                          <tr className="text-zinc-700">
+                            <th className="pb-0.5 text-left font-semibold" />
+                            <th className="pb-0.5 text-left font-semibold">per 3 sheets</th>
+                            <th className="pb-0.5 text-left font-semibold">58+ sheets</th>
                           </tr>
                         </thead>
-                        <tbody>
+                        <tbody className="align-top">
                           <tr>
-                            <td className="py-0.5">24&quot;x36&quot; and under</td>
-                            <td className="py-0.5">{formatPrice(10 * CORO_MARKUP)}</td>
-                            <td className="py-0.5">{formatPrice(199 * CORO_MARKUP)} (freight)</td>
+                            <td className="py-0">24&quot;x36&quot; and under</td>
+                            <td className="py-0">{formatPrice(10 * CORO_MARKUP)}</td>
+                            <td className="py-0">{formatPrice(199 * CORO_MARKUP)} (freight)</td>
                           </tr>
                         </tbody>
                       </table>
 
-                      <table className="w-full border-collapse">
+                      <table className="w-full border-collapse text-left">
                         <thead>
-                          <tr className="text-zinc-600">
-                            <th className="pb-1 text-left font-semibold" />
-                            <th className="pb-1 text-left font-semibold">per 3 sheets</th>
-                            <th className="pb-1 text-left font-semibold">22+ sheets</th>
+                          <tr className="text-zinc-700">
+                            <th className="pb-0.5 text-left font-semibold" />
+                            <th className="pb-0.5 text-left font-semibold">per 3 sheets</th>
+                            <th className="pb-0.5 text-left font-semibold">22+ sheets</th>
                           </tr>
                         </thead>
-                        <tbody>
+                        <tbody className="align-top">
                           <tr>
-                            <td className="py-0.5">24&quot;x36&quot; - 32&quot;x48&quot;</td>
-                            <td className="py-0.5">{formatPrice(15 * CORO_MARKUP)}</td>
-                            <td className="py-0.5">{formatPrice(199 * CORO_MARKUP)} (freight)</td>
+                            <td className="py-0">24&quot;x36&quot; - 32&quot;x48&quot;</td>
+                            <td className="py-0">{formatPrice(15 * CORO_MARKUP)}</td>
+                            <td className="py-0">{formatPrice(199 * CORO_MARKUP)} (freight)</td>
                           </tr>
                         </tbody>
                       </table>
 
-                      <table className="w-full border-collapse">
+                      <table className="w-full border-collapse text-left">
                         <thead>
-                          <tr className="text-zinc-600">
-                            <th className="pb-1 text-left font-semibold" />
-                            <th className="pb-1 text-left font-semibold">per 3 sheets</th>
-                            <th className="pb-1 text-left font-semibold">22+ sheets</th>
+                          <tr className="text-zinc-700">
+                            <th className="pb-0.5 text-left font-semibold" />
+                            <th className="pb-0.5 text-left font-semibold">per 3 sheets</th>
+                            <th className="pb-0.5 text-left font-semibold">22+ sheets</th>
                           </tr>
                         </thead>
-                        <tbody>
+                        <tbody className="align-top">
                           <tr>
-                            <td className="py-0.5">36&quot;x36&quot; - 36&quot;x48&quot;</td>
-                            <td className="py-0.5">{formatPrice(35 * CORO_MARKUP)}</td>
-                            <td className="py-0.5">{formatPrice(199 * CORO_MARKUP)} (freight)</td>
+                            <td className="py-0">36&quot;x36&quot; - 36&quot;x48&quot;</td>
+                            <td className="py-0">{formatPrice(35 * CORO_MARKUP)}</td>
+                            <td className="py-0">{formatPrice(199 * CORO_MARKUP)} (freight)</td>
                           </tr>
                         </tbody>
                       </table>
 
-                      <table className="w-full border-collapse">
+                      <table className="w-full border-collapse text-left">
                         <thead>
-                          <tr className="text-zinc-600">
-                            <th className="pb-1 text-left font-semibold" />
-                            <th className="pb-1 text-left font-semibold">1-5 sheets</th>
-                            <th className="pb-1 text-left font-semibold">6-9 sheets</th>
-                            <th className="pb-1 text-left font-semibold">10+ sheets</th>
+                          <tr className="text-zinc-700">
+                            <th className="pb-0.5 text-left font-semibold" />
+                            <th className="pb-0.5 text-left font-semibold">1-5 sheets</th>
+                            <th className="pb-0.5 text-left font-semibold">6-9 sheets</th>
+                            <th className="pb-0.5 text-left font-semibold">10+ sheets</th>
                           </tr>
                         </thead>
-                        <tbody>
+                        <tbody className="align-top">
                           <tr>
-                            <td className="py-0.5">36&quot;x48&quot; - 48&quot;x48&quot;</td>
-                            <td className="py-0.5">{formatPrice(50 * CORO_MARKUP)}</td>
-                            <td className="py-0.5">{formatPrice(75 * CORO_MARKUP)}</td>
-                            <td className="py-0.5">{formatPrice(199 * CORO_MARKUP)} (freight)</td>
+                            <td className="py-0">36&quot;x48&quot; - 48&quot;x48&quot;</td>
+                            <td className="py-0">{formatPrice(50 * CORO_MARKUP)}</td>
+                            <td className="py-0">{formatPrice(75 * CORO_MARKUP)}</td>
+                            <td className="py-0">{formatPrice(199 * CORO_MARKUP)} (freight)</td>
                           </tr>
                         </tbody>
                       </table>
 
-                      <table className="w-full border-collapse">
+                      <table className="w-full border-collapse text-left">
                         <thead>
-                          <tr className="text-zinc-600">
-                            <th className="pb-1 text-left font-semibold" />
-                            <th className="pb-1 text-left font-semibold">1-9 sheets</th>
-                            <th className="pb-1 text-left font-semibold">10+ sheets</th>
+                          <tr className="text-zinc-700">
+                            <th className="pb-0.5 text-left font-semibold" />
+                            <th className="pb-0.5 text-left font-semibold">1-9 sheets</th>
+                            <th className="pb-0.5 text-left font-semibold">10+ sheets</th>
                           </tr>
                         </thead>
-                        <tbody>
+                        <tbody className="align-top">
                           <tr>
-                            <td className="py-0.5">39&quot;x72&quot; &amp; 24&quot;x96&quot;</td>
-                            <td className="py-0.5">{formatPrice(75 * CORO_MARKUP)}</td>
-                            <td className="py-0.5">{formatPrice(199 * CORO_MARKUP)} (freight)</td>
+                            <td className="py-0">39&quot;x72&quot; &amp; 24&quot;x96&quot;</td>
+                            <td className="py-0">{formatPrice(75 * CORO_MARKUP)}</td>
+                            <td className="py-0">{formatPrice(199 * CORO_MARKUP)} (freight)</td>
                           </tr>
                         </tbody>
                       </table>
 
-                      <table className="w-full border-collapse">
+                      <table className="w-full border-collapse text-left">
                         <thead>
-                          <tr className="text-zinc-600">
-                            <th className="pb-1 text-left font-semibold" />
-                            <th className="pb-1 text-left font-semibold">1+ sheets</th>
+                          <tr className="text-zinc-700">
+                            <th className="pb-0.5 text-left font-semibold" />
+                            <th className="pb-0.5 text-left font-semibold">1+ sheets</th>
                           </tr>
                         </thead>
-                        <tbody>
+                        <tbody className="align-top">
                           <tr>
-                            <td className="py-0.5">48&quot;x96&quot;</td>
-                            <td className="py-0.5">{formatPrice(199 * CORO_MARKUP)} (freight)</td>
+                            <td className="py-0">48&quot;x96&quot;</td>
+                            <td className="py-0">{formatPrice(199 * CORO_MARKUP)} (freight)</td>
                           </tr>
                         </tbody>
                       </table>
