@@ -1027,9 +1027,6 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
                         </tbody>
                       </table>
 
-                      <div className="rounded border border-zinc-200 bg-zinc-50 px-3 py-2 text-[10px] text-zinc-600">
-                        All shipping prices above are displayed with a 50% markup (supplier rate x {CORO_MARKUP.toFixed(2)}).
-                      </div>
                     </div>
                   )}
 
