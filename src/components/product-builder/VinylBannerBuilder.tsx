@@ -1761,36 +1761,48 @@ export default function VinylBannerBuilder({
                   <div className="grid grid-cols-[42px_minmax(0,1fr)_12px_minmax(0,1fr)_12px] items-center gap-1 text-[11px] text-zinc-600">
                     <span className="font-semibold lowercase text-zinc-500">width:</span>
                     <input
-                      type="text"
+                      type="number"
+                      min={0}
+                      max={999}
+                      step={1}
                       inputMode="numeric"
                       value={dimensionInputs.widthFeet}
                       onChange={(event) => setDimension("width", "feet", event.target.value)}
-                      className="h-6 w-full min-w-0 rounded border border-zinc-300 px-1.5 text-[12px] [appearance:textfield]"
+                      className="h-6 w-full min-w-0 rounded border border-zinc-300 px-1.5 text-[12px]"
                     />
                     <span className="text-[10px] font-semibold">ft</span>
                     <input
-                      type="text"
+                      type="number"
+                      min={0}
+                      max={11}
+                      step={1}
                       inputMode="numeric"
                       value={dimensionInputs.widthInches}
                       onChange={(event) => setDimension("width", "inches", event.target.value)}
-                      className="h-6 w-full min-w-0 rounded border border-zinc-300 px-1.5 text-[12px] [appearance:textfield]"
+                      className="h-6 w-full min-w-0 rounded border border-zinc-300 px-1.5 text-[12px]"
                     />
                     <span className="text-[10px] font-semibold">in</span>
                     <span className="font-semibold lowercase text-zinc-500">height:</span>
                     <input
-                      type="text"
+                      type="number"
+                      min={0}
+                      max={999}
+                      step={1}
                       inputMode="numeric"
                       value={dimensionInputs.heightFeet}
                       onChange={(event) => setDimension("height", "feet", event.target.value)}
-                      className="h-6 w-full min-w-0 rounded border border-zinc-300 px-1.5 text-[12px] [appearance:textfield]"
+                      className="h-6 w-full min-w-0 rounded border border-zinc-300 px-1.5 text-[12px]"
                     />
                     <span className="text-[10px] font-semibold">ft</span>
                     <input
-                      type="text"
+                      type="number"
+                      min={0}
+                      max={11}
+                      step={1}
                       inputMode="numeric"
                       value={dimensionInputs.heightInches}
                       onChange={(event) => setDimension("height", "inches", event.target.value)}
-                      className="h-6 w-full min-w-0 rounded border border-zinc-300 px-1.5 text-[12px] [appearance:textfield]"
+                      className="h-6 w-full min-w-0 rounded border border-zinc-300 px-1.5 text-[12px]"
                     />
                     <span className="text-[10px] font-semibold">in</span>
                   </div>
