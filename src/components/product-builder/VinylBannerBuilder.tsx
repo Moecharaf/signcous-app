@@ -728,11 +728,11 @@ export default function VinylBannerBuilder({
             { label: "Rush", value: `${Math.round((PRICING_CONFIG.rushMultiplier - 1) * 100)}% additional` },
           ];
 
-  const pricingModalShippingRows = [
-    { label: "Standard Shipping", value: "Calculated at checkout by size, quantity, and destination" },
-    { label: "Freight", value: "Large-format orders may ship freight" },
-    { label: "Turnaround", value: "Production and delivery estimates are shown at checkout" },
-  ];
+  const pricingModalShippingTable = {
+    headers: ["1 - 999 sq. ft.", "1,000+ sq. ft.", '123"x123" or larger'],
+    values: [10, 199, 199],
+    freightIndexes: [1, 2],
+  };
 
   const set = useCallback(
     <K extends keyof FormState>(key: K, value: FormState[K]) => {
@@ -2073,7 +2073,7 @@ export default function VinylBannerBuilder({
         pricingColumns={pricingModalColumns}
         pricingRows={pricingModalRows}
         addOnRows={pricingModalAddOnRows}
-        shippingRows={pricingModalShippingRows}
+        shippingTable={pricingModalShippingTable}
         markup={BANNER_MARKUP}
       />
     </div>

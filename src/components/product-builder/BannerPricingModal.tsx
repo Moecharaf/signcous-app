@@ -12,9 +12,11 @@ type AddOnRow = {
   value: string;
 };
 
-type ShippingRow = {
-  label: string;
-  value: string;
+type ShippingTable = {
+  headers: string[];
+  rowLabel?: string;
+  values: number[];
+  freightIndexes?: number[];
 };
 
 interface BannerPricingModalProps {
@@ -23,8 +25,15 @@ interface BannerPricingModalProps {
   pricingColumns: string[];
   pricingRows: PricingRow[];
   addOnRows: AddOnRow[];
-  shippingRows: ShippingRow[];
+  shippingTable: ShippingTable;
   markup: number;
+}
+
+function formatPrice(value: number): string {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(value);
 }
 
 export default function BannerPricingModal({
@@ -33,7 +42,7 @@ export default function BannerPricingModal({
   pricingColumns,
   pricingRows,
   addOnRows,
-  shippingRows,
+  shippingTable,
   markup,
 }: BannerPricingModalProps) {
   const [activeTab, setActiveTab] = useState<"pricing" | "shipping">("pricing");
@@ -107,13 +116,27 @@ export default function BannerPricingModal({
         ) : (
           <div className="space-y-3 py-1 text-[11px] text-zinc-700">
             <table className="w-full border-collapse">
+              <thead>
+                <tr className="text-zinc-600">
+                  {shippingTable.headers.map((header) => (
+                    <th key={header} className="pb-1 text-left font-semibold">
+                      {header}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
               <tbody className="align-top">
-                {shippingRows.map((row) => (
-                  <tr key={row.label}>
-                    <td className="py-0.5">{row.label}</td>
-                    <td className="py-0.5 text-right">{row.value}</td>
-                  </tr>
-                ))}
+                <tr>
+                  {shippingTable.values.map((value, index) => {
+                    const isFreight = shippingTable.freightIndexes?.includes(index);
+                    return (
+                      <td key={`${value}-${index}`} className="py-0.5">
+                        {formatPrice(value * markup)}
+                        {isFreight ? " (freight)" : ""}
+                      </td>
+                    );
+                  })}
+                </tr>
               </tbody>
             </table>
 
