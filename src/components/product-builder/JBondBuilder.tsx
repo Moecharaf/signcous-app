@@ -798,15 +798,6 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
                 ]}
               />
 
-              <RigidSignsPricingModal
-                isOpen={isPricingModalOpen}
-                onClose={() => setIsPricingModalOpen(false)}
-                pricingColumns={pricingColumns}
-                pricingRows={pricingRows}
-                addOnRows={addOnRows}
-                markup={JBOND_MARKUP}
-              />
-
               <div
                 className="relative flex h-64 items-center justify-center overflow-hidden bg-[#fafaf9]"
                 style={{
@@ -816,6 +807,15 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
                 }}
               >
                 {sqinUpload?.blobUrl ? (
+
+            <RigidSignsPricingModal
+              isOpen={isPricingModalOpen}
+              onClose={() => setIsPricingModalOpen(false)}
+              pricingColumns={pricingColumns}
+              pricingRows={pricingRows}
+              addOnRows={addOnRows}
+              markup={JBOND_MARKUP}
+            />
                   <div className="relative flex h-44 w-44 items-center justify-center overflow-hidden rounded border-2 border-dashed border-zinc-400 bg-white">
                     <img src={sqinUpload.blobUrl} alt="preview" className="h-full w-full object-contain" />
                   </div>
