@@ -1565,11 +1565,19 @@ export default function VinylBannerBuilder({
 
             </div>
           ) : (
-            <div className="absolute left-1/2 top-1/2 w-full max-w-[420px] -translate-x-1/2 -translate-y-1/2 px-6 text-center text-zinc-500">
-              <div className="text-sm font-semibold uppercase tracking-[0.16em] text-zinc-400">Front Side</div>
-              <div className="mt-3 text-base font-medium text-zinc-700">Please specify dimensions</div>
-              <div className="mt-1 text-sm text-zinc-500">
-                {uploadedFileName ? "Artwork uploaded. Enter a size to preview it here." : "Enter a size or upload artwork from controls to start your layout."}
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+              <div className="flex h-[330px] w-[min(500px,calc(100vw-40px))] items-center justify-center border-[1.5px] border-dashed border-zinc-400 bg-[#f7f7f7] text-center">
+                <div className="px-6 text-zinc-500">
+                  <div className="text-[14px] font-medium uppercase tracking-[0.02em]">Please specify dimensions or</div>
+                  <div className="mt-1 text-[14px] font-medium uppercase tracking-[0.02em]">click to select an image</div>
+                  <div className="mt-4 flex justify-center text-zinc-400">
+                    <svg width="56" height="56" viewBox="0 0 56 56" fill="none" aria-hidden="true">
+                      <rect x="7" y="7" width="42" height="42" stroke="currentColor" strokeWidth="2" />
+                      <circle cx="25" cy="29" r="6" stroke="currentColor" strokeWidth="2" />
+                      <rect x="34" y="16" width="8" height="5" stroke="currentColor" strokeWidth="2" />
+                    </svg>
+                  </div>
+                </div>
               </div>
             </div>
           )}
