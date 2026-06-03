@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import ArtworkUploadModal from "@/components/product-builder/ArtworkUploadModal";
+import RigidSignsPricingModal from "@/components/product-builder/RigidSignsPricingModal";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
 import Button from "@/components/ui/Button";
 import RigidPricingHeader from "@/components/product-builder/RigidPricingHeader";
@@ -9,9 +10,11 @@ import { useCart } from "@/context/CartContext";
 import {
   POLYSTYRENE_SHEET,
   POLYSTYRENE_SIZE_OPTIONS,
+  POLYSTYRENE_MARKUP,
   calculatePolystyrenePricing,
   formatPolystyreneSize,
   getBestPolystyreneSheetLayout,
+  getPolystyreneSheetPrice,
   type PolystyrenePrintMode,
 } from "@/lib/polystyrene-pricing";
 
@@ -61,6 +64,7 @@ export default function PolystyreneBuilder({
   const [blockImageModes, setBlockImageModes] = useState<Record<string, ImageFitMode>>();
   const [previewSide, setPreviewSide] = useState<"front" | "back">("front");
   const [isArtworkModalOpen, setIsArtworkModalOpen] = useState(false);
+  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const fileInputBackRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -325,6 +329,35 @@ export default function PolystyreneBuilder({
     },
   ];
 
+  const pricingColumns = ["1-9", "10-50", "51+"];
+  const pricingRows = [
+    {
+      label: "Single-Sided",
+      values: [
+        `${formatPrice(getPolystyreneSheetPrice(1, "single") * POLYSTYRENE_MARKUP)} per sheet`,
+        `${formatPrice(getPolystyreneSheetPrice(10, "single") * POLYSTYRENE_MARKUP)} per sheet`,
+        `${formatPrice(getPolystyreneSheetPrice(51, "single") * POLYSTYRENE_MARKUP)} per sheet`,
+      ],
+    },
+    {
+      label: "Double-Sided",
+      values: [
+        `${formatPrice(getPolystyreneSheetPrice(1, "double") * POLYSTYRENE_MARKUP)} per sheet`,
+        `${formatPrice(getPolystyreneSheetPrice(10, "double") * POLYSTYRENE_MARKUP)} per sheet`,
+        `${formatPrice(getPolystyreneSheetPrice(51, "double") * POLYSTYRENE_MARKUP)} per sheet`,
+      ],
+    },
+  ];
+
+  const addOnRows = [
+    { label: "Step Stakes", value: `${formatPrice(2.5)} per item` },
+    { label: "Heavy Duty Step Stakes", value: `${formatPrice(4)} per item` },
+    { label: "Grommets", value: `${formatPrice(0.75)} per item, ${formatPrice(20)} setup fee` },
+    { label: "Gloss Finish", value: `${formatPrice(6)} per item` },
+    { label: "Contour Cutting", value: "20% additional" },
+    { label: "Rush", value: "120% additional" },
+  ];
+
   return (
     <div className="min-h-[calc(100vh-96px)] bg-[linear-gradient(145deg,#f4f4f5_0%,#ececef_55%,#e4e4e7_100%)] text-zinc-800">
       <div className="w-full px-3 py-3 md:px-4">
@@ -335,12 +368,22 @@ export default function PolystyreneBuilder({
               section
               productName={productName}
               detail="Rigid sheet-layout builder"
+              onMiddleTitleClick={() => setIsPricingModalOpen(true)}
               totalPrice={formatPrice(pricing.totalPrice)}
               middleRows={[
                 { label: "Price / Sheet", value: formatPrice(pricing.totalPrice / Math.max(pricing.sheetsRequired, 1)) },
                 { label: "Effective / Sign", value: formatPrice(pricing.totalPrice / Math.max(quantity, 1)) },
                 { label: "Sheets Needed", value: String(pricing.sheetsRequired) },
               ]}
+            />
+
+            <RigidSignsPricingModal
+              isOpen={isPricingModalOpen}
+              onClose={() => setIsPricingModalOpen(false)}
+              pricingColumns={pricingColumns}
+              pricingRows={pricingRows}
+              addOnRows={addOnRows}
+              markup={POLYSTYRENE_MARKUP}
             />
 
             <div

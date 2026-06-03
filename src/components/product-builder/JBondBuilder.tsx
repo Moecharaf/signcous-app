@@ -4,16 +4,19 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
 import SizeInputPanel, { composeDimensionInches, toFeetAndInches } from "@/components/product-builder/SizeInputPanel";
 import ArtworkUploadModal from "@/components/product-builder/ArtworkUploadModal";
+import RigidSignsPricingModal from "@/components/product-builder/RigidSignsPricingModal";
 import Button from "@/components/ui/Button";
 import RigidPricingHeader from "@/components/product-builder/RigidPricingHeader";
 import { useCart } from "@/context/CartContext";
 import {
+  JBOND_MARKUP,
   JBOND_SHEET,
   JBOND_SIZE_OPTIONS,
   calculateJBondSheetPricing,
   calculateJBondSqinPricing,
   formatJBondSize,
   getBestJBondSheetLayout,
+  getJBondSheetPrice,
   type JBondMaterial,
   type JBondPricingMode,
   type JBondPrintMode,
@@ -82,6 +85,7 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
   const [roundedCornersOption, setRoundedCornersOption] = useState<JBondRoundedCornerOption>("none");
   const [rush, setRush] = useState(false);
   const [added, setAdded] = useState(false);
+  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
 
   // ΓöÇΓöÇ derived ΓöÇΓöÇ
   const activeSize = useMemo(
@@ -560,6 +564,32 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
         },
       ];
 
+  const pricingColumns = ["1+"];
+  const pricingRows = [
+    {
+      label: "3mm Single-Sided",
+      values: [`${formatPrice(getJBondSheetPrice("3mm", "single") * JBOND_MARKUP)} per sheet`],
+    },
+    {
+      label: "3mm Double-Sided",
+      values: [`${formatPrice(getJBondSheetPrice("3mm", "double") * JBOND_MARKUP)} per sheet`],
+    },
+    {
+      label: "6mm Single-Sided",
+      values: [`${formatPrice(getJBondSheetPrice("6mm", "single") * JBOND_MARKUP)} per sheet`],
+    },
+    {
+      label: "6mm Double-Sided",
+      values: [`${formatPrice(getJBondSheetPrice("6mm", "double") * JBOND_MARKUP)} per sheet`],
+    },
+  ];
+
+  const addOnRows = [
+    { label: "Rounded Corners", value: `${formatPrice(15 * JBOND_MARKUP)} flat` },
+    { label: "Contour Cutting", value: "10% additional" },
+    { label: "Rush", value: "100% additional" },
+  ];
+
   // ΓöÇΓöÇΓöÇ render ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
   return (
     <div className="min-h-[calc(100vh-96px)] bg-[linear-gradient(145deg,#f0f4f8_0%,#e8edf2_55%,#dde4ec_100%)] text-zinc-800">
@@ -601,6 +631,7 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
                 section
                 productName={productName}
                 detail="Rigid sheet-layout builder"
+                onMiddleTitleClick={() => setIsPricingModalOpen(true)}
                 totalPrice={formatPrice(pricing.totalPrice)}
                 accentClassName="text-sky-400"
                 middleRows={[
@@ -757,6 +788,7 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
                 section
                 productName={productName}
                 detail="Rigid square-inch pricing builder"
+                onMiddleTitleClick={() => setIsPricingModalOpen(true)}
                 totalPrice={formatPrice(pricing.totalPrice)}
                 accentClassName="text-sky-400"
                 middleRows={[
@@ -764,6 +796,15 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
                   { label: "Area", value: `${pricing.sqInches} sq.in` },
                   { label: "Rate / Sq In", value: `$${pricing.ratePerSqIn}` },
                 ]}
+
+                <RigidSignsPricingModal
+                  isOpen={isPricingModalOpen}
+                  onClose={() => setIsPricingModalOpen(false)}
+                  pricingColumns={pricingColumns}
+                  pricingRows={pricingRows}
+                  addOnRows={addOnRows}
+                  markup={JBOND_MARKUP}
+                />
               />
 
               <div

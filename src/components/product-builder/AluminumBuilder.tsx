@@ -4,16 +4,19 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
 import SizeInputPanel, { composeDimensionInches, toFeetAndInches } from "@/components/product-builder/SizeInputPanel";
 import ArtworkUploadModal from "@/components/product-builder/ArtworkUploadModal";
+import RigidSignsPricingModal from "@/components/product-builder/RigidSignsPricingModal";
 import Button from "@/components/ui/Button";
 import RigidPricingHeader from "@/components/product-builder/RigidPricingHeader";
 import { useCart } from "@/context/CartContext";
 import {
+  ALUMINUM_MARKUP,
   ALUMINUM_SHEET,
   ALUMINUM_SIZE_OPTIONS,
   calculateAluminumSheetPricing,
   calculateAluminumSqinPricing,
   formatAluminumSize,
   getBestAluminumSheetLayout,
+  getAluminumSheetPrice,
   type AluminumMaterial,
   type AluminumPricingMode,
   type AluminumPrintMode,
@@ -82,6 +85,7 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
   const contourCut = false;
   const rush = false;
   const [added, setAdded] = useState(false);
+  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
 
   // ── derived ──
   const activeSize = useMemo(
@@ -557,6 +561,48 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
         },
       ];
 
+  const pricingColumns = ["1-9", "10-17", "18+"];
+  const pricingRows = [
+    {
+      label: '0.040" Single-Sided',
+      values: [
+        `${formatPrice(getAluminumSheetPrice(1, "040", "single") * ALUMINUM_MARKUP)} per sheet`,
+        `${formatPrice(getAluminumSheetPrice(10, "040", "single") * ALUMINUM_MARKUP)} per sheet`,
+        `${formatPrice(getAluminumSheetPrice(18, "040", "single") * ALUMINUM_MARKUP)} per sheet`,
+      ],
+    },
+    {
+      label: '0.040" Double-Sided',
+      values: [
+        `${formatPrice(getAluminumSheetPrice(1, "040", "double") * ALUMINUM_MARKUP)} per sheet`,
+        `${formatPrice(getAluminumSheetPrice(10, "040", "double") * ALUMINUM_MARKUP)} per sheet`,
+        `${formatPrice(getAluminumSheetPrice(18, "040", "double") * ALUMINUM_MARKUP)} per sheet`,
+      ],
+    },
+    {
+      label: '0.080" Single-Sided',
+      values: [
+        `${formatPrice(getAluminumSheetPrice(1, "080", "single") * ALUMINUM_MARKUP)} per sheet`,
+        `${formatPrice(getAluminumSheetPrice(10, "080", "single") * ALUMINUM_MARKUP)} per sheet`,
+        `${formatPrice(getAluminumSheetPrice(18, "080", "single") * ALUMINUM_MARKUP)} per sheet`,
+      ],
+    },
+    {
+      label: '0.080" Double-Sided',
+      values: [
+        `${formatPrice(getAluminumSheetPrice(1, "080", "double") * ALUMINUM_MARKUP)} per sheet`,
+        `${formatPrice(getAluminumSheetPrice(10, "080", "double") * ALUMINUM_MARKUP)} per sheet`,
+        `${formatPrice(getAluminumSheetPrice(18, "080", "double") * ALUMINUM_MARKUP)} per sheet`,
+      ],
+    },
+  ];
+
+  const addOnRows = [
+    { label: "Rounded Corners", value: `${formatPrice(20 * ALUMINUM_MARKUP)} flat` },
+    { label: "Contour Cutting", value: "10% additional" },
+    { label: "Rush", value: "100% additional" },
+  ];
+
   // ─── render ─────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-[calc(100vh-96px)] bg-[linear-gradient(145deg,#f4f4f5_0%,#ececef_55%,#e4e4e7_100%)] text-zinc-800">
@@ -598,6 +644,7 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
                 section
                 productName={productName}
                 detail="Rigid sheet-layout builder"
+                onMiddleTitleClick={() => setIsPricingModalOpen(true)}
                 totalPrice={formatPrice(pricing.totalPrice)}
                 accentClassName="text-[var(--brand-primary)]"
                 middleRows={[
@@ -756,6 +803,7 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
                 section
                 productName={productName}
                 detail="Rigid square-inch pricing builder"
+                onMiddleTitleClick={() => setIsPricingModalOpen(true)}
                 totalPrice={formatPrice(pricing.totalPrice)}
                 accentClassName="text-[var(--brand-primary)]"
                 middleRows={[
@@ -827,6 +875,15 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
               />
             </section>
           )}
+
+          <RigidSignsPricingModal
+            isOpen={isPricingModalOpen}
+            onClose={() => setIsPricingModalOpen(false)}
+            pricingColumns={pricingColumns}
+            pricingRows={pricingRows}
+            addOnRows={addOnRows}
+            markup={ALUMINUM_MARKUP}
+          />
 
         </div>
       </div>
