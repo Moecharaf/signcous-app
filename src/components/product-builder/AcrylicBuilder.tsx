@@ -703,22 +703,6 @@ export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
       <div className="w-full px-3 py-3 md:px-4">
         <div className="grid gap-4">
           <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
-            <div className="border-b border-zinc-200 px-4 py-3">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="text-sm font-medium text-zinc-700">
-                  Acrylic {thicknessOption.label} · {isValid ? `${formatInches(width)} x ${formatInches(height)}` : "Set dimensions"}
-                </div>
-                <div className="text-xs font-medium text-zinc-500">
-                  {mountingOption.label} · {cornerOption.label} corners · {contourCut ? "Contour cut" : "Square cut"}
-                </div>
-              </div>
-              {(widthError || heightError) && (
-                <div className="mt-2 inline-flex rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-semibold text-red-600">
-                  {widthError || heightError}
-                </div>
-              )}
-            </div>
-
             <RigidPricingHeader
               section
               productName="ACRYLIC"
