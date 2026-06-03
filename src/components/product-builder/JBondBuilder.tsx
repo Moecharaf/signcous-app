@@ -849,15 +849,6 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
                 disabled={sqinUploading}
               />
 
-              <RigidSignsPricingModal
-                isOpen={isPricingModalOpen}
-                onClose={() => setIsPricingModalOpen(false)}
-                pricingColumns={pricingColumns}
-                pricingRows={pricingRows}
-                addOnRows={addOnRows}
-                markup={JBOND_MARKUP}
-              />
-
               <BuilderBottomToolbar
                 panels={toolbarPanels}
                 action={
@@ -868,6 +859,15 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
               />
             </section>
           )}
+
+          <RigidSignsPricingModal
+            isOpen={isPricingModalOpen}
+            onClose={() => setIsPricingModalOpen(false)}
+            pricingColumns={pricingColumns}
+            pricingRows={pricingRows}
+            addOnRows={addOnRows}
+            markup={JBOND_MARKUP}
+          />
 
         </div>
       </div>
