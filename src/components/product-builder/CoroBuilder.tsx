@@ -924,14 +924,111 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
                       </table>
                     </div>
                   ) : (
-                    <div className="space-y-3 py-2 text-xs text-zinc-700">
-                      <div className="rounded border border-zinc-200 bg-zinc-50 px-3 py-2">
-                        Shipping follows the same markup rule as pricing.
-                        <div className="mt-1 font-semibold">Displayed Shipping = Supplier Shipping x {CORO_MARKUP.toFixed(2)}</div>
-                      </div>
-                      <div className="rounded border border-zinc-200 bg-white px-3 py-2 text-zinc-600">
-                        Final shipping rates still vary by quantity, destination, and turnaround and are calculated during checkout.
-                        Any returned supplier shipping amount is marked up by 50% before display.
+                    <div className="space-y-3 py-1 text-[11px] text-zinc-700">
+                      <table className="w-full border-collapse">
+                        <thead>
+                          <tr className="text-zinc-600">
+                            <th className="pb-1 text-left font-semibold" />
+                            <th className="pb-1 text-left font-semibold">per 3 sheets</th>
+                            <th className="pb-1 text-left font-semibold">58+ sheets</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td className="py-0.5">24&quot;x36&quot; and under</td>
+                            <td className="py-0.5">{formatPrice(10 * CORO_MARKUP)}</td>
+                            <td className="py-0.5">{formatPrice(199 * CORO_MARKUP)} (freight)</td>
+                          </tr>
+                        </tbody>
+                      </table>
+
+                      <table className="w-full border-collapse">
+                        <thead>
+                          <tr className="text-zinc-600">
+                            <th className="pb-1 text-left font-semibold" />
+                            <th className="pb-1 text-left font-semibold">per 3 sheets</th>
+                            <th className="pb-1 text-left font-semibold">22+ sheets</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td className="py-0.5">24&quot;x36&quot; - 32&quot;x48&quot;</td>
+                            <td className="py-0.5">{formatPrice(15 * CORO_MARKUP)}</td>
+                            <td className="py-0.5">{formatPrice(199 * CORO_MARKUP)} (freight)</td>
+                          </tr>
+                        </tbody>
+                      </table>
+
+                      <table className="w-full border-collapse">
+                        <thead>
+                          <tr className="text-zinc-600">
+                            <th className="pb-1 text-left font-semibold" />
+                            <th className="pb-1 text-left font-semibold">per 3 sheets</th>
+                            <th className="pb-1 text-left font-semibold">22+ sheets</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td className="py-0.5">36&quot;x36&quot; - 36&quot;x48&quot;</td>
+                            <td className="py-0.5">{formatPrice(35 * CORO_MARKUP)}</td>
+                            <td className="py-0.5">{formatPrice(199 * CORO_MARKUP)} (freight)</td>
+                          </tr>
+                        </tbody>
+                      </table>
+
+                      <table className="w-full border-collapse">
+                        <thead>
+                          <tr className="text-zinc-600">
+                            <th className="pb-1 text-left font-semibold" />
+                            <th className="pb-1 text-left font-semibold">1-5 sheets</th>
+                            <th className="pb-1 text-left font-semibold">6-9 sheets</th>
+                            <th className="pb-1 text-left font-semibold">10+ sheets</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td className="py-0.5">36&quot;x48&quot; - 48&quot;x48&quot;</td>
+                            <td className="py-0.5">{formatPrice(50 * CORO_MARKUP)}</td>
+                            <td className="py-0.5">{formatPrice(75 * CORO_MARKUP)}</td>
+                            <td className="py-0.5">{formatPrice(199 * CORO_MARKUP)} (freight)</td>
+                          </tr>
+                        </tbody>
+                      </table>
+
+                      <table className="w-full border-collapse">
+                        <thead>
+                          <tr className="text-zinc-600">
+                            <th className="pb-1 text-left font-semibold" />
+                            <th className="pb-1 text-left font-semibold">1-9 sheets</th>
+                            <th className="pb-1 text-left font-semibold">10+ sheets</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td className="py-0.5">39&quot;x72&quot; &amp; 24&quot;x96&quot;</td>
+                            <td className="py-0.5">{formatPrice(75 * CORO_MARKUP)}</td>
+                            <td className="py-0.5">{formatPrice(199 * CORO_MARKUP)} (freight)</td>
+                          </tr>
+                        </tbody>
+                      </table>
+
+                      <table className="w-full border-collapse">
+                        <thead>
+                          <tr className="text-zinc-600">
+                            <th className="pb-1 text-left font-semibold" />
+                            <th className="pb-1 text-left font-semibold">1+ sheets</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td className="py-0.5">48&quot;x96&quot;</td>
+                            <td className="py-0.5">{formatPrice(199 * CORO_MARKUP)} (freight)</td>
+                          </tr>
+                        </tbody>
+                      </table>
+
+                      <div className="rounded border border-zinc-200 bg-zinc-50 px-3 py-2 text-[10px] text-zinc-600">
+                        All shipping prices above are displayed with a 50% markup (supplier rate x {CORO_MARKUP.toFixed(2)}).
                       </div>
                     </div>
                   )}
