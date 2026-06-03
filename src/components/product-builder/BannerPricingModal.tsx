@@ -140,9 +140,6 @@ export default function BannerPricingModal({
               </tbody>
             </table>
 
-            <div className="rounded border border-zinc-200 bg-zinc-50 px-3 py-2 text-[10px] text-zinc-600">
-              Shipping rates displayed to customers include a 50% markup (supplier rate x {markup.toFixed(2)}).
-            </div>
           </div>
         )}
 
