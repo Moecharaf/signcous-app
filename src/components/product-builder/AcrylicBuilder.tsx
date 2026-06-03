@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
+import RigidSignsPricingModal from "@/components/product-builder/RigidSignsPricingModal";
 import SizeInputPanel, { composeDimensionInches } from "@/components/product-builder/SizeInputPanel";
 import Button from "@/components/ui/Button";
 import RigidPricingHeader from "@/components/product-builder/RigidPricingHeader";
@@ -16,6 +17,7 @@ import { useCart } from "@/context/CartContext";
 import {
   ACRYLIC_BASE_RATE,
   ACRYLIC_CORNER_OPTIONS,
+  ACRYLIC_MINIMUM_PRICE,
   ACRYLIC_MAX_HEIGHT,
   ACRYLIC_MAX_WIDTH,
   ACRYLIC_MOUNTING_OPTIONS,
@@ -29,6 +31,8 @@ import {
 interface AcrylicBuilderProps {
   productId?: number;
 }
+
+const ACRYLIC_MARKUP = 1.5;
 
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat("en-US", {
@@ -360,6 +364,7 @@ export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
   const [contourCut, setContourCut] = useState(false);
   const [rush, setRush] = useState(false);
   const [added, setAdded] = useState(false);
+  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null);
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
@@ -403,6 +408,33 @@ export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
     mounting,
     quantity: safeQuantity,
   });
+  const pricingColumns = ["1+"];
+  const pricingRows = [
+    {
+      label: "Base Acrylic",
+      values: [`${formatCurrency(ACRYLIC_BASE_RATE)} per sq.in`],
+    },
+    {
+      label: "Minimum Price",
+      values: [`${formatCurrency(ACRYLIC_MINIMUM_PRICE)} per item`],
+    },
+    ...ACRYLIC_THICKNESS_OPTIONS.map((option) => ({
+      label: `${option.label} Thickness`,
+      values: [option.modifier === 0 ? "Base rate" : `${Math.round(option.modifier * 100)}% additional`],
+    })),
+  ];
+  const addOnRows = [
+    ...ACRYLIC_MOUNTING_OPTIONS.filter((option) => option.price > 0).map((option) => ({
+      label: option.label,
+      value: `${formatCurrency(option.price)} per item`,
+    })),
+    ...ACRYLIC_CORNER_OPTIONS.filter((option) => option.price > 0).map((option) => ({
+      label: `Rounded Corners ${option.label}`,
+      value: `${formatCurrency(option.price)} per item`,
+    })),
+    { label: "Contour Cutting", value: "20% additional" },
+    { label: "Rush", value: "25% additional" },
+  ];
   const toolbarPanels: BuilderBottomToolbarPanel[] = [
     {
       id: "artwork",
@@ -691,6 +723,7 @@ export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
               section
               productName="ACRYLIC"
               detail="Premium rigid signage builder"
+              onMiddleTitleClick={() => setIsPricingModalOpen(true)}
               totalPrice={formatCurrency(pricing?.grandTotal ?? 0)}
               middleRows={[
                 { label: "Area", value: `${(pricing?.area ?? 0).toFixed(2)} sq.in` },
@@ -727,6 +760,15 @@ export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
                   {added ? "Added" : "Add"}
                 </Button>
               }
+            />
+
+            <RigidSignsPricingModal
+              isOpen={isPricingModalOpen}
+              onClose={() => setIsPricingModalOpen(false)}
+              pricingColumns={pricingColumns}
+              pricingRows={pricingRows}
+              addOnRows={addOnRows}
+              markup={ACRYLIC_MARKUP}
             />
           </div>
 
