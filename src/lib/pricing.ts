@@ -487,6 +487,7 @@ export function calculateBannerPrice(input: BannerPricingInput): BannerPricingRe
   const widthFt = safeWidthIn / 12;
   const heightFt = safeHeightIn / 12;
   const sqFt = widthFt * heightFt;
+  const billableSqFt = calculateBilledSqft(safeWidthIn, safeHeightIn, "inches");
   const perimeterFt = 2 * (widthFt + heightFt);
 
   // Mesh has its own pricing model and add-on rates.
@@ -544,11 +545,11 @@ export function calculateBannerPrice(input: BannerPricingInput): BannerPricingRe
   let basePricePerUnit: number;
   if (resolvedMaterial === "18oz Vinyl" && doubleSided) {
     const doubleSidedRate = safeQuantity >= 1000 ? 3.25 * BANNER_MARKUP : 4.25 * BANNER_MARKUP;
-    basePricePerUnit = sqFt * doubleSidedRate;
+    basePricePerUnit = billableSqFt * doubleSidedRate;
   } else if (doubleSided) {
-    basePricePerUnit = sqFt * sqFtRate * config.addOns.doubleSided;
+    basePricePerUnit = billableSqFt * sqFtRate * config.addOns.doubleSided;
   } else {
-    basePricePerUnit = sqFt * sqFtRate;
+    basePricePerUnit = billableSqFt * sqFtRate;
   }
 
   // Add-on costs — grommets: free, welding: free
@@ -559,7 +560,7 @@ export function calculateBannerPrice(input: BannerPricingInput): BannerPricingRe
     polePocketCostPerUnit = (widthFt * 2 * config.addOns.polePocketsPerLinearFt) + config.addOns.polePocketsSetupFee;
   }
 
-  const windSlitsCostPerUnit = windSlits ? sqFt * config.addOns.windSlitsPerSqFt : 0;
+  const windSlitsCostPerUnit = windSlits ? billableSqFt * config.addOns.windSlitsPerSqFt : 0;
 
   let edgeFinishCostPerUnit = 0;
   if (edgeFinish === "rope") {
@@ -587,7 +588,7 @@ export function calculateBannerPrice(input: BannerPricingInput): BannerPricingRe
   const totalPrice = unitPrice * safeQuantity;
 
   return {
-    sqFt: Math.round(sqFt * 100) / 100,
+    sqFt: billableSqFt,
     basePricePerUnit: Math.round(basePricePerUnit * 100) / 100,
     grommetCostPerUnit: Math.round(grommetCostPerUnit * 100) / 100,
     edgeFinishCostPerUnit,
