@@ -57,6 +57,7 @@ export const CORO_SHEET = {
   height: 96,
 };
 
+// Signcous retail pricing is always Signs365 supplier cost +50%.
 export const CORO_MARKUP = 1.5;
 
 // Signs365 uses fixed sheet counts for some sizes instead of pure max packing.
@@ -142,7 +143,7 @@ export const CORO_SIZE_OPTIONS: CoroSizeOption[] = [
   { id: "96x48", width: 96, height: 48 },
 ];
 
-interface TieredSheetPrice {
+export interface TieredSheetPrice {
   maxQty: number;
   single4mm: number;
   double4mm: number;
@@ -150,11 +151,21 @@ interface TieredSheetPrice {
   double10mm: number;
 }
 
-const SHEET_TIERS: TieredSheetPrice[] = [
+export const CORO_SHEET_TIERS: TieredSheetPrice[] = [
   { maxQty: 9, single4mm: 44, double4mm: 55, single10mm: 70, double10mm: 90 },
-  { maxQty: 50, single4mm: 33, double4mm: 44, single10mm: 56, double10mm: 72 },
-  { maxQty: Number.POSITIVE_INFINITY, single4mm: 28, double4mm: 38, single10mm: 48, double10mm: 62 },
+  { maxQty: 50, single4mm: 33, double4mm: 44, single10mm: 60, double10mm: 75 },
+  { maxQty: Number.POSITIVE_INFINITY, single4mm: 30, double4mm: 40, single10mm: 55, double10mm: 65 },
 ];
+
+export const CORO_SUPPLIER_FEES = {
+  contourCutRate: 0.1,
+  rushRate: 1,
+  stepStake: 1.25,
+  heavyDutyStake: 2.25,
+  grommetPerItem: 0.25,
+  grommetSetup: 15,
+  glossPerSign: 4,
+};
 
 export function formatCoroSize(size: CoroSizeOption): string {
   return `${size.width}\" x ${size.height}\"`;
@@ -400,7 +411,9 @@ export function getSignsPerSheet(width: number, height: number): number {
 
 export function getSupplierSheetPrice(quantity: number, material: CoroMaterial, printMode: CoroPrintMode): number {
   const safeQuantity = Math.max(1, quantity);
-  const tier = SHEET_TIERS.find((item) => safeQuantity <= item.maxQty) ?? SHEET_TIERS[SHEET_TIERS.length - 1];
+  const tier =
+    CORO_SHEET_TIERS.find((item) => safeQuantity <= item.maxQty) ??
+    CORO_SHEET_TIERS[CORO_SHEET_TIERS.length - 1];
 
   if (material === "4mm" && printMode === "single") return tier.single4mm;
   if (material === "4mm" && printMode === "double") return tier.double4mm;
@@ -425,16 +438,19 @@ export function calculateCoroPricing(input: CoroPricingInput): CoroPricingResult
   const markedUpUnitPrice = roundRetail(supplierCostPerSign * CORO_MARKUP);
   const baseSubtotal = markedUpUnitPrice * safeQuantity;
 
-  const contourCutFee = input.contourCut ? baseSubtotal * 0.2 : 0;
-  const rushFee = input.rush ? (baseSubtotal + contourCutFee) * 1.2 : 0;
+  const contourCutFee = input.contourCut ? baseSubtotal * CORO_SUPPLIER_FEES.contourCutRate : 0;
+  const rushFee = input.rush ? (baseSubtotal + contourCutFee) * CORO_SUPPLIER_FEES.rushRate : 0;
 
-  const stepStakesFee = Math.max(0, input.stepStakes) * 2.5;
-  const heavyDutyStakesFee = Math.max(0, input.heavyDutyStakes) * 4;
+  const stepStakesFee = Math.max(0, input.stepStakes) * CORO_SUPPLIER_FEES.stepStake * CORO_MARKUP;
+  const heavyDutyStakesFee =
+    Math.max(0, input.heavyDutyStakes) * CORO_SUPPLIER_FEES.heavyDutyStake * CORO_MARKUP;
 
   const grommetCount = input.grommetsEnabled ? Math.max(1, Math.floor(input.grommetCount)) : 0;
-  const grommetFee = input.grommetsEnabled ? 20 + grommetCount * 0.75 : 0;
+  const grommetFee = input.grommetsEnabled
+    ? (CORO_SUPPLIER_FEES.grommetSetup + grommetCount * CORO_SUPPLIER_FEES.grommetPerItem) * CORO_MARKUP
+    : 0;
 
-  const glossFee = input.gloss ? safeQuantity * 6 : 0;
+  const glossFee = input.gloss ? safeQuantity * CORO_SUPPLIER_FEES.glossPerSign * CORO_MARKUP : 0;
 
   const totalPrice =
     baseSubtotal +

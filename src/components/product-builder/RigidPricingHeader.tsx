@@ -10,6 +10,7 @@ type RigidPricingHeaderProps = {
   detail: string;
   totalPrice: string;
   middleTitle?: string;
+  onMiddleTitleClick?: () => void;
   middleRows: PricingRow[];
   totalSubtext?: string;
   accentClassName?: string;
@@ -22,6 +23,7 @@ export default function RigidPricingHeader({
   detail,
   totalPrice,
   middleTitle = "Pricing And Shipping",
+  onMiddleTitleClick,
   middleRows,
   totalSubtext = "Live total",
   accentClassName = "text-[var(--brand-primary)]",
@@ -55,7 +57,19 @@ export default function RigidPricingHeader({
         </div>
 
         <div className="text-center md:pt-1">
-          <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500">{middleTitle}</div>
+          <div className="mb-1">
+            {onMiddleTitleClick ? (
+              <button
+                type="button"
+                onClick={onMiddleTitleClick}
+                className="text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500 underline underline-offset-2 hover:text-zinc-700"
+              >
+                {middleTitle}
+              </button>
+            ) : (
+              <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500">{middleTitle}</div>
+            )}
+          </div>
           <div className="mx-auto w-full max-w-[320px] space-y-1 text-[10px] leading-5 text-zinc-600 md:text-[10px]">
             {middleRows.map((row) => (
               <div key={`${row.label}-${row.value}`} className="grid grid-cols-[1fr_92px] gap-3 text-left">

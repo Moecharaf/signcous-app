@@ -7,7 +7,10 @@ import Button from "@/components/ui/Button";
 import RigidPricingHeader from "@/components/product-builder/RigidPricingHeader";
 import { useCart } from "@/context/CartContext";
 import {
+  CORO_MARKUP,
   CORO_SHEET,
+  CORO_SHEET_TIERS,
+  CORO_SUPPLIER_FEES,
   CORO_SIZE_OPTIONS,
   calculateCoroPricing,
   formatCoroSize,
@@ -77,6 +80,8 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
   const fileInputBackRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const [added, setAdded] = useState(false);
+  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
+  const [pricingModalTab, setPricingModalTab] = useState<"pricing" | "shipping">("pricing");
 
   const activeSize = useMemo(
     () => {
@@ -564,7 +569,7 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
       width: 200,
       content: (
         <div>
-          <label className="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">Step Stakes ($2.50 ea)</label>
+          <label className="mb-1 block text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">Step Stakes ($1.88 ea)</label>
           <input
             type="number"
             min={0}
@@ -657,6 +662,7 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
               section
               productName={productName}
               detail="Rigid sheet-layout builder"
+              onMiddleTitleClick={() => setIsPricingModalOpen(true)}
               totalPrice={formatPrice(pricing.totalPrice)}
               middleRows={[
                 { label: "Price / Sheet", value: formatPrice(pricing.totalPrice / Math.max(pricing.sheetsRequired, 1)) },
@@ -814,6 +820,134 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
                 </Button>
               }
             />
+
+            {isPricingModalOpen && (
+              <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 px-4 py-6">
+                <div className="w-full max-w-[520px] rounded-sm bg-white p-4 shadow-2xl">
+                  <div className="mx-auto mb-4 inline-flex rounded border border-zinc-300 bg-zinc-100 p-0.5 text-xs font-semibold">
+                    <button
+                      type="button"
+                      onClick={() => setPricingModalTab("pricing")}
+                      className={`min-w-[88px] px-3 py-1 ${
+                        pricingModalTab === "pricing" ? "bg-white text-zinc-900 shadow" : "text-zinc-600"
+                      }`}
+                    >
+                      Pricing
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPricingModalTab("shipping")}
+                      className={`min-w-[88px] px-3 py-1 ${
+                        pricingModalTab === "shipping" ? "bg-white text-zinc-900 shadow" : "text-zinc-600"
+                      }`}
+                    >
+                      Shipping
+                    </button>
+                  </div>
+
+                  {pricingModalTab === "pricing" ? (
+                    <div className="space-y-4 text-xs text-zinc-800">
+                      <table className="w-full border-collapse">
+                        <thead>
+                          <tr className="text-[11px] uppercase tracking-[0.04em] text-zinc-700">
+                            <th className="pb-1 text-left font-bold">Per Quantity Pricing</th>
+                            <th className="pb-1 text-left font-bold">1-9</th>
+                            <th className="pb-1 text-left font-bold">10-50</th>
+                            <th className="pb-1 text-left font-bold">51+</th>
+                          </tr>
+                        </thead>
+                        <tbody className="align-top">
+                          <tr>
+                            <td className="py-0.5">4mm Single-Sided</td>
+                            <td className="py-0.5">{formatPrice(CORO_SHEET_TIERS[0].single4mm * CORO_MARKUP)} per sheet</td>
+                            <td className="py-0.5">{formatPrice(CORO_SHEET_TIERS[1].single4mm * CORO_MARKUP)} per sheet</td>
+                            <td className="py-0.5">{formatPrice(CORO_SHEET_TIERS[2].single4mm * CORO_MARKUP)} per sheet</td>
+                          </tr>
+                          <tr>
+                            <td className="py-0.5">4mm Double-Sided</td>
+                            <td className="py-0.5">{formatPrice(CORO_SHEET_TIERS[0].double4mm * CORO_MARKUP)} per sheet</td>
+                            <td className="py-0.5">{formatPrice(CORO_SHEET_TIERS[1].double4mm * CORO_MARKUP)} per sheet</td>
+                            <td className="py-0.5">{formatPrice(CORO_SHEET_TIERS[2].double4mm * CORO_MARKUP)} per sheet</td>
+                          </tr>
+                          <tr>
+                            <td className="py-0.5">10mm Single-Sided</td>
+                            <td className="py-0.5">{formatPrice(CORO_SHEET_TIERS[0].single10mm * CORO_MARKUP)} per sheet</td>
+                            <td className="py-0.5">{formatPrice(CORO_SHEET_TIERS[1].single10mm * CORO_MARKUP)} per sheet</td>
+                            <td className="py-0.5">{formatPrice(CORO_SHEET_TIERS[2].single10mm * CORO_MARKUP)} per sheet</td>
+                          </tr>
+                          <tr>
+                            <td className="py-0.5">10mm Double-Sided</td>
+                            <td className="py-0.5">{formatPrice(CORO_SHEET_TIERS[0].double10mm * CORO_MARKUP)} per sheet</td>
+                            <td className="py-0.5">{formatPrice(CORO_SHEET_TIERS[1].double10mm * CORO_MARKUP)} per sheet</td>
+                            <td className="py-0.5">{formatPrice(CORO_SHEET_TIERS[2].double10mm * CORO_MARKUP)} per sheet</td>
+                          </tr>
+                        </tbody>
+                      </table>
+
+                      <table className="w-full border-collapse">
+                        <tbody className="align-top">
+                          <tr>
+                            <td className="py-0.5">Standard wire step stakes</td>
+                            <td className="py-0.5 text-right">{formatPrice(CORO_SUPPLIER_FEES.stepStake * CORO_MARKUP)} per item</td>
+                          </tr>
+                          <tr>
+                            <td className="py-0.5">Grommets</td>
+                            <td className="py-0.5 text-right">
+                              {formatPrice(CORO_SUPPLIER_FEES.grommetPerItem * CORO_MARKUP)} per item, {formatPrice(CORO_SUPPLIER_FEES.grommetSetup * CORO_MARKUP)} setup fee
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="py-0.5">Custom Cut</td>
+                            <td className="py-0.5 text-right">No additional cost</td>
+                          </tr>
+                          <tr>
+                            <td className="py-0.5">Contour Cutting</td>
+                            <td className="py-0.5 text-right">{Math.round(CORO_SUPPLIER_FEES.contourCutRate * 100)}% additional</td>
+                          </tr>
+                          <tr>
+                            <td className="py-0.5">Gloss Finish</td>
+                            <td className="py-0.5 text-right">{formatPrice(CORO_SUPPLIER_FEES.glossPerSign * CORO_MARKUP)} per item</td>
+                          </tr>
+                          <tr>
+                            <td className="py-0.5">Heavy Duty Step Stakes</td>
+                            <td className="py-0.5 text-right">{formatPrice(CORO_SUPPLIER_FEES.heavyDutyStake * CORO_MARKUP)} per item</td>
+                          </tr>
+                          <tr>
+                            <td className="py-0.5">Score and Fold</td>
+                            <td className="py-0.5 text-right">No additional cost</td>
+                          </tr>
+                          <tr>
+                            <td className="py-0.5">Rush</td>
+                            <td className="py-0.5 text-right">{Math.round(CORO_SUPPLIER_FEES.rushRate * 100)}% additional</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <div className="space-y-3 py-2 text-xs text-zinc-700">
+                      <div className="rounded border border-zinc-200 bg-zinc-50 px-3 py-2">
+                        Shipping follows the same markup rule as pricing.
+                        <div className="mt-1 font-semibold">Displayed Shipping = Supplier Shipping x {CORO_MARKUP.toFixed(2)}</div>
+                      </div>
+                      <div className="rounded border border-zinc-200 bg-white px-3 py-2 text-zinc-600">
+                        Final shipping rates still vary by quantity, destination, and turnaround and are calculated during checkout.
+                        Any returned supplier shipping amount is marked up by 50% before display.
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="mt-4 text-center">
+                    <button
+                      type="button"
+                      onClick={() => setIsPricingModalOpen(false)}
+                      className="inline-flex h-6 items-center justify-center bg-[#ffde00] px-4 text-xs font-semibold text-zinc-900 hover:brightness-95"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <ArtworkUploadModal
               isOpen={isArtworkModalOpen}
