@@ -940,7 +940,7 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
                     <button
                       type="button"
                       onClick={() => setIsPricingModalOpen(false)}
-                      className="inline-flex h-6 items-center justify-center bg-[#ffde00] px-4 text-xs font-semibold text-zinc-900 hover:brightness-95"
+                      className="inline-flex h-7 items-center justify-center rounded bg-[var(--brand-primary)] px-4 text-xs font-semibold text-white hover:bg-[var(--brand-primary-hover)]"
                     >
                       Close
                     </button>
