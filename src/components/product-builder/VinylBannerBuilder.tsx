@@ -1743,7 +1743,7 @@ export default function VinylBannerBuilder({
                 {showMobileOptions ? "- Hide Options" : "+ Show Options"}
               </button>
             </div>
-            <div className={`${showMobileOptions ? "grid" : "hidden"} gap-2 sm:grid-cols-2 md:grid md:w-full md:grid-cols-[repeat(auto-fit,minmax(110px,1fr))]`}>
+            <div className={`${showMobileOptions ? "grid" : "hidden"} gap-2 sm:grid-cols-2 md:grid md:w-full md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7`}>
               <ToolbarButton
                 title="Images"
                 value={uploadedFileName ? "Uploaded" : "No file"}
@@ -2416,14 +2416,14 @@ function ToolbarButton({
     <button
       type="button"
       onClick={onClick}
-      className={`min-w-0 w-full rounded border px-2 py-1.5 text-left transition ${
+      className={`min-w-0 w-full rounded border px-3 py-2 text-left transition ${
         active ? "border-[#007fff] bg-white shadow-sm ring-1 ring-[#007fff]/20" : "border-zinc-200 bg-white hover:border-zinc-300"
       }`}
     >
-      <div className="flex items-center justify-between gap-2">
-        <span className={`min-w-0 truncate text-[9px] font-semibold uppercase tracking-[0.1em] ${active ? "text-[#007fff]" : "text-zinc-500"}`}>{title}</span>
+      <div className="flex items-center justify-between gap-3">
+        <span className={`min-w-0 truncate text-[10px] font-semibold uppercase tracking-[0.12em] ${active ? "text-[#007fff]" : "text-zinc-500"}`}>{title}</span>
         <span
-          className={`min-w-0 max-w-[65%] truncate rounded px-1.5 py-0.5 text-[11px] font-semibold ${
+          className={`min-w-0 max-w-[65%] truncate rounded px-2 py-1 text-xs font-semibold ${
             status === "alert"
               ? "bg-rose-500 text-white"
               : active
