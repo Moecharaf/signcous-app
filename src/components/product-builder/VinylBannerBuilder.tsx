@@ -848,14 +848,16 @@ export default function VinylBannerBuilder({
         }
 
         if (key === "ropeMode") {
-          if (value !== "none" && (prev.edgeFinish !== "welding" || prev.grommets)) {
+          const ropeModeValue = value as RopeMode;
+
+          if (ropeModeValue !== "none" && (prev.edgeFinish !== "welding" || prev.grommets)) {
             return prev;
           }
 
-          if (value === "none") {
+          if (ropeModeValue === "none") {
             next.edgeFinish = next.edgeFinish === "rope" ? "none" : next.edgeFinish;
           } else {
-            next.ropeMode = value;
+            next.ropeMode = ropeModeValue;
             next.edgeFinish = "rope";
             next.grommets = false;
           }
