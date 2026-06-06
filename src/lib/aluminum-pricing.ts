@@ -235,9 +235,10 @@ interface SheetTier {
 }
 
 const SHEET_TIERS: SheetTier[] = [
-  { maxQty: 9,                      single040: 210, double040: 240, single080: 350, double080: 380 },
-  { maxQty: 17,                     single040: 195, double040: 225, single080: 330, double080: 360 },
-  { maxQty: Number.POSITIVE_INFINITY, single040: 185, double040: 210, single080: 315, double080: 340 },
+  // Signs365 supplier tiers. Signcous applies ALUMINUM_MARKUP (+50%).
+  { maxQty: 9,                        single040: 175, double040: 200, single080: 300, double080: 325 },
+  { maxQty: 17,                       single040: 165, double040: 190, single080: 290, double080: 315 },
+  { maxQty: Number.POSITIVE_INFINITY, single040: 155, double040: 180, single080: 280, double080: 305 },
 ];
 
 export function getAluminumSheetPrice(
@@ -314,7 +315,7 @@ export function calculateAluminumSheetPricing(input: AluminumSheetPricingInput):
   const baseSubtotal = retailUnitPrice * qty;
 
   const contourCutFee = input.contourCut ? baseSubtotal * 0.1 : 0;
-  const roundedCornersFee = input.roundedCorners ? 20 * ALUMINUM_MARKUP : 0;
+  const roundedCornersFee = input.roundedCorners ? 15 * ALUMINUM_MARKUP : 0;
   const preRush = baseSubtotal + contourCutFee + roundedCornersFee;
   const rushFee = input.rush ? preRush * 1.0 : 0;
   const totalPrice = preRush + rushFee;
@@ -356,7 +357,7 @@ export function calculateAluminumSqinPricing(input: AluminumSqinPricingInput): A
   const baseSubtotal = pricePerSign * qty;
 
   const contourCutFee = input.contourCut ? baseSubtotal * 0.1 : 0;
-  const roundedCornersFee = input.roundedCorners ? 20 * ALUMINUM_MARKUP : 0;
+  const roundedCornersFee = input.roundedCorners ? 15 * ALUMINUM_MARKUP : 0;
   const preRush = baseSubtotal + contourCutFee + roundedCornersFee;
   const rushFee = input.rush ? preRush * 1.0 : 0;
   const totalPrice = preRush + rushFee;

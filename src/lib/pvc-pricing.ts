@@ -152,9 +152,10 @@ interface TieredSheetPrice {
 }
 
 const SHEET_TIERS: TieredSheetPrice[] = [
-  { maxQty: 9,  single3mm: 80, double3mm: 100, single6mm: 115, double6mm: 135 },
-  { maxQty: 17, single3mm: 70, double3mm: 85,  single6mm: 95,  double6mm: 115 },
-  { maxQty: Number.POSITIVE_INFINITY, single3mm: 65, double3mm: 75, single6mm: 85, double6mm: 100 },
+  // Signs365 supplier sheet tiers. Signcous applies PVC_MARKUP (+50%) in display and pricing.
+  { maxQty: 9,  single3mm: 65, double3mm: 85, single6mm: 95, double6mm: 115 },
+  { maxQty: 17, single3mm: 55, double3mm: 70, single6mm: 85, double6mm: 100 },
+  { maxQty: Number.POSITIVE_INFINITY, single3mm: 50, double3mm: 60, single6mm: 75, double6mm: 85 },
 ];
 
 export function formatPvcSize(size: PvcSizeOption): string {
@@ -328,8 +329,8 @@ export function calculatePvcPricing(input: PvcPricingInput): PvcPricingResult {
   const retailUnitPrice = (sheetsRequired * markedUpSheetPrice) / safeQuantity;
   const baseSubtotal = retailUnitPrice * safeQuantity;
 
-  const contourCutFee = input.contourCut ? baseSubtotal * 0.2 : 0;
-  const rushFee = input.rush ? (baseSubtotal + contourCutFee) * 1.2 : 0;
+  const contourCutFee = input.contourCut ? baseSubtotal * 0.1 : 0;
+  const rushFee = input.rush ? (baseSubtotal + contourCutFee) * 1.0 : 0;
 
   const stepStakesFee = Math.max(0, input.stepStakes) * 2.5;
   const heavyDutyStakesFee = Math.max(0, input.heavyDutyStakes) * 4;

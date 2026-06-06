@@ -147,9 +147,10 @@ interface TieredSheetPrice {
 }
 
 const SHEET_TIERS: TieredSheetPrice[] = [
-  { maxQty: 9,                      retailSingle: 70, retailDouble: 85 },
-  { maxQty: 50,                     retailSingle: 60, retailDouble: 70 },
-  { maxQty: Number.POSITIVE_INFINITY, retailSingle: 55, retailDouble: 65 },
+  // Signs365 supplier tiers. Signcous applies POLYSTYRENE_MARKUP (+50%) in display and pricing.
+  { maxQty: 9,                        retailSingle: 55, retailDouble: 65 },
+  { maxQty: 50,                       retailSingle: 45, retailDouble: 55 },
+  { maxQty: Number.POSITIVE_INFINITY, retailSingle: 40, retailDouble: 50 },
 ];
 
 export function formatPolystyreneSize(size: PolystyreneSizeOption): string {
@@ -347,8 +348,8 @@ export function calculatePolystyrenePricing(
   const retailUnitPrice = (sheetsRequired * markedUpSheetPrice) / safeQty;
   const baseSubtotal = retailUnitPrice * safeQty;
 
-  const contourCutFee = input.contourCut ? baseSubtotal * 0.2 : 0;
-  const rushFee = input.rush ? (baseSubtotal + contourCutFee) * 1.2 : 0;
+  const contourCutFee = input.contourCut ? baseSubtotal * 0.1 : 0;
+  const rushFee = input.rush ? (baseSubtotal + contourCutFee) * 1.0 : 0;
 
   const stepStakesFee = Math.max(0, input.stepStakes) * 2.5;
   const heavyDutyStakesFee = Math.max(0, input.heavyDutyStakes) * 4;
