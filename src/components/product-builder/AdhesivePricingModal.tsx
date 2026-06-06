@@ -94,15 +94,13 @@ export default function AdhesivePricingModal({ isOpen, onClose, config }: Adhesi
               <thead>
                 <tr className="text-[11px] uppercase tracking-[0.04em] text-zinc-700">
                   <th className="pb-1 text-left font-bold">Item</th>
-                  <th className="pb-1 text-left font-bold">Signs365 Base</th>
-                  <th className="pb-1 text-left font-bold">Signcous (+50%)</th>
+                  <th className="pb-1 text-left font-bold">Price</th>
                 </tr>
               </thead>
               <tbody className="align-top">
                 {pricingRows.map((row) => (
                   <tr key={row.label}>
                     <td className="py-0.5">{row.label}</td>
-                    <td className="py-0.5">{formatRate(row, row.base)}</td>
                     <td className="py-0.5">{formatRate(row, row.base * ADHESIVE_MARKUP)}</td>
                   </tr>
                 ))}
@@ -114,14 +112,12 @@ export default function AdhesivePricingModal({ isOpen, onClose, config }: Adhesi
                 {config.addOnRates.map((row) => (
                   <tr key={row.label}>
                     <td className="py-0.5">{row.label}</td>
-                    <td className="py-0.5">{formatRate(row, row.base)}</td>
                     <td className="py-0.5">{formatRate(row, row.base * ADHESIVE_MARKUP)}</td>
                   </tr>
                 ))}
                 {config.addOnText.map((row) => (
                   <tr key={row.label}>
                     <td className="py-0.5">{row.label}</td>
-                    <td className="py-0.5">{row.text}</td>
                     <td className="py-0.5">{row.text}</td>
                   </tr>
                 ))}
