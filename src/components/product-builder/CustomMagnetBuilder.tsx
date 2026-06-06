@@ -8,7 +8,9 @@ import { useCart } from "@/context/CartContext";
 
 type RoundedCornerOption = "none" | "half-inch" | "one-inch";
 
-const RATE_PER_SQ_IN = 0.1;
+const SUPPLIER_RATE_PER_SQ_IN = 0.07;
+const MAGNET_MARKUP = 1.5;
+const RATE_PER_SQ_IN = SUPPLIER_RATE_PER_SQ_IN * MAGNET_MARKUP;
 const PREVIEW_MAX_WIDTH = 880;
 const PREVIEW_MAX_HEIGHT = 540;
 const PREVIEW_SIDE_GUTTER = 88;
@@ -30,6 +32,10 @@ function formatCurrency(value: number): string {
   }).format(value);
 }
 
+function formatRate(value: number, suffix: string): string {
+  return `${formatCurrency(Math.round(value * 100) / 100)} ${suffix}`;
+}
+
 function dimensionLabel(value: number): string {
   if (!Number.isFinite(value) || value <= 0) return '--"';
   const rounded = Number(value.toFixed(2));
@@ -48,6 +54,8 @@ export default function CustomMagnetBuilder() {
   const [roundedCorners, setRoundedCorners] = useState<RoundedCornerOption>("none");
   const [contourCut, setContourCut] = useState(false);
   const [rush, setRush] = useState(false);
+  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
+  const [activePricingTab, setActivePricingTab] = useState<"pricing" | "shipping">("pricing");
   const [addedToCart, setAddedToCart] = useState(false);
 
   const [sizeError, setSizeError] = useState<string | null>(null);
@@ -329,23 +337,40 @@ export default function CustomMagnetBuilder() {
             backgroundSize: "26px 26px",
           }}
         >
-          <div className="pointer-events-none absolute left-1/2 top-4 z-20 w-[min(940px,calc(100%-24px))] -translate-x-1/2 px-2 md:px-3">
+          <div className="absolute left-1/2 top-4 z-20 w-[min(940px,calc(100%-24px))] -translate-x-1/2 px-2 md:px-3">
             <div className="grid w-full max-w-[940px] grid-cols-1 gap-2 px-1 md:grid-cols-[0.85fr_1.4fr_0.85fr] md:items-start md:gap-8">
               <div>
                 <div className="text-[27px] font-medium leading-[0.98] tracking-tight text-zinc-900 md:whitespace-nowrap md:text-[36px]">Custom Magnets</div>
                 <div className="mt-1 text-[11px] text-zinc-600 md:text-[12px]">Single-sided magnet builder, {dimensionLabel(width)} x {dimensionLabel(height)}</div>
               </div>
 
-              <div className="text-[10px] text-zinc-600 md:pt-1 md:text-center">
-                <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500">Quick Rate Reference</div>
-                <div className="grid grid-cols-[56px_1fr] gap-x-2 gap-y-0.5 text-[10px] md:text-center md:grid-cols-2 md:justify-center md:inline-grid">
-                  <span className="text-zinc-500">Base / sq in</span>
-                  <span>{pricing && pricing.sqIn > 0 ? formatCurrency(pricing.base / pricing.sqIn) : formatCurrency(0)}</span>
-                  <span className="text-zinc-500">Unit Price</span>
-                  <span>{formatCurrency(pricing.unitPrice)}</span>
-                  <span className="text-zinc-500">Sq in</span>
-                  <span>{pricing.sqIn.toFixed(2)}</span>
+              <div className="text-center md:pt-1">
+                <div className="mx-auto w-full max-w-[360px]">
+                  <table className="w-full border-collapse text-[10px] leading-5 text-zinc-600 md:text-[11px]">
+                    <thead>
+                      <tr>
+                        <th className="pb-0.5 text-left font-semibold text-zinc-500" />
+                        <th className="pb-0.5 text-left font-semibold text-zinc-500">Single-Sided</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td className="py-0.5 text-left text-zinc-500">Custom Magnets</td>
+                        <td className="py-0.5 text-left font-medium text-zinc-700">{formatRate(RATE_PER_SQ_IN, "per sq in")}</td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActivePricingTab("pricing");
+                    setIsPricingModalOpen(true);
+                  }}
+                  className="mt-1 text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500 underline underline-offset-2 hover:text-zinc-700"
+                >
+                  Pricing And Shipping
+                </button>
               </div>
 
               <div className="text-left md:pt-1 md:text-right">
@@ -422,6 +447,100 @@ export default function CustomMagnetBuilder() {
             </Button>
           }
         />
+
+        {isPricingModalOpen ? (
+          <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 px-4 py-6">
+            <div className="w-full max-w-[620px] rounded-sm bg-white p-4 shadow-2xl">
+              <div className="mx-auto mb-4 inline-flex rounded border border-zinc-300 bg-zinc-100 p-0.5 text-xs font-semibold">
+                <button
+                  type="button"
+                  onClick={() => setActivePricingTab("pricing")}
+                  className={`min-w-[88px] px-3 py-1 ${
+                    activePricingTab === "pricing" ? "bg-white text-zinc-900 shadow" : "text-zinc-600"
+                  }`}
+                >
+                  Pricing
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActivePricingTab("shipping")}
+                  className={`min-w-[88px] px-3 py-1 ${
+                    activePricingTab === "shipping" ? "bg-white text-zinc-900 shadow" : "text-zinc-600"
+                  }`}
+                >
+                  Shipping
+                </button>
+              </div>
+
+              {activePricingTab === "pricing" ? (
+                <div className="space-y-4 text-xs text-zinc-800">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="text-[11px] uppercase tracking-[0.04em] text-zinc-700">
+                        <th className="pb-1 text-left font-bold">Per Quantity Pricing</th>
+                        <th className="pb-1 text-left font-bold">1+</th>
+                      </tr>
+                    </thead>
+                    <tbody className="align-top">
+                      <tr>
+                        <td className="py-0.5">Custom Magnets</td>
+                        <td className="py-0.5">{formatRate(RATE_PER_SQ_IN, "per square inch")}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                  <table className="w-full border-collapse">
+                    <tbody className="align-top">
+                      <tr>
+                        <td className="py-0.5">Contour Cut</td>
+                        <td className="py-0.5">10% additional</td>
+                      </tr>
+                      <tr>
+                        <td className="py-0.5">Rounded Corners</td>
+                        <td className="py-0.5">No additional cost</td>
+                      </tr>
+                      <tr>
+                        <td className="py-0.5">Rush</td>
+                        <td className="py-0.5">100% additional</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="space-y-3 py-1 text-[11px] text-zinc-700">
+                  <div className="flex items-center gap-2 text-zinc-600">
+                    <span className="text-sm">i</span>
+                    <span>1 sheet = 4,608 sq. inches</span>
+                  </div>
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="text-zinc-600">
+                        <th className="pb-1 text-left font-semibold">per 2,025 sq. in.</th>
+                        <th className="pb-1 text-left font-semibold">40,500+ sq. in.</th>
+                      </tr>
+                    </thead>
+                    <tbody className="align-top">
+                      <tr>
+                        <td className="py-0.5">{formatCurrency(10 * MAGNET_MARKUP)}</td>
+                        <td className="py-0.5">{formatCurrency(199 * MAGNET_MARKUP)} (freight)</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              <div className="mt-4 text-center">
+                <button
+                  type="button"
+                  onClick={() => setIsPricingModalOpen(false)}
+                  className="inline-flex h-7 items-center justify-center rounded bg-[var(--brand-primary)] px-4 text-xs font-semibold text-white hover:bg-[var(--brand-primary-hover)]"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
       </div>
     </div>
   );

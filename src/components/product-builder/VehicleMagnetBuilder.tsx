@@ -15,11 +15,11 @@ interface VehicleMagnetSizeOption {
 type RoundedCornerOption = "none" | "half-inch" | "one-inch";
 
 const SIZE_OPTIONS: VehicleMagnetSizeOption[] = [
-  { label: '18" x 12"', width: 18, height: 12, price: 17.95 },
-  { label: '24" x 12"', width: 24, height: 12, price: 22.95 },
-  { label: '24" x 18"', width: 24, height: 18, price: 31.95 },
-  { label: '42" x 12"', width: 42, height: 12, price: 44.95 },
-  { label: '72" x 24"', width: 72, height: 24, price: 129.95 },
+  { label: '18"x12"', width: 18, height: 12, price: 17.93 },
+  { label: '24"x12"', width: 24, height: 12, price: 22.43 },
+  { label: '24"x18"', width: 24, height: 18, price: 31.43 },
+  { label: '42"x12"', width: 42, height: 12, price: 44.93 },
+  { label: '72"x24"', width: 72, height: 24, price: 134.55 },
 ];
 
 const ROUNDED_CORNER_OPTIONS: Array<{ value: RoundedCornerOption; label: string; price: number }> = [
@@ -52,6 +52,8 @@ export default function VehicleMagnetBuilder() {
   const [roundedCorners, setRoundedCorners] = useState<RoundedCornerOption>("none");
   const [quantityInput, setQuantityInput] = useState("1");
   const [rush, setRush] = useState(false);
+  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
+  const [activePricingTab, setActivePricingTab] = useState<"pricing" | "shipping">("pricing");
   const [addedToCart, setAddedToCart] = useState(false);
   const [qtyError, setQtyError] = useState<string | null>(null);
 
@@ -322,23 +324,42 @@ export default function VehicleMagnetBuilder() {
             backgroundSize: "26px 26px",
           }}
         >
-          <div className="pointer-events-none absolute left-1/2 top-4 z-20 w-[min(940px,calc(100%-24px))] -translate-x-1/2 px-2 md:px-3">
+          <div className="absolute left-1/2 top-4 z-20 w-[min(940px,calc(100%-24px))] -translate-x-1/2 px-2 md:px-3">
             <div className="grid w-full max-w-[940px] grid-cols-1 gap-2 px-1 md:grid-cols-[0.85fr_1.4fr_0.85fr] md:items-start md:gap-8">
               <div>
                 <div className="text-[27px] font-medium leading-[0.98] tracking-tight text-zinc-900 md:whitespace-nowrap md:text-[36px]">Vehicle Magnet</div>
                 <div className="mt-1 text-[11px] text-zinc-600 md:text-[12px]">Single-sided magnet builder, {hasSelectedSize ? selectedSize.label : '0" x 0"'}</div>
               </div>
 
-              <div className="text-[10px] text-zinc-600 md:pt-1 md:text-center">
-                <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500">Quick Rate Reference</div>
-                <div className="grid grid-cols-[56px_1fr] gap-x-2 gap-y-0.5 text-[10px] md:text-center md:grid-cols-2 md:justify-center md:inline-grid">
-                  <span className="text-zinc-500">Price / unit</span>
-                  <span>{quantity > 0 ? formatCurrency(pricing.total / quantity) : formatCurrency(0)}</span>
-                  <span className="text-zinc-500">Size</span>
-                  <span>{hasSelectedSize ? selectedSize.label : '0" x 0"'}</span>
-                  <span className="text-zinc-500">Quantity</span>
-                  <span>{quantity}</span>
+              <div className="text-center md:pt-1">
+                <div className="mx-auto w-full max-w-[360px]">
+                  <table className="w-full border-collapse text-[10px] leading-5 text-zinc-600 md:text-[11px]">
+                    <thead>
+                      <tr>
+                        <th className="pb-0.5 text-left font-semibold text-zinc-500" />
+                        <th className="pb-0.5 text-left font-semibold text-zinc-500">Single-Sided</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {SIZE_OPTIONS.map((option) => (
+                        <tr key={getSizeKey(option)}>
+                          <td className="py-0.5 text-left text-zinc-500">{option.label}</td>
+                          <td className="py-0.5 text-left font-medium text-zinc-700">{formatCurrency(option.price)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActivePricingTab("pricing");
+                    setIsPricingModalOpen(true);
+                  }}
+                  className="mt-1 text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500 underline underline-offset-2 hover:text-zinc-700"
+                >
+                  Pricing And Shipping
+                </button>
               </div>
 
               <div className="text-left md:pt-1 md:text-right">
@@ -426,6 +447,94 @@ export default function VehicleMagnetBuilder() {
             </Button>
           }
         />
+
+        {isPricingModalOpen ? (
+          <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 px-4 py-6">
+            <div className="w-full max-w-[620px] rounded-sm bg-white p-4 shadow-2xl">
+              <div className="mx-auto mb-4 inline-flex rounded border border-zinc-300 bg-zinc-100 p-0.5 text-xs font-semibold">
+                <button
+                  type="button"
+                  onClick={() => setActivePricingTab("pricing")}
+                  className={`min-w-[88px] px-3 py-1 ${
+                    activePricingTab === "pricing" ? "bg-white text-zinc-900 shadow" : "text-zinc-600"
+                  }`}
+                >
+                  Pricing
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActivePricingTab("shipping")}
+                  className={`min-w-[88px] px-3 py-1 ${
+                    activePricingTab === "shipping" ? "bg-white text-zinc-900 shadow" : "text-zinc-600"
+                  }`}
+                >
+                  Shipping
+                </button>
+              </div>
+
+              {activePricingTab === "pricing" ? (
+                <div className="space-y-4 text-xs text-zinc-800">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="text-[11px] uppercase tracking-[0.04em] text-zinc-700">
+                        <th className="pb-1 text-left font-bold">Per Quantity Pricing</th>
+                        <th className="pb-1 text-left font-bold">1+</th>
+                      </tr>
+                    </thead>
+                    <tbody className="align-top">
+                      {SIZE_OPTIONS.map((option) => (
+                        <tr key={`${getSizeKey(option)}-pricing`}>
+                          <td className="py-0.5">{option.label}</td>
+                          <td className="py-0.5">{formatCurrency(option.price)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+
+                  <table className="w-full border-collapse">
+                    <tbody className="align-top">
+                      <tr>
+                        <td className="py-0.5">Rounded Corners</td>
+                        <td className="py-0.5">No additional cost</td>
+                      </tr>
+                      <tr>
+                        <td className="py-0.5">Rush</td>
+                        <td className="py-0.5">100% additional</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="space-y-3 py-1 text-[11px] text-zinc-700">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="text-zinc-600">
+                        <th className="pb-1 text-left font-semibold">per 10 magnets</th>
+                        <th className="pb-1 text-left font-semibold">191+ magnets</th>
+                      </tr>
+                    </thead>
+                    <tbody className="align-top">
+                      <tr>
+                        <td className="py-0.5">{formatCurrency(15)}</td>
+                        <td className="py-0.5">{formatCurrency(298.5)} (freight)</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              <div className="mt-4 text-center">
+                <button
+                  type="button"
+                  onClick={() => setIsPricingModalOpen(false)}
+                  className="inline-flex h-7 items-center justify-center rounded bg-[var(--brand-primary)] px-4 text-xs font-semibold text-white hover:bg-[var(--brand-primary-hover)]"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
       </div>
     </div>
   );
