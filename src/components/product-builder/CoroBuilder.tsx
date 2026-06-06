@@ -98,14 +98,7 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
     [sizeId, sizeMode, customWidth, customHeight]
   );
 
-  const doubleSidedAllowed = material === "10mm";
   const contourCutAllowed = activeSize.width === 48 && activeSize.height === 96;
-
-  useEffect(() => {
-    if (!doubleSidedAllowed && printMode === "double") {
-      setPrintMode("single");
-    }
-  }, [doubleSidedAllowed, printMode]);
 
   useEffect(() => {
     if (!contourCutAllowed && contourCut) {
@@ -499,13 +492,8 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
             className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"
           >
             <option value="single">Single</option>
-            <option value="double" disabled={!doubleSidedAllowed}>Double</option>
+            <option value="double">Double</option>
           </select>
-          {!doubleSidedAllowed && (
-            <div className="mt-2 rounded border border-amber-200 bg-amber-50 px-2 py-1 text-[11px] leading-4 text-amber-700">
-              Double-sided is only available for 10mm material.
-            </div>
-          )}
         </>
       ),
     },
