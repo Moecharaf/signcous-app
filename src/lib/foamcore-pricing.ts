@@ -148,10 +148,10 @@ interface TieredSheetPrice {
 }
 
 const SHEET_TIERS: TieredSheetPrice[] = [
-  // Retail values use the midpoint of the recommended ranges.
-  { maxQty: 9, retailSingle: 90, retailDouble: 105 },
-  { maxQty: 50, retailSingle: 72.5, retailDouble: 87.5 },
-  { maxQty: Number.POSITIVE_INFINITY, retailSingle: 67.5, retailDouble: 77.5 },
+  // Signs365 supplier sheet prices (Signcous applies FOAMCORE_MARKUP on top).
+  { maxQty: 9, retailSingle: 70, retailDouble: 80 },
+  { maxQty: 50, retailSingle: 55, retailDouble: 65 },
+  { maxQty: Number.POSITIVE_INFINITY, retailSingle: 50, retailDouble: 60 },
 ];
 
 export function formatFoamcoreSize(size: FoamcoreSizeOption): string {
@@ -413,8 +413,8 @@ export function calculateFoamcorePricing(input: FoamcorePricingInput): FoamcoreP
   const retailUnitPrice = retailTotalCost / safeQuantity;
   const baseSubtotal = retailUnitPrice * safeQuantity;
 
-  const contourCutFee = input.contourCut ? baseSubtotal * 0.2 : 0;
-  const rushFee = input.rush ? (baseSubtotal + contourCutFee) * 1.2 : 0;
+  const contourCutFee = input.contourCut ? baseSubtotal * 0.1 : 0;
+  const rushFee = input.rush ? (baseSubtotal + contourCutFee) * 1.0 : 0;
 
   const stepStakesFee = Math.max(0, input.stepStakes) * 2.5;
   const heavyDutyStakesFee = Math.max(0, input.heavyDutyStakes) * 4;
