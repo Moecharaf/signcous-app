@@ -1763,7 +1763,7 @@ export default function VinylBannerBuilder({
                 <ToolbarButton
                   title="Material"
                   value={form.material}
-                  active={activePanel === "material"}
+                  active={true}
                   onClick={(event) => openPanel("material", event)}
                 />
               )}
@@ -1771,7 +1771,7 @@ export default function VinylBannerBuilder({
                 <ToolbarButton
                   title="Print Sides"
                   value={form.doubleSided ? "Double-sided" : "Single-sided"}
-                  active={activePanel === "print" || isPrintActivated}
+                  active={true}
                   onClick={(event) => openPanel("print", event)}
                 />
               )}
