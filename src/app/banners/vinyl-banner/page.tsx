@@ -9,6 +9,6 @@ export const metadata: Metadata = {
 
 export default function VinylBannerPage() {
   return (
-    <VinylBannerBuilder />
+    <VinylBannerBuilder productName="HD Banner ( Vinyl )" />
   );
 }
