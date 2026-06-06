@@ -1684,7 +1684,7 @@ export default function VinylBannerBuilder({
                   />
                 </>
               )}
-              {!isHdpeProduct && !isCanvasProduct && !isMeshProduct && (
+              {!isHdpeProduct && !isCanvasProduct && !isMeshProduct && !isPosterProduct && (
                 <ToolbarButton
                   title="Quantity"
                   value={`${form.quantity} unit${effectiveQtyNum !== 1 ? "s" : ""}`}
@@ -2082,7 +2082,7 @@ export default function VinylBannerBuilder({
               </div>
             )}
 
-            {activePanel === "quantity" && !isHdpeProduct && !isCanvasProduct && !isMeshProduct && (
+            {activePanel === "quantity" && !isHdpeProduct && !isCanvasProduct && !isMeshProduct && !isPosterProduct && (
               <div>
                 <div className="grid gap-2 md:grid-cols-[110px_1fr]">
                   <input type="number" min={1} value={form.quantity} onChange={(e) => set("quantity", e.target.value)} className="h-8 rounded border border-zinc-300 px-3 text-sm" />
@@ -2131,11 +2131,20 @@ function ToolbarButton({
         active ? "border-[#007fff] bg-[#007fff]/5 shadow-sm" : "border-zinc-200 bg-white hover:border-zinc-300"
       }`}
     >
-      <div className="flex items-center justify-between gap-2 text-[10px] font-semibold uppercase tracking-[0.12em]">
-        <span className="text-zinc-500">{title}</span>
-        <span className={`h-2 w-2 rounded-full ${status === "alert" ? "bg-rose-500" : "bg-emerald-500"}`} />
+      <div className="flex items-center justify-between gap-3">
+        <span className="min-w-0 truncate text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">{title}</span>
+        <span
+          className={`shrink-0 rounded px-2 py-1 text-xs font-semibold ${
+            status === "alert"
+              ? "bg-rose-500 text-white"
+              : active
+                ? "bg-[#007fff] text-white"
+                : "bg-zinc-100 text-zinc-700"
+          }`}
+        >
+          {value}
+        </span>
       </div>
-      <div className="mt-1 truncate text-xs font-semibold text-zinc-800">{value}</div>
     </button>
   );
 }

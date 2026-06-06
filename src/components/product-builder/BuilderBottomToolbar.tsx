@@ -111,29 +111,32 @@ export default function BuilderBottomToolbar({
                 onClick={(event) => togglePanel(panel.id, event)}
                 className={`min-w-0 rounded border px-3 py-2 text-left transition ${
                   activePanelId === panel.id
-                    ? "border-emerald-500 bg-emerald-50 shadow-sm"
+                    ? "border-[#007fff] bg-[#007fff]/5 shadow-sm"
                     : "border-zinc-200 bg-white hover:border-zinc-300"
                 }`}
               >
-                <div className="flex items-center justify-between gap-2 text-[10px] font-semibold uppercase tracking-[0.12em]">
-                  <span className="text-zinc-500">{panel.title}</span>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="min-w-0 truncate text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">{panel.title}</span>
                   <span
-                    className={`h-2 w-2 rounded-full ${
+                    className={`shrink-0 rounded px-2 py-1 text-xs font-semibold ${
                       panel.status === "alert"
-                        ? "bg-rose-500"
+                        ? "bg-rose-500 text-white"
                         : panel.status === "neutral"
-                          ? "bg-zinc-300"
-                          : "bg-emerald-500"
+                          ? "bg-zinc-100 text-zinc-600"
+                          : activePanelId === panel.id
+                            ? "bg-[#007fff] text-white"
+                            : "bg-zinc-100 text-zinc-700"
                     }`}
-                  />
+                  >
+                    {panel.value}
+                  </span>
                 </div>
-                <div className="mt-1 truncate text-xs font-semibold text-zinc-800">{panel.value}</div>
               </button>
             ))}
           </div>
 
-          <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-emerald-700">{actionTitle}</div>
+          <div className="rounded-lg border border-[#007fff]/20 bg-[#007fff]/5 p-3">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#007fff]">{actionTitle}</div>
             <div className="mt-3">{action}</div>
           </div>
         </div>
