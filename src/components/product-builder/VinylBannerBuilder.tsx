@@ -1669,7 +1669,7 @@ export default function VinylBannerBuilder({
                 {showMobileOptions ? "- Hide Options" : "+ Show Options"}
               </button>
             </div>
-            <div className={`${showMobileOptions ? "grid" : "hidden"} gap-2 sm:grid-cols-2 md:flex md:w-full md:flex-nowrap md:items-stretch md:gap-1.5`}>
+            <div className={`${showMobileOptions ? "grid" : "hidden"} gap-2 sm:grid-cols-2 md:w-full md:grid-cols-[repeat(auto-fit,minmax(110px,1fr))]`}>
               <ToolbarButton
                 title="Images"
                 value={uploadedFileName ? "Uploaded" : "No file"}
@@ -2332,7 +2332,7 @@ function ToolbarButton({
     <button
       type="button"
       onClick={onClick}
-      className={`min-w-0 rounded border px-2 py-1.5 text-left transition md:flex-1 ${
+      className={`min-w-0 w-full rounded border px-2 py-1.5 text-left transition ${
         active ? "border-[#007fff] bg-white shadow-sm ring-1 ring-[#007fff]/20" : "border-zinc-200 bg-white hover:border-zinc-300"
       }`}
     >
