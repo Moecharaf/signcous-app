@@ -445,6 +445,19 @@ export default function VinylBannerBuilder({
   const meshPolePocketsLocked = isMeshProduct && form.meshRopeMode !== "none";
   const meshWebbingCost = form.meshWebbing ? perimeterFt * 1.75 : 0;
   const meshRopeCost = meshRopeActive ? perimeterFt * 1.75 : 0;
+  const isImagesActivated = Boolean(uploadedFileName);
+  const isSizeActivated = hasSelectedSize;
+  const isPrintActivated = canEnableDoubleSided && form.doubleSided;
+  const isWeldingActivated = form.edgeFinish === "welding";
+  const isRopeActivated = form.edgeFinish === "rope";
+  const isGrommetsActivated = form.grommets;
+  const isPolePocketsActivated = form.polePocketMode !== "none";
+  const isWindSlitsActivated = form.windSlits;
+  const isMeshWeldingActivated = form.meshWelding;
+  const isMeshWebbingActivated = form.meshWebbing;
+  const isMeshGrommetsActivated = form.grommets;
+  const isMeshRopeActivated = form.meshRopeMode !== "none";
+  const isMeshPolePocketsActivated = form.meshPolePocketMode !== "none";
   const runtimeViewportWidth = typeof window !== "undefined" ? window.innerWidth : 1280;
   const isMobileViewport = runtimeViewportWidth < 768;
   const previewMaxWidth = isMobileViewport ? Math.max(220, runtimeViewportWidth - 48) : PREVIEW_MAX_WIDTH;
@@ -1673,14 +1686,14 @@ export default function VinylBannerBuilder({
               <ToolbarButton
                 title="Images"
                 value={uploadedFileName ? "Uploaded" : "No file"}
-                active={activePanel === "artwork"}
+                active={activePanel === "artwork" || isImagesActivated}
                 onClick={(event) => openPanel("artwork", event)}
               />
               {!isEconomicalStandProduct && (
                 <ToolbarButton
                   title="Size"
                   value={`${widthFeetInchesLabel} x ${heightFeetInchesLabel}`}
-                  active={activePanel === "size"}
+                  active={activePanel === "size" || isSizeActivated}
                   onClick={(event) => openPanel("size", event)}
                   status={errors.width || errors.height ? "alert" : "ok"}
                 />
@@ -1697,7 +1710,7 @@ export default function VinylBannerBuilder({
                 <ToolbarButton
                   title="Print Sides"
                   value={form.doubleSided ? "Double-sided" : "Single-sided"}
-                  active={activePanel === "print"}
+                  active={activePanel === "print" || isPrintActivated}
                   onClick={(event) => openPanel("print", event)}
                 />
               )}
@@ -1705,7 +1718,7 @@ export default function VinylBannerBuilder({
                 <ToolbarButton
                   title="Welding"
                   value={form.edgeFinish === "welding" ? "Yes" : "No"}
-                  active={activePanel === "welding"}
+                  active={activePanel === "welding" || isWeldingActivated}
                   onClick={(event) => openPanel("welding", event)}
                 />
               )}
@@ -1713,7 +1726,7 @@ export default function VinylBannerBuilder({
                 <ToolbarButton
                   title="Rope"
                   value={form.edgeFinish === "rope" ? "Yes" : "None"}
-                  active={activePanel === "rope"}
+                  active={activePanel === "rope" || isRopeActivated}
                   onClick={(event) => openPanel("rope", event)}
                 />
               )}
@@ -1721,7 +1734,7 @@ export default function VinylBannerBuilder({
                 <ToolbarButton
                   title="Grommets"
                   value={form.grommets ? "Yes" : "No"}
-                  active={activePanel === "grommets"}
+                  active={activePanel === "grommets" || isGrommetsActivated}
                   onClick={(event) => openPanel("grommets", event)}
                 />
               )}
@@ -1729,7 +1742,7 @@ export default function VinylBannerBuilder({
                 <ToolbarButton
                   title="Pole Pockets"
                   value={formatPolePocketMode(form.polePocketMode)}
-                  active={activePanel === "polePockets"}
+                  active={activePanel === "polePockets" || isPolePocketsActivated}
                   onClick={(event) => openPanel("polePockets", event)}
                 />
               )}
@@ -1737,7 +1750,7 @@ export default function VinylBannerBuilder({
                 <ToolbarButton
                   title="Wind Slits"
                   value={form.windSlits ? "Yes" : "No"}
-                  active={activePanel === "windSlits"}
+                  active={activePanel === "windSlits" || isWindSlitsActivated}
                   onClick={(event) => openPanel("windSlits", event)}
                 />
               )}
@@ -1746,34 +1759,34 @@ export default function VinylBannerBuilder({
                   <ToolbarButton
                     title="Welding"
                     value={form.meshWelding ? "Yes" : "No"}
-                    active={activePanel === "meshWelding"}
+                    active={activePanel === "meshWelding" || isMeshWeldingActivated}
                     onClick={(event) => openPanel("meshWelding", event)}
                   />
                   <ToolbarButton
                     title="Webbing"
                     value={form.meshWebbing ? "Yes" : "No"}
-                    active={activePanel === "meshWebbing"}
+                    active={activePanel === "meshWebbing" || isMeshWebbingActivated}
                     onClick={(event) => openPanel("meshWebbing", event)}
                     status={meshWebbingLocked ? "alert" : "ok"}
                   />
                   <ToolbarButton
                     title="Grommets"
                     value={form.grommets ? "Yes" : "No"}
-                    active={activePanel === "meshGrommets"}
+                    active={activePanel === "meshGrommets" || isMeshGrommetsActivated}
                     onClick={(event) => openPanel("meshGrommets", event)}
                     status={meshGrommetsLocked ? "alert" : "ok"}
                   />
                   <ToolbarButton
                     title="Rope"
                     value={form.meshRopeMode === "none" ? "None" : form.meshRopeMode === "top-only" ? "Top" : form.meshRopeMode === "bottom-only" ? "Bottom" : "Top & Bottom"}
-                    active={activePanel === "meshRope"}
+                    active={activePanel === "meshRope" || isMeshRopeActivated}
                     onClick={(event) => openPanel("meshRope", event)}
                     status={meshRopeLocked ? "alert" : "ok"}
                   />
                   <ToolbarButton
                     title="Pole Pockets"
                     value={form.meshPolePocketMode === "none" ? "None" : form.meshPolePocketMode === "top-only" ? "Top" : form.meshPolePocketMode === "bottom-only" ? "Bottom" : form.meshPolePocketMode === "left-only" ? "Left" : form.meshPolePocketMode === "right-only" ? "Right" : form.meshPolePocketMode === "top-bottom" ? "Top & Bottom" : "Left & Right"}
-                    active={activePanel === "meshPolePockets"}
+                    active={activePanel === "meshPolePockets" || isMeshPolePocketsActivated}
                     onClick={(event) => openPanel("meshPolePockets", event)}
                     status={meshPolePocketsLocked ? "alert" : "ok"}
                   />
