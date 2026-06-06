@@ -1669,7 +1669,7 @@ export default function VinylBannerBuilder({
                 {showMobileOptions ? "- Hide Options" : "+ Show Options"}
               </button>
             </div>
-            <div className={`${showMobileOptions ? "grid" : "hidden"} gap-2 sm:grid-cols-2 md:w-full md:grid-cols-[repeat(auto-fit,minmax(110px,1fr))]`}>
+            <div className={`${showMobileOptions ? "grid" : "hidden"} gap-2 sm:grid-cols-2 md:grid md:w-full md:grid-cols-[repeat(auto-fit,minmax(110px,1fr))]`}>
               <ToolbarButton
                 title="Images"
                 value={uploadedFileName ? "Uploaded" : "No file"}
