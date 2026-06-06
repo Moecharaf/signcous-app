@@ -48,7 +48,7 @@ function formatPrice(value: number): string {
 export default function CoroBuilder({ productId = 13, productName = "CORO" }: CoroBuilderProps) {
   const cart = useCart();
 
-  const [sizeId, setSizeId] = useState(CORO_SIZE_OPTIONS[0].id);
+  const [sizeId, setSizeId] = useState("24x18");
   const [sizeMode, setSizeMode] = useState<"preset" | "custom">("preset");
   const [customWidth, setCustomWidth] = useState(24);
   const [customHeight, setCustomHeight] = useState(18);

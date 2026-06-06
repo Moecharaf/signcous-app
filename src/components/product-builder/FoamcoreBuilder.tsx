@@ -48,7 +48,7 @@ function formatPrice(value: number): string {
 export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE" }: FoamcoreBuilderProps) {
   const cart = useCart();
 
-  const [sizeId, setSizeId] = useState(FOAMCORE_SIZE_OPTIONS[0].id);
+  const [sizeId, setSizeId] = useState("24x18");
   const [printMode, setPrintMode] = useState<FoamcorePrintMode>("single");
 
   // Simplified defaults - no longer adjustable via UI

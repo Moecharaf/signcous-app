@@ -46,7 +46,7 @@ export default function PolystyreneBuilder({
 }: PolystyreneBuilderProps) {
   const cart = useCart();
 
-  const [sizeId, setSizeId] = useState(POLYSTYRENE_SIZE_OPTIONS[0].id);
+  const [sizeId, setSizeId] = useState("24x18");
   const [printMode, setPrintMode] = useState<PolystyrenePrintMode>("single");
   const quantity = 1;
   const stepStakes = 0;

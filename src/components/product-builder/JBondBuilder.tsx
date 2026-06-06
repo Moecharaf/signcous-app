@@ -56,7 +56,7 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
   const [pricingMode, setPricingMode] = useState<JBondPricingMode>("sheet");
 
   // ΓöÇΓöÇ sheet mode state ΓöÇΓöÇ
-  const [sizeId, setSizeId] = useState(JBOND_SIZE_OPTIONS[0].id);
+  const [sizeId, setSizeId] = useState("24x18");
   const [imageCount, setImageCount] = useState(12);
   const [blockUploads, setBlockUploads] = useState<Record<number, BlockUploadPair>>({});
   const [uploadingBlock, setUploadingBlock] = useState<string | null>(null);

@@ -56,7 +56,7 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
   const [pricingMode, setPricingMode] = useState<AluminumPricingMode>("sheet");
 
   // ── sheet mode state ──
-  const [sizeId, setSizeId] = useState(ALUMINUM_SIZE_OPTIONS[0].id);
+  const [sizeId, setSizeId] = useState("24x18");
   const [imageCount, setImageCount] = useState(12);
   const [blockUploads, setBlockUploads] = useState<Record<number, BlockUploadPair>>({});
   const [uploadingBlock, setUploadingBlock] = useState<string | null>(null);

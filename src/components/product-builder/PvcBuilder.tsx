@@ -47,7 +47,7 @@ function formatPrice(value: number): string {
 export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBuilderProps) {
   const cart = useCart();
 
-  const [sizeId, setSizeId] = useState(PVC_SIZE_OPTIONS[0].id);
+  const [sizeId, setSizeId] = useState("24x18");
   const [material, setMaterial] = useState<PvcMaterial>("3mm");
   const [printMode, setPrintMode] = useState<PvcPrintMode>("single");
   const [quantity, setQuantity] = useState(1);
