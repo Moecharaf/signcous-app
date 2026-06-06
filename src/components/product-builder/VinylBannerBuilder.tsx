@@ -1669,7 +1669,7 @@ export default function VinylBannerBuilder({
                 {showMobileOptions ? "- Hide Options" : "+ Show Options"}
               </button>
             </div>
-            <div className={`${showMobileOptions ? "grid" : "hidden"} gap-2 sm:grid-cols-2 md:flex md:flex-nowrap md:items-stretch md:gap-1.5`}>
+            <div className={`${showMobileOptions ? "grid" : "hidden"} gap-2 sm:grid-cols-2 md:flex md:w-full md:flex-nowrap md:items-stretch md:gap-1.5`}>
               <ToolbarButton
                 title="Images"
                 value={uploadedFileName ? "Uploaded" : "No file"}
@@ -2332,14 +2332,14 @@ function ToolbarButton({
     <button
       type="button"
       onClick={onClick}
-      className={`min-w-0 rounded border px-2 py-1.5 text-left transition md:min-w-[124px] ${
+      className={`min-w-0 rounded border px-2 py-1.5 text-left transition md:flex-1 ${
         active ? "border-[#007fff] bg-white shadow-sm ring-1 ring-[#007fff]/20" : "border-zinc-200 bg-white hover:border-zinc-300"
       }`}
     >
       <div className="flex items-center justify-between gap-2">
         <span className={`min-w-0 truncate text-[9px] font-semibold uppercase tracking-[0.1em] ${active ? "text-[#007fff]" : "text-zinc-500"}`}>{title}</span>
         <span
-          className={`shrink-0 rounded px-1.5 py-0.5 text-[11px] font-semibold ${
+          className={`min-w-0 max-w-[65%] truncate rounded px-1.5 py-0.5 text-[11px] font-semibold ${
             status === "alert"
               ? "bg-rose-500 text-white"
               : active
