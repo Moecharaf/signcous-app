@@ -423,6 +423,7 @@ export default function VinylBannerBuilder({
     width: typeof window !== "undefined" ? window.innerWidth : 1280,
     height: typeof window !== "undefined" ? window.innerHeight : 900,
   }));
+  const [workspaceSize, setWorkspaceSize] = useState({ width: 0, height: 0 });
   const [dimensionInputs, setDimensionInputs] = useState(() => {
     const widthParts = toFeetAndInches(parseFloat(DEFAULTS.width) || 0);
     const heightParts = toFeetAndInches(parseFloat(DEFAULTS.height) || 0);
@@ -478,13 +479,15 @@ export default function VinylBannerBuilder({
   const isMeshGrommetsActivated = form.grommets;
   const isMeshRopeActivated = form.meshRopeMode !== "none";
   const isMeshPolePocketsActivated = form.meshPolePocketMode !== "none";
+  const availablePreviewWidth = workspaceSize.width > 0 ? workspaceSize.width : viewportSize.width;
+  const availablePreviewHeight = workspaceSize.height > 0 ? workspaceSize.height : viewportSize.height;
   const isMobileViewport = viewportSize.width < 768;
   const previewMaxWidth = isMobileViewport
-    ? Math.max(220, viewportSize.width - 48)
-    : Math.max(320, Math.min(PREVIEW_MAX_WIDTH, viewportSize.width - 72));
+    ? Math.max(220, availablePreviewWidth - 56)
+    : Math.max(300, Math.min(PREVIEW_MAX_WIDTH, availablePreviewWidth - 220));
   const previewMaxHeight = isMobileViewport
-    ? Math.max(240, Math.min(PREVIEW_MAX_HEIGHT, viewportSize.height - 260))
-    : Math.max(260, Math.min(PREVIEW_MAX_HEIGHT, viewportSize.height - 320));
+    ? Math.max(220, Math.min(PREVIEW_MAX_HEIGHT, availablePreviewHeight - 200))
+    : Math.max(240, Math.min(PREVIEW_MAX_HEIGHT, availablePreviewHeight - 380));
 
   const fitScale = Math.min(
     previewMaxWidth / Math.max(widthIn, 1),
@@ -1192,6 +1195,41 @@ export default function VinylBannerBuilder({
     window.addEventListener("resize", handleResize);
     return () => {
       window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  useEffect(() => {
+    function updateWorkspaceSize() {
+      if (!workspaceRef.current) return;
+
+      const rect = workspaceRef.current.getBoundingClientRect();
+      const nextWidth = Math.round(rect.width);
+      const nextHeight = Math.round(rect.height);
+
+      setWorkspaceSize((prev) => {
+        if (prev.width === nextWidth && prev.height === nextHeight) {
+          return prev;
+        }
+
+        return { width: nextWidth, height: nextHeight };
+      });
+    }
+
+    updateWorkspaceSize();
+
+    const observer = typeof ResizeObserver !== "undefined" && workspaceRef.current
+      ? new ResizeObserver(() => updateWorkspaceSize())
+      : null;
+
+    if (observer && workspaceRef.current) {
+      observer.observe(workspaceRef.current);
+    }
+
+    window.addEventListener("resize", updateWorkspaceSize);
+
+    return () => {
+      window.removeEventListener("resize", updateWorkspaceSize);
+      observer?.disconnect();
     };
   }, []);
 
