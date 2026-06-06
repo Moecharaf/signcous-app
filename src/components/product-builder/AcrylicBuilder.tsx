@@ -411,29 +411,43 @@ export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
   const pricingColumns = ["1+"];
   const pricingRows = [
     {
-      label: "Base Acrylic",
-      values: [`${formatCurrency(ACRYLIC_BASE_RATE)} per sq.in`],
+      label: "Acrylic",
+      values: [`${formatCurrency(ACRYLIC_BASE_RATE)} per square inch (minimum price of ${formatCurrency(ACRYLIC_MINIMUM_PRICE)})`],
     },
-    {
-      label: "Minimum Price",
-      values: [`${formatCurrency(ACRYLIC_MINIMUM_PRICE)} per item`],
-    },
-    ...ACRYLIC_THICKNESS_OPTIONS.map((option) => ({
-      label: `${option.label} Thickness`,
-      values: [option.modifier === 0 ? "Base rate" : `${Math.round(option.modifier * 100)}% additional`],
-    })),
   ];
   const addOnRows = [
-    ...ACRYLIC_MOUNTING_OPTIONS.filter((option) => option.price > 0).map((option) => ({
-      label: option.label,
-      value: `${formatCurrency(option.price)} per item`,
-    })),
-    ...ACRYLIC_CORNER_OPTIONS.filter((option) => option.price > 0).map((option) => ({
-      label: `Rounded Corners ${option.label}`,
-      value: `${formatCurrency(option.price)} per item`,
-    })),
-    { label: "Contour Cutting", value: "20% additional" },
-    { label: "Rush", value: "25% additional" },
+    { label: "Contour Cut", value: "10% additional" },
+    { label: "Rounded Corners", value: `${formatCurrency(5 * ACRYLIC_MARKUP)} setup fee` },
+    { label: "Stand-Off - Silver", value: `${formatCurrency(2.5 * ACRYLIC_MARKUP)} per item` },
+    { label: "Stand-Off - Black", value: `${formatCurrency(3.5 * ACRYLIC_MARKUP)} per item` },
+    { label: "Additional Stand-Off - Silver", value: `${formatCurrency(2.5 * ACRYLIC_MARKUP)} per item` },
+    { label: "Additional Stand-Off - Black", value: `${formatCurrency(3.5 * ACRYLIC_MARKUP)} per item` },
+  ];
+  const shippingTables = [
+    {
+      headers: ["per 3 sheets", "10+ sheets"],
+      row: { label: '24"x36" and under', values: [10, 199], freightIndex: 1 },
+    },
+    {
+      headers: ["per 3 sheets", "10+ sheets"],
+      row: { label: '24"x36" - 32"x48"', values: [15, 199], freightIndex: 1 },
+    },
+    {
+      headers: ["per 3 sheets", "10+ sheets"],
+      row: { label: '36"x36" - 36"x48"', values: [35, 199], freightIndex: 1 },
+    },
+    {
+      headers: ["1-5 sheets", "6-9 sheets", "10+ sheets"],
+      row: { label: '36"x48" - 48"x48"', values: [50, 75, 199], freightIndex: 2 },
+    },
+    {
+      headers: ["1-9 sheets", "10+ sheets"],
+      row: { label: '39"x72" & 24"x96"', values: [75, 199], freightIndex: 1 },
+    },
+    {
+      headers: ["1+ sheets"],
+      row: { label: '48"x96"', values: [199], freightIndex: 0 },
+    },
   ];
   const toolbarPanels: BuilderBottomToolbarPanel[] = [
     {
@@ -710,9 +724,7 @@ export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
               onMiddleTitleClick={() => setIsPricingModalOpen(true)}
               totalPrice={formatCurrency(pricing?.grandTotal ?? 0)}
               middleRows={[
-                { label: "Area", value: `${(pricing?.area ?? 0).toFixed(2)} sq.in` },
-                { label: "Per Item", value: formatCurrency(pricing?.perItemTotal ?? 0) },
-                { label: "Base Rate", value: `$${ACRYLIC_BASE_RATE}/sq.in` },
+                { label: "Acrylic", value: `${formatCurrency(ACRYLIC_BASE_RATE)} per sqin` },
               ]}
               accentClassName="text-sky-400"
             />
@@ -753,6 +765,8 @@ export default function AcrylicBuilder({ productId = 0 }: AcrylicBuilderProps) {
               pricingRows={pricingRows}
               addOnRows={addOnRows}
               markup={ACRYLIC_MARKUP}
+              shippingInfo="1 sheet = 4,608 sq. inches"
+              shippingTables={shippingTables}
             />
           </div>
 

@@ -12,6 +12,15 @@ type AddOnRow = {
   value: string;
 };
 
+type ShippingTable = {
+  headers: string[];
+  row: {
+    label: string;
+    values: number[];
+    freightIndex: number;
+  };
+};
+
 interface RigidSignsPricingModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -19,6 +28,8 @@ interface RigidSignsPricingModalProps {
   pricingRows: PricingRow[];
   addOnRows: AddOnRow[];
   markup: number;
+  shippingTables?: ShippingTable[];
+  shippingInfo?: string;
 }
 
 function formatPrice(value: number): string {
@@ -86,8 +97,11 @@ export default function RigidSignsPricingModal({
   pricingRows,
   addOnRows,
   markup,
+  shippingTables,
+  shippingInfo,
 }: RigidSignsPricingModalProps) {
   const [activeTab, setActiveTab] = useState<"pricing" | "shipping">("pricing");
+  const resolvedShippingTables = shippingTables ?? SHIPPING_TABLES;
 
   if (!isOpen) return null;
 
@@ -155,7 +169,12 @@ export default function RigidSignsPricingModal({
           </div>
         ) : (
           <div className="space-y-3 py-1 text-[11px] text-zinc-700">
-            {SHIPPING_TABLES.map((table, tableIndex) => (
+            {shippingInfo && (
+              <div className="rounded border border-zinc-200 bg-zinc-50 px-2 py-1.5 text-zinc-600">
+                {shippingInfo}
+              </div>
+            )}
+            {resolvedShippingTables.map((table, tableIndex) => (
               <table key={tableIndex} className="w-full border-collapse">
                 <thead>
                   <tr className="text-zinc-600">

@@ -37,8 +37,8 @@ export interface AcrylicPricingResult {
 
 // ─── Constants ────────────────────────────────────────────────
 
-export const ACRYLIC_BASE_RATE = 0.16;    // $ per sq-in
-export const ACRYLIC_MINIMUM_PRICE = 22;  // $ per item
+export const ACRYLIC_BASE_RATE = 0.10 * 1.5;    // Signs365 $0.10 with +50% markup
+export const ACRYLIC_MINIMUM_PRICE = 14.4 * 1.5;  // Signs365 $14.40 minimum with +50% markup
 
 export const ACRYLIC_THICKNESS_OPTIONS: { label: string; value: AcrylicThickness; modifier: number }[] = [
   { label: '1/8"',  value: "1/8",  modifier: 0 },
@@ -48,16 +48,16 @@ export const ACRYLIC_THICKNESS_OPTIONS: { label: string; value: AcrylicThickness
 
 export const ACRYLIC_MOUNTING_OPTIONS: { label: string; value: AcrylicMounting; price: number; note?: string }[] = [
   { label: "None",                value: "none",           price: 0 },
-  { label: "Silver Standoff Kit", value: "silver-standoff", price: 18, note: "Floating premium look" },
-  { label: "Black Standoff Kit",  value: "black-standoff",  price: 24, note: "Floating premium look" },
+  { label: "Silver Standoff Kit", value: "silver-standoff", price: 2.5 * 1.5, note: "Floating premium look" },
+  { label: "Black Standoff Kit",  value: "black-standoff",  price: 3.5 * 1.5, note: "Floating premium look" },
 ];
 
 export const ACRYLIC_CORNER_OPTIONS: { label: string; value: AcrylicRoundedCorner; price: number }[] = [
   { label: 'None',  value: "none",  price: 0  },
-  { label: '1/4"',  value: "1/4",  price: 8  },
-  { label: '1/2"',  value: "1/2",  price: 10 },
-  { label: '3/4"',  value: "3/4",  price: 12 },
-  { label: '1"',    value: "1",    price: 15 },
+  { label: '1/4"',  value: "1/4",  price: 5 * 1.5  },
+  { label: '1/2"',  value: "1/2",  price: 5 * 1.5 },
+  { label: '3/4"',  value: "3/4",  price: 5 * 1.5 },
+  { label: '1"',    value: "1",    price: 5 * 1.5 },
 ];
 
 export const ACRYLIC_MAX_WIDTH  = 96;   // inches
@@ -84,8 +84,8 @@ export function calculateAcrylicPricing(input: AcrylicPricingInput): AcrylicPric
   const thicknessAdjustedBase = minAdjustedBase * thicknessMultiplier;
   const thicknessCharge = thicknessAdjustedBase - minAdjustedBase;
 
-  // 5. Contour cut (+20% of thickness-adjusted base)
-  const contourCutCharge = input.contourCut ? thicknessAdjustedBase * 0.2 : 0;
+  // 5. Contour cut (+10% of thickness-adjusted base)
+  const contourCutCharge = input.contourCut ? thicknessAdjustedBase * 0.1 : 0;
 
   // 6. Fixed add-ons
   const roundedCornersCharge =
