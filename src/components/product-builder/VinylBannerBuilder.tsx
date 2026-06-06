@@ -18,6 +18,7 @@ import {
   getHdpeSqFtRate,
   getMeshSqFtRate,
   getNoCurlSqFtRate,
+  type PolePocketMode,
   getPosterSqFtRate,
   type GrommetPlacement,
   type Material,
@@ -30,7 +31,26 @@ const unitOptions = ["inches", "feet"] as const;
 type Unit = (typeof unitOptions)[number];
 type MeshGrommetSpacing = "every-2-3-feet" | "every-1-2-feet" | "every-6-12-inches" | "corners-only" | "custom-inches";
 type MeshRopeMode = "none" | "top-only" | "bottom-only" | "top-bottom";
-type MeshPolePocketMode = "none" | "top-only" | "bottom-only" | "left-only" | "right-only" | "top-bottom" | "left-right";
+type MeshPolePocketMode = PolePocketMode;
+
+function formatPolePocketMode(mode: PolePocketMode): string {
+  switch (mode) {
+    case "top-only":
+      return "Top Only";
+    case "bottom-only":
+      return "Bottom Only";
+    case "left-only":
+      return "Left Only";
+    case "right-only":
+      return "Right Only";
+    case "top-bottom":
+      return "Top & Bottom";
+    case "left-right":
+      return "Left & Right";
+    default:
+      return "None";
+  }
+}
 
 interface FormState {
   width: string;
@@ -44,6 +64,8 @@ interface FormState {
   grommetSpacingIn: number;
   edgeFinish: EdgeFinish;
   polePockets: boolean;
+  polePocketMode: PolePocketMode;
+  polePocketSize: 1 | 2 | 3 | 4;
   windSlits: boolean;
   hemming: boolean;
   rush: boolean;
@@ -101,6 +123,8 @@ const DEFAULTS: FormState = {
   grommetSpacingIn: 24,
   edgeFinish: "none",
   polePockets: false,
+  polePocketMode: "none",
+  polePocketSize: 2,
   windSlits: false,
   hemming: false,
   rush: false,
@@ -626,7 +650,9 @@ export default function VinylBannerBuilder({
         grommetPlacement: form.grommetPlacement,
         grommetSpacingIn: form.grommetSpacingIn,
         edgeFinish: form.edgeFinish,
-        polePockets: form.polePockets,
+        polePockets: form.polePocketMode !== "none",
+        polePocketMode: form.polePocketMode,
+        polePocketSize: form.polePocketSize,
         windSlits: form.windSlits,
         hemming: form.hemming,
         rush: form.rush,
@@ -653,7 +679,8 @@ export default function VinylBannerBuilder({
       form.grommetPlacement,
       form.grommetSpacingIn,
       form.edgeFinish,
-      form.polePockets,
+      form.polePocketMode,
+      form.polePocketSize,
       form.windSlits,
       form.hemming,
       form.rush,
@@ -1151,6 +1178,8 @@ export default function VinylBannerBuilder({
         prev.doubleSided !== false ||
         prev.grommets !== false ||
         prev.polePockets !== false ||
+        prev.polePocketMode !== "none" ||
+        prev.polePocketSize !== 2 ||
         prev.windSlits !== false ||
         prev.hemming !== false ||
         prev.rush !== false;
@@ -1167,6 +1196,8 @@ export default function VinylBannerBuilder({
         doubleSided: false,
         grommets: false,
         polePockets: false,
+        polePocketMode: "none",
+        polePocketSize: 2,
         windSlits: false,
         hemming: false,
         rush: false,
@@ -1552,6 +1583,22 @@ export default function VinylBannerBuilder({
             )}
 
             {/* Pole pocket visualization */}
+            {!isMeshProduct && isRegularBannerProduct && form.polePocketMode !== "none" && (() => {
+              const pocketPx = Math.max(8, form.polePocketSize * pxPerIn);
+              const hasTop = form.polePocketMode === "top-only" || form.polePocketMode === "top-bottom";
+              const hasBottom = form.polePocketMode === "bottom-only" || form.polePocketMode === "top-bottom";
+              const hasLeft = form.polePocketMode === "left-only" || form.polePocketMode === "left-right";
+              const hasRight = form.polePocketMode === "right-only" || form.polePocketMode === "left-right";
+              return (
+                <>
+                  {hasTop && <div className="pointer-events-none absolute left-0 right-0 top-0 border-b-2 border-[#007fff]/60 bg-[#007fff]/15" style={{ height: pocketPx }} />}
+                  {hasBottom && <div className="pointer-events-none absolute left-0 right-0 bottom-0 border-t-2 border-[#007fff]/60 bg-[#007fff]/15" style={{ height: pocketPx }} />}
+                  {hasLeft && <div className="pointer-events-none absolute top-0 bottom-0 left-0 border-r-2 border-[#007fff]/60 bg-[#007fff]/15" style={{ width: pocketPx }} />}
+                  {hasRight && <div className="pointer-events-none absolute top-0 bottom-0 right-0 border-l-2 border-[#007fff]/60 bg-[#007fff]/15" style={{ width: pocketPx }} />}
+                </>
+              );
+            })()}
+
             {isMeshProduct && form.meshPolePocketMode !== "none" && (() => {
               const pocketPx = Math.max(8, form.meshPolePocketSize * pxPerIn);
               const hasTop = form.meshPolePocketMode === "top-only" || form.meshPolePocketMode === "top-bottom";
@@ -1671,7 +1718,7 @@ export default function VinylBannerBuilder({
               {isRegularBannerProduct && (
                 <ToolbarButton
                   title="Pole Pockets"
-                  value={form.polePockets ? "Top & Bottom" : "None"}
+                  value={formatPolePocketMode(form.polePocketMode)}
                   active={activePanel === "polePockets"}
                   onClick={(event) => openPanel("polePockets", event)}
                 />
@@ -1972,9 +2019,24 @@ export default function VinylBannerBuilder({
               <div>
                 <SubControlGroup title="Pole Pockets">
                   <div className="grid grid-cols-2 gap-1">
-                    <SegButton active={!form.polePockets} onClick={() => set("polePockets", false)}>None</SegButton>
-                    <SegButton active={form.polePockets} onClick={() => set("polePockets", true)}>Top & Bottom</SegButton>
+                    <SegButton active={form.polePocketMode === "right-only"} onClick={() => setForm((prev) => ({ ...prev, polePockets: true, polePocketMode: "right-only" }))}>Right Only</SegButton>
+                    <SegButton active={form.polePocketMode === "left-only"} onClick={() => setForm((prev) => ({ ...prev, polePockets: true, polePocketMode: "left-only" }))}>Left Only</SegButton>
+                    <SegButton active={form.polePocketMode === "left-right"} onClick={() => setForm((prev) => ({ ...prev, polePockets: true, polePocketMode: "left-right" }))}>Left &amp; Right</SegButton>
+                    <SegButton active={form.polePocketMode === "bottom-only"} onClick={() => setForm((prev) => ({ ...prev, polePockets: true, polePocketMode: "bottom-only" }))}>Bottom Only</SegButton>
+                    <SegButton active={form.polePocketMode === "top-only"} onClick={() => setForm((prev) => ({ ...prev, polePockets: true, polePocketMode: "top-only" }))}>Top Only</SegButton>
+                    <SegButton active={form.polePocketMode === "top-bottom"} onClick={() => setForm((prev) => ({ ...prev, polePockets: true, polePocketMode: "top-bottom" }))}>Top &amp; Bottom</SegButton>
+                    <SegButton active={form.polePocketMode === "none"} onClick={() => setForm((prev) => ({ ...prev, polePockets: false, polePocketMode: "none" }))}>None</SegButton>
                   </div>
+                  {form.polePocketMode !== "none" && (
+                    <div className="mt-2">
+                      <label className="text-[9px] font-semibold uppercase tracking-[0.1em] text-zinc-500">Pocket Size</label>
+                      <div className="mt-1 grid grid-cols-4 gap-1">
+                        {([1, 2, 3, 4] as const).map((size) => (
+                          <SegButton key={size} active={form.polePocketSize === size} onClick={() => setForm((prev) => ({ ...prev, polePocketSize: size }))}>{size}&quot;</SegButton>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </SubControlGroup>
               </div>
             )}
@@ -2261,11 +2323,11 @@ function ToolbarButton({
       type="button"
       onClick={onClick}
       className={`min-w-0 rounded border px-3 py-2 text-left transition ${
-        active ? "border-[#007fff] bg-[#007fff]/5 shadow-sm" : "border-zinc-200 bg-white hover:border-zinc-300"
+        active ? "border-[#007fff] bg-white shadow-sm ring-1 ring-[#007fff]/20" : "border-zinc-200 bg-white hover:border-zinc-300"
       }`}
     >
       <div className="flex items-center justify-between gap-3">
-        <span className="min-w-0 truncate text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">{title}</span>
+        <span className={`min-w-0 truncate text-[10px] font-semibold uppercase tracking-[0.12em] ${active ? "text-[#007fff]" : "text-zinc-500"}`}>{title}</span>
         <span
           className={`shrink-0 rounded px-2 py-1 text-xs font-semibold ${
             status === "alert"

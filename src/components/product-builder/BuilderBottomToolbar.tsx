@@ -111,12 +111,12 @@ export default function BuilderBottomToolbar({
                 onClick={(event) => togglePanel(panel.id, event)}
                 className={`min-w-0 rounded border px-3 py-2 text-left transition ${
                   activePanelId === panel.id
-                    ? "border-[#007fff] bg-[#007fff]/5 shadow-sm"
+                    ? "border-[#007fff] bg-white shadow-sm ring-1 ring-[#007fff]/20"
                     : "border-zinc-200 bg-white hover:border-zinc-300"
                 }`}
               >
                 <div className="flex items-center justify-between gap-3">
-                  <span className="min-w-0 truncate text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-500">{panel.title}</span>
+                  <span className={`min-w-0 truncate text-[10px] font-semibold uppercase tracking-[0.12em] ${activePanelId === panel.id ? "text-[#007fff]" : "text-zinc-500"}`}>{panel.title}</span>
                   <span
                     className={`shrink-0 rounded px-2 py-1 text-xs font-semibold ${
                       panel.status === "alert"

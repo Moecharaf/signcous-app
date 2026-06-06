@@ -94,6 +94,7 @@ export type GrommetPlacement =
   | "right-only"
   | "bottom-only";
 export type EdgeFinish = "none" | "welding" | "webbing" | "rope";
+export type PolePocketMode = "none" | "top-only" | "bottom-only" | "left-only" | "right-only" | "top-bottom" | "left-right";
 
 export interface PricingConfig {
   // Square foot rate (USD) per material
@@ -152,6 +153,8 @@ export interface BannerPricingInput {
   grommetSpacingIn: number;
   edgeFinish: EdgeFinish;
   polePockets: boolean;
+  polePocketMode?: PolePocketMode;
+  polePocketSize?: 1 | 2 | 3 | 4;
   windSlits: boolean;
   hemming: boolean;
   rush: boolean;
@@ -469,12 +472,30 @@ export function calculateGrommetCount(
   }
 }
 
+function getPolePocketLinearFeet(mode: PolePocketMode | undefined, widthFt: number, heightFt: number): number {
+  switch (mode) {
+    case "top-only":
+    case "bottom-only":
+      return widthFt;
+    case "left-only":
+    case "right-only":
+      return heightFt;
+    case "left-right":
+      return heightFt * 2;
+    case "top-bottom":
+    case undefined:
+      return widthFt * 2;
+    case "none":
+      return 0;
+  }
+}
+
 /**
  * Calculates the total price for a vinyl banner order.
  */
 export function calculateBannerPrice(input: BannerPricingInput): BannerPricingResult {
   const { widthIn, heightIn, quantity, material, doubleSided,
-          grommets, grommetPlacement, grommetSpacingIn, edgeFinish, polePockets, windSlits, hemming, rush } = input;
+          grommets, grommetPlacement, grommetSpacingIn, edgeFinish, polePockets, polePocketMode, windSlits, hemming, rush } = input;
 
   const config = PRICING_CONFIG;
   const resolvedMaterial = resolveMaterial(material);
@@ -557,7 +578,7 @@ export function calculateBannerPrice(input: BannerPricingInput): BannerPricingRe
 
   let polePocketCostPerUnit = 0;
   if (polePockets) {
-    polePocketCostPerUnit = (widthFt * 2 * config.addOns.polePocketsPerLinearFt) + config.addOns.polePocketsSetupFee;
+    polePocketCostPerUnit = (getPolePocketLinearFeet(polePocketMode, widthFt, heightFt) * config.addOns.polePocketsPerLinearFt) + config.addOns.polePocketsSetupFee;
   }
 
   const windSlitsCostPerUnit = windSlits ? billableSqFt * config.addOns.windSlitsPerSqFt : 0;
