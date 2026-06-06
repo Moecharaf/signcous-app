@@ -1753,7 +1753,7 @@ export default function VinylBannerBuilder({
               {!isEconomicalStandProduct && (
                 <ToolbarButton
                   title="Size"
-                  value={`${widthFeetInchesLabel} x ${heightFeetInchesLabel}`}
+                  value={`${widthLabelInches} x ${heightLabelInches}`}
                   active={activePanel === "size" || isSizeActivated}
                   onClick={(event) => openPanel("size", event)}
                   status={errors.width || errors.height ? "alert" : "ok"}
