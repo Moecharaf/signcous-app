@@ -419,6 +419,10 @@ export default function VinylBannerBuilder({
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [showMobileOptions, setShowMobileOptions] = useState(false);
   const [panelAnchor, setPanelAnchor] = useState<{ left: number; top: number; width: number } | null>(null);
+  const [viewportSize, setViewportSize] = useState(() => ({
+    width: typeof window !== "undefined" ? window.innerWidth : 1280,
+    height: typeof window !== "undefined" ? window.innerHeight : 900,
+  }));
   const [dimensionInputs, setDimensionInputs] = useState(() => {
     const widthParts = toFeetAndInches(parseFloat(DEFAULTS.width) || 0);
     const heightParts = toFeetAndInches(parseFloat(DEFAULTS.height) || 0);
@@ -474,10 +478,13 @@ export default function VinylBannerBuilder({
   const isMeshGrommetsActivated = form.grommets;
   const isMeshRopeActivated = form.meshRopeMode !== "none";
   const isMeshPolePocketsActivated = form.meshPolePocketMode !== "none";
-  const runtimeViewportWidth = typeof window !== "undefined" ? window.innerWidth : 1280;
-  const isMobileViewport = runtimeViewportWidth < 768;
-  const previewMaxWidth = isMobileViewport ? Math.max(220, runtimeViewportWidth - 48) : PREVIEW_MAX_WIDTH;
-  const previewMaxHeight = isMobileViewport ? 360 : PREVIEW_MAX_HEIGHT;
+  const isMobileViewport = viewportSize.width < 768;
+  const previewMaxWidth = isMobileViewport
+    ? Math.max(220, viewportSize.width - 48)
+    : Math.max(320, Math.min(PREVIEW_MAX_WIDTH, viewportSize.width - 72));
+  const previewMaxHeight = isMobileViewport
+    ? Math.max(240, Math.min(PREVIEW_MAX_HEIGHT, viewportSize.height - 260))
+    : Math.max(260, Math.min(PREVIEW_MAX_HEIGHT, viewportSize.height - 320));
 
   const fitScale = Math.min(
     previewMaxWidth / Math.max(widthIn, 1),
@@ -1178,6 +1185,17 @@ export default function VinylBannerBuilder({
   }, [activePanel, closePanel]);
 
   useEffect(() => {
+    function handleResize() {
+      setViewportSize({ width: window.innerWidth, height: window.innerHeight });
+    }
+
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  useEffect(() => {
     if (!activePanel) return;
 
     function handlePointerDown(event: MouseEvent) {
@@ -1274,7 +1292,7 @@ export default function VinylBannerBuilder({
     setArtPos({ x: 0, y: isMobileViewport ? 0 : 55 });
   }, [isMobileViewport]);
 
-  const viewportWidth = runtimeViewportWidth;
+  const viewportWidth = viewportSize.width;
   const panelMaxWidth =
     activePanel === "size"
       ? 300
