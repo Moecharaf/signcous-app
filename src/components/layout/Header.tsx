@@ -176,7 +176,7 @@ export default function Header() {
     <header
       className={`sticky top-0 z-50 overflow-visible border-b border-[#cfcfcf] bg-[#f5f5f5]/95 backdrop-blur transition-transform duration-300 will-change-transform dark:border-[#2a2a2a] dark:bg-[#111111]/95 ${showHeader ? "translate-y-0" : "-translate-y-full"}`}
     >
-      <div className="mx-auto flex h-16 max-w-[1500px] items-center justify-between gap-4 overflow-visible px-4 py-0 md:h-20 md:px-6">
+      <div className="mx-auto flex h-16 max-w-[1500px] items-center justify-between gap-2 overflow-visible px-3 py-0 md:h-20 md:gap-4 md:px-6">
         {/* Logo */}
         <Link href="/" className="flex shrink-0 items-center overflow-visible" aria-label="Signcous home">
           <Image
@@ -185,19 +185,19 @@ export default function Header() {
             width={480}
             height={175}
             priority
-            className="h-30 w-auto object-contain object-center"
+            className="h-9 w-auto object-contain object-center sm:h-10 md:h-12"
           />
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden items-end gap-6 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#666] dark:text-[#9a9a9a] lg:flex">
+        <nav className="min-w-0 flex-1 items-end justify-center gap-1.5 overflow-x-auto px-1 text-[9px] font-semibold uppercase tracking-[0.07em] text-[#666] [scrollbar-width:none] flex dark:text-[#9a9a9a] sm:gap-2 sm:px-2 sm:text-[10px] lg:gap-6 lg:text-[11px] [&::-webkit-scrollbar]:hidden">
           {categoryNavLinks.map((link) => (
             <a
               key={`${link.hash}-${link.label}`}
               href={`/portal#${link.hash}`}
-              className="group inline-flex min-w-[72px] flex-col items-center gap-2 px-1 py-1 transition-colors hover:text-[#3a3a3a] dark:hover:text-[#d0d0d0]"
+              className="group inline-flex min-w-[48px] flex-col items-center gap-1 px-0.5 py-1 transition-colors hover:text-[#3a3a3a] dark:hover:text-[#d0d0d0] sm:min-w-[58px] sm:gap-1.5 sm:px-1 lg:min-w-[72px] lg:gap-2"
             >
-              <span className="leading-none text-[#7c7c7c] transition group-hover:text-[#3b3b3b] dark:text-[#767676] dark:group-hover:text-[#d3d3d3]">
+              <span className="leading-none text-[#7c7c7c] transition group-hover:text-[#3b3b3b] dark:text-[#767676] dark:group-hover:text-[#d3d3d3] [&>svg]:h-4 [&>svg]:w-4 sm:[&>svg]:h-5 sm:[&>svg]:w-5 lg:[&>svg]:h-7 lg:[&>svg]:w-7">
                 {link.icon}
               </span>
               <span>{link.label}</span>
@@ -206,7 +206,7 @@ export default function Header() {
         </nav>
 
         {/* Desktop actions */}
-        <div className="hidden items-center gap-2 md:flex">
+        <div className="hidden items-center gap-2 lg:flex">
           <Link
             href="/contact"
             className="rounded-sm border border-[#d0d0d0] bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-[#4b4b4b] transition-colors hover:bg-[#f4f4f4] dark:border-[#333] dark:bg-[#1a1a1a] dark:text-[#bbb] dark:hover:bg-[#252525]"
@@ -260,7 +260,7 @@ export default function Header() {
         </div>
 
         {/* Mobile: theme toggle + hamburger */}
-        <div className="flex items-center gap-2 md:hidden">
+        <div className="flex items-center gap-2 lg:hidden">
           <ThemeToggle />
           <button
             className="flex flex-col gap-1.5"
@@ -276,7 +276,7 @@ export default function Header() {
 
       {/* Mobile menu */}
       {menuOpen && (
-        <div className="border-t border-[#d6d6d6] bg-[#f5f5f5] px-4 pb-5 dark:border-[#222] dark:bg-[#111] md:hidden">
+        <div className="border-t border-[#d6d6d6] bg-[#f5f5f5] px-4 pb-5 dark:border-[#222] dark:bg-[#111] lg:hidden">
           <nav className="flex flex-col gap-3 pt-4 text-sm text-[#4c4c4c] dark:text-[#bbb]">
             {categoryNavLinks.map((link) => (
               <a
