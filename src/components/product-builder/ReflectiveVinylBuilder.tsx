@@ -6,11 +6,10 @@ import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/componen
 import AdhesivePricingModal from "@/components/product-builder/AdhesivePricingModal";
 import { ADHESIVE_PRICING_CONFIGS } from "@/components/product-builder/adhesive-pricing-data";
 import Button from "@/components/ui/Button";
-import RigidPricingHeader from "@/components/product-builder/RigidPricingHeader";
 import { useCart } from "@/context/CartContext";
 import {
-  REFLECTIVE_VINYL_MIN,
-  REFLECTIVE_VINYL_RATE,
+  REFLECTIVE_VINYL_MARKUP_MULTIPLIER,
+  REFLECTIVE_VINYL_SUPPLIER_RATE,
   calculateReflectiveVinylPrice,
   getReflectiveVinylPanelInfo,
 } from "@/lib/pricing/reflective-vinyl";
@@ -88,7 +87,6 @@ export default function ReflectiveVinylBuilder({ productId = 0 }: ReflectiveViny
   const [heightUnit, setHeightUnit] = useState<DimensionUnit>("inches");
   const [quantity, setQuantity] = useState(1);
   const [contourCut, setContourCut] = useState(false);
-  const [rush, setRush] = useState(false);
   const [splitDirection, setSplitDirection] = useState<SplitDirection>("vertical");
   const [selectedSplit, setSelectedSplit] = useState<"all" | number>("all");
   const [splitOffsets, setSplitOffsets] = useState<Record<number, number>>({});
@@ -109,8 +107,8 @@ export default function ReflectiveVinylBuilder({ productId = 0 }: ReflectiveViny
   const isValid = !widthError && !heightError && widthIn > 0 && heightIn > 0;
 
   const pricing = useMemo(
-    () => isValid ? calculateReflectiveVinylPrice(widthIn, heightIn, { contourCut, rush }, safeQuantity) : null,
-    [widthIn, heightIn, contourCut, rush, safeQuantity, isValid]
+    () => isValid ? calculateReflectiveVinylPrice(widthIn, heightIn, { contourCut }, safeQuantity) : null,
+    [widthIn, heightIn, contourCut, safeQuantity, isValid]
   );
 
   const panelInfo = useMemo(
@@ -214,7 +212,7 @@ export default function ReflectiveVinylBuilder({ productId = 0 }: ReflectiveViny
       polePockets: false,
       windSlits: false,
       hemming: false,
-      rush,
+      rush: false,
       uploadedFileUrl,
       uploadedFileName,
       unitPrice: pricing.unitPrice,
@@ -226,7 +224,6 @@ export default function ReflectiveVinylBuilder({ productId = 0 }: ReflectiveViny
         custom_billable_height_ft: `${pricing.heightFt} ft`,
         custom_sq_ft: `${pricing.sqFt} sq ft`,
         custom_contour_cut: contourCut ? "Yes" : "No",
-        custom_rush: rush ? "Yes" : "No",
         custom_split_direction: splitDirection,
         custom_split_count: String(splitCount),
         custom_split_offsets: JSON.stringify(splitOffsets),
@@ -273,18 +270,52 @@ export default function ReflectiveVinylBuilder({ productId = 0 }: ReflectiveViny
         <div className="grid gap-4">
           {/* Preview canvas + controls */}
           <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
-            <RigidPricingHeader
-              section
-              productName="REFLECTIVE VINYL"
-              detail="Adhesive reflective builder"
-              onMiddleTitleClick={() => setIsPricingModalOpen(true)}
-              totalPrice={pricing ? formatCurrency(pricing.totalPrice) : formatCurrency(0)}
-              middleRows={[
-                { label: "Area", value: pricing ? `${pricing.sqFt} sq ft` : "--" },
-                { label: "Per Item", value: pricing ? formatCurrency(pricing.totalPrice / Math.max(safeQuantity, 1)) : formatCurrency(0) },
-                { label: "Qty", value: String(safeQuantity) },
-              ]}
-            />
+            <div
+              className="bg-[#fafaf9] px-4 py-3"
+              style={{
+                backgroundImage:
+                  "linear-gradient(to right, rgba(63,63,70,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(63,63,70,0.08) 1px, transparent 1px)",
+                backgroundSize: "26px 26px",
+              }}
+            >
+              <div className="grid gap-3 md:grid-cols-[0.85fr_1.4fr_0.85fr] md:items-start md:gap-8">
+                <div>
+                  <div className="text-[27px] leading-[0.98] font-medium uppercase tracking-tight text-zinc-900 md:whitespace-nowrap md:text-[36px]">REFLECTIVE VINYL</div>
+                  <div className="mt-1 text-[11px] text-zinc-600 md:text-[12px]">Adhesive reflective builder</div>
+                </div>
+
+                <div className="text-center md:pt-1">
+                  <div className="mx-auto w-full max-w-[360px]">
+                    <table className="w-full border-collapse text-[10px] leading-5 text-zinc-600 md:text-[11px]">
+                      <thead>
+                        <tr>
+                          <th className="pb-0.5 text-left font-semibold text-zinc-500" />
+                          <th className="pb-0.5 text-left font-semibold text-zinc-500">Single-Sided</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td className="py-0.5 text-left text-zinc-500">Reflective</td>
+                          <td className="py-0.5 text-left font-medium text-zinc-700">{formatCurrency(REFLECTIVE_VINYL_SUPPLIER_RATE * REFLECTIVE_VINYL_MARKUP_MULTIPLIER)} per sq ft</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsPricingModalOpen(true)}
+                    className="mt-1 text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500 underline underline-offset-2 hover:text-zinc-700"
+                  >
+                    Pricing And Shipping
+                  </button>
+                </div>
+
+                <div className="text-left md:text-right">
+                  <div className="text-[34px] leading-none font-semibold text-[var(--brand-primary)] md:text-[44px]">{pricing ? formatCurrency(pricing.totalPrice) : formatCurrency(0)}</div>
+                  <div className="mt-1 text-[10px] text-zinc-500">Live total</div>
+                </div>
+              </div>
+            </div>
 
             <AdhesivePricingModal
               isOpen={isPricingModalOpen}
@@ -449,7 +480,6 @@ export default function ReflectiveVinylBuilder({ productId = 0 }: ReflectiveViny
                 { id: "width", title: "Width", value: `${widthIn || 0}${widthUnit === "feet" ? " ft" : " in"}`, status: widthError ? "alert" : "ok", width: 280, content: <div className="grid grid-cols-[1fr_auto] gap-1"><input type="number" min={0.1} step={0.25} value={widthStr} onChange={(e) => setWidthStr(e.target.value)} className="h-9 rounded border border-zinc-300 px-2 text-sm" /><select value={widthUnit} onChange={(e) => setWidthUnit(e.target.value as DimensionUnit)} className="h-9 rounded border border-zinc-300 bg-white px-1 text-xs"><option value="inches">in</option><option value="feet">ft</option></select></div> },
                 { id: "height", title: "Height", value: `${heightIn || 0}${heightUnit === "feet" ? " ft" : " in"}`, status: heightError ? "alert" : "ok", width: 280, content: <div className="grid grid-cols-[1fr_auto] gap-1"><input type="number" min={0.1} step={0.25} value={heightStr} onChange={(e) => setHeightStr(e.target.value)} className="h-9 rounded border border-zinc-300 px-2 text-sm" /><select value={heightUnit} onChange={(e) => setHeightUnit(e.target.value as DimensionUnit)} className="h-9 rounded border border-zinc-300 bg-white px-1 text-xs"><option value="inches">in</option><option value="feet">ft</option></select></div> },
                 { id: "contour", title: "Contour Cut", value: contourCut ? "Enabled" : "Disabled", width: 260, content: <button type="button" onClick={() => setContourCut((v) => !v)} className={`h-9 w-full rounded border px-3 text-xs font-semibold transition ${contourCut ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>{contourCut ? "Enabled" : "Disabled"}</button> },
-                { id: "rush", title: "Rush", value: rush ? "Rush" : "Standard", width: 260, content: <button type="button" onClick={() => setRush((v) => !v)} className={`h-9 w-full rounded border px-3 text-xs font-semibold transition ${rush ? "border-red-300 bg-red-50 text-red-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>{rush ? "Rush" : "Standard"}</button> },
                 { id: "split-direction", title: "Split Direction", value: splitDirection, width: 280, content: <select value={splitDirection} onChange={(e) => { setSplitDirection(e.target.value as SplitDirection); setSelectedSplit("all"); setSplitOffsets({}); }} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"><option value="vertical">Vertical</option><option value="horizontal">Horizontal</option></select> },
                 { id: "split-selected", title: "Split Selected", value: selectedSplit === "all" ? "All Splits" : `Split ${selectedSplit}`, width: 280, content: <select value={selectedSplit === "all" ? "all" : String(selectedSplit)} onChange={(e) => setSelectedSplit(e.target.value === "all" ? "all" : Number(e.target.value))} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"><option value="all">All Splits</option>{Array.from({ length: splitCount }, (_, i) => i + 1).map((n) => <option key={n} value={n}>Split {n}</option>)}</select> },
                 { id: "position", title: "Position", value: splitCount > 0 ? positionDisplay : "—", width: 340, content: <div className="flex h-9 items-center gap-1"><button type="button" onClick={() => adjustSplitPosition(-0.25)} disabled={splitCount === 0} className="flex h-9 w-[72px] shrink-0 items-center justify-center rounded border border-zinc-300 bg-white text-[11px] font-semibold text-zinc-700 hover:border-zinc-400 disabled:cursor-not-allowed disabled:opacity-40">− 0.25&quot;</button><div className="flex h-9 flex-1 items-center justify-center rounded border border-zinc-200 bg-zinc-100 px-1 text-xs font-semibold tabular-nums text-zinc-700">{splitCount > 0 ? positionDisplay : "—"}</div><button type="button" onClick={() => adjustSplitPosition(0.25)} disabled={splitCount === 0} className="flex h-9 w-[72px] shrink-0 items-center justify-center rounded border border-zinc-300 bg-white text-[11px] font-semibold text-zinc-700 hover:border-zinc-400 disabled:cursor-not-allowed disabled:opacity-40">+ 0.25&quot;</button></div> },

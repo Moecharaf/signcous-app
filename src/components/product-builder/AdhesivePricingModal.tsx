@@ -28,11 +28,12 @@ function formatRate(row: AdhesiveRateRow, value: number): string {
 }
 
 function renderShippingTable(table: AdhesiveShippingTable) {
+  const hasRowLabel = table.rowLabel.trim().length > 0;
   return (
     <table className="w-full border-collapse" key={table.rowLabel}>
       <thead>
         <tr className="text-zinc-600">
-          <th className="pb-1 text-left font-semibold">{table.rowLabel}</th>
+          {hasRowLabel ? <th className="pb-1 text-left font-semibold">{table.rowLabel}</th> : null}
           {table.headers.map((header) => (
             <th key={`${table.rowLabel}-${header}`} className="pb-1 text-left font-semibold">
               {header}
@@ -42,7 +43,7 @@ function renderShippingTable(table: AdhesiveShippingTable) {
       </thead>
       <tbody className="align-top">
         <tr>
-          <td className="py-0.5">Shipping</td>
+          {hasRowLabel ? <td className="py-0.5">Shipping</td> : null}
           {table.values.map((value, index) => (
             <td key={`${table.rowLabel}-retail-${index}`} className="py-0.5">
               {formatPrice(value * ADHESIVE_MARKUP)}

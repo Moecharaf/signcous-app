@@ -34,9 +34,10 @@ export interface IJ35CPricingResult {
   panelOverlap: boolean;
 }
 
-export const IJ35C_BASE_RATE = 3.49;
+export const IJ35C_BASE_RATE = 2.99;
+export const IJ35C_MARKUP = 1.5;
 export const IJ35C_MINIMUM_PRICE = 25;
-export const IJ35C_CONTOUR_CUT_MULTIPLIER = 1.15;
+export const IJ35C_CONTOUR_CUT_MULTIPLIER = 1.1;
 export const IJ35C_RUSH_MULTIPLIER = 2;
 export const IJ35C_MAX_ROLL_WIDTH = 52;
 
@@ -100,18 +101,21 @@ export function calculateIJ35CPricing(input: IJ35CPricingInput): IJ35CPricingRes
   const areaSqFt = (widthIn * heightIn) / 144;
   const rawBase = areaSqFt * IJ35C_BASE_RATE;
 
-  const contourAdjustedBase = input.contourCut
+  const supplierContourAdjustedBase = input.contourCut
     ? rawBase * IJ35C_CONTOUR_CUT_MULTIPLIER
     : rawBase;
-  const contourCutCharge = contourAdjustedBase - rawBase;
+  const supplierContourCutCharge = supplierContourAdjustedBase - rawBase;
 
-  const rushAdjustedBase = input.rush
-    ? contourAdjustedBase * IJ35C_RUSH_MULTIPLIER
-    : contourAdjustedBase;
-  const rushCharge = rushAdjustedBase - contourAdjustedBase;
+  const supplierRushAdjustedBase = input.rush
+    ? supplierContourAdjustedBase * IJ35C_RUSH_MULTIPLIER
+    : supplierContourAdjustedBase;
+  const supplierRushCharge = supplierRushAdjustedBase - supplierContourAdjustedBase;
 
-  const preMinimumTotal = rushAdjustedBase;
-  const perItemTotal = Math.max(preMinimumTotal, IJ35C_MINIMUM_PRICE);
+  const contourAdjustedBase = supplierContourAdjustedBase * IJ35C_MARKUP;
+  const contourCutCharge = supplierContourCutCharge * IJ35C_MARKUP;
+  const rushCharge = supplierRushCharge * IJ35C_MARKUP;
+  const preMinimumTotal = supplierRushAdjustedBase * IJ35C_MARKUP;
+  const perItemTotal = Math.max(preMinimumTotal, IJ35C_MINIMUM_PRICE * IJ35C_MARKUP);
   const minimumApplied = perItemTotal > preMinimumTotal;
 
   const resolvedSplitDirection = resolveSplitDirection(widthIn, heightIn, input.splitDirection);

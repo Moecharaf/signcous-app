@@ -48,12 +48,10 @@ export interface OneWayWindowPricingResult {
 
 export const ONE_WAY_MINIMUM_PRICE = 25;
 export const ONE_WAY_MAX_PANEL_WIDTH = 50; // inches — STRICT
-export const ONE_WAY_PANEL_EXTRA_COST = 7; // per extra panel
 export const ONE_WAY_SUPPLIER_RATE = 2.75; // per sq ft
 export const ONE_WAY_SUPPLIER_LAMINATE_RATE = 1.24; // per sq ft
 export const ONE_WAY_MARKUP_MULTIPLIER = 1.5;
 export const ONE_WAY_RUSH_MULTIPLIER = 2.0; // 100% additional
-export const ONE_WAY_CONTOUR_MULTIPLIER = 1.10;
 
 export const ONE_WAY_MATERIAL_OPTIONS: { value: OneWayWindowMaterial; label: string; note: string }[] = [
   {
@@ -89,25 +87,24 @@ export function calculateOneWayWindowPrice(input: OneWayWindowPricingInput): One
   const laminateCost = input.laminate ? footprint.billedSqft * ONE_WAY_SUPPLIER_LAMINATE_RATE : 0;
   const laminateAdjustedBase = baseCost + laminateCost;
 
-  // Contour +10%
-  const contourAdjustedBase = input.contourCut
-    ? laminateAdjustedBase * ONE_WAY_CONTOUR_MULTIPLIER
-    : laminateAdjustedBase;
-  const contourCutCharge = contourAdjustedBase - laminateAdjustedBase;
+  // Signs365 one-way window pricing uses laminate and rush options only.
+  const contourAdjustedBase = laminateAdjustedBase;
+  const contourCutCharge = 0;
 
   // Rush = 100% additional on production subtotal
   const rushCharge = input.rush ? contourAdjustedBase * (ONE_WAY_RUSH_MULTIPLIER - 1) : 0;
   const productionSubtotal = contourAdjustedBase + rushCharge;
 
-  // Panel splitting — always based on 50in max width
+  // Panel splitting for artwork guidance only (no panel surcharge)
   const panelCount = calculateOneWayPanels(widthIn);
-  const panelCost = (panelCount - 1) * ONE_WAY_PANEL_EXTRA_COST;
-  const preMinimumTotal = productionSubtotal + panelCost;
+  const panelCost = 0;
+  const preMinimumTotal = productionSubtotal;
   const retailBeforeMinimum = calculateRetailPrice(preMinimumTotal, ONE_WAY_MARKUP_MULTIPLIER);
 
   // Minimum retail floor
-  const minimumApplied = retailBeforeMinimum < ONE_WAY_MINIMUM_PRICE;
-  const perItemTotal = Math.max(retailBeforeMinimum, ONE_WAY_MINIMUM_PRICE);
+  const minimumWithMarkup = ONE_WAY_MINIMUM_PRICE * ONE_WAY_MARKUP_MULTIPLIER;
+  const minimumApplied = retailBeforeMinimum < minimumWithMarkup;
+  const perItemTotal = Math.max(retailBeforeMinimum, minimumWithMarkup);
 
   const panelWidthIn = widthIn / panelCount;
   const panelHeightIn = heightIn;

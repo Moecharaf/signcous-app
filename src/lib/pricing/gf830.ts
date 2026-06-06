@@ -47,7 +47,6 @@ export const GF830_PRODUCT_CONFIG = {
 export const GF830_AUTOMARK_PANEL_CONFIG: GF830PanelConfig = GF830_PRODUCT_CONFIG.gf830AutoMark;
 export const GF830_MAX_PANEL_WIDTH = GF830_AUTOMARK_PANEL_CONFIG.maxPanelWidthInches; // inches
 export const GF830_MAX_PANEL_HEIGHT = GF830_AUTOMARK_PANEL_CONFIG.maxPanelHeightInches; // inches
-export const GF830_PANEL_EXTRA_COST = 8; // per extra panel
 export const GF830_SUPPLIER_RATE = 3.99; // cost per sq ft
 export const GF830_MARKUP_MULTIPLIER = 1.5; // +50% markup
 export const GF830_CONTOUR_MULTIPLIER = 1.10;
@@ -64,6 +63,7 @@ function toInches(value: number, unit: GF830Unit): number {
 }
 
 export function getDynamicRate(sqFt: number): number {
+  void sqFt;
   return GF830_SUPPLIER_RATE * GF830_MARKUP_MULTIPLIER;
 }
 
@@ -104,14 +104,15 @@ export function calculateGF830Price(input: GF830PricingInput): GF830PricingResul
   const rushAdjustedBase = input.rush ? contourAdjustedBase * GF830_RUSH_MULTIPLIER : contourAdjustedBase;
   const rushCharge = rushAdjustedBase - contourAdjustedBase;
 
-  // Step 5: Minimum
+  // Step 5: Minimum (supplier minimum with Signcous +50% markup)
   const preMin = rushAdjustedBase;
-  const minimumApplied = preMin < GF830_MINIMUM_PRICE;
-  const afterMinimum = Math.max(preMin, GF830_MINIMUM_PRICE);
+  const minimumWithMarkup = GF830_MINIMUM_PRICE * GF830_MARKUP_MULTIPLIER;
+  const minimumApplied = preMin < minimumWithMarkup;
+  const afterMinimum = Math.max(preMin, minimumWithMarkup);
 
-  // Step 6: Panel splitting — cost added AFTER minimum
+  // Step 6: Panel splitting for artwork guidance only (no panel surcharge)
   const panelCount = calculateGF830Panels(widthIn, heightIn, input.splitDirection, GF830_AUTOMARK_PANEL_CONFIG);
-  const panelCost = (panelCount - 1) * GF830_PANEL_EXTRA_COST;
+  const panelCost = 0;
 
   const perItemTotal = Math.round((afterMinimum + panelCost) * 100) / 100;
 

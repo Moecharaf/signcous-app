@@ -1,6 +1,8 @@
-export const BOOTPRINTS_RATE = 14.95; // $ per sq ft
-export const BOOTPRINTS_MIN = 40;
-export const BOOTPRINTS_CONTOUR_MULTIPLIER = 0.15; // +15%
+export const BOOTPRINTS_SUPPLIER_RATE = 12.5; // $ per sq ft (Signs365 baseline)
+export const BOOTPRINTS_MARKUP_MULTIPLIER = 1.5;
+export const BOOTPRINTS_RATE = BOOTPRINTS_SUPPLIER_RATE * BOOTPRINTS_MARKUP_MULTIPLIER;
+export const BOOTPRINTS_MIN = 0;
+export const BOOTPRINTS_CONTOUR_MULTIPLIER = 0.1; // +10%
 export const BOOTPRINTS_RUSH_MULTIPLIER = 1.0; // +100%
 export const BOOTPRINTS_PANEL_MAX_IN = 48; // max panel width/height in inches
 
@@ -47,7 +49,8 @@ export function getBootprintsPanelInfo(widthIn: number, heightIn: number): Bootp
  * Calculates pricing for Bootprints (Outdoor Heavy-Duty Floor Graphics).
  *
  * Billable dimensions are rounded UP to the nearest foot before area is computed.
- * Pricing: $14.95 / sq ft · contour cut +15% · rush +100% · $40 minimum per unit.
+ * Pricing: supplier $12.50 / sq ft with +50% markup (retail $18.75 / sq ft)
+ * · contour cut +10% · rush +100%.
  */
 export function calculateBootprintsPrice(
   widthIn: number,
@@ -68,8 +71,8 @@ export function calculateBootprintsPrice(
   const contourCutCharge = options.contourCut ? base * BOOTPRINTS_CONTOUR_MULTIPLIER : 0;
   const rushCharge = options.rush ? base * BOOTPRINTS_RUSH_MULTIPLIER : 0;
   const preMinimumTotal = base + contourCutCharge + rushCharge;
-  const unitPrice = Math.max(preMinimumTotal, BOOTPRINTS_MIN);
-  const minimumApplied = unitPrice > preMinimumTotal;
+  const unitPrice = preMinimumTotal;
+  const minimumApplied = false;
 
   return {
     widthFt,

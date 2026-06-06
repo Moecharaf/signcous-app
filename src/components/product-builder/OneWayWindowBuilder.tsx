@@ -5,7 +5,6 @@ import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
 import SizeInputPanel, { composeDimensionInches } from "@/components/product-builder/SizeInputPanel";
 import Button from "@/components/ui/Button";
-import RigidPricingHeader from "@/components/product-builder/RigidPricingHeader";
 import AdhesivePricingModal from "@/components/product-builder/AdhesivePricingModal";
 import { ADHESIVE_PRICING_CONFIGS } from "@/components/product-builder/adhesive-pricing-data";
 import { useCart } from "@/context/CartContext";
@@ -13,6 +12,8 @@ import {
   ONE_WAY_MARKUP_MULTIPLIER,
   ONE_WAY_MATERIAL_OPTIONS,
   ONE_WAY_MAX_PANEL_WIDTH,
+  ONE_WAY_SUPPLIER_LAMINATE_RATE,
+  ONE_WAY_SUPPLIER_RATE,
   calculateOneWayWindowPrice,
   type OneWayWindowMaterial,
 } from "@/lib/pricing/one-way-window";
@@ -67,7 +68,6 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
   const [quantity, setQuantity] = useState(1);
   const [material, setMaterial] = useState<OneWayWindowMaterial>("50/50");
   const [laminate, setLaminate] = useState(false);
-  const [contourCut, setContourCut] = useState(false);
   const [rush, setRush] = useState(false);
   const [added, setAdded] = useState(false);
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
@@ -101,11 +101,11 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
             quantity: safeQuantity,
             material,
             laminate,
-            contourCut,
+            contourCut: false,
             rush,
           })
         : null,
-    [width, height, safeQuantity, material, laminate, contourCut, rush, isValid]
+    [width, height, safeQuantity, material, laminate, rush, isValid]
   );
 
   const selectedMaterial = ONE_WAY_MATERIAL_OPTIONS.find((o) => o.value === material)!;
@@ -239,7 +239,6 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
         custom_material: selectedMaterial.label,
         custom_laminate: laminate ? "Yes" : "No",
         custom_rush: rush ? "Yes" : "No",
-        custom_contour_cut: contourCut ? "Yes" : "No",
         custom_panel_count: String(pricing.panelCount),
         custom_panel_size: `${formatInches(pricing.panelWidthIn)} x ${formatInches(pricing.panelHeightIn)}`,
         custom_max_panel_width: `${ONE_WAY_MAX_PANEL_WIDTH}"`,
@@ -249,7 +248,6 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
         custom_supplier_rate: `${formatCurrency(pricing.supplierRate)}/sq ft`,
         custom_markup: `${Math.round((ONE_WAY_MARKUP_MULTIPLIER - 1) * 100)}%`,
         custom_rush_charge: formatCurrency(pricing.rushCharge),
-        custom_panel_cost: formatCurrency(pricing.panelCost),
         custom_laminate_charge: formatCurrency(pricing.laminateCharge),
       },
     });
@@ -280,20 +278,59 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
       <div className="w-full px-3 py-3 md:px-4">
         <div className="grid gap-4">
           <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
-            <RigidPricingHeader
-              section
-              productName="ONE WAY WINDOW"
-              detail="Adhesive window film builder"
-              totalPrice={pricing ? formatCurrency(pricing.grandTotal) : formatCurrency(0)}
-              middleRows={[
-                { label: "Actual Area", value: pricing ? `${pricing.areaSqFt.toFixed(2)} sq ft` : "--" },
-                { label: "Billed Area", value: pricing ? `${pricing.billedSqFt.toFixed(2)} sq ft` : "--" },
-                { label: "Per Item", value: pricing ? formatCurrency(pricing.grandTotal / Math.max(safeQuantity, 1)) : formatCurrency(0) },
-                { label: "Qty", value: String(safeQuantity) },
-              ]}
-              onMiddleTitleClick={() => setIsPricingModalOpen(true)}
-              accentClassName="text-[var(--brand-primary)]"
-            />
+            <div
+              className="bg-[#fafaf9] px-4 py-3"
+              style={{
+                backgroundImage:
+                  "linear-gradient(to right, rgba(63,63,70,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(63,63,70,0.08) 1px, transparent 1px)",
+                backgroundSize: "26px 26px",
+              }}
+            >
+              <div className="grid gap-3 md:grid-cols-[0.85fr_1.4fr_0.85fr] md:items-start md:gap-8">
+                <div>
+                  <div className="text-[27px] leading-[0.98] font-medium uppercase tracking-tight text-zinc-900 md:whitespace-nowrap md:text-[36px]">ONE WAY WINDOW</div>
+                  <div className="mt-1 text-[11px] text-zinc-600 md:text-[12px]">Adhesive window film builder</div>
+                </div>
+
+                <div className="text-center md:pt-1">
+                  <div className="mx-auto w-full max-w-[360px]">
+                    <table className="w-full border-collapse text-[10px] leading-5 text-zinc-600 md:text-[11px]">
+                      <thead>
+                        <tr>
+                          <th className="pb-0.5 text-left font-semibold text-zinc-500" />
+                          <th className="pb-0.5 text-left font-semibold text-zinc-500">Laminate</th>
+                          <th className="pb-0.5 text-left font-semibold text-zinc-500">No Laminate</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td className="py-0.5 text-left text-zinc-500">50/50 Perforation</td>
+                          <td className="py-0.5 text-left font-medium text-zinc-700">{formatCurrency((ONE_WAY_SUPPLIER_RATE + ONE_WAY_SUPPLIER_LAMINATE_RATE) * ONE_WAY_MARKUP_MULTIPLIER)} per sq ft</td>
+                          <td className="py-0.5 text-left font-medium text-zinc-700">{formatCurrency(ONE_WAY_SUPPLIER_RATE * ONE_WAY_MARKUP_MULTIPLIER)} per sq ft</td>
+                        </tr>
+                        <tr>
+                          <td className="py-0.5 text-left text-zinc-500">70/30 Perforation</td>
+                          <td className="py-0.5 text-left font-medium text-zinc-700">{formatCurrency((ONE_WAY_SUPPLIER_RATE + ONE_WAY_SUPPLIER_LAMINATE_RATE) * ONE_WAY_MARKUP_MULTIPLIER)} per sq ft</td>
+                          <td className="py-0.5 text-left font-medium text-zinc-700">{formatCurrency(ONE_WAY_SUPPLIER_RATE * ONE_WAY_MARKUP_MULTIPLIER)} per sq ft</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsPricingModalOpen(true)}
+                    className="mt-1 text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500 underline underline-offset-2 hover:text-zinc-700"
+                  >
+                    Pricing And Shipping
+                  </button>
+                </div>
+
+                <div className="text-left md:text-right">
+                  <div className="text-[34px] leading-none font-semibold text-[var(--brand-primary)] md:text-[44px]">{pricing ? formatCurrency(pricing.grandTotal) : formatCurrency(0)}</div>
+                  <div className="mt-1 text-[10px] text-zinc-500">Live total</div>
+                </div>
+              </div>
+            </div>
 
             <AdhesivePricingModal
               isOpen={isPricingModalOpen}
@@ -430,7 +467,7 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
                 { id: "artwork", title: "Artwork", value: uploadedFileName ? "Uploaded" : "No file", width: 420, content: <><label className="inline-flex h-10 w-full cursor-pointer items-center justify-center rounded border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-700 hover:border-zinc-400"><input type="file" accept="image/*,.pdf,.ai,.eps,.psd,.svg" className="hidden" onChange={onUploadArtwork} />{uploadingArtwork ? "Uploading..." : uploadedFileName ? "Replace Artwork" : "Upload Artwork"}</label>{uploadedFileName && <div className="flex items-center justify-between gap-2 rounded border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-600"><span className="truncate">{uploadedFileName}</span><button type="button" onClick={clearArtwork} className="font-semibold text-zinc-500 hover:text-zinc-900">Remove</button></div>}{uploadError && <div className="text-xs font-medium text-red-600">{uploadError}</div>}</> },
                 { id: "size", title: "Size", value: pricing ? `${formatInches(pricing.widthIn)} x ${formatInches(pricing.heightIn)}` : "Set dimensions", status: widthError || heightError ? "alert" : "ok", width: 360, content: (<SizeInputPanel widthFeet={widthFeet} widthInches={widthInches} heightFeet={heightFeet} heightInches={heightInches} onWidthFeetChange={setWidthFeet} onWidthInchesChange={setWidthInches} onHeightFeetChange={setHeightFeet} onHeightInchesChange={setHeightInches} onWidthNormalize={(f, i) => { setWidthFeet(f); setWidthInches(i); }} onHeightNormalize={(f, i) => { setHeightFeet(f); setHeightInches(i); }} error={widthError || heightError} helper="Max width 50 in. Height up to 25 ft 0 in." />) },
                 { id: "material", title: "Material", value: selectedMaterial.label, width: 320, content: <select value={material} onChange={(event) => setMaterial(event.target.value as OneWayWindowMaterial)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm">{ONE_WAY_MATERIAL_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select> },
-                { id: "finish", title: "Laminate / Contour / Rush", value: [laminate ? "Laminate" : null, contourCut ? "Contour" : null, rush ? "Rush" : null].filter(Boolean).join(" / ") || "None", width: 360, content: <div className="grid grid-cols-3 gap-1"><button type="button" onClick={() => setLaminate((v) => !v)} className={`h-9 rounded border px-3 text-xs font-semibold transition ${laminate ? "border-sky-300 bg-sky-50 text-sky-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Laminate</button><button type="button" onClick={() => setContourCut((v) => !v)} className={`h-9 rounded border px-3 text-xs font-semibold transition ${contourCut ? "border-sky-300 bg-sky-50 text-sky-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Contour</button><button type="button" onClick={() => setRush((v) => !v)} className={`h-9 rounded border px-3 text-xs font-semibold transition ${rush ? "border-sky-300 bg-sky-50 text-sky-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Rush</button></div> },
+                { id: "finish", title: "Laminate / Rush", value: [laminate ? "Laminate" : null, rush ? "Rush" : null].filter(Boolean).join(" / ") || "None", width: 360, content: <div className="grid grid-cols-2 gap-1"><button type="button" onClick={() => setLaminate((v) => !v)} className={`h-9 rounded border px-3 text-xs font-semibold transition ${laminate ? "border-sky-300 bg-sky-50 text-sky-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Laminate</button><button type="button" onClick={() => setRush((v) => !v)} className={`h-9 rounded border px-3 text-xs font-semibold transition ${rush ? "border-sky-300 bg-sky-50 text-sky-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Rush</button></div> },
                 { id: "quantity", title: "Quantity", value: String(safeQuantity), width: 260, content: <input type="number" min={1} value={safeQuantity} onChange={(event) => setQuantity(Math.max(1, Math.floor(Number(event.target.value) || 1)))} className="h-9 w-full rounded border border-zinc-300 px-2 text-sm" /> },
               ] satisfies BuilderBottomToolbarPanel[]}
               action={<Button className="h-10 w-full rounded bg-[var(--brand-primary)] text-xs font-semibold text-white hover:bg-[var(--brand-primary-hover)]" disabled={!isValid} onClick={addToCart}>{added ? "Added" : "Add"}</Button>}

@@ -1,12 +1,12 @@
-export const REFLECTIVE_VINYL_RATE = 9.95; // $ per sq ft
-export const REFLECTIVE_VINYL_MIN = 30;
-export const REFLECTIVE_VINYL_CONTOUR_MULTIPLIER = 0.15; // +15%
-export const REFLECTIVE_VINYL_RUSH_MULTIPLIER = 1.0; // +100%
+export const REFLECTIVE_VINYL_SUPPLIER_RATE = 8; // $ per sq ft (Signs365 baseline)
+export const REFLECTIVE_VINYL_MARKUP_MULTIPLIER = 1.5;
+export const REFLECTIVE_VINYL_RATE = REFLECTIVE_VINYL_SUPPLIER_RATE * REFLECTIVE_VINYL_MARKUP_MULTIPLIER;
+export const REFLECTIVE_VINYL_MIN = 0;
+export const REFLECTIVE_VINYL_CONTOUR_MULTIPLIER = 0.1; // +10%
 export const REFLECTIVE_VINYL_PANEL_MAX_IN = 48; // max panel width/height in inches
 
 export interface ReflectiveVinylPricingOptions {
   contourCut?: boolean;
-  rush?: boolean;
 }
 
 export interface ReflectiveVinylPricingResult {
@@ -51,10 +51,10 @@ export function calculateReflectiveVinylPrice(
 
   const base = sqFt * REFLECTIVE_VINYL_RATE;
   const contourCutCharge = options.contourCut ? base * REFLECTIVE_VINYL_CONTOUR_MULTIPLIER : 0;
-  const rushCharge = options.rush ? base * REFLECTIVE_VINYL_RUSH_MULTIPLIER : 0;
+  const rushCharge = 0;
   const preMinimumTotal = base + contourCutCharge + rushCharge;
-  const unitPrice = Math.max(preMinimumTotal, REFLECTIVE_VINYL_MIN);
-  const minimumApplied = unitPrice > preMinimumTotal;
+  const unitPrice = preMinimumTotal;
+  const minimumApplied = false;
 
   return {
     widthFt,

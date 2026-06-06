@@ -34,11 +34,10 @@ export interface OrajetClearPricingResult {
 
 export const ORAJET_CLEAR_MINIMUM_PRICE = 35;
 export const ORAJET_CLEAR_MAX_PANEL_WIDTH = 54; // inches
-export const ORAJET_CLEAR_PANEL_EXTRA_COST = 10; // per extra panel
 export const ORAJET_CLEAR_SUPPLIER_RATE = 6.0; // cost per sq ft
 export const ORAJET_CLEAR_MARKUP_MULTIPLIER = 1.5; // +50% on cost
 export const ORAJET_CLEAR_CONTOUR_MULTIPLIER = 1.10;
-export const ORAJET_CLEAR_RUSH_MULTIPLIER = 1.75;
+export const ORAJET_CLEAR_RUSH_MULTIPLIER = 2;
 
 export const ORAJET_CLEAR_LAMINATE_OPTIONS: { value: OrajetClearLaminate; label: string; note: string }[] = [
   { value: "gloss", label: "Gloss Laminate", note: "Shiny finish enhancing color vibrancy through clear vinyl." },
@@ -51,6 +50,7 @@ function toInches(value: number, unit: OrajetClearUnit): number {
 }
 
 export function getDynamicRate(sqFt: number): number {
+  void sqFt;
   return ORAJET_CLEAR_SUPPLIER_RATE * ORAJET_CLEAR_MARKUP_MULTIPLIER;
 }
 
@@ -84,14 +84,15 @@ export function calculateOrajetClearPrice(input: OrajetClearPricingInput): Oraje
   const rushAdjustedBase = input.rush ? contourAdjustedBase * ORAJET_CLEAR_RUSH_MULTIPLIER : contourAdjustedBase;
   const rushCharge = rushAdjustedBase - contourAdjustedBase;
 
-  // Step 6: Minimum
+  // Step 6: Minimum (supplier minimum with Signcous +50% markup)
   const preMin = rushAdjustedBase;
-  const minimumApplied = preMin < ORAJET_CLEAR_MINIMUM_PRICE;
-  const afterMinimum = Math.max(preMin, ORAJET_CLEAR_MINIMUM_PRICE);
+  const minimumWithMarkup = ORAJET_CLEAR_MINIMUM_PRICE * ORAJET_CLEAR_MARKUP_MULTIPLIER;
+  const minimumApplied = preMin < minimumWithMarkup;
+  const afterMinimum = Math.max(preMin, minimumWithMarkup);
 
-  // Panel splitting — cost added AFTER minimum
+  // Panel splitting for artwork guidance only (no panel surcharge)
   const panelCount = calculateOrajetClearPanels(widthIn, heightIn, input.splitDirection);
-  const panelCost = (panelCount - 1) * ORAJET_CLEAR_PANEL_EXTRA_COST;
+  const panelCost = 0;
 
   const perItemTotal = Math.round((afterMinimum + panelCost) * 100) / 100;
 

@@ -1,7 +1,9 @@
-export const WINDOW_CLING_RATE = 0.024;
-export const WINDOW_CLING_MIN = 4.99;
+export const WINDOW_CLING_RATE = 0.02;
+export const WINDOW_CLING_MIN = 2.88;
+export const WINDOW_CLING_MARKUP = 1.5;
 export const WINDOW_CLING_MAX_WIDTH_IN = 52;
 export const WINDOW_CLING_MAX_HEIGHT_IN = 240;
+export const WINDOW_CLING_CONTOUR_MULTIPLIER = 1.1;
 
 export type WindowClingApplication = "inside" | "outside";
 export type WindowClingViewable = "inside" | "outside";
@@ -33,10 +35,13 @@ export function calculateWindowClingPrice(
 
   const sqIn = safeWidth * safeHeight;
   const rawBase = sqIn * WINDOW_CLING_RATE;
-  const contourAdjusted = options.contourCut ? rawBase * 1.15 : rawBase;
-  const contourCutCharge = contourAdjusted - rawBase;
+  const supplierContourAdjusted = options.contourCut ? rawBase * WINDOW_CLING_CONTOUR_MULTIPLIER : rawBase;
+  const supplierContourCutCharge = supplierContourAdjusted - rawBase;
 
-  const unitPrice = Math.max(contourAdjusted, WINDOW_CLING_MIN);
+  const contourAdjusted = supplierContourAdjusted * WINDOW_CLING_MARKUP;
+  const contourCutCharge = supplierContourCutCharge * WINDOW_CLING_MARKUP;
+
+  const unitPrice = Math.max(contourAdjusted, WINDOW_CLING_MIN * WINDOW_CLING_MARKUP);
   const minimumApplied = unitPrice > contourAdjusted;
   const totalPrice = unitPrice * safeQuantity;
 

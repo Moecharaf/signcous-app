@@ -5,16 +5,14 @@ import { useEffect, useMemo, useState, type ChangeEvent, type ReactNode } from "
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
 import SizeInputPanel, { composeDimensionInches } from "@/components/product-builder/SizeInputPanel";
 import Button from "@/components/ui/Button";
-import RigidPricingHeader from "@/components/product-builder/RigidPricingHeader";
 import AdhesivePricingModal from "@/components/product-builder/AdhesivePricingModal";
 import { ADHESIVE_PRICING_CONFIGS } from "@/components/product-builder/adhesive-pricing-data";
 import { useCart } from "@/context/CartContext";
 import {
   ORAJET_CLEAR_LAMINATE_OPTIONS,
+  ORAJET_CLEAR_MARKUP_MULTIPLIER,
   ORAJET_CLEAR_MAX_PANEL_WIDTH,
-  ORAJET_CLEAR_MINIMUM_PRICE,
-  ORAJET_CLEAR_PANEL_EXTRA_COST,
-  ORAJET_CLEAR_RUSH_MULTIPLIER,
+  ORAJET_CLEAR_SUPPLIER_RATE,
   calculateOrajetClearPrice,
   type OrajetClearLaminate,
   type OrajetClearSplitDirection,
@@ -166,7 +164,6 @@ export default function OrajetClearBuilder({ productId = 0 }: OrajetClearBuilder
   const [quantity, setQuantity] = useState(1);
   const [laminate, setLaminate] = useState<OrajetClearLaminate>("gloss");
   const [contourCut, setContourCut] = useState(false);
-  const [rush, setRush] = useState(false);
   const [splitDirection, setSplitDirection] = useState<OrajetClearSplitDirection>("auto");
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [added, setAdded] = useState(false);
@@ -193,11 +190,11 @@ export default function OrajetClearBuilder({ productId = 0 }: OrajetClearBuilder
             unit: "inches",
             quantity: safeQuantity,
             contourCut,
-            rush,
+            rush: false,
             splitDirection,
           })
         : null,
-    [width, height, safeQuantity, contourCut, rush, splitDirection, isValid]
+    [width, height, safeQuantity, contourCut, splitDirection, isValid]
   );
 
   const selectedLaminate = ORAJET_CLEAR_LAMINATE_OPTIONS.find((option) => option.value === laminate)!;
@@ -303,7 +300,7 @@ export default function OrajetClearBuilder({ productId = 0 }: OrajetClearBuilder
       polePockets: false,
       windSlits: false,
       hemming: false,
-      rush,
+      rush: false,
       uploadedFileUrl,
       uploadedFileName,
       unitPrice: pricing.perItemTotal,
@@ -313,7 +310,6 @@ export default function OrajetClearBuilder({ productId = 0 }: OrajetClearBuilder
         custom_height: `${height} inches`,
         custom_laminate: selectedLaminate.label,
         custom_contour_cut: contourCut ? "Yes" : "No",
-        custom_rush: rush ? "Yes" : "No",
         custom_split_direction_input: splitDirection,
         custom_split_direction_applied: appliedSplitDirection,
         custom_panel_count: String(pricing.panelCount),
@@ -321,7 +317,6 @@ export default function OrajetClearBuilder({ productId = 0 }: OrajetClearBuilder
         custom_roll_width_limit: `${ORAJET_CLEAR_MAX_PANEL_WIDTH}"`,
         custom_area_sqft: pricing.areaSqFt.toFixed(2),
         custom_base_rate: `${formatCurrency(pricing.baseRate)}/sq ft`,
-        custom_panel_cost: formatCurrency(pricing.panelCost),
       },
     });
 
@@ -337,19 +332,52 @@ export default function OrajetClearBuilder({ productId = 0 }: OrajetClearBuilder
       <div className="w-full px-3 py-3 md:px-4">
         <div className="grid gap-4">
           <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
-            <RigidPricingHeader
-              section
-              productName="ORAJET CLEAR"
-              detail="Adhesive vinyl builder"
-              onMiddleTitleClick={() => setIsPricingModalOpen(true)}
-              totalPrice={pricing ? formatCurrency(pricing.grandTotal) : formatCurrency(0)}
-              middleRows={[
-                { label: "Area", value: pricing ? `${pricing.areaSqFt.toFixed(2)} sq ft` : "--" },
-                { label: "Per Item", value: pricing ? formatCurrency(pricing.grandTotal / Math.max(safeQuantity, 1)) : formatCurrency(0) },
-                { label: "Qty", value: String(safeQuantity) },
-              ]}
-              accentClassName="text-[var(--brand-primary)]"
-            />
+            <div
+              className="bg-[#fafaf9] px-4 py-3"
+              style={{
+                backgroundImage:
+                  "linear-gradient(to right, rgba(63,63,70,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(63,63,70,0.08) 1px, transparent 1px)",
+                backgroundSize: "26px 26px",
+              }}
+            >
+              <div className="grid gap-3 md:grid-cols-[0.85fr_1.4fr_0.85fr] md:items-start md:gap-8">
+                <div>
+                  <div className="text-[27px] leading-[0.98] font-medium uppercase tracking-tight text-zinc-900 md:whitespace-nowrap md:text-[36px]">ORAJET CLEAR</div>
+                  <div className="mt-1 text-[11px] text-zinc-600 md:text-[12px]">Adhesive vinyl builder</div>
+                </div>
+
+                <div className="text-center md:pt-1">
+                  <div className="mx-auto w-full max-w-[320px]">
+                    <table className="w-full border-collapse text-[10px] leading-5 text-zinc-600 md:text-[11px]">
+                      <thead>
+                        <tr>
+                          <th className="pb-0.5 text-left font-semibold text-zinc-500" />
+                          <th className="pb-0.5 text-left font-semibold text-zinc-500">Single-Sided</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td className="py-0.5 text-left text-zinc-500">Orajet Clear</td>
+                          <td className="py-0.5 text-left font-medium text-zinc-700">{formatCurrency(ORAJET_CLEAR_SUPPLIER_RATE * ORAJET_CLEAR_MARKUP_MULTIPLIER)} per sq ft</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsPricingModalOpen(true)}
+                    className="mt-1 text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500 underline underline-offset-2 hover:text-zinc-700"
+                  >
+                    Pricing And Shipping
+                  </button>
+                </div>
+
+                <div className="text-left md:text-right">
+                  <div className="text-[34px] leading-none font-semibold text-[var(--brand-primary)] md:text-[44px]">{pricing ? formatCurrency(pricing.grandTotal) : formatCurrency(0)}</div>
+                  <div className="mt-1 text-[10px] text-zinc-500">Live total</div>
+                </div>
+              </div>
+            </div>
 
             <AdhesivePricingModal
               isOpen={isPricingModalOpen}
@@ -478,7 +506,7 @@ export default function OrajetClearBuilder({ productId = 0 }: OrajetClearBuilder
                 { id: "size", title: "Size", value: pricing ? `${formatInches(pricing.widthIn)} x ${formatInches(pricing.heightIn)}` : "Set dimensions", status: widthError || heightError ? "alert" : "ok", width: 360, content: (<SizeInputPanel widthFeet={widthFeet} widthInches={widthInches} heightFeet={heightFeet} heightInches={heightInches} onWidthFeetChange={setWidthFeet} onWidthInchesChange={setWidthInches} onHeightFeetChange={setHeightFeet} onHeightInchesChange={setHeightInches} onWidthNormalize={(f, i) => { setWidthFeet(f); setWidthInches(i); }} onHeightNormalize={(f, i) => { setHeightFeet(f); setHeightInches(i); }} error={widthError || heightError} helper="Up to 25 ft 0 in per side." />) },
                 { id: "laminate", title: "Laminate", value: selectedLaminate.label, width: 320, content: <select value={laminate} onChange={(event) => setLaminate(event.target.value as OrajetClearLaminate)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm">{ORAJET_CLEAR_LAMINATE_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select> },
                 { id: "split", title: "Split Direction", value: splitDirection === "auto" ? "Auto" : splitDirection.charAt(0).toUpperCase() + splitDirection.slice(1), width: 320, content: <select value={splitDirection} onChange={(event) => setSplitDirection(event.target.value as OrajetClearSplitDirection)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"><option value="auto">Auto</option><option value="vertical">Vertical</option><option value="horizontal">Horizontal</option></select> },
-                { id: "finish", title: "Contour / Rush", value: [contourCut ? "Contour" : "No contour", rush ? "Rush" : "Standard"].join(" / "), width: 320, content: <div className="grid grid-cols-2 gap-1"><button type="button" onClick={() => setContourCut((value) => !value)} className={`h-9 rounded border px-3 text-xs font-semibold transition ${contourCut ? "border-blue-300 bg-blue-50 text-blue-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Contour</button><button type="button" onClick={() => setRush((value) => !value)} className={`h-9 rounded border px-3 text-xs font-semibold transition ${rush ? "border-blue-300 bg-blue-50 text-blue-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Rush</button></div> },
+                { id: "contour", title: "Contour", value: contourCut ? "Enabled" : "Disabled", width: 320, content: <button type="button" onClick={() => setContourCut((value) => !value)} className={`h-9 w-full rounded border px-3 text-xs font-semibold transition ${contourCut ? "border-blue-300 bg-blue-50 text-blue-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>{contourCut ? "Enabled" : "Disabled"}</button> },
                 { id: "quantity", title: "Quantity", value: String(safeQuantity), width: 260, content: <input type="number" min={1} value={safeQuantity} onChange={(event) => setQuantity(Math.max(1, Math.floor(Number(event.target.value) || 1)))} className="h-9 w-full rounded border border-zinc-300 px-2 text-sm" /> },
               ] satisfies BuilderBottomToolbarPanel[]}
               action={<Button className="h-10 w-full rounded bg-[var(--brand-primary)] text-xs font-semibold text-white hover:bg-[var(--brand-primary-hover)]" disabled={!isValid} onClick={addToCart}>{added ? "Added" : "Add"}</Button>}

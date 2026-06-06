@@ -33,9 +33,10 @@ export interface GF2030PricingResult {
   panelHeightIn: number;
 }
 
-export const GF2030_BASE_RATE = 2.95;
+export const GF2030_BASE_RATE = 2.49;
+export const GF2030_MARKUP = 1.5;
 export const GF2030_MINIMUM_PRICE = 30;
-export const GF2030_CONTOUR_CUT_MULTIPLIER = 1.15;
+export const GF2030_CONTOUR_CUT_MULTIPLIER = 1.1;
 export const GF2030_RUSH_MULTIPLIER = 2;
 export const GF2030_MAX_ROLL_WIDTH = 52;
 
@@ -99,18 +100,21 @@ export function calculateGF2030Pricing(input: GF2030PricingInput): GF2030Pricing
   const areaSqFt = (widthIn * heightIn) / 144;
   const rawBase = areaSqFt * GF2030_BASE_RATE;
 
-  const contourAdjustedBase = input.contourCut
+  const supplierContourAdjustedBase = input.contourCut
     ? rawBase * GF2030_CONTOUR_CUT_MULTIPLIER
     : rawBase;
-  const contourCutCharge = contourAdjustedBase - rawBase;
+  const supplierContourCutCharge = supplierContourAdjustedBase - rawBase;
 
-  const rushAdjustedBase = input.rush
-    ? contourAdjustedBase * GF2030_RUSH_MULTIPLIER
-    : contourAdjustedBase;
-  const rushCharge = rushAdjustedBase - contourAdjustedBase;
+  const supplierRushAdjustedBase = input.rush
+    ? supplierContourAdjustedBase * GF2030_RUSH_MULTIPLIER
+    : supplierContourAdjustedBase;
+  const supplierRushCharge = supplierRushAdjustedBase - supplierContourAdjustedBase;
 
-  const preMinimumTotal = rushAdjustedBase;
-  const perItemTotal = Math.max(preMinimumTotal, GF2030_MINIMUM_PRICE);
+  const contourAdjustedBase = supplierContourAdjustedBase * GF2030_MARKUP;
+  const contourCutCharge = supplierContourCutCharge * GF2030_MARKUP;
+  const rushCharge = supplierRushCharge * GF2030_MARKUP;
+  const preMinimumTotal = supplierRushAdjustedBase * GF2030_MARKUP;
+  const perItemTotal = Math.max(preMinimumTotal, GF2030_MINIMUM_PRICE * GF2030_MARKUP);
   const minimumApplied = perItemTotal > preMinimumTotal;
 
   const resolvedSplitDirection = resolveSplitDirection(widthIn, heightIn, input.splitDirection);

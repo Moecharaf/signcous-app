@@ -31,10 +31,11 @@ export interface PrintWrapPricingResult {
   panelHeightIn: number;
 }
 
-export const PRINT_WRAP_BASE_RATE = 5.75;
+export const PRINT_WRAP_BASE_RATE = 4.99;
+export const PRINT_WRAP_MARKUP = 1.5;
 export const PRINT_WRAP_MINIMUM_PRICE = 35;
 export const PRINT_WRAP_MAX_ROLL_WIDTH = 52;
-export const PRINT_WRAP_CONTOUR_MULTIPLIER = 1.15;
+export const PRINT_WRAP_CONTOUR_MULTIPLIER = 1.1;
 export const PRINT_WRAP_RUSH_MULTIPLIER = 2;
 
 export const PRINT_WRAP_LAMINATE_OPTIONS: { value: PrintWrapLaminate; label: string; note: string }[] = [
@@ -68,13 +69,17 @@ export function calculatePrintWrapPrice(input: PrintWrapPricingInput): PrintWrap
   const areaSqFt = (widthIn * heightIn) / 144;
   const rawBase = areaSqFt * PRINT_WRAP_BASE_RATE;
 
-  const contourAdjustedBase = input.contourCut ? rawBase * PRINT_WRAP_CONTOUR_MULTIPLIER : rawBase;
-  const contourCutCharge = contourAdjustedBase - rawBase;
+  const supplierContourAdjustedBase = input.contourCut ? rawBase * PRINT_WRAP_CONTOUR_MULTIPLIER : rawBase;
+  const supplierContourCutCharge = supplierContourAdjustedBase - rawBase;
 
-  const rushAdjustedBase = input.rush ? contourAdjustedBase * PRINT_WRAP_RUSH_MULTIPLIER : contourAdjustedBase;
-  const rushCharge = rushAdjustedBase - contourAdjustedBase;
+  const supplierRushAdjustedBase = input.rush ? supplierContourAdjustedBase * PRINT_WRAP_RUSH_MULTIPLIER : supplierContourAdjustedBase;
+  const supplierRushCharge = supplierRushAdjustedBase - supplierContourAdjustedBase;
 
-  const perItemTotalUnrounded = Math.max(rushAdjustedBase, PRINT_WRAP_MINIMUM_PRICE);
+  const contourAdjustedBase = supplierContourAdjustedBase * PRINT_WRAP_MARKUP;
+  const contourCutCharge = supplierContourCutCharge * PRINT_WRAP_MARKUP;
+  const rushCharge = supplierRushCharge * PRINT_WRAP_MARKUP;
+  const preMinimumTotal = supplierRushAdjustedBase * PRINT_WRAP_MARKUP;
+  const perItemTotalUnrounded = Math.max(preMinimumTotal, PRINT_WRAP_MINIMUM_PRICE * PRINT_WRAP_MARKUP);
   const perItemTotal = Math.round(perItemTotalUnrounded * 100) / 100;
 
   const panelCount = calculatePanels(widthIn, heightIn, input.splitDirection);
@@ -90,8 +95,8 @@ export function calculatePrintWrapPrice(input: PrintWrapPricingInput): PrintWrap
     contourCutCharge,
     contourAdjustedBase,
     rushCharge,
-    preMinimumTotal: rushAdjustedBase,
-    minimumApplied: perItemTotalUnrounded > rushAdjustedBase,
+    preMinimumTotal,
+    minimumApplied: perItemTotalUnrounded > preMinimumTotal,
     perItemTotal,
     quantity,
     grandTotal: Math.round(perItemTotal * quantity * 100) / 100,

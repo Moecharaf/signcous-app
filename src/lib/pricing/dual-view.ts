@@ -69,6 +69,7 @@ export const DUAL_VIEW_MINIMUM: Record<DualViewSide, number> = {
 
 export const DUAL_VIEW_SINGLE_SUPPLIER_RATE = 2.79;
 export const DUAL_VIEW_DOUBLE_SUPPLIER_RATE = 4.99;
+export const DUAL_VIEW_MARKUP_MULTIPLIER = 1.5;
 
 export const DUAL_VIEW_CONTOUR_MULTIPLIER = 1.10;
 
@@ -119,14 +120,13 @@ export function calculateDualViewPrice(input: DualViewPricingInput): DualViewPri
   const contourCutCharge = contourAdjustedBase - productionCost;
 
   const panelCount = calculateDualViewPanels(footprint.billedWidthIn);
-  const panelCostPer = DUAL_VIEW_PANEL_COST[input.side];
-  const panelCost = (panelCount - 1) * panelCostPer;
+  const panelCostPer = 0;
+  const panelCost = 0;
 
-  const minimumPrice = DUAL_VIEW_MINIMUM[input.side];
-  const preMinimumTotal = contourAdjustedBase + panelCost;
-  const retailBeforeMinimum = calculateRetailPrice(preMinimumTotal);
-  const minimumApplied = retailBeforeMinimum < minimumPrice;
-  const perItemTotal = Math.max(retailBeforeMinimum, minimumPrice);
+  const minimumPrice = 0;
+  const preMinimumTotal = contourAdjustedBase;
+  const minimumApplied = false;
+  const perItemTotal = calculateRetailPrice(preMinimumTotal, DUAL_VIEW_MARKUP_MULTIPLIER);
 
   const panelWidthIn = footprint.billedWidthIn / panelCount;
   const panelHeightIn = footprint.billedHeightIn;

@@ -1,6 +1,8 @@
-export const FOOTPRINTS_RATE = 3.10; // $ per sq ft
-export const FOOTPRINTS_MIN = 25;
-export const FOOTPRINTS_CONTOUR_MULTIPLIER = 0.15; // +15%
+export const FOOTPRINTS_SUPPLIER_RATE = 2.5; // $ per sq ft (Signs365 baseline)
+export const FOOTPRINTS_MARKUP_MULTIPLIER = 1.5;
+export const FOOTPRINTS_RATE = FOOTPRINTS_SUPPLIER_RATE * FOOTPRINTS_MARKUP_MULTIPLIER;
+export const FOOTPRINTS_MIN = 0;
+export const FOOTPRINTS_CONTOUR_MULTIPLIER = 0.1; // +10%
 export const FOOTPRINTS_RUSH_MULTIPLIER = 1.0; // +100%
 export const FOOTPRINTS_PANEL_MAX_IN = 48; // max panel width/height in inches
 
@@ -47,7 +49,8 @@ export function getFootprintsPanelInfo(widthIn: number, heightIn: number): Footp
  * Calculates pricing for Footprints (Floor Graphics).
  *
  * Billable dimensions are rounded UP to the nearest foot before area is computed.
- * Pricing: $3.10 / sq ft · contour cut +15% · rush +100% · $25 minimum per unit.
+ * Pricing: supplier $2.50 / sq ft with +50% markup (retail $3.75 / sq ft)
+ * · contour cut +10% · rush +100%.
  */
 export function calculateFootprintsPrice(
   widthIn: number,
@@ -68,8 +71,8 @@ export function calculateFootprintsPrice(
   const contourCutCharge = options.contourCut ? base * FOOTPRINTS_CONTOUR_MULTIPLIER : 0;
   const rushCharge = options.rush ? base * FOOTPRINTS_RUSH_MULTIPLIER : 0;
   const preMinimumTotal = base + contourCutCharge + rushCharge;
-  const unitPrice = Math.max(preMinimumTotal, FOOTPRINTS_MIN);
-  const minimumApplied = unitPrice > preMinimumTotal;
+  const unitPrice = preMinimumTotal;
+  const minimumApplied = false;
 
   return {
     widthFt,

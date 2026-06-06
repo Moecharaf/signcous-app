@@ -1,6 +1,8 @@
-export const LOW_TAC_WALL_RATE = 4.25; // $ per sq ft
-export const LOW_TAC_WALL_MIN = 25;
-export const LOW_TAC_WALL_CONTOUR_MULTIPLIER = 0.15; // +15%
+export const LOW_TAC_WALL_SUPPLIER_RATE = 3.47; // $ per sq ft (Signs365 baseline)
+export const LOW_TAC_WALL_MARKUP_MULTIPLIER = 1.5;
+export const LOW_TAC_WALL_RATE = LOW_TAC_WALL_SUPPLIER_RATE * LOW_TAC_WALL_MARKUP_MULTIPLIER;
+export const LOW_TAC_WALL_MIN = 0;
+export const LOW_TAC_WALL_CONTOUR_MULTIPLIER = 0.1; // +10%
 export const LOW_TAC_WALL_RUSH_MULTIPLIER = 1.0; // +100%
 export const LOW_TAC_WALL_PANEL_MAX_IN = 54; // max panel width/height in inches
 
@@ -47,7 +49,8 @@ export function getLowTacWallPanelInfo(widthIn: number, heightIn: number): LowTa
  * Calculates pricing for Removable Wall Decals (Low-Tac Wall Graphics).
  *
  * Billable dimensions are rounded UP to the nearest foot before area is computed.
- * Pricing: $4.25 / sq ft · contour cut +15% · rush +100% · $25 minimum per unit.
+ * Pricing: supplier $3.47 / sq ft with +50% markup (retail $5.21 / sq ft)
+ * · contour cut +10% · rush +100%.
  */
 export function calculateLowTacWallPrice(
   widthIn: number,
@@ -68,8 +71,8 @@ export function calculateLowTacWallPrice(
   const contourCutCharge = options.contourCut ? base * LOW_TAC_WALL_CONTOUR_MULTIPLIER : 0;
   const rushCharge = options.rush ? base * LOW_TAC_WALL_RUSH_MULTIPLIER : 0;
   const preMinimumTotal = base + contourCutCharge + rushCharge;
-  const unitPrice = Math.max(preMinimumTotal, LOW_TAC_WALL_MIN);
-  const minimumApplied = unitPrice > preMinimumTotal;
+  const unitPrice = preMinimumTotal;
+  const minimumApplied = false;
 
   return {
     widthFt,

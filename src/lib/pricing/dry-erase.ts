@@ -1,6 +1,8 @@
-export const DRY_ERASE_RATE = 4.35; // $ per sq ft
-export const DRY_ERASE_MIN = 30;
-export const DRY_ERASE_CONTOUR_MULTIPLIER = 0.15; // +15%
+export const DRY_ERASE_SUPPLIER_RATE = 3.5; // $ per sq ft (Signs365 baseline)
+export const DRY_ERASE_MARKUP_MULTIPLIER = 1.5;
+export const DRY_ERASE_RATE = DRY_ERASE_SUPPLIER_RATE * DRY_ERASE_MARKUP_MULTIPLIER;
+export const DRY_ERASE_MIN = 0;
+export const DRY_ERASE_CONTOUR_MULTIPLIER = 0.1; // +10%
 export const DRY_ERASE_RUSH_MULTIPLIER = 1.0; // +100%
 export const DRY_ERASE_PANEL_MAX_IN = 48; // max panel width/height in inches
 
@@ -47,7 +49,8 @@ export function getDryErasePanelInfo(widthIn: number, heightIn: number): DryEras
  * Calculates pricing for Dry Erase Wall Graphics.
  *
  * Billable dimensions are rounded UP to the nearest foot before area is computed.
- * Pricing: $4.35 / sq ft · contour cut +15% · rush +100% · $30 minimum per unit.
+ * Pricing: supplier $3.50 / sq ft with +50% markup (retail $5.25 / sq ft)
+ * · contour cut +10% · rush +100%.
  */
 export function calculateDryErasePrice(
   widthIn: number,
@@ -68,8 +71,8 @@ export function calculateDryErasePrice(
   const contourCutCharge = options.contourCut ? base * DRY_ERASE_CONTOUR_MULTIPLIER : 0;
   const rushCharge = options.rush ? base * DRY_ERASE_RUSH_MULTIPLIER : 0;
   const preMinimumTotal = base + contourCutCharge + rushCharge;
-  const unitPrice = Math.max(preMinimumTotal, DRY_ERASE_MIN);
-  const minimumApplied = unitPrice > preMinimumTotal;
+  const unitPrice = preMinimumTotal;
+  const minimumApplied = false;
 
   return {
     widthFt,

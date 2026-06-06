@@ -5,16 +5,14 @@ import { useEffect, useMemo, useState, type ChangeEvent, type ReactNode } from "
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
 import SizeInputPanel, { composeDimensionInches } from "@/components/product-builder/SizeInputPanel";
 import Button from "@/components/ui/Button";
-import RigidPricingHeader from "@/components/product-builder/RigidPricingHeader";
 import AdhesivePricingModal from "@/components/product-builder/AdhesivePricingModal";
 import { ADHESIVE_PRICING_CONFIGS } from "@/components/product-builder/adhesive-pricing-data";
 import { useCart } from "@/context/CartContext";
 import {
+  GF830_MARKUP_MULTIPLIER,
   GF830_MAX_PANEL_HEIGHT,
   GF830_LAMINATE_OPTIONS,
   GF830_MAX_PANEL_WIDTH,
-  GF830_MINIMUM_PRICE,
-  GF830_PANEL_EXTRA_COST,
   GF830_SUPPLIER_RATE,
   calculateGF830Price,
   type GF830Laminate,
@@ -323,7 +321,6 @@ export default function GF830Builder({ productId = 0 }: GF830BuilderProps) {
         custom_roll_height_limit: `${GF830_MAX_PANEL_HEIGHT}"`,
         custom_area_sqft: pricing.areaSqFt.toFixed(2),
         custom_base_rate: `${formatCurrency(pricing.baseRate)}/sq ft`,
-        custom_panel_cost: formatCurrency(pricing.panelCost),
       },
     });
 
@@ -339,18 +336,52 @@ export default function GF830Builder({ productId = 0 }: GF830BuilderProps) {
       <div className="w-full px-3 py-3 md:px-4">
         <div className="grid gap-4">
           <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
-            <RigidPricingHeader
-              section
-              productName="GF830 AUTOMARK"
-              detail="Adhesive vinyl builder"
-              onMiddleTitleClick={() => setIsPricingModalOpen(true)}
-              totalPrice={pricing ? formatCurrency(pricing.grandTotal) : formatCurrency(0)}
-              middleRows={[
-                { label: "Area", value: pricing ? `${pricing.areaSqFt.toFixed(2)} sq ft` : "--" },
-                { label: "Per Item", value: pricing ? formatCurrency(pricing.grandTotal / Math.max(safeQuantity, 1)) : formatCurrency(0) },
-                { label: "Qty", value: String(safeQuantity) },
-              ]}
-            />
+            <div
+              className="bg-[#fafaf9] px-4 py-3"
+              style={{
+                backgroundImage:
+                  "linear-gradient(to right, rgba(63,63,70,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(63,63,70,0.08) 1px, transparent 1px)",
+                backgroundSize: "26px 26px",
+              }}
+            >
+              <div className="grid gap-3 md:grid-cols-[0.85fr_1.4fr_0.85fr] md:items-start md:gap-8">
+                <div>
+                  <div className="text-[27px] leading-[0.98] font-medium uppercase tracking-tight text-zinc-900 md:whitespace-nowrap md:text-[36px]">GF830 AUTOMARK</div>
+                  <div className="mt-1 text-[11px] text-zinc-600 md:text-[12px]">Adhesive vinyl builder</div>
+                </div>
+
+                <div className="text-center md:pt-1">
+                  <div className="mx-auto w-full max-w-[320px]">
+                    <table className="w-full border-collapse text-[10px] leading-5 text-zinc-600 md:text-[11px]">
+                      <thead>
+                        <tr>
+                          <th className="pb-0.5 text-left font-semibold text-zinc-500" />
+                          <th className="pb-0.5 text-left font-semibold text-zinc-500">Single-Sided</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td className="py-0.5 text-left text-zinc-500">GF830 AutoMark</td>
+                          <td className="py-0.5 text-left font-medium text-zinc-700">{formatCurrency(GF830_SUPPLIER_RATE * GF830_MARKUP_MULTIPLIER)} per sq ft</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsPricingModalOpen(true)}
+                    className="mt-1 text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500 underline underline-offset-2 hover:text-zinc-700"
+                  >
+                    Pricing And Shipping
+                  </button>
+                </div>
+
+                <div className="text-left md:text-right">
+                  <div className="text-[34px] leading-none font-semibold text-[var(--brand-primary)] md:text-[44px]">{pricing ? formatCurrency(pricing.grandTotal) : formatCurrency(0)}</div>
+                  <div className="mt-1 text-[10px] text-zinc-500">Live total</div>
+                </div>
+              </div>
+            </div>
 
             <AdhesivePricingModal
               isOpen={isPricingModalOpen}
