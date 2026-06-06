@@ -463,7 +463,7 @@ export default function VinylBannerBuilder({
   const meshWebbingLocked = isMeshProduct && (!form.meshWelding || form.meshRopeMode !== "none");
   const meshRopeLocked = isMeshProduct && (!form.meshWelding || form.meshWebbing || form.grommets);
   const meshGrommetsLocked = isMeshProduct && form.meshRopeMode !== "none";
-  const meshPolePocketsLocked = isMeshProduct && form.meshRopeMode !== "none";
+  const meshPolePocketsLocked = isMeshProduct && (form.meshRopeMode !== "none" || form.meshWelding);
   const meshWebbingCost = form.meshWebbing ? perimeterFt * 1.75 : 0;
   const meshRopeCost = meshRopeActive ? perimeterFt * 1.75 : 0;
   const isImagesActivated = Boolean(uploadedFileName);
@@ -831,6 +831,10 @@ export default function VinylBannerBuilder({
           }
         }
 
+        if (prev.meshWelding && key === "meshPolePocketMode" && value !== "none") {
+          return prev;
+        }
+
         const next = { ...prev, [key]: value } as FormState;
 
         if (key === "meshRopeMode" && value !== "none") {
@@ -846,6 +850,10 @@ export default function VinylBannerBuilder({
         if (key === "meshWelding" && value === false) {
           next.meshWebbing = false;
           next.meshRopeMode = "none";
+        }
+
+        if (key === "meshWelding" && value === true) {
+          next.meshPolePocketMode = "none";
         }
 
         if (key === "grommets" && value === true) {
@@ -2399,13 +2407,18 @@ export default function VinylBannerBuilder({
                   <div className="space-y-2">
                     <div className="grid grid-cols-2 gap-1">
                       <SegButton active={form.meshPolePocketMode === "none"} onClick={() => set("meshPolePocketMode", "none")}>None</SegButton>
-                      <SegButton active={form.meshPolePocketMode === "top-only"} disabled={form.meshRopeMode !== "none"} onClick={() => set("meshPolePocketMode", "top-only")}>Top Only</SegButton>
-                      <SegButton active={form.meshPolePocketMode === "bottom-only"} disabled={form.meshRopeMode !== "none"} onClick={() => set("meshPolePocketMode", "bottom-only")}>Bottom Only</SegButton>
-                      <SegButton active={form.meshPolePocketMode === "left-only"} disabled={form.meshRopeMode !== "none"} onClick={() => set("meshPolePocketMode", "left-only")}>Left Only</SegButton>
-                      <SegButton active={form.meshPolePocketMode === "right-only"} disabled={form.meshRopeMode !== "none"} onClick={() => set("meshPolePocketMode", "right-only")}>Right Only</SegButton>
-                      <SegButton active={form.meshPolePocketMode === "top-bottom"} disabled={form.meshRopeMode !== "none"} onClick={() => set("meshPolePocketMode", "top-bottom")}>Top &amp; Bottom</SegButton>
-                      <SegButton active={form.meshPolePocketMode === "left-right"} disabled={form.meshRopeMode !== "none"} onClick={() => set("meshPolePocketMode", "left-right")}>Left &amp; Right</SegButton>
+                      <SegButton active={form.meshPolePocketMode === "top-only"} disabled={form.meshRopeMode !== "none" || form.meshWelding} onClick={() => set("meshPolePocketMode", "top-only")}>Top Only</SegButton>
+                      <SegButton active={form.meshPolePocketMode === "bottom-only"} disabled={form.meshRopeMode !== "none" || form.meshWelding} onClick={() => set("meshPolePocketMode", "bottom-only")}>Bottom Only</SegButton>
+                      <SegButton active={form.meshPolePocketMode === "left-only"} disabled={form.meshRopeMode !== "none" || form.meshWelding} onClick={() => set("meshPolePocketMode", "left-only")}>Left Only</SegButton>
+                      <SegButton active={form.meshPolePocketMode === "right-only"} disabled={form.meshRopeMode !== "none" || form.meshWelding} onClick={() => set("meshPolePocketMode", "right-only")}>Right Only</SegButton>
+                      <SegButton active={form.meshPolePocketMode === "top-bottom"} disabled={form.meshRopeMode !== "none" || form.meshWelding} onClick={() => set("meshPolePocketMode", "top-bottom")}>Top &amp; Bottom</SegButton>
+                      <SegButton active={form.meshPolePocketMode === "left-right"} disabled={form.meshRopeMode !== "none" || form.meshWelding} onClick={() => set("meshPolePocketMode", "left-right")}>Left &amp; Right</SegButton>
                     </div>
+                    {form.meshWelding && (
+                      <div className="rounded border border-zinc-200 bg-zinc-50 p-2 text-[11px] text-zinc-600">
+                        Pole Pockets must stay off while Welding is set to Yes.
+                      </div>
+                    )}
                     {form.meshRopeMode !== "none" && (
                       <div className="rounded border border-zinc-200 bg-zinc-50 p-2 text-[11px] text-zinc-600">
                         Pole Pockets cannot be enabled while Rope is on.
