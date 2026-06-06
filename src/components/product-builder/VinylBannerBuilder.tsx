@@ -1513,7 +1513,7 @@ export default function VinylBannerBuilder({
               <>
                 {/* Top dimension line */}
                 <div className="pointer-events-none absolute left-0 right-0 flex flex-col gap-1" style={{ bottom: "calc(100% + 4px)" }}>
-                  <div className="text-center text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500">↓ TOP OF IMAGE ↓</div>
+                  <div className="text-center text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500">↓ TOP OF IMAGE ↓</div>
                   <div className="relative flex h-3 items-center">
                     <div className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-zinc-400" />
                     <div className="absolute left-0 h-full w-px bg-zinc-400" />
@@ -1559,7 +1559,7 @@ export default function VinylBannerBuilder({
               <>
                 {/* Top dimension line with TOP OF IMAGE label */}
                 <div className="pointer-events-none absolute left-0 right-0 flex flex-col gap-1" style={{ bottom: "calc(100% + 4px)" }}>
-                  <div className="text-center text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500">↓ TOP OF IMAGE ↓</div>
+                  <div className="text-center text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500">↓ TOP OF IMAGE ↓</div>
                   <div className="relative flex h-3 items-center">
                     <div className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-zinc-400" />
                     <div className="absolute left-0 h-full w-px bg-zinc-400" />
@@ -1608,7 +1608,7 @@ export default function VinylBannerBuilder({
                     isMobileViewport ? "top-2" : "-top-11"
                   }`}
                 >
-                  <span className="text-[10px] uppercase tracking-[0.25em] text-zinc-500">Top Of Image</span>
+                  <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-zinc-500">Top Of Image</span>
                   <div className="mt-1 flex items-center gap-2 text-zinc-700">
                     <span className={`${isMobileViewport ? "w-8" : "w-12"} h-px bg-zinc-400`} />
                     <span>{widthLabelInches}</span>
