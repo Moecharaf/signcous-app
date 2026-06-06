@@ -30,8 +30,22 @@ const unitOptions = ["inches", "feet"] as const;
 
 type Unit = (typeof unitOptions)[number];
 type MeshGrommetSpacing = "every-2-3-feet" | "every-1-2-feet" | "every-6-12-inches" | "corners-only" | "custom-inches";
+type RopeMode = "none" | "bottom-only" | "top-only" | "top-bottom";
 type MeshRopeMode = "none" | "top-only" | "bottom-only" | "top-bottom";
 type MeshPolePocketMode = PolePocketMode;
+
+function formatRopeMode(mode: RopeMode): string {
+  switch (mode) {
+    case "top-only":
+      return "Top Only";
+    case "bottom-only":
+      return "Bottom Only";
+    case "top-bottom":
+      return "Top & Bottom";
+    default:
+      return "None";
+  }
+}
 
 function formatPolePocketMode(mode: PolePocketMode): string {
   switch (mode) {
@@ -66,6 +80,7 @@ interface FormState {
   polePockets: boolean;
   polePocketMode: PolePocketMode;
   polePocketSize: 1 | 2 | 3 | 4;
+  ropeMode: RopeMode;
   windSlits: boolean;
   hemming: boolean;
   rush: boolean;
@@ -125,6 +140,7 @@ const DEFAULTS: FormState = {
   polePockets: false,
   polePocketMode: "none",
   polePocketSize: 2,
+  ropeMode: "none",
   windSlits: false,
   hemming: false,
   rush: false,
@@ -449,7 +465,7 @@ export default function VinylBannerBuilder({
   const isSizeActivated = hasSelectedSize;
   const isPrintActivated = canEnableDoubleSided && form.doubleSided;
   const isWeldingActivated = form.edgeFinish === "welding";
-  const isRopeActivated = form.edgeFinish === "rope";
+  const isRopeActivated = form.ropeMode !== "none";
   const isGrommetsActivated = form.grommets;
   const isPolePocketsActivated = form.polePocketMode !== "none";
   const isWindSlitsActivated = form.windSlits;
@@ -820,6 +836,29 @@ export default function VinylBannerBuilder({
         if (key === "meshWelding" && value === false) {
           next.meshWebbing = false;
           next.meshRopeMode = "none";
+        }
+
+        if (key === "grommets" && value === true) {
+          next.ropeMode = "none";
+          next.edgeFinish = next.edgeFinish === "rope" ? "none" : next.edgeFinish;
+        }
+
+        if (key === "edgeFinish" && value === "none") {
+          next.ropeMode = "none";
+        }
+
+        if (key === "ropeMode") {
+          if (value !== "none" && (prev.edgeFinish !== "welding" || prev.grommets)) {
+            return prev;
+          }
+
+          if (value === "none") {
+            next.edgeFinish = next.edgeFinish === "rope" ? "none" : next.edgeFinish;
+          } else {
+            next.ropeMode = value;
+            next.edgeFinish = "rope";
+            next.grommets = false;
+          }
         }
 
         if (key === "polePocketMode") {
@@ -1203,6 +1242,7 @@ export default function VinylBannerBuilder({
         prev.polePockets !== false ||
         prev.polePocketMode !== "none" ||
         prev.polePocketSize !== 2 ||
+        prev.ropeMode !== "none" ||
         prev.windSlits !== false ||
         prev.hemming !== false ||
         prev.rush !== false;
@@ -1221,6 +1261,7 @@ export default function VinylBannerBuilder({
         polePockets: false,
         polePocketMode: "none",
         polePocketSize: 2,
+        ropeMode: "none",
         windSlits: false,
         hemming: false,
         rush: false,
@@ -1605,6 +1646,24 @@ export default function VinylBannerBuilder({
               </>
             )}
 
+            {/* Regular banner rope visualization */}
+            {!isMeshProduct && isRegularBannerProduct && form.ropeMode !== "none" && (
+              <>
+                {(form.ropeMode === "top-only" || form.ropeMode === "top-bottom") && (
+                  <div
+                    className="pointer-events-none absolute rounded-sm bg-zinc-900"
+                    style={{ top: -7, left: -14, right: -14, height: 7 }}
+                  />
+                )}
+                {(form.ropeMode === "bottom-only" || form.ropeMode === "top-bottom") && (
+                  <div
+                    className="pointer-events-none absolute rounded-sm bg-zinc-900"
+                    style={{ bottom: -7, left: -14, right: -14, height: 7 }}
+                  />
+                )}
+              </>
+            )}
+
             {/* Pole pocket visualization */}
             {!isMeshProduct && isRegularBannerProduct && form.polePocketMode !== "none" && (() => {
               const pocketPx = Math.max(8, form.polePocketSize * pxPerIn);
@@ -1725,9 +1784,10 @@ export default function VinylBannerBuilder({
               {isRegularBannerProduct && (
                 <ToolbarButton
                   title="Rope"
-                  value={form.edgeFinish === "rope" ? "Yes" : "None"}
+                  value={formatRopeMode(form.ropeMode)}
                   active={activePanel === "rope" || isRopeActivated}
                   onClick={(event) => openPanel("rope", event)}
+                  status={form.edgeFinish === "welding" && !form.grommets ? "ok" : "alert"}
                 />
               )}
               {isRegularBannerProduct && (
@@ -1979,9 +2039,18 @@ export default function VinylBannerBuilder({
             {activePanel === "rope" && isRegularBannerProduct && (
               <div>
                 <SubControlGroup title="Rope">
-                  <div className="grid grid-cols-2 gap-1">
-                    <SegButton active={form.edgeFinish !== "rope"} onClick={() => set("edgeFinish", "none")}>None</SegButton>
-                    <SegButton active={form.edgeFinish === "rope"} onClick={() => set("edgeFinish", "rope")}>Yes</SegButton>
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-2 gap-1">
+                      <SegButton active={form.ropeMode === "none"} onClick={() => set("ropeMode", "none")}>None</SegButton>
+                      <SegButton active={form.ropeMode === "bottom-only"} disabled={form.edgeFinish !== "welding" || form.grommets} onClick={() => set("ropeMode", "bottom-only")}>Bottom Only</SegButton>
+                      <SegButton active={form.ropeMode === "top-only"} disabled={form.edgeFinish !== "welding" || form.grommets} onClick={() => set("ropeMode", "top-only")}>Top Only</SegButton>
+                      <SegButton active={form.ropeMode === "top-bottom"} disabled={form.edgeFinish !== "welding" || form.grommets} onClick={() => set("ropeMode", "top-bottom")}>Top &amp; Bottom</SegButton>
+                    </div>
+                    {form.edgeFinish !== "welding" || form.grommets ? (
+                      <div className="rounded border border-zinc-200 bg-zinc-50 p-2 text-[11px] text-zinc-600">
+                        Rope is available only when Welding is set to Yes and Grommets is set to No.
+                      </div>
+                    ) : null}
                   </div>
                 </SubControlGroup>
               </div>
