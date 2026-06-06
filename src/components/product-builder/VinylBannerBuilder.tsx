@@ -68,7 +68,7 @@ type DragState =
   | { mode: "move"; startX: number; startY: number; originX: number; originY: number }
   | { mode: "resize"; startX: number; startY: number; startW: number; startH: number; startPxPerIn: number };
 
-type ControlPanel = "artwork" | "size" | "material" | "print" | "finish" | "quantity" | "meshWelding" | "meshWebbing" | "meshGrommets" | "meshRope" | "meshPolePockets";
+type ControlPanel = "artwork" | "size" | "material" | "print" | "finish" | "quantity" | "welding" | "rope" | "grommets" | "polePockets" | "windSlits" | "meshWelding" | "meshWebbing" | "meshGrommets" | "meshRope" | "meshPolePockets";
 
 const CONTROL_PANEL_TITLE: Record<ControlPanel, string> = {
   artwork: "Artwork",
@@ -77,6 +77,11 @@ const CONTROL_PANEL_TITLE: Record<ControlPanel, string> = {
   print: "Print Sides",
   finish: "Finishing",
   quantity: "Quantity",
+  welding: "Welding",
+  rope: "Rope",
+  grommets: "Grommets",
+  polePockets: "Pole Pockets",
+  windSlits: "Wind Slits",
   meshWelding: "Welding",
   meshWebbing: "Webbing",
   meshGrommets: "Grommets",
@@ -401,6 +406,7 @@ export default function VinylBannerBuilder({
   const isPosterProduct = pricingMode === "poster";
   const isNoCurlProduct = pricingMode === "nocurl";
   const isEconomicalStandProduct = pricingMode === "economical-stand";
+  const isRegularBannerProduct = !(isCanvasProduct || isMeshProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct || isEconomicalStandProduct);
   const hasSelectedSize = isEconomicalStandProduct || (widthIn > 0 && heightIn > 0);
   const effectiveQtyNum = isPosterProduct ? 1 : qtyNum;
   const isMeshMaterial  = isMeshProduct || form.material === "Mesh Banner";
@@ -1608,7 +1614,7 @@ export default function VinylBannerBuilder({
             </div>
             <div className={`${showMobileOptions ? "grid" : "hidden"} gap-2 sm:grid-cols-2 xl:grid-cols-6 md:grid`}>
               <ToolbarButton
-                title="Artwork"
+                title="Images"
                 value={uploadedFileName ? "Uploaded" : "No file"}
                 active={activePanel === "artwork"}
                 onClick={(event) => openPanel("artwork", event)}
@@ -1622,28 +1628,60 @@ export default function VinylBannerBuilder({
                   status={errors.width || errors.height ? "alert" : "ok"}
                 />
               )}
-              {!isPosterProduct && !isEconomicalStandProduct && !isHdpeProduct && !isCanvasProduct && !isMeshProduct && (
+              {isRegularBannerProduct && (
                 <ToolbarButton
                   title="Material"
-                  value={isCanvasProduct ? "Canvas" : isNoCurlProduct ? "No-Curl Banner" : isMeshProduct ? "Mesh Banner" : isHdpeProduct ? "HDPE" : form.material}
+                  value={form.material}
                   active={activePanel === "material"}
                   onClick={(event) => openPanel("material", event)}
                 />
               )}
-              {!(isCanvasProduct || isMeshProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct || isEconomicalStandProduct) && (
+              {isRegularBannerProduct && (
                 <ToolbarButton
-                  title="Print"
+                  title="Print Sides"
                   value={form.doubleSided ? "Double-sided" : "Single-sided"}
                   active={activePanel === "print"}
                   onClick={(event) => openPanel("print", event)}
                 />
               )}
-              {!(isCanvasProduct || isHdpeProduct || isPosterProduct || isNoCurlProduct || isEconomicalStandProduct || isMeshProduct) && (
+              {isRegularBannerProduct && (
                 <ToolbarButton
-                  title="Finishing"
-                  value={isMeshProduct ? [form.meshWelding ? "Welded" : null, form.meshRopeMode !== "none" ? "Rope" : null, form.grommets ? "Grommets" : null, form.meshPolePocketMode !== "none" ? "Pockets" : null].filter(Boolean).join(" / ") || "None" : [form.hemming ? "Hemmed" : null, form.grommets ? "Grommets" : null, form.polePockets ? "Pockets" : null, form.windSlits ? "Wind slits" : null].filter(Boolean).join(" / ") || "None"}
-                  active={activePanel === "finish"}
-                  onClick={(event) => openPanel("finish", event)}
+                  title="Welding"
+                  value={form.edgeFinish === "welding" ? "Yes" : "No"}
+                  active={activePanel === "welding"}
+                  onClick={(event) => openPanel("welding", event)}
+                />
+              )}
+              {isRegularBannerProduct && (
+                <ToolbarButton
+                  title="Rope"
+                  value={form.edgeFinish === "rope" ? "Yes" : "None"}
+                  active={activePanel === "rope"}
+                  onClick={(event) => openPanel("rope", event)}
+                />
+              )}
+              {isRegularBannerProduct && (
+                <ToolbarButton
+                  title="Grommets"
+                  value={form.grommets ? "Yes" : "No"}
+                  active={activePanel === "grommets"}
+                  onClick={(event) => openPanel("grommets", event)}
+                />
+              )}
+              {isRegularBannerProduct && (
+                <ToolbarButton
+                  title="Pole Pockets"
+                  value={form.polePockets ? "Top & Bottom" : "None"}
+                  active={activePanel === "polePockets"}
+                  onClick={(event) => openPanel("polePockets", event)}
+                />
+              )}
+              {isRegularBannerProduct && (
+                <ToolbarButton
+                  title="Wind Slits"
+                  value={form.windSlits ? "Yes" : "No"}
+                  active={activePanel === "windSlits"}
+                  onClick={(event) => openPanel("windSlits", event)}
                 />
               )}
               {isMeshProduct && (
@@ -1854,6 +1892,101 @@ export default function VinylBannerBuilder({
                 {!canEnableDoubleSided && (
                   <div className="mt-2 text-[10px] font-semibold text-zinc-500">Double-sided is available only with 18oz Vinyl.</div>
                 )}
+              </div>
+            )}
+
+            {activePanel === "welding" && isRegularBannerProduct && (
+              <div>
+                <SubControlGroup title="Welding">
+                  <div className="grid grid-cols-2 gap-1">
+                    <SegButton active={form.edgeFinish !== "welding"} onClick={() => set("edgeFinish", form.edgeFinish === "welding" ? "none" : form.edgeFinish)}>No</SegButton>
+                    <SegButton active={form.edgeFinish === "welding"} onClick={() => set("edgeFinish", "welding")}>Yes</SegButton>
+                  </div>
+                </SubControlGroup>
+              </div>
+            )}
+
+            {activePanel === "rope" && isRegularBannerProduct && (
+              <div>
+                <SubControlGroup title="Rope">
+                  <div className="grid grid-cols-2 gap-1">
+                    <SegButton active={form.edgeFinish !== "rope"} onClick={() => set("edgeFinish", "none")}>None</SegButton>
+                    <SegButton active={form.edgeFinish === "rope"} onClick={() => set("edgeFinish", "rope")}>Yes</SegButton>
+                  </div>
+                </SubControlGroup>
+              </div>
+            )}
+
+            {activePanel === "grommets" && isRegularBannerProduct && (
+              <div>
+                <SubControlGroup title="Grommets">
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-2 gap-1">
+                      <SegButton active={!form.grommets} onClick={() => set("grommets", false)}>No</SegButton>
+                      <SegButton active={form.grommets} onClick={() => set("grommets", true)}>Yes</SegButton>
+                    </div>
+                    <div>
+                      <label className="text-[9px] font-semibold uppercase tracking-[0.1em] text-zinc-500">Placement</label>
+                      <select
+                        value={form.grommetPlacement}
+                        onChange={(e) => set("grommetPlacement", e.target.value as GrommetPlacement)}
+                        disabled={!form.grommets}
+                        className="mt-1 w-full h-7 rounded border border-zinc-300 bg-white px-2 text-[11px] font-semibold text-zinc-700 disabled:bg-zinc-100 disabled:text-zinc-400"
+                      >
+                        <option value="all-sides">All Sides</option>
+                        <option value="top-left-right">Top, Left & Right</option>
+                        <option value="top-left-bottom">Top, Left & Bottom</option>
+                        <option value="top-right-bottom">Top, Right & Bottom</option>
+                        <option value="left-right-bottom">Left, Right & Bottom</option>
+                        <option value="top-left">Top & Left</option>
+                        <option value="top-right">Top & Right</option>
+                        <option value="top-bottom">Top & Bottom</option>
+                        <option value="left-right">Left & Right</option>
+                        <option value="left-bottom">Left & Bottom</option>
+                        <option value="right-bottom">Right & Bottom</option>
+                        <option value="top-only">Top Only</option>
+                        <option value="bottom-only">Bottom Only</option>
+                        <option value="left-only">Left Only</option>
+                        <option value="right-only">Right Only</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-[9px] font-semibold uppercase tracking-[0.1em] text-zinc-500">Spacing (inches)</label>
+                      <select
+                        value={form.grommetSpacingIn}
+                        onChange={(e) => set("grommetSpacingIn", parseInt(e.target.value, 10))}
+                        disabled={!form.grommets}
+                        className="mt-1 w-full h-7 rounded border border-zinc-300 bg-white px-2 text-[11px] font-semibold text-zinc-700 disabled:bg-zinc-100 disabled:text-zinc-400"
+                      >
+                        {[6, 8, 10, 12, 15, 18, 20, 24].map((spacing) => (
+                          <option key={spacing} value={spacing}>{spacing}&quot;</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                </SubControlGroup>
+              </div>
+            )}
+
+            {activePanel === "polePockets" && isRegularBannerProduct && (
+              <div>
+                <SubControlGroup title="Pole Pockets">
+                  <div className="grid grid-cols-2 gap-1">
+                    <SegButton active={!form.polePockets} onClick={() => set("polePockets", false)}>None</SegButton>
+                    <SegButton active={form.polePockets} onClick={() => set("polePockets", true)}>Top & Bottom</SegButton>
+                  </div>
+                </SubControlGroup>
+              </div>
+            )}
+
+            {activePanel === "windSlits" && isRegularBannerProduct && (
+              <div>
+                <SubControlGroup title="Wind Slits">
+                  <div className="grid grid-cols-2 gap-1">
+                    <SegButton active={!form.windSlits} onClick={() => set("windSlits", false)}>No</SegButton>
+                    <SegButton active={form.windSlits} onClick={() => set("windSlits", true)} disabled={isMeshMaterial}>Yes</SegButton>
+                  </div>
+                </SubControlGroup>
               </div>
             )}
 
