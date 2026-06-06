@@ -855,10 +855,9 @@ export default function VinylBannerBuilder({
           }
 
           if (ropeModeValue === "none") {
-            next.edgeFinish = next.edgeFinish === "rope" ? "none" : next.edgeFinish;
+            next.ropeMode = "none";
           } else {
             next.ropeMode = ropeModeValue;
-            next.edgeFinish = "rope";
             next.grommets = false;
           }
         }
