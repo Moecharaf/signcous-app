@@ -227,10 +227,11 @@ export function getBestJBondSheetLayout(w: number, h: number): JBondSheetLayout 
 // ─── Sheet pricing (flat rate — no tiers) ────────────────────────────────────
 
 const SHEET_PRICES: Record<string, number> = {
-  "3mm_single": 190,
-  "3mm_double": 210,
-  "6mm_single": 260,
-  "6mm_double": 300,
+  // Signs365 supplier baseline; Signcous applies JBOND_MARKUP (+50%).
+  "3mm_single": 160,
+  "3mm_double": 180,
+  "6mm_single": 220,
+  "6mm_double": 260,
 };
 
 export function getJBondSheetPrice(material: JBondMaterial, printMode: JBondPrintMode): number {
