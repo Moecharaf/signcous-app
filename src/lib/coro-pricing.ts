@@ -57,8 +57,8 @@ export const CORO_SHEET = {
   height: 96,
 };
 
-// Signcous retail pricing is always Signs365 supplier cost +50%.
-export const CORO_MARKUP = 1.5;
+// Coro pricing is set to match Signs365 values directly.
+export const CORO_MARKUP = 1;
 
 // Signs365 uses fixed sheet counts for some sizes instead of pure max packing.
 const SIGNS365_SIGNS_PER_SHEET_OVERRIDES: Record<string, number> = {
@@ -422,8 +422,7 @@ export function getSupplierSheetPrice(quantity: number, material: CoroMaterial, 
 }
 
 function roundRetail(price: number): number {
-  const rounded = Math.ceil(price);
-  return Math.max(rounded - 0.01, 0.99);
+  return Number(price.toFixed(2));
 }
 
 export function calculateCoroPricing(input: CoroPricingInput): CoroPricingResult {
