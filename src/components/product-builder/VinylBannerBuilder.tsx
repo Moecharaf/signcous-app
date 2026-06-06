@@ -809,6 +809,16 @@ export default function VinylBannerBuilder({
           next.meshRopeMode = "none";
         }
 
+        if (key === "polePocketMode") {
+          if (value === "none") {
+            next.polePockets = false;
+          } else {
+            // Pole pockets and welding cannot both be active.
+            next.polePockets = true;
+            next.edgeFinish = next.edgeFinish === "welding" ? "none" : next.edgeFinish;
+          }
+        }
+
         return next;
       });
     },
@@ -1659,7 +1669,7 @@ export default function VinylBannerBuilder({
                 {showMobileOptions ? "- Hide Options" : "+ Show Options"}
               </button>
             </div>
-            <div className={`${showMobileOptions ? "grid" : "hidden"} gap-2 sm:grid-cols-2 xl:grid-cols-6 md:grid`}>
+            <div className={`${showMobileOptions ? "grid" : "hidden"} gap-2 sm:grid-cols-2 md:flex md:flex-nowrap md:items-stretch md:gap-1.5`}>
               <ToolbarButton
                 title="Images"
                 value={uploadedFileName ? "Uploaded" : "No file"}
@@ -1769,7 +1779,7 @@ export default function VinylBannerBuilder({
                   />
                 </>
               )}
-              {!isHdpeProduct && !isCanvasProduct && !isMeshProduct && !isPosterProduct && (
+              {!isHdpeProduct && !isCanvasProduct && !isMeshProduct && !isPosterProduct && !isRegularBannerProduct && (
                 <ToolbarButton
                   title="Quantity"
                   value={`${form.quantity} unit${effectiveQtyNum !== 1 ? "s" : ""}`}
@@ -2019,20 +2029,20 @@ export default function VinylBannerBuilder({
               <div>
                 <SubControlGroup title="Pole Pockets">
                   <div className="grid grid-cols-2 gap-1">
-                    <SegButton active={form.polePocketMode === "right-only"} onClick={() => setForm((prev) => ({ ...prev, polePockets: true, polePocketMode: "right-only" }))}>Right Only</SegButton>
-                    <SegButton active={form.polePocketMode === "left-only"} onClick={() => setForm((prev) => ({ ...prev, polePockets: true, polePocketMode: "left-only" }))}>Left Only</SegButton>
-                    <SegButton active={form.polePocketMode === "left-right"} onClick={() => setForm((prev) => ({ ...prev, polePockets: true, polePocketMode: "left-right" }))}>Left &amp; Right</SegButton>
-                    <SegButton active={form.polePocketMode === "bottom-only"} onClick={() => setForm((prev) => ({ ...prev, polePockets: true, polePocketMode: "bottom-only" }))}>Bottom Only</SegButton>
-                    <SegButton active={form.polePocketMode === "top-only"} onClick={() => setForm((prev) => ({ ...prev, polePockets: true, polePocketMode: "top-only" }))}>Top Only</SegButton>
-                    <SegButton active={form.polePocketMode === "top-bottom"} onClick={() => setForm((prev) => ({ ...prev, polePockets: true, polePocketMode: "top-bottom" }))}>Top &amp; Bottom</SegButton>
-                    <SegButton active={form.polePocketMode === "none"} onClick={() => setForm((prev) => ({ ...prev, polePockets: false, polePocketMode: "none" }))}>None</SegButton>
+                    <SegButton active={form.polePocketMode === "right-only"} onClick={() => set("polePocketMode", "right-only")}>Right Only</SegButton>
+                    <SegButton active={form.polePocketMode === "left-only"} onClick={() => set("polePocketMode", "left-only")}>Left Only</SegButton>
+                    <SegButton active={form.polePocketMode === "left-right"} onClick={() => set("polePocketMode", "left-right")}>Left &amp; Right</SegButton>
+                    <SegButton active={form.polePocketMode === "bottom-only"} onClick={() => set("polePocketMode", "bottom-only")}>Bottom Only</SegButton>
+                    <SegButton active={form.polePocketMode === "top-only"} onClick={() => set("polePocketMode", "top-only")}>Top Only</SegButton>
+                    <SegButton active={form.polePocketMode === "top-bottom"} onClick={() => set("polePocketMode", "top-bottom")}>Top &amp; Bottom</SegButton>
+                    <SegButton active={form.polePocketMode === "none"} onClick={() => set("polePocketMode", "none")}>None</SegButton>
                   </div>
                   {form.polePocketMode !== "none" && (
                     <div className="mt-2">
                       <label className="text-[9px] font-semibold uppercase tracking-[0.1em] text-zinc-500">Pocket Size</label>
                       <div className="mt-1 grid grid-cols-4 gap-1">
                         {([1, 2, 3, 4] as const).map((size) => (
-                          <SegButton key={size} active={form.polePocketSize === size} onClick={() => setForm((prev) => ({ ...prev, polePocketSize: size }))}>{size}&quot;</SegButton>
+                          <SegButton key={size} active={form.polePocketSize === size} onClick={() => set("polePocketSize", size)}>{size}&quot;</SegButton>
                         ))}
                       </div>
                     </div>
@@ -2277,7 +2287,7 @@ export default function VinylBannerBuilder({
               </div>
             )}
 
-            {activePanel === "quantity" && !isHdpeProduct && !isCanvasProduct && !isMeshProduct && !isPosterProduct && (
+            {activePanel === "quantity" && !isHdpeProduct && !isCanvasProduct && !isMeshProduct && !isPosterProduct && !isRegularBannerProduct && (
               <div>
                 <div className="grid gap-2 md:grid-cols-[110px_1fr]">
                   <input type="number" min={1} value={form.quantity} onChange={(e) => set("quantity", e.target.value)} className="h-8 rounded border border-zinc-300 px-3 text-sm" />
@@ -2322,14 +2332,14 @@ function ToolbarButton({
     <button
       type="button"
       onClick={onClick}
-      className={`min-w-0 rounded border px-3 py-2 text-left transition ${
+      className={`min-w-0 rounded border px-2 py-1.5 text-left transition md:min-w-[124px] ${
         active ? "border-[#007fff] bg-white shadow-sm ring-1 ring-[#007fff]/20" : "border-zinc-200 bg-white hover:border-zinc-300"
       }`}
     >
-      <div className="flex items-center justify-between gap-3">
-        <span className={`min-w-0 truncate text-[10px] font-semibold uppercase tracking-[0.12em] ${active ? "text-[#007fff]" : "text-zinc-500"}`}>{title}</span>
+      <div className="flex items-center justify-between gap-2">
+        <span className={`min-w-0 truncate text-[9px] font-semibold uppercase tracking-[0.1em] ${active ? "text-[#007fff]" : "text-zinc-500"}`}>{title}</span>
         <span
-          className={`shrink-0 rounded px-2 py-1 text-xs font-semibold ${
+          className={`shrink-0 rounded px-1.5 py-0.5 text-[11px] font-semibold ${
             status === "alert"
               ? "bg-rose-500 text-white"
               : active
