@@ -4,7 +4,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
 import ArtworkUploadModal from "@/components/product-builder/ArtworkUploadModal";
 import Button from "@/components/ui/Button";
-import RigidPricingHeader from "@/components/product-builder/RigidPricingHeader";
 import { useCart } from "@/context/CartContext";
 import {
   CORO_MARKUP,
@@ -646,18 +645,59 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
       <div className="w-full px-3 py-3 md:px-4">
         <div className="grid gap-3">
           <section className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
-            <RigidPricingHeader
-              section
-              productName={productName}
-              detail="Rigid sheet-layout builder"
-              onMiddleTitleClick={() => setIsPricingModalOpen(true)}
-              totalPrice={formatPrice(pricing.totalPrice)}
-              middleRows={[
-                { label: "Price / Sheet", value: formatPrice(pricing.totalPrice / Math.max(pricing.sheetsRequired, 1)) },
-                { label: "Effective / Sign", value: formatPrice(pricing.totalPrice / Math.max(quantity, 1)) },
-                { label: "Sheets Needed", value: String(pricing.sheetsRequired) },
-              ]}
-            />
+            <div
+              className="bg-[#fafaf9] px-4 py-3"
+              style={{
+                backgroundImage:
+                  "linear-gradient(to right, rgba(63,63,70,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(63,63,70,0.08) 1px, transparent 1px)",
+                backgroundSize: "26px 26px",
+              }}
+            >
+              <div className="grid gap-3 md:grid-cols-[0.85fr_1.4fr_0.85fr] md:items-start md:gap-8">
+                <div>
+                  <div className="text-[27px] leading-[0.98] font-medium uppercase tracking-tight text-zinc-900 md:whitespace-nowrap md:text-[36px]">{productName}</div>
+                  <div className="mt-1 text-[11px] text-zinc-600 md:text-[12px]">Rigid sheet-layout builder</div>
+                </div>
+
+                <div className="text-center md:pt-1">
+                  <div className="mx-auto w-full max-w-[340px]">
+                    <table className="w-full border-collapse text-[10px] leading-5 text-zinc-600 md:text-[11px]">
+                      <thead>
+                        <tr>
+                          <th className="pb-0.5 text-left font-semibold text-zinc-500" />
+                          <th className="pb-0.5 text-left font-semibold text-zinc-500">Single-Sided</th>
+                          <th className="pb-0.5 text-left font-semibold text-zinc-500">Double-Sided</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td className="py-0.5 text-left text-zinc-500">4mm</td>
+                          <td className="py-0.5 text-left font-medium text-zinc-700">{formatPrice(CORO_SHEET_TIERS[0].single4mm * CORO_MARKUP)} per sheet</td>
+                          <td className="py-0.5 text-left font-medium text-zinc-700">{formatPrice(CORO_SHEET_TIERS[0].double4mm * CORO_MARKUP)} per sheet</td>
+                        </tr>
+                        <tr>
+                          <td className="py-0.5 text-left text-zinc-500">10mm</td>
+                          <td className="py-0.5 text-left font-medium text-zinc-700">{formatPrice(CORO_SHEET_TIERS[0].single10mm * CORO_MARKUP)} per sheet</td>
+                          <td className="py-0.5 text-left font-medium text-zinc-700">{formatPrice(CORO_SHEET_TIERS[0].double10mm * CORO_MARKUP)} per sheet</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsPricingModalOpen(true)}
+                    className="mt-1 text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500 underline underline-offset-2 hover:text-zinc-700"
+                  >
+                    Pricing And Shipping
+                  </button>
+                </div>
+
+                <div className="text-left md:text-right">
+                  <div className="text-[34px] leading-none font-semibold text-[var(--brand-primary)] md:text-[44px]">{formatPrice(pricing.totalPrice)}</div>
+                  <div className="mt-1 text-[10px] text-zinc-500">Live total</div>
+                </div>
+              </div>
+            </div>
 
             <div className="relative">
               {/* Canvas Area */}
