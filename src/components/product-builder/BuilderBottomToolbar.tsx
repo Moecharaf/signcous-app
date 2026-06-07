@@ -117,19 +117,19 @@ export default function BuilderBottomToolbar({
                   key={panel.id}
                   onMouseEnter={() => setHoveredPanelId(panel.id)}
                   onMouseLeave={() => setHoveredPanelId((prev) => (prev === panel.id ? null : prev))}
-                  className={`min-w-0 rounded-[2px] border-2 px-2 py-1 text-left transition ${
+                  className={`min-w-0 rounded-none border-2 px-2 py-1 text-left transition ${
                     hoveredPanelId === panel.id
                       ? "border-[#007fff] bg-white shadow-sm"
                       : "border-[#007fff] bg-[#f7fbff]"
                   }`}
                 >
-                  <div className="flex min-h-[42px] items-center justify-between gap-2">
+                  <div className="flex min-h-[36px] items-center justify-between gap-2">
                     <span className={`min-w-0 truncate text-[10px] font-semibold uppercase tracking-[0.12em] ${hoveredPanelId === panel.id ? "text-[#0068d1]" : "text-[#4f5f72]"}`}>{panel.title}</span>
                     {panel.inlineAlways || hoveredPanelId === panel.id ? (
                       <div className="shrink-0">{panel.inlineContent}</div>
                     ) : (
                       <span
-                        className={`inline-flex h-7 min-w-[62px] items-center justify-center shrink-0 rounded-[1px] px-2 text-[11px] font-bold tracking-[0.06em] ${
+                        className={`inline-flex h-6 min-w-[70px] items-center justify-center shrink-0 rounded-none px-2 text-[10px] font-bold tracking-[0.06em] ${
                           panel.status === "alert"
                             ? "bg-rose-500 text-white"
                             : panel.status === "neutral"
@@ -153,16 +153,16 @@ export default function BuilderBottomToolbar({
                       openPanelFromElement(panel.id, event.currentTarget);
                     }
                   }}
-                  className={`min-w-0 rounded-[2px] border-2 px-2 py-1 text-left transition ${
+                  className={`min-w-0 rounded-none border-2 px-2 py-1 text-left transition ${
                     activePanelId === panel.id
                       ? "border-[#007fff] bg-white shadow-sm"
                       : "border-[#007fff] bg-[#f7fbff]"
                   }`}
                 >
-                  <div className="flex min-h-[42px] items-center justify-between gap-2">
+                  <div className="flex min-h-[36px] items-center justify-between gap-2">
                     <span className={`min-w-0 truncate text-[10px] font-semibold uppercase tracking-[0.12em] ${activePanelId === panel.id ? "text-[#0068d1]" : "text-[#4f5f72]"}`}>{panel.title}</span>
                     <span
-                      className={`inline-flex h-7 min-w-[62px] items-center justify-center shrink-0 rounded-[1px] px-2 text-[11px] font-bold tracking-[0.06em] ${
+                      className={`inline-flex h-6 min-w-[70px] items-center justify-center shrink-0 rounded-none px-2 text-[10px] font-bold tracking-[0.06em] ${
                         panel.status === "alert"
                           ? "bg-rose-500 text-white"
                           : panel.status === "neutral"
