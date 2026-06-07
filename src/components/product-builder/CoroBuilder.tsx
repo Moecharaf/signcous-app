@@ -535,28 +535,28 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
       title: "Print Sides",
       value: printMode === "single" ? "SINGLE" : "DOUBLE",
       inlineContent: (
-        <div className="grid grid-cols-2 overflow-hidden rounded-sm border border-[#007fff]/40 bg-[#cfe6ff]">
-          <button
-            type="button"
-            onClick={() => setPrintMode("single")}
-            className={`px-2 py-1 text-[10px] font-bold tracking-[0.08em] transition ${
-              printMode === "single"
-                ? "bg-[#007fff] text-white"
-                : "bg-[#8bc4ff] text-white"
-            }`}
-          >
-            SINGLE
-          </button>
+        <div className="grid h-7 w-[112px] grid-cols-2 overflow-hidden rounded-[1px] border border-[#007fff]/45 bg-[#cfe6ff]">
           <button
             type="button"
             onClick={() => setPrintMode("double")}
-            className={`border-l border-[#007fff]/30 px-2 py-1 text-[10px] font-bold tracking-[0.08em] transition ${
+            className={`px-2 text-[10px] font-bold tracking-[0.08em] transition ${
               printMode === "double"
                 ? "bg-[#007fff] text-white"
                 : "bg-[#8bc4ff] text-white"
             }`}
           >
             DOUBLE
+          </button>
+          <button
+            type="button"
+            onClick={() => setPrintMode("single")}
+            className={`border-l border-[#007fff]/30 px-2 text-[10px] font-bold tracking-[0.08em] transition ${
+              printMode === "single"
+                ? "bg-[#007fff] text-white"
+                : "bg-[#8bc4ff] text-white"
+            }`}
+          >
+            SINGLE
           </button>
         </div>
       ),
@@ -664,11 +664,11 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
       title: "Gloss",
       value: gloss ? "YES" : "NO",
       inlineContent: (
-        <div className="grid grid-cols-2 overflow-hidden rounded-sm border border-[#007fff]/40 bg-[#cfe6ff]">
+        <div className="grid h-7 w-[96px] grid-cols-2 overflow-hidden rounded-[1px] border border-[#007fff]/45 bg-[#cfe6ff]">
           <button
             type="button"
             onClick={() => setGloss(false)}
-            className={`px-2 py-1 text-[10px] font-bold tracking-[0.08em] transition ${
+            className={`px-2 text-[10px] font-bold tracking-[0.08em] transition ${
               !gloss
                 ? "bg-[#007fff] text-white"
                 : "bg-[#8bc4ff] text-white"
@@ -679,7 +679,7 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
           <button
             type="button"
             onClick={() => setGloss(true)}
-            className={`border-l border-[#007fff]/30 px-2 py-1 text-[10px] font-bold tracking-[0.08em] transition ${
+            className={`border-l border-[#007fff]/30 px-2 text-[10px] font-bold tracking-[0.08em] transition ${
               gloss
                 ? "bg-[#007fff] text-white"
                 : "bg-[#8bc4ff] text-white"
