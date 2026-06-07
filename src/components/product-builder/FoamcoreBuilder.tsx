@@ -303,59 +303,6 @@ export default function FoamcoreBuilder({ productId = 0, productName = "FOAMCORE
     
   const toolbarPanels: BuilderBottomToolbarPanel[] = [
     {
-      id: "grommet-presets",
-      title: "Grommet Presets",
-      value: grommetsEnabled
-        ? `${grommetPosition.replace("-", " ")} / ${grommetSpacingMode === "every-2-3-feet" ? "Every 2-3 Ft" : grommetSpacingMode === "corners-only" ? "Corners Only" : "Custom"}`
-        : "Disabled",
-      width: 360,
-      content: (
-        <>
-          <button
-            type="button"
-            onClick={() => setGrommetsEnabled((prev) => !prev)}
-            className="mb-2 h-9 w-full rounded border border-zinc-300 bg-white px-2 text-left text-sm font-semibold"
-          >
-            {grommetsEnabled ? "Enabled" : "Disabled"}
-          </button>
-          {grommetsEnabled && (
-            <div className="space-y-2">
-              <select
-                value={grommetPosition}
-                onChange={(event) => setGrommetPosition(event.target.value as GrommetPosition)}
-                className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"
-              >
-                <option value="all-sides">All Sides</option>
-                <option value="top-bottom">Top and Bottom</option>
-                <option value="left-right">Left and Right</option>
-              </select>
-              <select
-                value={grommetSpacingMode}
-                onChange={(event) => setGrommetSpacingMode(event.target.value as GrommetSpacingMode)}
-                className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"
-              >
-                <option value="every-2-3-feet">Every 2-3 Feet</option>
-                <option value="corners-only">Corners Only</option>
-                <option value="custom">Custom Spacing</option>
-              </select>
-              {grommetSpacingMode === "custom" && (
-                <input
-                  type="number"
-                  min={6}
-                  max={48}
-                  step={1}
-                  value={grommetSpacing}
-                  onChange={(event) => setGrommetSpacing(Math.min(48, Math.max(6, Number(event.target.value) || 24)))}
-                  className="h-9 w-full rounded border border-zinc-300 px-2 text-sm"
-                />
-              )}
-              <div className="text-[11px] leading-4 text-zinc-500">Approx: {estimatedGrommetCount} per sign</div>
-            </div>
-          )}
-        </>
-      ),
-    },
-    {
       id: "artwork",
       title: "Artwork",
       value:
