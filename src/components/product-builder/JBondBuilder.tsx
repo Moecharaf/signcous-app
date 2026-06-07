@@ -172,9 +172,21 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
       } else {
         const newUpload = result;
         setBlockUploads(prev => {
+          const isFirstUpload = !Object.values(prev).some((pair) => Boolean(pair?.[side]?.fileUrl));
+          if (!isFirstUpload) {
+            return {
+              ...prev,
+              [blockIndex]: { ...prev[blockIndex], [side]: newUpload },
+            };
+          }
+
           const updated = { ...prev };
-          for (let i = 0; i < maxImages; i++) {
-            updated[i] = { ...updated[i], [side]: newUpload };
+          const autoFillCount = maxImages;
+          setImageCount(autoFillCount);
+          for (let i = 0; i < autoFillCount; i += 1) {
+            if (!updated[i]?.[side]) {
+              updated[i] = { ...updated[i], [side]: newUpload };
+            }
           }
           return updated;
         });
