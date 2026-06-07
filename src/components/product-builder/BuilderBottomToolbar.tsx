@@ -20,6 +20,7 @@ export interface BuilderBottomToolbarPanel {
   status?: ToolbarStatus;
   openOnHover?: boolean;
   inlineContent?: ReactNode;
+  inlineAlways?: boolean;
 }
 
 interface BuilderBottomToolbarProps {
@@ -124,7 +125,7 @@ export default function BuilderBottomToolbar({
                 >
                   <div className="flex items-center justify-between gap-3">
                     <span className={`min-w-0 truncate text-[10px] font-semibold uppercase tracking-[0.12em] ${hoveredPanelId === panel.id ? "text-[#007fff]" : "text-zinc-500"}`}>{panel.title}</span>
-                    {hoveredPanelId === panel.id ? (
+                    {panel.inlineAlways || hoveredPanelId === panel.id ? (
                       <div className="shrink-0">{panel.inlineContent}</div>
                     ) : (
                       <span
