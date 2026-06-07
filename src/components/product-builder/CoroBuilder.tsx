@@ -534,7 +534,6 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
       id: "print",
       title: "Print Sides",
       value: printMode === "single" ? "SINGLE" : "DOUBLE",
-      inlineAlways: true,
       inlineContent: (
         <div className="grid grid-cols-2 overflow-hidden rounded border border-[#007fff]/30 bg-[#007fff]/10 p-0.5">
           <button
@@ -664,7 +663,6 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
       id: "gloss",
       title: "Gloss",
       value: gloss ? "YES" : "NO",
-      inlineAlways: true,
       inlineContent: (
         <div className="grid grid-cols-2 overflow-hidden rounded border border-[#007fff]/30 bg-[#007fff]/10 p-0.5">
           <button
