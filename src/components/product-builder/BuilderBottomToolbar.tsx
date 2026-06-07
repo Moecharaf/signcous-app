@@ -19,6 +19,7 @@ export interface BuilderBottomToolbarPanel {
   width?: number;
   status?: ToolbarStatus;
   openOnHover?: boolean;
+  inlineContent?: ReactNode;
 }
 
 interface BuilderBottomToolbarProps {
@@ -37,6 +38,7 @@ export default function BuilderBottomToolbar({
   actionTitle = "Cart Action",
 }: BuilderBottomToolbarProps) {
   const [activePanelId, setActivePanelId] = useState<string | null>(null);
+  const [hoveredPanelId, setHoveredPanelId] = useState<string | null>(null);
   const [panelAnchor, setPanelAnchor] = useState<{ left: number; top: number; width: number } | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
 
@@ -109,39 +111,71 @@ export default function BuilderBottomToolbar({
         <div className="grid gap-2 xl:grid-cols-[minmax(0,1fr)_280px]">
           <div className="grid gap-2 [grid-template-columns:repeat(auto-fit,minmax(132px,1fr))]">
             {panels.map((panel) => (
-              <button
-                key={panel.id}
-                type="button"
-                data-role="builder-toolbar-button"
-                onClick={(event) => togglePanel(panel.id, event)}
-                onMouseEnter={(event) => {
-                  if (panel.openOnHover) {
-                    openPanelFromElement(panel.id, event.currentTarget);
-                  }
-                }}
-                className={`min-w-0 rounded border px-3 py-2 text-left transition ${
-                  activePanelId === panel.id
-                    ? "border-[#007fff] bg-white shadow-sm ring-1 ring-[#007fff]/20"
-                    : "border-zinc-200 bg-white hover:border-zinc-300"
-                }`}
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <span className={`min-w-0 truncate text-[10px] font-semibold uppercase tracking-[0.12em] ${activePanelId === panel.id ? "text-[#007fff]" : "text-zinc-500"}`}>{panel.title}</span>
-                  <span
-                    className={`shrink-0 rounded px-2 py-1 text-xs font-semibold ${
-                      panel.status === "alert"
-                        ? "bg-rose-500 text-white"
-                        : panel.status === "neutral"
-                          ? "bg-zinc-100 text-zinc-600"
-                          : activePanelId === panel.id
-                            ? "bg-[#007fff] text-white"
-                            : "bg-zinc-100 text-zinc-700"
-                    }`}
-                  >
-                    {panel.value}
-                  </span>
+              panel.inlineContent ? (
+                <div
+                  key={panel.id}
+                  onMouseEnter={() => setHoveredPanelId(panel.id)}
+                  onMouseLeave={() => setHoveredPanelId((prev) => (prev === panel.id ? null : prev))}
+                  className={`min-w-0 rounded border px-3 py-2 text-left transition ${
+                    hoveredPanelId === panel.id
+                      ? "border-[#007fff] bg-white shadow-sm ring-1 ring-[#007fff]/20"
+                      : "border-zinc-200 bg-white hover:border-zinc-300"
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <span className={`min-w-0 truncate text-[10px] font-semibold uppercase tracking-[0.12em] ${hoveredPanelId === panel.id ? "text-[#007fff]" : "text-zinc-500"}`}>{panel.title}</span>
+                    {hoveredPanelId === panel.id ? (
+                      <div className="shrink-0">{panel.inlineContent}</div>
+                    ) : (
+                      <span
+                        className={`shrink-0 rounded px-2 py-1 text-xs font-semibold ${
+                          panel.status === "alert"
+                            ? "bg-rose-500 text-white"
+                            : panel.status === "neutral"
+                              ? "bg-zinc-100 text-zinc-600"
+                              : "bg-zinc-100 text-zinc-700"
+                        }`}
+                      >
+                        {panel.value}
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </button>
+              ) : (
+                <button
+                  key={panel.id}
+                  type="button"
+                  data-role="builder-toolbar-button"
+                  onClick={(event) => togglePanel(panel.id, event)}
+                  onMouseEnter={(event) => {
+                    if (panel.openOnHover) {
+                      openPanelFromElement(panel.id, event.currentTarget);
+                    }
+                  }}
+                  className={`min-w-0 rounded border px-3 py-2 text-left transition ${
+                    activePanelId === panel.id
+                      ? "border-[#007fff] bg-white shadow-sm ring-1 ring-[#007fff]/20"
+                      : "border-zinc-200 bg-white hover:border-zinc-300"
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <span className={`min-w-0 truncate text-[10px] font-semibold uppercase tracking-[0.12em] ${activePanelId === panel.id ? "text-[#007fff]" : "text-zinc-500"}`}>{panel.title}</span>
+                    <span
+                      className={`shrink-0 rounded px-2 py-1 text-xs font-semibold ${
+                        panel.status === "alert"
+                          ? "bg-rose-500 text-white"
+                          : panel.status === "neutral"
+                            ? "bg-zinc-100 text-zinc-600"
+                            : activePanelId === panel.id
+                              ? "bg-[#007fff] text-white"
+                              : "bg-zinc-100 text-zinc-700"
+                      }`}
+                    >
+                      {panel.value}
+                    </span>
+                  </div>
+                </button>
+              )
             ))}
           </div>
 

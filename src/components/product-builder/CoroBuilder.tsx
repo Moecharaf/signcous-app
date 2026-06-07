@@ -534,7 +534,32 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
       id: "print",
       title: "Print Sides",
       value: printMode === "single" ? "SINGLE" : "DOUBLE",
-      openOnHover: true,
+      inlineContent: (
+        <div className="grid grid-cols-2 overflow-hidden rounded border border-[#007fff]/30 bg-[#007fff]/10 p-0.5">
+          <button
+            type="button"
+            onClick={() => setPrintMode("single")}
+            className={`rounded px-2 py-1 text-[10px] font-bold tracking-[0.08em] transition ${
+              printMode === "single"
+                ? "bg-[#007fff] text-white"
+                : "bg-white text-zinc-600 hover:bg-[#007fff]/10"
+            }`}
+          >
+            SINGLE
+          </button>
+          <button
+            type="button"
+            onClick={() => setPrintMode("double")}
+            className={`rounded px-2 py-1 text-[10px] font-bold tracking-[0.08em] transition ${
+              printMode === "double"
+                ? "bg-[#007fff] text-white"
+                : "bg-white text-zinc-600 hover:bg-[#007fff]/10"
+            }`}
+          >
+            DOUBLE
+          </button>
+        </div>
+      ),
       width: 220,
       content: (
         <div className="grid grid-cols-2 overflow-hidden rounded border border-zinc-200 bg-[#007fff]/10 p-1">
@@ -638,7 +663,32 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
       id: "gloss",
       title: "Gloss",
       value: gloss ? "YES" : "NO",
-      openOnHover: true,
+      inlineContent: (
+        <div className="grid grid-cols-2 overflow-hidden rounded border border-[#007fff]/30 bg-[#007fff]/10 p-0.5">
+          <button
+            type="button"
+            onClick={() => setGloss(false)}
+            className={`rounded px-2 py-1 text-[10px] font-bold tracking-[0.08em] transition ${
+              !gloss
+                ? "bg-[#007fff] text-white"
+                : "bg-white text-zinc-600 hover:bg-[#007fff]/10"
+            }`}
+          >
+            NO
+          </button>
+          <button
+            type="button"
+            onClick={() => setGloss(true)}
+            className={`rounded px-2 py-1 text-[10px] font-bold tracking-[0.08em] transition ${
+              gloss
+                ? "bg-[#007fff] text-white"
+                : "bg-white text-zinc-600 hover:bg-[#007fff]/10"
+            }`}
+          >
+            YES
+          </button>
+        </div>
+      ),
       width: 200,
       content: (
         <div className="space-y-2">
