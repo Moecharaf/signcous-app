@@ -21,6 +21,7 @@ export interface BuilderBottomToolbarPanel {
   openOnHover?: boolean;
   inlineContent?: ReactNode;
   inlineAlways?: boolean;
+  inlineSlotWidth?: number;
 }
 
 interface BuilderBottomToolbarProps {
@@ -107,33 +108,44 @@ export default function BuilderBottomToolbar({
 
   return (
     <>
-      <div className="border-t border-zinc-200 bg-white px-2 py-1">
-        <div className="grid gap-1 xl:grid-cols-[minmax(0,1fr)_280px]">
-          <div className="grid gap-1 [grid-template-columns:repeat(auto-fit,minmax(116px,1fr))]">
+      <div className="border-t border-zinc-200 bg-white px-1.5 py-0.5">
+        <div className="grid gap-1 xl:grid-cols-[minmax(0,1fr)_240px]">
+          <div className="grid gap-1 [grid-template-columns:repeat(auto-fit,minmax(112px,1fr))]">
             {panels.map((panel) => (
               panel.inlineContent ? (
                 <div
                   key={panel.id}
                   className="group min-w-0 rounded-none border-2 border-[#007fff] bg-[#f7fbff] px-2 py-1 text-left transition hover:bg-white"
                 >
-                  <div className="flex min-h-[36px] items-center justify-between gap-2">
-                    <span className="min-w-0 truncate text-[10px] font-semibold uppercase tracking-[0.12em] text-[#4f5f72] group-hover:text-[#0068d1]">{panel.title}</span>
+                  <div className="flex min-h-[30px] items-center justify-between gap-2">
+                    <span className="min-w-0 truncate text-[9px] font-semibold uppercase tracking-[0.11em] text-[#4f5f72] group-hover:text-[#0068d1]">{panel.title}</span>
                     {panel.inlineAlways ? (
-                      <div className="shrink-0">{panel.inlineContent}</div>
+                      <div
+                        className="shrink-0"
+                        style={panel.inlineSlotWidth ? { width: `${panel.inlineSlotWidth}px` } : undefined}
+                      >
+                        {panel.inlineContent}
+                      </div>
                     ) : (
                       <>
                         <span
-                          className={`inline-flex h-6 min-w-[64px] items-center justify-center shrink-0 rounded-none px-2 text-[10px] font-bold tracking-[0.06em] group-hover:hidden ${
+                          className={`inline-flex h-5 items-center justify-center shrink-0 rounded-none px-1.5 text-[9px] font-bold tracking-[0.06em] group-hover:hidden ${
                             panel.status === "alert"
                               ? "bg-rose-500 text-white"
                               : panel.status === "neutral"
                                 ? "bg-zinc-100 text-zinc-600"
                                 : "bg-[#007fff] text-white"
                           }`}
+                          style={panel.inlineSlotWidth ? { width: `${panel.inlineSlotWidth}px` } : { minWidth: "52px" }}
                         >
                           {panel.value}
                         </span>
-                        <div className="hidden shrink-0 group-hover:block">{panel.inlineContent}</div>
+                        <div
+                          className="hidden shrink-0 group-hover:block"
+                          style={panel.inlineSlotWidth ? { width: `${panel.inlineSlotWidth}px` } : undefined}
+                        >
+                          {panel.inlineContent}
+                        </div>
                       </>
                     )}
                   </div>
@@ -155,10 +167,10 @@ export default function BuilderBottomToolbar({
                       : "border-[#007fff] bg-[#f7fbff]"
                   }`}
                 >
-                  <div className="flex min-h-[36px] items-center justify-between gap-2">
-                    <span className={`min-w-0 truncate text-[10px] font-semibold uppercase tracking-[0.12em] ${activePanelId === panel.id ? "text-[#0068d1]" : "text-[#4f5f72]"}`}>{panel.title}</span>
+                  <div className="flex min-h-[30px] items-center justify-between gap-2">
+                    <span className={`min-w-0 truncate text-[9px] font-semibold uppercase tracking-[0.11em] ${activePanelId === panel.id ? "text-[#0068d1]" : "text-[#4f5f72]"}`}>{panel.title}</span>
                     <span
-                      className={`inline-flex h-6 min-w-[64px] items-center justify-center shrink-0 rounded-none px-2 text-[10px] font-bold tracking-[0.06em] ${
+                      className={`inline-flex h-5 min-w-[52px] items-center justify-center shrink-0 rounded-none px-1.5 text-[9px] font-bold tracking-[0.06em] ${
                         panel.status === "alert"
                           ? "bg-rose-500 text-white"
                           : panel.status === "neutral"
@@ -176,9 +188,9 @@ export default function BuilderBottomToolbar({
             ))}
           </div>
 
-          <div className="rounded-lg border border-[#007fff]/20 bg-[#007fff]/5 p-3">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#007fff]">{actionTitle}</div>
-            <div className="mt-3">{action}</div>
+          <div className="rounded border border-[#007fff]/25 bg-[#007fff]/5 p-1.5">
+            <div className="text-[9px] font-semibold uppercase tracking-[0.11em] text-[#007fff]">{actionTitle}</div>
+            <div className="mt-1">{action}</div>
           </div>
         </div>
       </div>
