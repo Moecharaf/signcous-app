@@ -73,6 +73,7 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
   const [uploadingBlock, setUploadingBlock] = useState<string | null>(null); // format: "blockIndex:side"
   const [blockUploadErrors, setBlockUploadErrors] = useState<Record<string, string>>({});
   const [blockImageModes, setBlockImageModes] = useState<Record<string, "fit" | "stretch">>();
+  const [singleUploadTarget, setSingleUploadTarget] = useState<string | null>(null);
   const [previewSide, setPreviewSide] = useState<"front" | "back">("front"); // New: toggle for double-sided preview
   const [isArtworkModalOpen, setIsArtworkModalOpen] = useState(false);
   const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -182,8 +183,14 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
       setImageCount(maxImages);
     }, [maxImages]);
 
-    async function uploadArtworkForBlock(blockIndex: number, file: File, side: "front" | "back" = "front") {
+    async function uploadArtworkForBlock(
+      blockIndex: number,
+      file: File,
+      side: "front" | "back" = "front",
+      options?: { applyToAll?: boolean }
+    ) {
       const uploadKey = `${blockIndex}:${side}`;
+      const applyToAll = options?.applyToAll ?? true;
       setUploadingBlock(uploadKey);
       setBlockUploadErrors((prev) => {
         const n = { ...prev };
@@ -211,19 +218,26 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
           setBlockUploadErrors((prev) => ({ ...prev, [uploadKey]: data.error ?? "Upload failed." }));
           return;
         }
-        let blobUrl: string | null = null;
-        if (file.type.startsWith("image/")) {
-          blobUrl = URL.createObjectURL(file);
-        }
-        const newUpload = { fileUrl: data.fileUrl!, fileName: data.originalName ?? file.name, blobUrl };
-        
-        // Auto-fill: Check if this is the first upload for this side
-        // If so, fill all empty blocks with the same image (Signs365 behavior)
+        const targetIndexes = applyToAll ? Array.from({ length: safeImageCount }, (_, i) => i) : [blockIndex];
+
         setBlockUploads((prev) => {
           const updated = { ...prev };
-          for (let i = 0; i < safeImageCount; i++) {
-            updated[i] = { ...updated[i], [side]: newUpload };
+
+          for (const targetIndex of targetIndexes) {
+            const previousUpload = updated[targetIndex]?.[side];
+            if (previousUpload?.blobUrl) {
+              URL.revokeObjectURL(previousUpload.blobUrl);
+            }
+
+            const blobUrl = file.type.startsWith("image/") ? URL.createObjectURL(file) : null;
+            const nextUpload = {
+              fileUrl: data.fileUrl!,
+              fileName: data.originalName ?? file.name,
+              blobUrl,
+            };
+            updated[targetIndex] = { ...updated[targetIndex], [side]: nextUpload };
           }
+
           return updated;
         });
       } catch {
@@ -234,9 +248,26 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
     }
 
     function handleFileChange(blockIndex: number, event: React.ChangeEvent<HTMLInputElement>, side: "front" | "back" = "front") {
+      const uploadKey = `${blockIndex}:${side}`;
+      const applyToAll = singleUploadTarget !== uploadKey;
+      if (singleUploadTarget === uploadKey) {
+        setSingleUploadTarget(null);
+      }
+
       const file = event.target.files?.[0];
-      if (file) void uploadArtworkForBlock(blockIndex, file, side);
+      if (file) {
+        void uploadArtworkForBlock(blockIndex, file, side, { applyToAll });
+      }
       event.target.value = "";
+    }
+
+    function triggerPanelUpload(blockIndex: number, side: "front" | "back") {
+      setSingleUploadTarget(`${blockIndex}:${side}`);
+      if (side === "back") {
+        fileInputBackRefs.current[blockIndex]?.click();
+      } else {
+        fileInputRefs.current[blockIndex]?.click();
+      }
     }
 
     function setBlockImageMode(blockIndex: number, side: "front" | "back", mode: "fit" | "stretch") {
@@ -730,11 +761,7 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
                       disabled={slotIndex === null}
                       onClick={() => {
                         if (slotIndex !== null) {
-                          if (printMode === "double" && previewSide === "back") {
-                            fileInputBackRefs.current[slotIndex]?.click();
-                          } else {
-                            fileInputRefs.current[slotIndex]?.click();
-                          }
+                          triggerPanelUpload(slotIndex, printMode === "double" && previewSide === "back" ? "back" : "front");
                         }
                       }}
                       className={`absolute overflow-hidden border ${
