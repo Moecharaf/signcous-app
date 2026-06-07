@@ -79,7 +79,7 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
   // ── shared state ──
   const [material, setMaterial] = useState<AluminumMaterial>("040");
   const [printMode, setPrintMode] = useState<AluminumPrintMode>("single");
-  const [quantity, setQuantity] = useState(1);
+  const quantity = 1;
   const [roundedCornersOption, setRoundedCornersOption] = useState<AluminumRoundedCornerOption>("none");
   const contourCut = false;
   const rush = false;
@@ -375,20 +375,14 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
         },
         {
           id: "material",
-          title: "Material / Print",
-          value: `${material} / ${printMode === "single" ? "Single" : "Double"}`,
-          width: 320,
+          title: "Material",
+          value: material,
+          width: 220,
           content: (
-            <div className="grid grid-cols-2 gap-1">
-              <select value={material} onChange={e => setMaterial(e.target.value as AluminumMaterial)} className="h-9 rounded border border-zinc-300 bg-white px-2 text-sm">
-                <option value="040">0.040&quot;</option>
-                <option value="080">0.080&quot;</option>
-              </select>
-              <select value={printMode} onChange={e => setPrintMode(e.target.value as AluminumPrintMode)} className="h-9 rounded border border-zinc-300 bg-white px-2 text-sm">
-                <option value="single">Single</option>
-                <option value="double">Double</option>
-              </select>
-            </div>
+            <select value={material} onChange={e => setMaterial(e.target.value as AluminumMaterial)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm">
+              <option value="040">0.040&quot;</option>
+              <option value="080">0.080&quot;</option>
+            </select>
           ),
         },
         {
@@ -435,15 +429,15 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
           ),
         },
         {
-          id: "quantity",
-          title: "Quantity",
-          value: String(quantity),
+          id: "print",
+          title: "Print Sides",
+          value: printMode === "single" ? "Single" : "Double",
           width: 260,
           content: (
-            <>
-              <input type="number" min={1} value={quantity} onChange={e => setQuantity(Math.max(1, Number(e.target.value) || 1))} className="h-9 w-full rounded border border-zinc-300 px-2 text-sm" />
-              <div className="text-[11px] leading-4 text-zinc-500">Set the number of signs in this order.</div>
-            </>
+            <select value={printMode} onChange={e => setPrintMode(e.target.value as AluminumPrintMode)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm">
+              <option value="single">Single</option>
+              <option value="double">Double</option>
+            </select>
           ),
         },
       ]
@@ -498,20 +492,14 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
         },
         {
           id: "material",
-          title: "Material / Print",
-          value: `${material} / ${printMode === "single" ? "Single" : "Double"}`,
-          width: 320,
+          title: "Material",
+          value: material,
+          width: 220,
           content: (
-            <div className="grid grid-cols-2 gap-1">
-              <select value={material} onChange={e => setMaterial(e.target.value as AluminumMaterial)} className="h-9 rounded border border-zinc-300 bg-white px-2 text-sm">
-                <option value="040">0.040&quot;</option>
-                <option value="080">0.080&quot;</option>
-              </select>
-              <select value={printMode} onChange={e => setPrintMode(e.target.value as AluminumPrintMode)} className="h-9 rounded border border-zinc-300 bg-white px-2 text-sm">
-                <option value="single">Single</option>
-                <option value="double">Double</option>
-              </select>
-            </div>
+            <select value={material} onChange={e => setMaterial(e.target.value as AluminumMaterial)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm">
+              <option value="040">0.040&quot;</option>
+              <option value="080">0.080&quot;</option>
+            </select>
           ),
         },
         {
@@ -558,15 +546,15 @@ export default function AluminumBuilder({ productId = 0, productName = "ALUMINUM
           ),
         },
         {
-          id: "quantity",
-          title: "Quantity",
-          value: String(quantity),
+          id: "print",
+          title: "Print Sides",
+          value: printMode === "single" ? "Single" : "Double",
           width: 260,
           content: (
-            <>
-              <input type="number" min={1} value={quantity} onChange={e => setQuantity(Math.max(1, Number(e.target.value) || 1))} className="h-9 w-full rounded border border-zinc-300 px-2 text-sm" />
-              <div className="text-[11px] leading-4 text-zinc-500">Set the number of signs in this order.</div>
-            </>
+            <select value={printMode} onChange={e => setPrintMode(e.target.value as AluminumPrintMode)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm">
+              <option value="single">Single</option>
+              <option value="double">Double</option>
+            </select>
           ),
         },
       ];
