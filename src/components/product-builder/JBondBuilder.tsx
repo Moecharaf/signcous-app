@@ -349,8 +349,8 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
           id: "artwork",
           title: "Artwork",
           value: printMode === "double"
-            ? `${uploadedBlockCount}/${safeImageCount} front, ${uploadedBackCount}/${safeImageCount} back`
-            : `${uploadedBlockCount}/${safeImageCount} uploaded`,
+            ? `${safeImageCount}/${maxImages} active • ${uploadedBlockCount}/${safeImageCount} front, ${uploadedBackCount}/${safeImageCount} back`
+            : `${safeImageCount}/${maxImages} active • ${uploadedBlockCount}/${safeImageCount} uploaded`,
           width: 280,
           status:
             printMode === "double"
@@ -358,6 +358,17 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
               : uploadedBlockCount === safeImageCount && safeImageCount > 0 ? "ok" : "neutral",
           content: (
             <div className="space-y-3">
+              <div className="space-y-1">
+                <div className="text-[11px] font-medium text-zinc-600">Active image blocks</div>
+                <input
+                  type="number"
+                  min={1}
+                  max={maxImages}
+                  value={safeImageCount}
+                  onChange={e => setImageCount(Math.min(maxImages, Math.max(1, Number(e.target.value) || 1)))}
+                  className="h-9 w-full rounded border border-zinc-300 px-2 text-sm"
+                />
+              </div>
               <p className="text-[11px] leading-4 text-zinc-500">
                 {printMode === "double"
                   ? "Upload front and back artworks for each block."
@@ -374,18 +385,6 @@ export default function JBondBuilder({ productId = 0, productName = "JBOND" }: J
               </button>
               <div className="text-[10px] text-zinc-400">Accepted: PDF, AI, EPS, PNG, JPG, TIFF, PSD (up to 100MB)</div>
             </div>
-          ),
-        },
-        {
-          id: "layout",
-          title: "Images",
-          value: `${safeImageCount}/${maxImages} active`,
-          width: 260,
-          content: (
-            <>
-              <input type="number" min={1} max={maxImages} value={safeImageCount} onChange={e => setImageCount(Math.min(maxImages, Math.max(1, Number(e.target.value) || 1)))} className="h-9 w-full rounded border border-zinc-300 px-2 text-sm" />
-              <div className="text-[11px] leading-4 text-zinc-500">Adjust how many artwork blocks are active on the sheet.</div>
-            </>
           ),
         },
         {
