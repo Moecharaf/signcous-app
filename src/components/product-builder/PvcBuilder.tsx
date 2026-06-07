@@ -145,10 +145,27 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
         blobUrl = URL.createObjectURL(file);
       }
       const newUpload = { fileUrl: data.fileUrl!, fileName: data.originalName ?? file.name, blobUrl };
-      setBlockUploads((prev) => ({
-        ...prev,
-        [blockIndex]: { ...prev[blockIndex], [side]: newUpload },
-      }));
+
+      // Match Coro behavior: first upload on a side fills all active panels.
+      setBlockUploads((prev) => {
+        const isFirstUpload = !Object.values(prev).some((pair) => Boolean(pair?.[side]?.fileUrl));
+        if (!isFirstUpload) {
+          return {
+            ...prev,
+            [blockIndex]: { ...prev[blockIndex], [side]: newUpload },
+          };
+        }
+
+        const next = { ...prev };
+        const autoFillCount = maxImages;
+        setImageCount(autoFillCount);
+        for (let i = 0; i < autoFillCount; i += 1) {
+          if (!next[i]?.[side]) {
+            next[i] = { ...next[i], [side]: newUpload };
+          }
+        }
+        return next;
+      });
     } catch {
       setBlockUploadErrors((prev) => ({ ...prev, [uploadKey]: "Upload failed. Please try again." }));
     } finally {
@@ -472,7 +489,7 @@ export default function PvcBuilder({ productId = 0, productName = "PVC" }: PvcBu
                       ) : slotIndex !== null ? (
                         <div className="sc-panel-dotted-guides flex h-full w-full items-center justify-center">
                           <span className="text-[7px] font-semibold text-zinc-500">
-                            {uploadingBlock === `all:${previewSide}` || uploadingBlock?.startsWith(`${slotIndex}:`) ? "\u2026" : slotIndex + 1}
+                            {uploadingBlock === `${slotIndex}:${previewSide}` ? "\u2026" : slotIndex + 1}
                           </span>
                         </div>
                       ) : null}
