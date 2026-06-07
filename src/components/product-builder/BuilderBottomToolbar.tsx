@@ -39,7 +39,6 @@ export default function BuilderBottomToolbar({
   actionTitle = "Cart Action",
 }: BuilderBottomToolbarProps) {
   const [activePanelId, setActivePanelId] = useState<string | null>(null);
-  const [hoveredPanelId, setHoveredPanelId] = useState<string | null>(null);
   const [panelAnchor, setPanelAnchor] = useState<{ left: number; top: number; width: number } | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
 
@@ -108,37 +107,34 @@ export default function BuilderBottomToolbar({
 
   return (
     <>
-      <div className="border-t border-zinc-200 bg-white px-2 py-1.5">
-        <div className="grid gap-1.5 xl:grid-cols-[minmax(0,1fr)_280px]">
-          <div className="grid gap-1.5 [grid-template-columns:repeat(auto-fit,minmax(122px,1fr))]">
+      <div className="border-t border-zinc-200 bg-white px-2 py-1">
+        <div className="grid gap-1 xl:grid-cols-[minmax(0,1fr)_280px]">
+          <div className="grid gap-1 [grid-template-columns:repeat(auto-fit,minmax(116px,1fr))]">
             {panels.map((panel) => (
               panel.inlineContent ? (
                 <div
                   key={panel.id}
-                  onMouseEnter={() => setHoveredPanelId(panel.id)}
-                  onMouseLeave={() => setHoveredPanelId((prev) => (prev === panel.id ? null : prev))}
-                  className={`min-w-0 rounded-none border-2 px-2 py-1 text-left transition ${
-                    hoveredPanelId === panel.id
-                      ? "border-[#007fff] bg-white shadow-sm"
-                      : "border-[#007fff] bg-[#f7fbff]"
-                  }`}
+                  className="group min-w-0 rounded-none border-2 border-[#007fff] bg-[#f7fbff] px-2 py-1 text-left transition hover:bg-white"
                 >
                   <div className="flex min-h-[36px] items-center justify-between gap-2">
-                    <span className={`min-w-0 truncate text-[10px] font-semibold uppercase tracking-[0.12em] ${hoveredPanelId === panel.id ? "text-[#0068d1]" : "text-[#4f5f72]"}`}>{panel.title}</span>
-                    {panel.inlineAlways || hoveredPanelId === panel.id ? (
+                    <span className="min-w-0 truncate text-[10px] font-semibold uppercase tracking-[0.12em] text-[#4f5f72] group-hover:text-[#0068d1]">{panel.title}</span>
+                    {panel.inlineAlways ? (
                       <div className="shrink-0">{panel.inlineContent}</div>
                     ) : (
-                      <span
-                        className={`inline-flex h-6 min-w-[70px] items-center justify-center shrink-0 rounded-none px-2 text-[10px] font-bold tracking-[0.06em] ${
-                          panel.status === "alert"
-                            ? "bg-rose-500 text-white"
-                            : panel.status === "neutral"
-                              ? "bg-zinc-100 text-zinc-600"
-                              : "bg-[#007fff] text-white"
-                        }`}
-                      >
-                        {panel.value}
-                      </span>
+                      <>
+                        <span
+                          className={`inline-flex h-6 min-w-[64px] items-center justify-center shrink-0 rounded-none px-2 text-[10px] font-bold tracking-[0.06em] group-hover:hidden ${
+                            panel.status === "alert"
+                              ? "bg-rose-500 text-white"
+                              : panel.status === "neutral"
+                                ? "bg-zinc-100 text-zinc-600"
+                                : "bg-[#007fff] text-white"
+                          }`}
+                        >
+                          {panel.value}
+                        </span>
+                        <div className="hidden shrink-0 group-hover:block">{panel.inlineContent}</div>
+                      </>
                     )}
                   </div>
                 </div>
@@ -162,7 +158,7 @@ export default function BuilderBottomToolbar({
                   <div className="flex min-h-[36px] items-center justify-between gap-2">
                     <span className={`min-w-0 truncate text-[10px] font-semibold uppercase tracking-[0.12em] ${activePanelId === panel.id ? "text-[#0068d1]" : "text-[#4f5f72]"}`}>{panel.title}</span>
                     <span
-                      className={`inline-flex h-6 min-w-[70px] items-center justify-center shrink-0 rounded-none px-2 text-[10px] font-bold tracking-[0.06em] ${
+                      className={`inline-flex h-6 min-w-[64px] items-center justify-center shrink-0 rounded-none px-2 text-[10px] font-bold tracking-[0.06em] ${
                         panel.status === "alert"
                           ? "bg-rose-500 text-white"
                           : panel.status === "neutral"
