@@ -18,6 +18,7 @@ export interface BuilderBottomToolbarPanel {
   content: ReactNode;
   width?: number;
   status?: ToolbarStatus;
+  openOnHover?: boolean;
 }
 
 interface BuilderBottomToolbarProps {
@@ -49,6 +50,12 @@ export default function BuilderBottomToolbar({
     setPanelAnchor(null);
   }, []);
 
+  const openPanelFromElement = useCallback((panelId: string, element: HTMLElement) => {
+    const rect = element.getBoundingClientRect();
+    setPanelAnchor({ left: rect.left, top: rect.top, width: rect.width });
+    setActivePanelId(panelId);
+  }, []);
+
   const togglePanel = useCallback(
     (panelId: string, event: React.MouseEvent<HTMLButtonElement>) => {
       if (activePanelId === panelId) {
@@ -56,11 +63,9 @@ export default function BuilderBottomToolbar({
         return;
       }
 
-      const rect = event.currentTarget.getBoundingClientRect();
-      setPanelAnchor({ left: rect.left, top: rect.top, width: rect.width });
-      setActivePanelId(panelId);
+      openPanelFromElement(panelId, event.currentTarget);
     },
-    [activePanelId, closePanel]
+    [activePanelId, closePanel, openPanelFromElement]
   );
 
   useEffect(() => {
@@ -109,6 +114,11 @@ export default function BuilderBottomToolbar({
                 type="button"
                 data-role="builder-toolbar-button"
                 onClick={(event) => togglePanel(panel.id, event)}
+                onMouseEnter={(event) => {
+                  if (panel.openOnHover) {
+                    openPanelFromElement(panel.id, event.currentTarget);
+                  }
+                }}
                 className={`min-w-0 rounded border px-3 py-2 text-left transition ${
                   activePanelId === panel.id
                     ? "border-[#007fff] bg-white shadow-sm ring-1 ring-[#007fff]/20"

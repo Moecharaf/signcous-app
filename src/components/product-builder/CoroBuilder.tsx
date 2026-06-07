@@ -509,34 +509,58 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
       id: "material",
       title: "Material",
       value: material,
+      openOnHover: true,
       width: 200,
       content: (
-        <select
-          value={material}
-          onChange={(event) => setMaterial(event.target.value as CoroMaterial)}
-          className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"
-        >
-          <option value="4mm">4mm</option>
-          <option value="10mm">10mm</option>
-        </select>
+        <div className="overflow-hidden rounded border border-zinc-200">
+          {(["4mm", "10mm"] as CoroMaterial[]).map((option) => (
+            <button
+              key={option}
+              type="button"
+              onClick={() => setMaterial(option)}
+              className={`block w-full border-b border-zinc-200 px-3 py-2 text-left text-sm font-semibold last:border-b-0 ${
+                material === option
+                  ? "bg-[#007fff] text-white"
+                  : "bg-white text-zinc-700 hover:bg-[#007fff]/10"
+              }`}
+            >
+              {option}
+            </button>
+          ))}
+        </div>
       ),
     },
     {
       id: "print",
       title: "Print Sides",
-      value: printMode === "single" ? "Single" : "Double",
+      value: printMode === "single" ? "SINGLE" : "DOUBLE",
+      openOnHover: true,
       width: 220,
       content: (
-        <>
-          <select
-            value={printMode}
-            onChange={(event) => setPrintMode(event.target.value as CoroPrintMode)}
-            className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"
+        <div className="grid grid-cols-2 overflow-hidden rounded border border-zinc-200 bg-[#007fff]/10 p-1">
+          <button
+            type="button"
+            onClick={() => setPrintMode("single")}
+            className={`rounded px-3 py-2 text-xs font-bold tracking-[0.08em] transition ${
+              printMode === "single"
+                ? "bg-[#007fff] text-white"
+                : "bg-white text-zinc-600 hover:bg-[#007fff]/10"
+            }`}
           >
-            <option value="single">Single</option>
-            <option value="double">Double</option>
-          </select>
-        </>
+            SINGLE
+          </button>
+          <button
+            type="button"
+            onClick={() => setPrintMode("double")}
+            className={`rounded px-3 py-2 text-xs font-bold tracking-[0.08em] transition ${
+              printMode === "double"
+                ? "bg-[#007fff] text-white"
+                : "bg-white text-zinc-600 hover:bg-[#007fff]/10"
+            }`}
+          >
+            DOUBLE
+          </button>
+        </div>
       ),
     },
     {
@@ -613,32 +637,33 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
     {
       id: "gloss",
       title: "Gloss",
-      value: gloss ? "Yes" : "No",
+      value: gloss ? "YES" : "NO",
+      openOnHover: true,
       width: 200,
       content: (
         <div className="space-y-2">
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 overflow-hidden rounded border border-zinc-200 bg-[#007fff]/10 p-1">
             <button
               type="button"
               onClick={() => setGloss(false)}
-              className={`rounded border-2 px-3 py-2 text-sm font-semibold transition ${
+              className={`rounded px-3 py-2 text-xs font-bold tracking-[0.08em] transition ${
                 !gloss
-                  ? "border-[var(--brand-primary)] bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]"
-                  : "border-zinc-300 bg-white text-zinc-600 hover:border-zinc-400"
+                  ? "bg-[#007fff] text-white"
+                  : "bg-white text-zinc-600 hover:bg-[#007fff]/10"
               }`}
             >
-              No
+              NO
             </button>
             <button
               type="button"
               onClick={() => setGloss(true)}
-              className={`rounded border-2 px-3 py-2 text-sm font-semibold transition ${
+              className={`rounded px-3 py-2 text-xs font-bold tracking-[0.08em] transition ${
                 gloss
-                  ? "border-[var(--brand-primary)] bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]"
-                  : "border-zinc-300 bg-white text-zinc-600 hover:border-zinc-400"
+                  ? "bg-[#007fff] text-white"
+                  : "bg-white text-zinc-600 hover:bg-[#007fff]/10"
               }`}
             >
-              Yes
+              YES
             </button>
           </div>
           <div className="text-[11px] text-zinc-500">Gloss finish adds $6 per sign</div>
