@@ -117,24 +117,24 @@ export default function BuilderBottomToolbar({
                   key={panel.id}
                   onMouseEnter={() => setHoveredPanelId(panel.id)}
                   onMouseLeave={() => setHoveredPanelId((prev) => (prev === panel.id ? null : prev))}
-                  className={`min-w-0 rounded border px-3 py-2 text-left transition ${
+                  className={`min-w-0 rounded-sm border-2 px-3 py-2 text-left transition ${
                     hoveredPanelId === panel.id
-                      ? "border-[#007fff] bg-white shadow-sm ring-1 ring-[#007fff]/20"
-                      : "border-zinc-200 bg-white hover:border-zinc-300"
+                      ? "border-[#007fff] bg-white shadow-sm"
+                      : "border-[#007fff] bg-[#f7fbff]"
                   }`}
                 >
                   <div className="flex items-center justify-between gap-3">
-                    <span className={`min-w-0 truncate text-[10px] font-semibold uppercase tracking-[0.12em] ${hoveredPanelId === panel.id ? "text-[#007fff]" : "text-zinc-500"}`}>{panel.title}</span>
+                    <span className={`min-w-0 truncate text-[10px] font-semibold uppercase tracking-[0.12em] ${hoveredPanelId === panel.id ? "text-[#0068d1]" : "text-[#4f5f72]"}`}>{panel.title}</span>
                     {panel.inlineAlways || hoveredPanelId === panel.id ? (
                       <div className="shrink-0">{panel.inlineContent}</div>
                     ) : (
                       <span
-                        className={`shrink-0 rounded px-2 py-1 text-xs font-semibold ${
+                        className={`shrink-0 rounded-sm px-2 py-1 text-xs font-bold tracking-[0.06em] ${
                           panel.status === "alert"
                             ? "bg-rose-500 text-white"
                             : panel.status === "neutral"
                               ? "bg-zinc-100 text-zinc-600"
-                              : "bg-zinc-100 text-zinc-700"
+                              : "bg-[#007fff] text-white"
                         }`}
                       >
                         {panel.value}
@@ -153,23 +153,23 @@ export default function BuilderBottomToolbar({
                       openPanelFromElement(panel.id, event.currentTarget);
                     }
                   }}
-                  className={`min-w-0 rounded border px-3 py-2 text-left transition ${
+                  className={`min-w-0 rounded-sm border-2 px-3 py-2 text-left transition ${
                     activePanelId === panel.id
-                      ? "border-[#007fff] bg-white shadow-sm ring-1 ring-[#007fff]/20"
-                      : "border-zinc-200 bg-white hover:border-zinc-300"
+                      ? "border-[#007fff] bg-white shadow-sm"
+                      : "border-[#007fff] bg-[#f7fbff]"
                   }`}
                 >
                   <div className="flex items-center justify-between gap-3">
-                    <span className={`min-w-0 truncate text-[10px] font-semibold uppercase tracking-[0.12em] ${activePanelId === panel.id ? "text-[#007fff]" : "text-zinc-500"}`}>{panel.title}</span>
+                    <span className={`min-w-0 truncate text-[10px] font-semibold uppercase tracking-[0.12em] ${activePanelId === panel.id ? "text-[#0068d1]" : "text-[#4f5f72]"}`}>{panel.title}</span>
                     <span
-                      className={`shrink-0 rounded px-2 py-1 text-xs font-semibold ${
+                      className={`shrink-0 rounded-sm px-2 py-1 text-xs font-bold tracking-[0.06em] ${
                         panel.status === "alert"
                           ? "bg-rose-500 text-white"
                           : panel.status === "neutral"
                             ? "bg-zinc-100 text-zinc-600"
                             : activePanelId === panel.id
                               ? "bg-[#007fff] text-white"
-                              : "bg-zinc-100 text-zinc-700"
+                              : "bg-[#007fff] text-white"
                       }`}
                     >
                       {panel.value}
