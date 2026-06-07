@@ -364,7 +364,7 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
     {
       id: "layout",
       title: "Images",
-      value: `${safeImageCount}/${maxImages} active`,
+      value: String(safeImageCount),
       width: 200,
       content: (
         <>
@@ -377,6 +377,18 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
             className="h-9 w-full rounded border border-zinc-300 px-2 text-sm"
           />
           <div className="text-[11px] leading-4 text-zinc-500">Adjust how many artwork blocks are active on the sheet.</div>
+          <div className="text-[11px] leading-4 text-zinc-500">
+            {printMode === "double"
+              ? `${uploadedCount}/${safeImageCount} front, ${uploadedBackCount}/${safeImageCount} back uploaded`
+              : `${uploadedCount}/${safeImageCount} uploaded`}
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsArtworkModalOpen(true)}
+            className="w-full rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition-colors shadow-sm"
+          >
+            Open Upload Panel
+          </button>
         </>
       ),
     },
@@ -630,42 +642,6 @@ export default function CoroBuilder({ productId = 13, productName = "CORO" }: Co
             </button>
           </div>
           <div className="text-[11px] text-zinc-500">Gloss finish adds $6 per sign</div>
-        </div>
-      ),
-    },
-    {
-      id: "artwork",
-      title: "Artwork",
-      value:
-        printMode === "double"
-          ? `${uploadedCount}/${safeImageCount} front, ${uploadedBackCount}/${safeImageCount} back`
-          : `${uploadedCount}/${safeImageCount} uploaded`,
-      width: 280,
-      status:
-        printMode === "double"
-          ? uploadedCount === safeImageCount && uploadedBackCount === safeImageCount && safeImageCount > 0
-            ? "ok"
-            : "neutral"
-          : uploadedCount === safeImageCount && safeImageCount > 0
-            ? "ok"
-            : "neutral",
-      content: (
-        <div className="space-y-3">
-          <p className="text-[11px] leading-4 text-zinc-500">
-            {printMode === "double"
-              ? "Upload front and back artworks for each block."
-              : safeImageCount === 1
-                ? "Upload 1 artwork for all signs."
-                : `Upload artworks for up to ${safeImageCount} blocks.`}
-          </p>
-          <button
-            type="button"
-            onClick={() => setIsArtworkModalOpen(true)}
-            className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition-colors shadow-sm"
-          >
-            🎨 Open Upload Panel
-          </button>
-          <div className="text-[10px] text-zinc-400">Accepted: PDF, AI, EPS, PNG, JPG, TIFF, PSD (up to 100MB)</div>
         </div>
       ),
     },
