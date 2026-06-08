@@ -58,7 +58,10 @@ export function calculatePanels(widthIn: number, heightIn: number, splitDirectio
     return Math.max(1, Math.ceil(heightIn / PRINT_WRAP_MAX_ROLL_WIDTH));
   }
 
-  return Math.max(1, Math.ceil(Math.max(widthIn, heightIn) / PRINT_WRAP_MAX_ROLL_WIDTH));
+  // Auto mode: only split if BOTH dimensions exceed roll width.
+  // If one dimension fits, the print can be oriented to avoid splitting.
+  if (widthIn <= PRINT_WRAP_MAX_ROLL_WIDTH || heightIn <= PRINT_WRAP_MAX_ROLL_WIDTH) return 1;
+  return Math.max(1, Math.ceil(Math.min(widthIn, heightIn) / PRINT_WRAP_MAX_ROLL_WIDTH));
 }
 
 export function calculatePrintWrapPrice(input: PrintWrapPricingInput): PrintWrapPricingResult {
