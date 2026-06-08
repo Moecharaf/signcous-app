@@ -137,15 +137,8 @@ export default function WindowClingBuilder({ productId = 137 }: WindowClingBuild
   const height = composeDimensionInches(heightFeet, heightInches);
   const safeQuantity = Math.max(1, Math.floor(quantity) || 1);
 
-  const widthError =
-    width > WINDOW_CLING_MAX_WIDTH_IN
-      ? `Maximum width for Window Cling is ${WINDOW_CLING_MAX_WIDTH_IN} inches.`
-      : null;
-
-  const heightError =
-    height > WINDOW_CLING_MAX_HEIGHT_IN
-      ? `Maximum height is ${WINDOW_CLING_MAX_HEIGHT_IN} inches.`
-      : null;
+  const widthError = width <= 0 ? "Width must be greater than 0." : null;
+  const heightError = height <= 0 ? "Height must be greater than 0." : null;
 
   const isValid = !widthError && !heightError && width > 0 && height > 0;
 
@@ -467,7 +460,7 @@ export default function WindowClingBuilder({ productId = 137 }: WindowClingBuild
             <BuilderBottomToolbar
               panels={[
                 { id: "artwork", title: "Artwork", value: uploadedFileName ? "Uploaded" : "No file", width: 420, content: <><label className="inline-flex h-10 w-full cursor-pointer items-center justify-center rounded border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-700 hover:border-zinc-400"><input type="file" accept="image/*,.pdf,.ai,.eps,.psd,.svg" className="hidden" onChange={onUploadArtwork} />{uploadingArtwork ? "Uploading..." : uploadedFileName ? "Replace Artwork" : "Upload Artwork"}</label>{uploadedFileName && <div className="flex items-center justify-between gap-2 rounded border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-600"><span className="truncate">{uploadedFileName}</span><button type="button" onClick={clearArtwork} className="font-semibold text-zinc-500 hover:text-zinc-900">Remove</button></div>}{uploadError && <div className="text-xs font-medium text-red-600">{uploadError}</div>}</> },
-                { id: "size", title: "Size", value: formatSizeLabel(width, height), status: widthError || heightError ? "alert" : "ok", width: 360, content: (<SizeInputPanel widthFeet={widthFeet} widthInches={widthInches} heightFeet={heightFeet} heightInches={heightInches} onWidthFeetChange={setWidthFeet} onWidthInchesChange={setWidthInches} onHeightFeetChange={setHeightFeet} onHeightInchesChange={setHeightInches} onWidthNormalize={(f, i) => { setWidthFeet(f); setWidthInches(i); }} onHeightNormalize={(f, i) => { setHeightFeet(f); setHeightInches(i); }} error={widthError || heightError} helper={`Max ${WINDOW_CLING_MAX_WIDTH_IN}" wide x ${WINDOW_CLING_MAX_HEIGHT_IN}" tall.`} />) },
+                { id: "size", title: "Size", value: formatSizeLabel(width, height), status: widthError || heightError ? "alert" : "ok", width: 360, content: (<SizeInputPanel widthFeet={widthFeet} widthInches={widthInches} heightFeet={heightFeet} heightInches={heightInches} onWidthFeetChange={setWidthFeet} onWidthInchesChange={setWidthInches} onHeightFeetChange={setHeightFeet} onHeightInchesChange={setHeightInches} onWidthNormalize={(f, i) => { setWidthFeet(f); setWidthInches(i); }} onHeightNormalize={(f, i) => { setHeightFeet(f); setHeightInches(i); }} error={widthError || heightError} helper="" />) },
                 { id: "application", title: "Application", value: application, width: 280, content: <select value={application} onChange={(event) => setApplication(event.target.value as WindowClingApplication)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"><option value="inside">Inside</option><option value="outside">Outside</option></select> },
                 { id: "viewable", title: "Viewable", value: viewable, width: 280, content: <select value={viewable} onChange={(event) => setViewable(event.target.value as WindowClingViewable)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"><option value="inside">Inside</option><option value="outside">Outside</option></select> },
                 { id: "contour", title: "Contour Cut", value: contourCut ? "Enabled" : "Disabled", width: 280, content: <button type="button" onClick={() => setContourCut((value) => !value)} className={`h-9 w-full rounded border px-3 text-xs font-semibold transition ${contourCut ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>{contourCut ? "Enabled" : "Disabled"}</button> },
