@@ -243,8 +243,30 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
     window.setTimeout(() => setAdded(false), 1800);
   }
 
-  const previewWidth = pricing ? Math.max(240, Math.min(640, pricing.widthIn * 2.8)) : 320;
-  const previewHeight = pricing ? Math.max(180, Math.min(460, pricing.heightIn * 2.8)) : 220;
+  const preview = useMemo(() => {
+    if (!pricing) return { width: 320, height: 220 };
+
+    const maxPreviewWidth = 640;
+    const maxPreviewHeight = 460;
+    const minPreviewWidth = 240;
+    const minPreviewHeight = 180;
+
+    const fitScale = Math.min(maxPreviewWidth / pricing.widthIn, maxPreviewHeight / pricing.heightIn);
+    const fittedWidth = pricing.widthIn * fitScale;
+    const fittedHeight = pricing.heightIn * fitScale;
+
+    if (fittedWidth < minPreviewWidth || fittedHeight < minPreviewHeight) {
+      const boost = Math.max(minPreviewWidth / fittedWidth, minPreviewHeight / fittedHeight);
+      const boostedWidth = fittedWidth * boost;
+      const boostedHeight = fittedHeight * boost;
+
+      if (boostedWidth <= maxPreviewWidth && boostedHeight <= maxPreviewHeight) {
+        return { width: boostedWidth, height: boostedHeight };
+      }
+    }
+
+    return { width: fittedWidth, height: fittedHeight };
+  }, [pricing]);
   const toolbarPanels: BuilderBottomToolbarPanel[] = [
     {
       id: "artwork",
@@ -500,7 +522,7 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
                   <>
                     <div
                       className="relative border border-zinc-300 bg-white shadow-[0_26px_70px_rgba(15,23,42,0.13)]"
-                      style={{ width: previewWidth, height: previewHeight }}
+                      style={{ width: preview.width, height: preview.height }}
                     >
                       <div className="pointer-events-none absolute left-0 right-0 flex flex-col gap-1" style={{ bottom: "calc(100% + 4px)" }}>
                         <div className="text-center text-[10px] font-semibold uppercase tracking-[0.14em] text-zinc-500">↓ TOP OF IMAGE ↓</div>
