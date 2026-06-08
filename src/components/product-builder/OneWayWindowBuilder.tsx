@@ -74,7 +74,7 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [uploadedPdf, setUploadedPdf] = useState<string | null>(null);
   const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null);
-  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);`r`n  const [imageDisplayMode, setImageDisplayMode] = useState<"fit" | "stretch">("fit");
   const [uploadingArtwork, setUploadingArtwork] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
@@ -413,7 +413,7 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
                           alt="Uploaded One Way Window artwork preview"
                           fill
                           unoptimized
-                          className="object-fill"
+                          className={imageDisplayMode === "stretch" ? "object-fill" : "object-contain"}
                         />
                       ) : uploadedPdf ? (
                         <>
@@ -464,7 +464,30 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
 
             <BuilderBottomToolbar
               panels={[
-                { id: "artwork", title: "Artwork", value: uploadedFileName ? "Uploaded" : "No file", width: 420, content: <><label className="inline-flex h-10 w-full cursor-pointer items-center justify-center rounded border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-700 hover:border-zinc-400"><input type="file" accept="image/*,.pdf,.ai,.eps,.psd,.svg" className="hidden" onChange={onUploadArtwork} />{uploadingArtwork ? "Uploading..." : uploadedFileName ? "Replace Artwork" : "Upload Artwork"}</label>{uploadedFileName && <div className="flex items-center justify-between gap-2 rounded border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-600"><span className="truncate">{uploadedFileName}</span><button type="button" onClick={clearArtwork} className="font-semibold text-zinc-500 hover:text-zinc-900">Remove</button></div>}{uploadError && <div className="text-xs font-medium text-red-600">{uploadError}</div>}</> },
+                { id: "artwork", title: "Artwork", value: uploadedFileName ? "Uploaded" : "No file", width: 420, content: <><label className="inline-flex h-10 w-full cursor-pointer items-center justify-center rounded border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-700 hover:border-zinc-400"><input type="file" accept="image/*,.pdf,.ai,.eps,.psd,.svg" className="hidden" onChange={onUploadArtwork} />{uploadingArtwork ? "Uploading..." : uploadedFileName ? "Replace Artwork" : "Upload Artwork"}</label><div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => setImageDisplayMode("fit")}
+              className={`h-9 rounded border px-3 text-xs font-semibold transition ${
+                imageDisplayMode === "fit"
+                  ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]"
+                  : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"
+              }`}
+            >
+              Fit
+            </button>
+            <button
+              type="button"
+              onClick={() => setImageDisplayMode("stretch")}
+              className={`h-9 rounded border px-3 text-xs font-semibold transition ${
+                imageDisplayMode === "stretch"
+                  ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]"
+                  : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"
+              }`}
+            >
+              Stretch
+            </button>
+          </div>{uploadedFileName && <div className="flex items-center justify-between gap-2 rounded border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-600"><span className="truncate">{uploadedFileName}</span><button type="button" onClick={clearArtwork} className="font-semibold text-zinc-500 hover:text-zinc-900">Remove</button></div>}{uploadError && <div className="text-xs font-medium text-red-600">{uploadError}</div>}</> },
                 { id: "size", title: "Size", value: pricing ? `${formatInches(pricing.widthIn)} x ${formatInches(pricing.heightIn)}` : "Set dimensions", status: widthError || heightError ? "alert" : "ok", width: 360, content: (<SizeInputPanel widthFeet={widthFeet} widthInches={widthInches} heightFeet={heightFeet} heightInches={heightInches} onWidthFeetChange={setWidthFeet} onWidthInchesChange={setWidthInches} onHeightFeetChange={setHeightFeet} onHeightInchesChange={setHeightInches} onWidthNormalize={(f, i) => { setWidthFeet(f); setWidthInches(i); }} onHeightNormalize={(f, i) => { setHeightFeet(f); setHeightInches(i); }} error={widthError || heightError} helper="Max width 50 in. Height up to 25 ft 0 in." />) },
                 { id: "material", title: "Material", value: selectedMaterial.label, width: 320, content: <select value={material} onChange={(event) => setMaterial(event.target.value as OneWayWindowMaterial)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm">{ONE_WAY_MATERIAL_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select> },
                 { id: "finish", title: "Laminate / Rush", value: [laminate ? "Laminate" : null, rush ? "Rush" : null].filter(Boolean).join(" / ") || "None", width: 360, content: <div className="grid grid-cols-2 gap-1"><button type="button" onClick={() => setLaminate((v) => !v)} className={`h-9 rounded border px-3 text-xs font-semibold transition ${laminate ? "border-sky-300 bg-sky-50 text-sky-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Laminate</button><button type="button" onClick={() => setRush((v) => !v)} className={`h-9 rounded border px-3 text-xs font-semibold transition ${rush ? "border-sky-300 bg-sky-50 text-sky-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Rush</button></div> },

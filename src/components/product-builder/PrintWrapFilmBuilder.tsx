@@ -170,7 +170,7 @@ export default function PrintWrapFilmBuilder({ productId = 136 }: PrintWrapFilmB
   const [added, setAdded] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null);
-  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);`r`n  const [imageDisplayMode, setImageDisplayMode] = useState<"fit" | "stretch">("fit");
   const [uploadingArtwork, setUploadingArtwork] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
@@ -453,7 +453,7 @@ export default function PrintWrapFilmBuilder({ productId = 136 }: PrintWrapFilmB
                       <div className="absolute inset-0 overflow-hidden">
                         <div className="absolute inset-0 bg-[#f6f6f6]" />
                         {uploadedImage ? (
-                          <Image src={uploadedImage} alt="Uploaded print wrap artwork preview" fill unoptimized className="object-contain" />
+                          <Image src={uploadedImage} alt="Uploaded print wrap artwork preview" fill unoptimized className={imageDisplayMode === "stretch" ? "object-fill" : "object-contain"} />
                         ) : uploadedFileUrl && uploadedFileName?.toLowerCase().endsWith(".pdf") ? (
                           <div className="relative h-full w-full">
                             <iframe
@@ -503,7 +503,30 @@ export default function PrintWrapFilmBuilder({ productId = 136 }: PrintWrapFilmB
 
             <BuilderBottomToolbar
               panels={[
-                { id: "artwork", title: "Artwork", value: uploadedFileName ? "Uploaded" : "No file", width: 420, content: <><label className="inline-flex h-10 w-full cursor-pointer items-center justify-center rounded border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-700 hover:border-zinc-400"><input type="file" accept="image/*,.pdf,.ai,.eps,.psd,.svg" className="hidden" onChange={onUploadArtwork} />{uploadingArtwork ? "Uploading..." : uploadedFileName ? "Replace Artwork" : "Upload Artwork"}</label>{uploadedFileName && <div className="flex items-center justify-between gap-2 rounded border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-600"><span className="truncate">{uploadedFileName}</span><button type="button" onClick={clearArtwork} className="font-semibold text-zinc-500 hover:text-zinc-900">Remove</button></div>}{uploadError && <div className="text-xs font-medium text-red-600">{uploadError}</div>}</> },
+                { id: "artwork", title: "Artwork", value: uploadedFileName ? "Uploaded" : "No file", width: 420, content: <><label className="inline-flex h-10 w-full cursor-pointer items-center justify-center rounded border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-700 hover:border-zinc-400"><input type="file" accept="image/*,.pdf,.ai,.eps,.psd,.svg" className="hidden" onChange={onUploadArtwork} />{uploadingArtwork ? "Uploading..." : uploadedFileName ? "Replace Artwork" : "Upload Artwork"}</label><div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => setImageDisplayMode("fit")}
+              className={`h-9 rounded border px-3 text-xs font-semibold transition ${
+                imageDisplayMode === "fit"
+                  ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]"
+                  : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"
+              }`}
+            >
+              Fit
+            </button>
+            <button
+              type="button"
+              onClick={() => setImageDisplayMode("stretch")}
+              className={`h-9 rounded border px-3 text-xs font-semibold transition ${
+                imageDisplayMode === "stretch"
+                  ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]"
+                  : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"
+              }`}
+            >
+              Stretch
+            </button>
+          </div>{uploadedFileName && <div className="flex items-center justify-between gap-2 rounded border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-600"><span className="truncate">{uploadedFileName}</span><button type="button" onClick={clearArtwork} className="font-semibold text-zinc-500 hover:text-zinc-900">Remove</button></div>}{uploadError && <div className="text-xs font-medium text-red-600">{uploadError}</div>}</> },
                 { id: "size", title: "Size", value: pricing ? `${formatInches(pricing.widthIn)} x ${formatInches(pricing.heightIn)}` : "Set dimensions", status: widthError || heightError ? "alert" : "ok", width: 360, content: (<SizeInputPanel widthFeet={widthFeet} widthInches={widthInches} heightFeet={heightFeet} heightInches={heightInches} onWidthFeetChange={setWidthFeet} onWidthInchesChange={setWidthInches} onHeightFeetChange={setHeightFeet} onHeightInchesChange={setHeightInches} onWidthNormalize={(f, i) => { setWidthFeet(f); setWidthInches(i); }} onHeightNormalize={(f, i) => { setHeightFeet(f); setHeightInches(i); }} error={widthError || heightError} helper="" />) },
                 { id: "split", title: "Split Direction", value: splitDirection === "auto" ? "Auto" : splitDirection.charAt(0).toUpperCase() + splitDirection.slice(1), width: 320, content: <select value={splitDirection} onChange={(event) => setSplitDirection(event.target.value as PrintWrapSplitDirection)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm text-zinc-700 transition hover:border-[var(--brand-accent)] focus:border-[var(--brand-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary-soft)]"><option value="auto">Auto</option><option value="vertical">Vertical</option><option value="horizontal">Horizontal</option></select> },
                 { id: "finish", title: "Contour / Rush", value: [contourCut ? "Contour" : "No contour", rush ? "Rush" : "Standard"].join(" / "), width: 320, content: <div className="grid grid-cols-2 gap-1"><button type="button" onClick={() => setContourCut((value) => !value)} className={`h-9 rounded border px-3 text-xs font-semibold transition ${contourCut ? "border-[var(--brand-primary)] bg-[linear-gradient(90deg,var(--brand-primary-soft),var(--brand-accent-soft))] text-[var(--brand-primary)]" : "border-zinc-300 bg-white text-zinc-700 hover:border-[var(--brand-accent)]"}`}>Contour</button><button type="button" onClick={() => setRush((value) => !value)} className={`h-9 rounded border px-3 text-xs font-semibold transition ${rush ? "border-[var(--brand-primary)] bg-[linear-gradient(90deg,var(--brand-primary-soft),var(--brand-accent-soft))] text-[var(--brand-primary)]" : "border-zinc-300 bg-white text-zinc-700 hover:border-[var(--brand-accent)]"}`}>Rush</button></div> },

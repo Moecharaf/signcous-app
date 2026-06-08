@@ -158,7 +158,7 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
   const [added, setAdded] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null);
-  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);`r`n  const [imageDisplayMode, setImageDisplayMode] = useState<"fit" | "stretch">("fit");
   const [uploadingArtwork, setUploadingArtwork] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
@@ -521,7 +521,7 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
                             alt="Uploaded Dual View artwork preview"
                             fill
                             unoptimized
-                            className="object-fill"
+                            className={imageDisplayMode === "stretch" ? "object-fill" : "object-contain"}
                           />
                         ) : uploadedFileUrl && uploadedFileName?.toLowerCase().endsWith(".pdf") ? (
                           <div className="relative h-full w-full">
@@ -570,7 +570,30 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
 
             <BuilderBottomToolbar
               panels={[
-                { id: "artwork", title: "Artwork", value: uploadedFileName ? "Uploaded" : "No file", width: 420, content: <><label className="inline-flex h-10 w-full cursor-pointer items-center justify-center rounded border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-700 hover:border-zinc-400"><input type="file" accept="image/*,.pdf,.ai,.eps,.psd,.svg" className="hidden" onChange={onUploadArtwork} />{uploadingArtwork ? "Uploading..." : uploadedFileName ? "Replace Artwork" : "Upload Artwork"}</label>{uploadedFileName && <div className="flex items-center justify-between gap-2 rounded border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-600"><span className="truncate">{uploadedFileName}</span><button type="button" onClick={clearArtwork} className="font-semibold text-zinc-500 hover:text-zinc-900">Remove</button></div>}{uploadError && <div className="text-xs font-medium text-red-600">{uploadError}</div>}</> },
+                { id: "artwork", title: "Artwork", value: uploadedFileName ? "Uploaded" : "No file", width: 420, content: <><label className="inline-flex h-10 w-full cursor-pointer items-center justify-center rounded border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-700 hover:border-zinc-400"><input type="file" accept="image/*,.pdf,.ai,.eps,.psd,.svg" className="hidden" onChange={onUploadArtwork} />{uploadingArtwork ? "Uploading..." : uploadedFileName ? "Replace Artwork" : "Upload Artwork"}</label><div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => setImageDisplayMode("fit")}
+              className={`h-9 rounded border px-3 text-xs font-semibold transition ${
+                imageDisplayMode === "fit"
+                  ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]"
+                  : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"
+              }`}
+            >
+              Fit
+            </button>
+            <button
+              type="button"
+              onClick={() => setImageDisplayMode("stretch")}
+              className={`h-9 rounded border px-3 text-xs font-semibold transition ${
+                imageDisplayMode === "stretch"
+                  ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]"
+                  : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"
+              }`}
+            >
+              Stretch
+            </button>
+          </div>{uploadedFileName && <div className="flex items-center justify-between gap-2 rounded border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-600"><span className="truncate">{uploadedFileName}</span><button type="button" onClick={clearArtwork} className="font-semibold text-zinc-500 hover:text-zinc-900">Remove</button></div>}{uploadError && <div className="text-xs font-medium text-red-600">{uploadError}</div>}</> },
                 { id: "print-side", title: "Print Side", value: side === "double" ? "Double" : "Single", width: 320, content: <div className="grid grid-cols-2 gap-1"><button type="button" onClick={() => handleSideChange("single")} className={`h-9 rounded border px-3 text-xs font-semibold transition ${side === "single" ? "border-sky-300 bg-sky-50 text-sky-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Single</button><button type="button" onClick={() => handleSideChange("double")} className={`h-9 rounded border px-3 text-xs font-semibold transition ${side === "double" ? "border-sky-300 bg-sky-50 text-sky-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Double</button></div> },
                 {
                   id: "size",
