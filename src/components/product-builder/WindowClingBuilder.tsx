@@ -139,8 +139,21 @@ export default function WindowClingBuilder({ productId = 137 }: WindowClingBuild
 
   const widthError = width <= 0 ? "Width must be greater than 0." : null;
   const heightError = height <= 0 ? "Height must be greater than 0." : null;
+  const dimensionConstraintError = useMemo(() => {
+    if (width <= 0 || height <= 0) return null;
 
-  const isValid = !widthError && !heightError && width > 0 && height > 0;
+    const shortSide = Math.min(width, height);
+    const longSide = Math.max(width, height);
+
+    if (shortSide > WINDOW_CLING_MAX_WIDTH_IN || longSide > WINDOW_CLING_MAX_HEIGHT_IN) {
+      return `The maximum dimensions for this material are ${WINDOW_CLING_MAX_WIDTH_IN} inches by ${WINDOW_CLING_MAX_HEIGHT_IN} inches.`;
+    }
+
+    return null;
+  }, [width, height]);
+
+  const sizeError = widthError || heightError || dimensionConstraintError;
+  const isValid = !sizeError && width > 0 && height > 0;
 
   const pricing = useMemo(
     () => (isValid ? calculateWindowClingPrice(width, height, { contourCut }, safeQuantity) : null),
@@ -437,6 +450,16 @@ export default function WindowClingBuilder({ productId = 137 }: WindowClingBuild
                       </div>
                     </div>
                   </>
+                ) : dimensionConstraintError ? (
+                  <div className="flex flex-col items-center justify-center rounded border-2 border-red-500 bg-white px-10 py-8 text-center shadow-lg" style={{ minWidth: 280, maxWidth: 440 }}>
+                    <div className="text-base font-semibold leading-relaxed text-red-600">
+                      The maximum dimensions for this material are{" "}
+                      <span className="font-bold">
+                        {WINDOW_CLING_MAX_WIDTH_IN} inches by {WINDOW_CLING_MAX_HEIGHT_IN} inches
+                      </span>
+                      .
+                    </div>
+                  </div>
                 ) : (
                   <div className="flex items-center justify-center">
                     <div className="flex h-[330px] w-[min(500px,calc(100vw-40px))] items-center justify-center border-[1.5px] border-dashed border-zinc-400 bg-[#f7f7f7] text-center">
@@ -460,7 +483,7 @@ export default function WindowClingBuilder({ productId = 137 }: WindowClingBuild
             <BuilderBottomToolbar
               panels={[
                 { id: "artwork", title: "Artwork", value: uploadedFileName ? "Uploaded" : "No file", width: 420, content: <><label className="inline-flex h-10 w-full cursor-pointer items-center justify-center rounded border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-700 hover:border-zinc-400"><input type="file" accept="image/*,.pdf,.ai,.eps,.psd,.svg" className="hidden" onChange={onUploadArtwork} />{uploadingArtwork ? "Uploading..." : uploadedFileName ? "Replace Artwork" : "Upload Artwork"}</label>{uploadedFileName && <div className="flex items-center justify-between gap-2 rounded border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-600"><span className="truncate">{uploadedFileName}</span><button type="button" onClick={clearArtwork} className="font-semibold text-zinc-500 hover:text-zinc-900">Remove</button></div>}{uploadError && <div className="text-xs font-medium text-red-600">{uploadError}</div>}</> },
-                { id: "size", title: "Size", value: formatSizeLabel(width, height), status: widthError || heightError ? "alert" : "ok", width: 360, content: (<SizeInputPanel widthFeet={widthFeet} widthInches={widthInches} heightFeet={heightFeet} heightInches={heightInches} onWidthFeetChange={setWidthFeet} onWidthInchesChange={setWidthInches} onHeightFeetChange={setHeightFeet} onHeightInchesChange={setHeightInches} onWidthNormalize={(f, i) => { setWidthFeet(f); setWidthInches(i); }} onHeightNormalize={(f, i) => { setHeightFeet(f); setHeightInches(i); }} error={widthError || heightError} helper="" />) },
+                { id: "size", title: "Size", value: formatSizeLabel(width, height), status: sizeError ? "alert" : "ok", width: 360, content: (<SizeInputPanel widthFeet={widthFeet} widthInches={widthInches} heightFeet={heightFeet} heightInches={heightInches} onWidthFeetChange={setWidthFeet} onWidthInchesChange={setWidthInches} onHeightFeetChange={setHeightFeet} onHeightInchesChange={setHeightInches} onWidthNormalize={(f, i) => { setWidthFeet(f); setWidthInches(i); }} onHeightNormalize={(f, i) => { setHeightFeet(f); setHeightInches(i); }} error={sizeError} helper="" />) },
                 { id: "application", title: "Application", value: application, width: 280, content: <select value={application} onChange={(event) => setApplication(event.target.value as WindowClingApplication)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"><option value="inside">Inside</option><option value="outside">Outside</option></select> },
                 { id: "viewable", title: "Viewable", value: viewable, width: 280, content: <select value={viewable} onChange={(event) => setViewable(event.target.value as WindowClingViewable)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"><option value="inside">Inside</option><option value="outside">Outside</option></select> },
                 { id: "contour", title: "Contour Cut", value: contourCut ? "Enabled" : "Disabled", width: 280, content: <button type="button" onClick={() => setContourCut((value) => !value)} className={`h-9 w-full rounded border px-3 text-xs font-semibold transition ${contourCut ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>{contourCut ? "Enabled" : "Disabled"}</button> },
