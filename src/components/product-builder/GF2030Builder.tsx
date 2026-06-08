@@ -179,7 +179,7 @@ export default function GF2030Builder({ productId = 138 }: GF2030BuilderProps) {
   const height = composeDimensionInches(heightFeet, heightInches);
   const safeQuantity = 1;
 
-  const widthError = width <= 0 ? "Width must be greater than 0." : width > 300 ? "Maximum width is 25 ft 0 in." : null;
+  const widthError = width <= 0 ? "Width must be greater than 0." : null;
   const heightError = height <= 0 ? "Height must be greater than 0." : null;
   const isValid = !widthError && !heightError && width > 0 && height > 0;
 
@@ -394,7 +394,7 @@ export default function GF2030Builder({ productId = 138 }: GF2030BuilderProps) {
           onWidthNormalize={(f, i) => { setWidthFeet(f); setWidthInches(i); }}
           onHeightNormalize={(f, i) => { setHeightFeet(f); setHeightInches(i); }}
           error={widthError || heightError}
-          helper="Up to 25 ft 0 in per side."
+          helper=""
         />
       ),
     },
