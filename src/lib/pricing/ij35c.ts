@@ -83,9 +83,10 @@ export function resolveSplitDirection(
   const needsVertical = widthIn > IJ35C_MAX_ROLL_WIDTH;
   const needsHorizontal = heightIn > IJ35C_MAX_ROLL_WIDTH;
 
-  if (!needsVertical && !needsHorizontal) return "none";
-  if (needsVertical && !needsHorizontal) return "vertical";
-  if (!needsVertical && needsHorizontal) return "horizontal";
+  // Auto mode: only split if BOTH dimensions exceed roll width.
+  // If one dimension fits, the print can be oriented so that dimension runs
+  // across the roll, producing a single panel (matches Signs365 behaviour).
+  if (!needsVertical || !needsHorizontal) return "none";
 
   const verticalPanels = Math.ceil(widthIn / IJ35C_MAX_ROLL_WIDTH);
   const horizontalPanels = Math.ceil(heightIn / IJ35C_MAX_ROLL_WIDTH);

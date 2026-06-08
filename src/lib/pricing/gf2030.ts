@@ -82,9 +82,10 @@ export function resolveSplitDirection(
   const needsVertical = widthIn > GF2030_MAX_ROLL_WIDTH;
   const needsHorizontal = heightIn > GF2030_MAX_ROLL_WIDTH;
 
-  if (!needsVertical && !needsHorizontal) return "none";
-  if (needsVertical && !needsHorizontal) return "vertical";
-  if (!needsVertical && needsHorizontal) return "horizontal";
+  // Auto mode: only split if BOTH dimensions exceed roll width.
+  // If one dimension fits, the print can be oriented so that dimension runs
+  // across the roll, producing a single panel.
+  if (!needsVertical || !needsHorizontal) return "none";
 
   const verticalPanels = Math.ceil(widthIn / GF2030_MAX_ROLL_WIDTH);
   const horizontalPanels = Math.ceil(heightIn / GF2030_MAX_ROLL_WIDTH);
