@@ -43,7 +43,6 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
   const [widthInches, setWidthInches] = useState("0");
   const [heightFeet, setHeightFeet] = useState("0");
   const [heightInches, setHeightInches] = useState("0");
-  const [quantity, setQuantity] = useState(1);
   const [material, setMaterial] = useState<OneWayWindowMaterial>("50/50");
   const [laminate, setLaminate] = useState(false);
   const [rush, setRush] = useState(false);
@@ -59,7 +58,7 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
 
   const width = composeDimensionInches(widthFeet, widthInches);
   const height = composeDimensionInches(heightFeet, heightInches);
-  const safeQuantity = Math.max(1, Math.floor(quantity) || 1);
+  const safeQuantity = 1;
 
   const widthError = width <= 0 ? "Width must be greater than 0." : null;
   const heightError = height <= 0 ? "Height must be greater than 0." : null;
@@ -471,10 +470,8 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
             </button>
           </div>{uploadedFileName && <div className="flex items-center justify-between gap-2 rounded border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-600"><span className="truncate">{uploadedFileName}</span><button type="button" onClick={clearArtwork} className="font-semibold text-zinc-500 hover:text-zinc-900">Remove</button></div>}{uploadError && <div className="text-xs font-medium text-red-600">{uploadError}</div>}</> },
                 { id: "size", title: "Size", value: pricing ? `${formatInches(pricing.widthIn)} x ${formatInches(pricing.heightIn)}` : "Set dimensions", status: widthError || heightError || rollConstraintError ? "alert" : "ok", width: 360, content: (<SizeInputPanel widthFeet={widthFeet} widthInches={widthInches} heightFeet={heightFeet} heightInches={heightInches} onWidthFeetChange={setWidthFeet} onWidthInchesChange={setWidthInches} onHeightFeetChange={setHeightFeet} onHeightInchesChange={setHeightInches} onWidthNormalize={(f, i) => { setWidthFeet(f); setWidthInches(i); }} onHeightNormalize={(f, i) => { setHeightFeet(f); setHeightInches(i); }} error={widthError || heightError || rollConstraintError} helper="Single-roll product: one side must be 50 in or less." />) },
-                { id: "orientation", title: "Orientation", value: orientation === "portrait" ? "Portrait" : orientation === "landscape" ? "Landscape" : "Invalid", width: 280, content: <div className="h-9 w-full rounded border border-zinc-300 bg-zinc-50 px-2 text-sm font-medium leading-9 text-zinc-700">{orientation === "portrait" ? "Portrait (width <= 50\")" : orientation === "landscape" ? "Landscape (height <= 50\")" : "Invalid size"}</div> },
                 { id: "material", title: "Material", value: selectedMaterial.label, width: 320, content: <select value={material} onChange={(event) => setMaterial(event.target.value as OneWayWindowMaterial)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm">{ONE_WAY_MATERIAL_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select> },
                 { id: "finish", title: "Laminate / Rush", value: [laminate ? "Laminate" : null, rush ? "Rush" : null].filter(Boolean).join(" / ") || "None", width: 360, content: <div className="grid grid-cols-2 gap-1"><button type="button" onClick={() => setLaminate((v) => !v)} className={`h-9 rounded border px-3 text-xs font-semibold transition ${laminate ? "border-sky-300 bg-sky-50 text-sky-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Laminate</button><button type="button" onClick={() => setRush((v) => !v)} className={`h-9 rounded border px-3 text-xs font-semibold transition ${rush ? "border-sky-300 bg-sky-50 text-sky-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Rush</button></div> },
-                { id: "quantity", title: "Quantity", value: String(safeQuantity), width: 260, content: <input type="number" min={1} value={safeQuantity} onChange={(event) => setQuantity(Math.max(1, Math.floor(Number(event.target.value) || 1)))} className="h-9 w-full rounded border border-zinc-300 px-2 text-sm" /> },
               ] satisfies BuilderBottomToolbarPanel[]}
               action={<Button className="h-10 w-full rounded bg-[var(--brand-primary)] text-xs font-semibold text-white hover:bg-[var(--brand-primary-hover)]" disabled={!isValid} onClick={addToCart}>{added ? "Added" : "Add"}</Button>}
             />
