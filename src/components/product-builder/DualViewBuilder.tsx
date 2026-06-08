@@ -158,7 +158,8 @@ export default function DualViewBuilder({ productId = 0 }: DualViewBuilderProps)
   const [added, setAdded] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null);
-  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);`r`n  const [imageDisplayMode, setImageDisplayMode] = useState<"fit" | "stretch">("fit");
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  const [imageDisplayMode, setImageDisplayMode] = useState<"fit" | "stretch">("fit");
   const [uploadingArtwork, setUploadingArtwork] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
