@@ -36,28 +36,6 @@ function formatInches(value: number): string {
   return `${text.replace(/\.0+$/, "")}"`;
 }
 
-function PanelSplitPreview({ panelCount }: { panelCount: number }) {
-  if (panelCount <= 1) return null;
-
-  const lines = Array.from({ length: panelCount - 1 }, (_, i) => i + 1);
-
-  return (
-    <>
-      {lines.map((lineNumber) => {
-        const x = (lineNumber / panelCount) * 100;
-        return (
-          <div key={`v-${lineNumber}`} className="absolute inset-y-0" style={{ left: `${x}%` }}>
-            <div className="absolute inset-y-0 border-l-2 border-dashed border-[var(--brand-primary)]" />
-            <div className="absolute left-1/2 top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--brand-primary)] text-center text-xs font-bold leading-5 text-white">
-              !
-            </div>
-          </div>
-        );
-      })}
-    </>
-  );
-}
-
 export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuilderProps) {
   const cart = useCart();
 
@@ -83,14 +61,19 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
   const height = composeDimensionInches(heightFeet, heightInches);
   const safeQuantity = Math.max(1, Math.floor(quantity) || 1);
 
-  const widthError =
-    width <= 0
-      ? "Width must be greater than 0."
-      : width > ONE_WAY_MAX_PANEL_WIDTH
-      ? `Maximum width is ${ONE_WAY_MAX_PANEL_WIDTH} inches.`
+  const widthError = width <= 0 ? "Width must be greater than 0." : null;
+  const heightError = height <= 0 ? "Height must be greater than 0." : null;
+  const orientation = useMemo(() => {
+    if (width <= 0 || height <= 0) return null;
+    if (width <= ONE_WAY_MAX_PANEL_WIDTH) return "portrait" as const;
+    if (height <= ONE_WAY_MAX_PANEL_WIDTH) return "landscape" as const;
+    return null;
+  }, [width, height]);
+  const rollConstraintError =
+    width > 0 && height > 0 && width > ONE_WAY_MAX_PANEL_WIDTH && height > ONE_WAY_MAX_PANEL_WIDTH
+      ? `Maximum roll width is ${ONE_WAY_MAX_PANEL_WIDTH} inches. At least one side must be ${ONE_WAY_MAX_PANEL_WIDTH} inches or less.`
       : null;
-  const heightError = height <= 0 ? "Height must be greater than 0." : height > 300 ? "Maximum height is 25 ft 0 in." : null;
-  const isValid = !widthError && !heightError && width > 0 && height > 0;
+  const isValid = !widthError && !heightError && !rollConstraintError && width > 0 && height > 0;
 
   const pricing = useMemo(
     () =>
@@ -240,9 +223,8 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
         custom_material: selectedMaterial.label,
         custom_laminate: laminate ? "Yes" : "No",
         custom_rush: rush ? "Yes" : "No",
-        custom_panel_count: String(pricing.panelCount),
-        custom_panel_size: `${formatInches(pricing.panelWidthIn)} x ${formatInches(pricing.panelHeightIn)}`,
-        custom_max_panel_width: `${ONE_WAY_MAX_PANEL_WIDTH}"`,
+        custom_orientation: orientation ?? pricing.orientation,
+        custom_max_roll_width: `${ONE_WAY_MAX_PANEL_WIDTH}"`,
         custom_area_sqft: pricing.areaSqFt.toFixed(2),
         custom_billed_sqft: pricing.billedSqFt.toFixed(2),
         custom_base_rate: `${formatCurrency(pricing.supplierRate)}/sq ft`,
@@ -348,7 +330,7 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
               }}
             >
               <div className="absolute left-5 top-5 rounded-md border border-zinc-200 bg-white px-3 py-1 text-xs font-medium text-zinc-600 shadow-sm">
-                Upload artwork to preview panel splits
+                Upload artwork to preview single-roll output
               </div>
 
               <div className="relative flex h-full items-center justify-center px-8 py-14">
@@ -439,7 +421,6 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
                           </div>
                         </div>
                       )}
-                      <PanelSplitPreview panelCount={pricing.panelCount} />
                       </div>
                     </div>
                   </>
@@ -489,7 +470,8 @@ export default function OneWayWindowBuilder({ productId = 0 }: OneWayWindowBuild
               Stretch
             </button>
           </div>{uploadedFileName && <div className="flex items-center justify-between gap-2 rounded border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-600"><span className="truncate">{uploadedFileName}</span><button type="button" onClick={clearArtwork} className="font-semibold text-zinc-500 hover:text-zinc-900">Remove</button></div>}{uploadError && <div className="text-xs font-medium text-red-600">{uploadError}</div>}</> },
-                { id: "size", title: "Size", value: pricing ? `${formatInches(pricing.widthIn)} x ${formatInches(pricing.heightIn)}` : "Set dimensions", status: widthError || heightError ? "alert" : "ok", width: 360, content: (<SizeInputPanel widthFeet={widthFeet} widthInches={widthInches} heightFeet={heightFeet} heightInches={heightInches} onWidthFeetChange={setWidthFeet} onWidthInchesChange={setWidthInches} onHeightFeetChange={setHeightFeet} onHeightInchesChange={setHeightInches} onWidthNormalize={(f, i) => { setWidthFeet(f); setWidthInches(i); }} onHeightNormalize={(f, i) => { setHeightFeet(f); setHeightInches(i); }} error={widthError || heightError} helper="Max width 50 in. Height up to 25 ft 0 in." />) },
+                { id: "size", title: "Size", value: pricing ? `${formatInches(pricing.widthIn)} x ${formatInches(pricing.heightIn)}` : "Set dimensions", status: widthError || heightError || rollConstraintError ? "alert" : "ok", width: 360, content: (<SizeInputPanel widthFeet={widthFeet} widthInches={widthInches} heightFeet={heightFeet} heightInches={heightInches} onWidthFeetChange={setWidthFeet} onWidthInchesChange={setWidthInches} onHeightFeetChange={setHeightFeet} onHeightInchesChange={setHeightInches} onWidthNormalize={(f, i) => { setWidthFeet(f); setWidthInches(i); }} onHeightNormalize={(f, i) => { setHeightFeet(f); setHeightInches(i); }} error={widthError || heightError || rollConstraintError} helper="Single-roll product: one side must be 50 in or less." />) },
+                { id: "orientation", title: "Orientation", value: orientation === "portrait" ? "Portrait" : orientation === "landscape" ? "Landscape" : "Invalid", width: 280, content: <div className="h-9 w-full rounded border border-zinc-300 bg-zinc-50 px-2 text-sm font-medium leading-9 text-zinc-700">{orientation === "portrait" ? "Portrait (width <= 50\")" : orientation === "landscape" ? "Landscape (height <= 50\")" : "Invalid size"}</div> },
                 { id: "material", title: "Material", value: selectedMaterial.label, width: 320, content: <select value={material} onChange={(event) => setMaterial(event.target.value as OneWayWindowMaterial)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm">{ONE_WAY_MATERIAL_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select> },
                 { id: "finish", title: "Laminate / Rush", value: [laminate ? "Laminate" : null, rush ? "Rush" : null].filter(Boolean).join(" / ") || "None", width: 360, content: <div className="grid grid-cols-2 gap-1"><button type="button" onClick={() => setLaminate((v) => !v)} className={`h-9 rounded border px-3 text-xs font-semibold transition ${laminate ? "border-sky-300 bg-sky-50 text-sky-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Laminate</button><button type="button" onClick={() => setRush((v) => !v)} className={`h-9 rounded border px-3 text-xs font-semibold transition ${rush ? "border-sky-300 bg-sky-50 text-sky-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Rush</button></div> },
                 { id: "quantity", title: "Quantity", value: String(safeQuantity), width: 260, content: <input type="number" min={1} value={safeQuantity} onChange={(event) => setQuantity(Math.max(1, Math.floor(Number(event.target.value) || 1)))} className="h-9 w-full rounded border border-zinc-300 px-2 text-sm" /> },

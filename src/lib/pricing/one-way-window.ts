@@ -2,6 +2,7 @@ import { calculateProductionFootprint, calculateRetailPrice } from "../pricing";
 
 export type OneWayWindowUnit = "inches" | "feet";
 export type OneWayWindowMaterial = "50/50" | "70/30";
+export type OneWayWindowOrientation = "portrait" | "landscape";
 
 export interface OneWayWindowPricingInput {
   width: number;
@@ -44,10 +45,11 @@ export interface OneWayWindowPricingResult {
   grandTotal: number;
   panelWidthIn: number;
   panelHeightIn: number;
+  orientation: OneWayWindowOrientation;
 }
 
 export const ONE_WAY_MINIMUM_PRICE = 25;
-export const ONE_WAY_MAX_PANEL_WIDTH = 50; // inches — STRICT
+export const ONE_WAY_MAX_PANEL_WIDTH = 50; // inches (roll width limit)
 export const ONE_WAY_SUPPLIER_RATE = 2.75; // per sq ft
 export const ONE_WAY_SUPPLIER_LAMINATE_RATE = 1.24; // per sq ft
 export const ONE_WAY_MARKUP_MULTIPLIER = 1.5;
@@ -71,7 +73,7 @@ function toInches(value: number, unit: OneWayWindowUnit): number {
 }
 
 export function calculateOneWayPanels(widthIn: number): number {
-  return Math.max(1, Math.ceil(widthIn / ONE_WAY_MAX_PANEL_WIDTH));
+  return 1;
 }
 
 export function calculateOneWayWindowPrice(input: OneWayWindowPricingInput): OneWayWindowPricingResult {
@@ -95,8 +97,8 @@ export function calculateOneWayWindowPrice(input: OneWayWindowPricingInput): One
   const rushCharge = input.rush ? contourAdjustedBase * (ONE_WAY_RUSH_MULTIPLIER - 1) : 0;
   const productionSubtotal = contourAdjustedBase + rushCharge;
 
-  // Panel splitting for artwork guidance only (no panel surcharge)
-  const panelCount = calculateOneWayPanels(widthIn);
+  // One Way Window is produced as one continuous roll print.
+  const panelCount = 1;
   const panelCost = 0;
   const preMinimumTotal = productionSubtotal;
   const retailBeforeMinimum = calculateRetailPrice(preMinimumTotal, ONE_WAY_MARKUP_MULTIPLIER);
@@ -106,8 +108,9 @@ export function calculateOneWayWindowPrice(input: OneWayWindowPricingInput): One
   const minimumApplied = retailBeforeMinimum < minimumWithMarkup;
   const perItemTotal = Math.max(retailBeforeMinimum, minimumWithMarkup);
 
-  const panelWidthIn = widthIn / panelCount;
+  const panelWidthIn = widthIn;
   const panelHeightIn = heightIn;
+  const orientation: OneWayWindowOrientation = widthIn <= ONE_WAY_MAX_PANEL_WIDTH ? "portrait" : "landscape";
 
   return {
     enteredWidthIn: Math.max(0, toInches(input.width, input.unit)),
@@ -139,5 +142,6 @@ export function calculateOneWayWindowPrice(input: OneWayWindowPricingInput): One
     grandTotal: Math.round(perItemTotal * quantity * 100) / 100,
     panelWidthIn,
     panelHeightIn,
+    orientation,
   };
 }
