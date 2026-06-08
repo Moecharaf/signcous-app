@@ -162,7 +162,6 @@ export default function GF830Builder({ productId = 0 }: GF830BuilderProps) {
   const [widthInches, setWidthInches] = useState("0");
   const [heightFeet, setHeightFeet] = useState("0");
   const [heightInches, setHeightInches] = useState("0");
-  const [quantity, setQuantity] = useState(1);
   const [laminate, setLaminate] = useState<GF830Laminate>("gloss");
   const [contourCut, setContourCut] = useState(false);
   const [rush, setRush] = useState(false);
@@ -178,10 +177,10 @@ export default function GF830Builder({ productId = 0 }: GF830BuilderProps) {
 
   const width = composeDimensionInches(widthFeet, widthInches);
   const height = composeDimensionInches(heightFeet, heightInches);
-  const safeQuantity = Math.max(1, Math.floor(quantity) || 1);
+  const safeQuantity = 1;
 
-  const widthError = width <= 0 ? "Width must be greater than 0." : width > 300 ? "Maximum width is 25 ft 0 in." : null;
-  const heightError = height <= 0 ? "Height must be greater than 0." : height > 300 ? "Maximum height is 25 ft 0 in." : null;
+  const widthError = width <= 0 ? "Width must be greater than 0." : null;
+  const heightError = height <= 0 ? "Height must be greater than 0." : null;
   const isValid = !widthError && !heightError && width > 0 && height > 0;
 
   const pricing = useMemo(
@@ -594,13 +593,6 @@ export default function GF830Builder({ productId = 0 }: GF830BuilderProps) {
                   value: [contourCut ? "Contour" : "No contour", rush ? "Rush" : "Standard"].join(" / "),
                   width: 320,
                   content: <div className="grid grid-cols-2 gap-1"><button type="button" onClick={() => setContourCut((value) => !value)} className={`h-9 rounded border px-3 text-xs font-semibold transition ${contourCut ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Contour</button><button type="button" onClick={() => setRush((value) => !value)} className={`h-9 rounded border px-3 text-xs font-semibold transition ${rush ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>Rush</button></div>,
-                },
-                {
-                  id: "quantity",
-                  title: "Quantity",
-                  value: String(safeQuantity),
-                  width: 260,
-                  content: <input type="number" min={1} value={safeQuantity} onChange={(event) => setQuantity(Math.max(1, Math.floor(Number(event.target.value) || 1)))} className="h-9 w-full rounded border border-zinc-300 px-2 text-sm" />,
                 },
               ] satisfies BuilderBottomToolbarPanel[]}
               action={<Button className="h-10 w-full rounded bg-[var(--brand-primary)] text-xs font-semibold text-white hover:bg-[var(--brand-primary-hover)]" disabled={!isValid} onClick={addToCart}>{added ? "Added" : "Add"}</Button>}
