@@ -415,9 +415,6 @@ export default function OrajetClearBuilder({ productId = 0 }: OrajetClearBuilder
                 Upload artwork to preview panel splits
               </div>
 
-              <div className="pointer-events-none absolute left-1/2 top-5 -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
-                Top of Image
-              </div>
               <div className="pointer-events-none absolute bottom-5 left-1/2 -translate-x-1/2 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
                 Front Side
               </div>
