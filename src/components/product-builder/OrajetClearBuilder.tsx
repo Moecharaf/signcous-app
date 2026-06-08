@@ -9,12 +9,10 @@ import AdhesivePricingModal from "@/components/product-builder/AdhesivePricingMo
 import { ADHESIVE_PRICING_CONFIGS } from "@/components/product-builder/adhesive-pricing-data";
 import { useCart } from "@/context/CartContext";
 import {
-  ORAJET_CLEAR_LAMINATE_OPTIONS,
   ORAJET_CLEAR_MARKUP_MULTIPLIER,
   ORAJET_CLEAR_MAX_PANEL_WIDTH,
   ORAJET_CLEAR_SUPPLIER_RATE,
   calculateOrajetClearPrice,
-  type OrajetClearLaminate,
   type OrajetClearSplitDirection,
 } from "@/lib/pricing/orajet-clear";
 
@@ -161,8 +159,6 @@ export default function OrajetClearBuilder({ productId = 0 }: OrajetClearBuilder
   const [widthInches, setWidthInches] = useState("0");
   const [heightFeet, setHeightFeet] = useState("0");
   const [heightInches, setHeightInches] = useState("0");
-  const [quantity, setQuantity] = useState(1);
-  const [laminate, setLaminate] = useState<OrajetClearLaminate>("gloss");
   const [contourCut, setContourCut] = useState(false);
   const [splitDirection, setSplitDirection] = useState<OrajetClearSplitDirection>("auto");
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
@@ -176,10 +172,10 @@ export default function OrajetClearBuilder({ productId = 0 }: OrajetClearBuilder
 
   const width = composeDimensionInches(widthFeet, widthInches);
   const height = composeDimensionInches(heightFeet, heightInches);
-  const safeQuantity = Math.max(1, Math.floor(quantity) || 1);
+  const safeQuantity = 1;
 
-  const widthError = width <= 0 ? "Width must be greater than 0." : width > 300 ? "Maximum width is 25 ft 0 in." : null;
-  const heightError = height <= 0 ? "Height must be greater than 0." : height > 300 ? "Maximum height is 25 ft 0 in." : null;
+  const widthError = width <= 0 ? "Width must be greater than 0." : null;
+  const heightError = height <= 0 ? "Height must be greater than 0." : null;
   const isValid = !widthError && !heightError && width > 0 && height > 0;
 
   const pricing = useMemo(
@@ -198,7 +194,6 @@ export default function OrajetClearBuilder({ productId = 0 }: OrajetClearBuilder
     [width, height, safeQuantity, contourCut, splitDirection, isValid]
   );
 
-  const selectedLaminate = ORAJET_CLEAR_LAMINATE_OPTIONS.find((option) => option.value === laminate)!;
   const appliedSplitDirection = useMemo(() => {
     if (!pricing) return "none" as const;
     if (pricing.panelCount <= 1) return "none" as const;
@@ -309,7 +304,7 @@ export default function OrajetClearBuilder({ productId = 0 }: OrajetClearBuilder
       customOptions: {
         custom_width: `${width} inches`,
         custom_height: `${height} inches`,
-        custom_laminate: selectedLaminate.label,
+        custom_laminate: "Gloss",
         custom_contour_cut: contourCut ? "Yes" : "No",
         custom_split_direction_input: splitDirection,
         custom_split_direction_applied: appliedSplitDirection,
@@ -527,11 +522,9 @@ export default function OrajetClearBuilder({ productId = 0 }: OrajetClearBuilder
               Stretch
             </button>
           </div>{uploadedFileName && <div className="flex items-center justify-between gap-2 rounded border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-600"><span className="truncate">{uploadedFileName}</span><button type="button" onClick={clearArtwork} className="font-semibold text-zinc-500 hover:text-zinc-900">Remove</button></div>}{uploadError && <div className="text-xs font-medium text-red-600">{uploadError}</div>}</> },
-                { id: "size", title: "Size", value: pricing ? `${formatInches(pricing.widthIn)} x ${formatInches(pricing.heightIn)}` : "Set dimensions", status: widthError || heightError ? "alert" : "ok", width: 360, content: (<SizeInputPanel widthFeet={widthFeet} widthInches={widthInches} heightFeet={heightFeet} heightInches={heightInches} onWidthFeetChange={setWidthFeet} onWidthInchesChange={setWidthInches} onHeightFeetChange={setHeightFeet} onHeightInchesChange={setHeightInches} onWidthNormalize={(f, i) => { setWidthFeet(f); setWidthInches(i); }} onHeightNormalize={(f, i) => { setHeightFeet(f); setHeightInches(i); }} error={widthError || heightError} helper="Up to 25 ft 0 in per side." />) },
-                { id: "laminate", title: "Laminate", value: selectedLaminate.label, width: 320, content: <select value={laminate} onChange={(event) => setLaminate(event.target.value as OrajetClearLaminate)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm">{ORAJET_CLEAR_LAMINATE_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select> },
+                { id: "size", title: "Size", value: pricing ? `${formatInches(pricing.widthIn)} x ${formatInches(pricing.heightIn)}` : "Set dimensions", status: widthError || heightError ? "alert" : "ok", width: 360, content: (<SizeInputPanel widthFeet={widthFeet} widthInches={widthInches} heightFeet={heightFeet} heightInches={heightInches} onWidthFeetChange={setWidthFeet} onWidthInchesChange={setWidthInches} onHeightFeetChange={setHeightFeet} onHeightInchesChange={setHeightInches} onWidthNormalize={(f, i) => { setWidthFeet(f); setWidthInches(i); }} onHeightNormalize={(f, i) => { setHeightFeet(f); setHeightInches(i); }} error={widthError || heightError} helper="" />) },
                 { id: "split", title: "Split Direction", value: splitDirection === "auto" ? "Auto" : splitDirection.charAt(0).toUpperCase() + splitDirection.slice(1), width: 320, content: <select value={splitDirection} onChange={(event) => setSplitDirection(event.target.value as OrajetClearSplitDirection)} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"><option value="auto">Auto</option><option value="vertical">Vertical</option><option value="horizontal">Horizontal</option></select> },
                 { id: "contour", title: "Contour", value: contourCut ? "Enabled" : "Disabled", width: 320, content: <button type="button" onClick={() => setContourCut((value) => !value)} className={`h-9 w-full rounded border px-3 text-xs font-semibold transition ${contourCut ? "border-blue-300 bg-blue-50 text-blue-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>{contourCut ? "Enabled" : "Disabled"}</button> },
-                { id: "quantity", title: "Quantity", value: String(safeQuantity), width: 260, content: <input type="number" min={1} value={safeQuantity} onChange={(event) => setQuantity(Math.max(1, Math.floor(Number(event.target.value) || 1)))} className="h-9 w-full rounded border border-zinc-300 px-2 text-sm" /> },
               ] satisfies BuilderBottomToolbarPanel[]}
               action={<Button className="h-10 w-full rounded bg-[var(--brand-primary)] text-xs font-semibold text-white hover:bg-[var(--brand-primary-hover)]" disabled={!isValid} onClick={addToCart}>{added ? "Added" : "Add"}</Button>}
             />
