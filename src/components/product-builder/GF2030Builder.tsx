@@ -162,7 +162,6 @@ export default function GF2030Builder({ productId = 138 }: GF2030BuilderProps) {
   const [widthInches, setWidthInches] = useState("0");
   const [heightFeet, setHeightFeet] = useState("0");
   const [heightInches, setHeightInches] = useState("0");
-  const [quantity, setQuantity] = useState(1);
   const [laminate, setLaminate] = useState<GF2030Laminate>("gloss");
   const [contourCut, setContourCut] = useState(false);
   const [rush, setRush] = useState(false);
@@ -178,7 +177,7 @@ export default function GF2030Builder({ productId = 138 }: GF2030BuilderProps) {
 
   const width = composeDimensionInches(widthFeet, widthInches);
   const height = composeDimensionInches(heightFeet, heightInches);
-  const safeQuantity = Math.max(1, Math.floor(quantity) || 1);
+  const safeQuantity = 1;
 
   const widthError = width <= 0 ? "Width must be greater than 0." : width > 300 ? "Maximum width is 25 ft 0 in." : null;
   const heightError = height <= 0 ? "Height must be greater than 0." : height > 300 ? "Maximum height is 25 ft 0 in." : null;
@@ -473,24 +472,6 @@ export default function GF2030Builder({ productId = 138 }: GF2030BuilderProps) {
             </button>
           </div>
           <div className="text-[11px] leading-4 text-zinc-500">Contour +10%, Rush +100%.</div>
-        </>
-      ),
-    },
-    {
-      id: "quantity",
-      title: "Quantity",
-      value: String(safeQuantity),
-      width: 260,
-      content: (
-        <>
-          <input
-            type="number"
-            min={1}
-            value={safeQuantity}
-            onChange={(event) => setQuantity(Math.max(1, Math.floor(Number(event.target.value) || 1)))}
-            className="h-9 w-full rounded border border-zinc-300 px-2 text-sm"
-          />
-          <div className="text-[11px] leading-4 text-zinc-500">Adjust the number of identical prints in the order.</div>
         </>
       ),
     },
