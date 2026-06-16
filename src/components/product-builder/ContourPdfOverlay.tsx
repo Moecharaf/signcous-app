@@ -18,29 +18,22 @@ export default function ContourPdfOverlay({
   title = "Contour overlay",
 }: ContourPdfOverlayProps) {
   const [generatedPreviewUrl, setGeneratedPreviewUrl] = useState<string | null>(null);
-  const [renderFailed, setRenderFailed] = useState(false);
 
-  const wrapperClassName = `pointer-events-none absolute inset-0 z-20 flex items-center justify-center opacity-70 mix-blend-multiply ${className}`;
+  const wrapperClassName = `pointer-events-none absolute inset-0 z-20 opacity-70 mix-blend-multiply ${className}`;
   const assetClassName =
     displayMode === "stretch"
       ? "h-full w-full object-fill"
-      : "h-auto w-auto max-h-full max-w-full object-contain";
+      : "h-full w-full object-contain";
 
   useEffect(() => {
     if (previewUrl) {
-      setRenderFailed(false);
-      setGeneratedPreviewUrl((previous) => {
-        if (previous) URL.revokeObjectURL(previous);
-        return null;
-      });
+      setGeneratedPreviewUrl(null);
       return;
     }
 
     let cancelled = false;
-    let objectUrlToRevoke: string | null = null;
 
     async function renderPdfFirstPage() {
-      setRenderFailed(false);
       try {
         const pdfjsLib = await import("pdfjs-dist");
         pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
@@ -60,34 +53,24 @@ export default function ContourPdfOverlay({
           canvas.height = Math.max(1, Math.floor(viewport.height));
           await page.render({ canvasContext: context, canvas, viewport }).promise;
 
-          const nextPreviewUrl = await new Promise<string | null>((resolve) => {
-            canvas.toBlob((blob) => {
-              resolve(blob ? URL.createObjectURL(blob) : null);
-            }, "image/png");
-          });
+          const nextPreviewUrl = canvas.toDataURL("image/png");
 
           if (cancelled) {
-            if (nextPreviewUrl) URL.revokeObjectURL(nextPreviewUrl);
             return;
           }
 
-          objectUrlToRevoke = nextPreviewUrl;
-          setGeneratedPreviewUrl((previous) => {
-            if (previous) URL.revokeObjectURL(previous);
-            return nextPreviewUrl;
-          });
+          setGeneratedPreviewUrl(nextPreviewUrl);
         } finally {
           await pdf.destroy();
         }
       } catch {
-        if (!cancelled) setRenderFailed(true);
+        if (!cancelled) setGeneratedPreviewUrl(null);
       }
     }
 
     void renderPdfFirstPage();
     return () => {
       cancelled = true;
-      if (objectUrlToRevoke) URL.revokeObjectURL(objectUrlToRevoke);
     };
   }, [fileUrl, previewUrl]);
 
@@ -97,19 +80,6 @@ export default function ContourPdfOverlay({
     return (
       <div className={wrapperClassName}>
         <img src={activePreviewUrl} alt={title} className={assetClassName} />
-      </div>
-    );
-  }
-
-  if (renderFailed) {
-    return (
-      <div className={wrapperClassName}>
-        <iframe
-          src={`${fileUrl}#toolbar=0&navpanes=0&scrollbar=0&page=1&view=FitH`}
-          title={title}
-          className={assetClassName}
-          scrolling="no"
-        />
       </div>
     );
   }
