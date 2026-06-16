@@ -244,6 +244,10 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
         if (previous) URL.revokeObjectURL(previous);
         return null;
       });
+      setContourPreviewUrl((previous) => {
+        if (previous) URL.revokeObjectURL(previous);
+        return null;
+      });
 
       if (file.type.startsWith("image/")) {
         const blobUrl = URL.createObjectURL(file);
@@ -280,6 +284,10 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
       if (previous) URL.revokeObjectURL(previous);
       return null;
     });
+    setContourPreviewUrl((previous) => {
+      if (previous) URL.revokeObjectURL(previous);
+      return null;
+    });
     setUploadError(null);
   }
 
@@ -294,25 +302,8 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
       return;
     }
 
-    if (!uploadedFileUrl || !artworkImageSize) {
-      setUploadError("Upload image artwork first so contour size can be validated.");
-      event.target.value = "";
-      return;
-    }
-
-    const contourSize = await getUploadedImageSizeInches(file);
-    if (contourSize && !contourSizesMatch(artworkImageSize, contourSize) && !aspectRatioMatches(artworkImageSize, contourSize)) {
-      setUploadError(
-        `Contour file uploaded. Double-check alignment before adding to cart. Artwork: ${formatSizeForMessage(artworkImageSize)}, Contour: ${formatSizeForMessage(
-          contourSize
-        )}.`
-      );
-    }
-
     setUploadingContour(true);
-    if (!contourSize || contourSizesMatch(artworkImageSize, contourSize) || aspectRatioMatches(artworkImageSize, contourSize)) {
-      setUploadError(null);
-    }
+    setUploadError(null);
 
     try {
       const formData = new FormData();
@@ -348,6 +339,19 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
         if (previous) URL.revokeObjectURL(previous);
         return previewUrl;
       });
+
+      if (!uploadedFileUrl || !artworkImageSize) {
+        setUploadError("Contour file uploaded. Upload artwork to compare alignment before adding to cart.");
+      } else {
+        const contourSize = await getUploadedImageSizeInches(file);
+        if (contourSize && !contourSizesMatch(artworkImageSize, contourSize) && !aspectRatioMatches(artworkImageSize, contourSize)) {
+          setUploadError(
+            `Contour file uploaded. Double-check alignment before adding to cart. Artwork: ${formatSizeForMessage(
+              artworkImageSize
+            )}, Contour: ${formatSizeForMessage(contourSize)}.`
+          );
+        }
+      }
     } catch {
       setUploadError("Contour upload failed. Please try again.");
     } finally {
