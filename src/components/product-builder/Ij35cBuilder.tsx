@@ -73,7 +73,12 @@ function extractContourStrokes(canvas: HTMLCanvasElement) {
     const alpha = pixels[index + 3];
 
     const luminance = 0.2126 * red + 0.7152 * green + 0.0722 * blue;
-    if (alpha === 0 || luminance > 110) {
+    const maxChannel = Math.max(red, green, blue);
+    const minChannel = Math.min(red, green, blue);
+    const saturation = maxChannel - minChannel;
+    const isNearWhiteBackground = luminance >= 242 && saturation <= 18;
+
+    if (alpha === 0 || isNearWhiteBackground) {
       pixels[index + 3] = 0;
       continue;
     }
