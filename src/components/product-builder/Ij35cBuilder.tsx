@@ -54,6 +54,12 @@ function aspectRatioMatches(first: UploadedImageSize, second: UploadedImageSize,
   return Math.abs(firstRatio - secondRatio) <= tolerance;
 }
 
+function revokeBlobUrl(url: string | null) {
+  if (url?.startsWith("blob:")) {
+    URL.revokeObjectURL(url);
+  }
+}
+
 function SplitLinePreview({
   resolvedDirection,
   panelCount,
@@ -151,9 +157,9 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
 
   useEffect(() => {
     return () => {
-      if (uploadedImage) URL.revokeObjectURL(uploadedImage);
-      if (contourImage) URL.revokeObjectURL(contourImage);
-      if (contourPreviewUrl) URL.revokeObjectURL(contourPreviewUrl);
+      revokeBlobUrl(uploadedImage);
+      revokeBlobUrl(contourImage);
+      revokeBlobUrl(contourPreviewUrl);
     };
   }, [uploadedImage, contourImage, contourPreviewUrl]);
 
@@ -175,11 +181,7 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
         canvas.height = Math.max(1, Math.floor(viewport.height));
         await page.render({ canvasContext: context, canvas, viewport }).promise;
 
-        return await new Promise<string | null>((resolve) => {
-          canvas.toBlob((blob) => {
-            resolve(blob ? URL.createObjectURL(blob) : null);
-          }, "image/png");
-        });
+        return canvas.toDataURL("image/png");
       } finally {
         await pdf.destroy();
       }
@@ -241,11 +243,11 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
       setContourFileName(null);
       setContourAlignmentConfirmed(false);
       setContourImage((previous) => {
-        if (previous) URL.revokeObjectURL(previous);
+        revokeBlobUrl(previous);
         return null;
       });
       setContourPreviewUrl((previous) => {
-        if (previous) URL.revokeObjectURL(previous);
+        revokeBlobUrl(previous);
         return null;
       });
 
@@ -281,11 +283,11 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
     setContourFileName(null);
     setContourAlignmentConfirmed(false);
     setContourImage((previous) => {
-      if (previous) URL.revokeObjectURL(previous);
+      revokeBlobUrl(previous);
       return null;
     });
     setContourPreviewUrl((previous) => {
-      if (previous) URL.revokeObjectURL(previous);
+      revokeBlobUrl(previous);
       return null;
     });
     setUploadError(null);
@@ -331,12 +333,12 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
       setContourAlignmentConfirmed(false);
       const blobUrl = URL.createObjectURL(file);
       setContourImage((previous) => {
-        if (previous) URL.revokeObjectURL(previous);
+        revokeBlobUrl(previous);
         return blobUrl;
       });
       const previewUrl = await createContourPreviewUrl(file);
       setContourPreviewUrl((previous) => {
-        if (previous) URL.revokeObjectURL(previous);
+        revokeBlobUrl(previous);
         return previewUrl;
       });
 
@@ -365,11 +367,11 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
     setContourFileName(null);
     setContourAlignmentConfirmed(false);
     setContourImage((previous) => {
-      if (previous) URL.revokeObjectURL(previous);
+      revokeBlobUrl(previous);
       return null;
     });
     setContourPreviewUrl((previous) => {
-      if (previous) URL.revokeObjectURL(previous);
+      revokeBlobUrl(previous);
       return null;
     });
     setUploadError(null);
