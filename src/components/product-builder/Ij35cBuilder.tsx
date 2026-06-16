@@ -60,6 +60,27 @@ function revokeBlobUrl(url: string | null) {
   }
 }
 
+function removeNearWhitePixels(canvas: HTMLCanvasElement) {
+  const context = canvas.getContext("2d");
+  if (!context) return;
+
+  const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+  const pixels = imageData.data;
+
+  for (let index = 0; index < pixels.length; index += 4) {
+    const red = pixels[index];
+    const green = pixels[index + 1];
+    const blue = pixels[index + 2];
+    const alpha = pixels[index + 3];
+
+    if (alpha > 0 && red >= 235 && green >= 235 && blue >= 235) {
+      pixels[index + 3] = 0;
+    }
+  }
+
+  context.putImageData(imageData, 0, 0);
+}
+
 function SplitLinePreview({
   resolvedDirection,
   panelCount,
@@ -178,6 +199,7 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
         canvas.width = Math.max(1, Math.floor(viewport.width));
         canvas.height = Math.max(1, Math.floor(viewport.height));
         await page.render({ canvasContext: context, canvas, viewport }).promise;
+        removeNearWhitePixels(canvas);
 
         return canvas.toDataURL("image/png");
       } finally {
