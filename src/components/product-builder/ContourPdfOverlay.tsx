@@ -18,6 +18,7 @@ export default function ContourPdfOverlay({
   title = "Contour overlay",
 }: ContourPdfOverlayProps) {
   const [generatedPreviewUrl, setGeneratedPreviewUrl] = useState<string | null>(null);
+  const [renderFailed, setRenderFailed] = useState(false);
 
   const wrapperClassName = `pointer-events-none absolute inset-0 z-20 opacity-90 ${className}`;
   const assetClassName =
@@ -27,6 +28,7 @@ export default function ContourPdfOverlay({
 
   useEffect(() => {
     if (previewUrl) {
+      setRenderFailed(false);
       setGeneratedPreviewUrl(null);
       return;
     }
@@ -34,6 +36,7 @@ export default function ContourPdfOverlay({
     let cancelled = false;
 
     async function renderPdfFirstPage() {
+      setRenderFailed(false);
       try {
         const pdfjsLib = await import("pdfjs-dist");
         const sourceData = await fetch(fileUrl).then((response) => response.arrayBuffer());
@@ -50,7 +53,11 @@ export default function ContourPdfOverlay({
 
           canvas.width = Math.max(1, Math.floor(viewport.width));
           canvas.height = Math.max(1, Math.floor(viewport.height));
-          await page.render({ canvasContext: context, canvas, viewport, background: "rgba(0,0,0,0)" }).promise;
+          try {
+            await page.render({ canvasContext: context, canvas, viewport, background: "rgba(0,0,0,0)" } as any).promise;
+          } catch {
+            await page.render({ canvasContext: context, canvas, viewport }).promise;
+          }
 
           const nextPreviewUrl = canvas.toDataURL("image/png");
 
@@ -63,7 +70,10 @@ export default function ContourPdfOverlay({
           await pdf.destroy();
         }
       } catch {
-        if (!cancelled) setGeneratedPreviewUrl(null);
+        if (!cancelled) {
+          setGeneratedPreviewUrl(null);
+          setRenderFailed(true);
+        }
       }
     }
 
@@ -79,6 +89,19 @@ export default function ContourPdfOverlay({
     return (
       <div className={wrapperClassName}>
         <img src={activePreviewUrl} alt={title} className={assetClassName} />
+      </div>
+    );
+  }
+
+  if (renderFailed && fileUrl) {
+    return (
+      <div className={wrapperClassName}>
+        <iframe
+          src={`${fileUrl}#toolbar=0&navpanes=0&scrollbar=0&page=1&view=FitH`}
+          title={title}
+          className="absolute inset-0 h-full w-full border-0"
+          scrolling="no"
+        />
       </div>
     );
   }

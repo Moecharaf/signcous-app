@@ -177,7 +177,11 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
 
         canvas.width = Math.max(1, Math.floor(viewport.width));
         canvas.height = Math.max(1, Math.floor(viewport.height));
-        await page.render({ canvasContext: context, canvas, viewport, background: "rgba(0,0,0,0)" }).promise;
+        try {
+          await page.render({ canvasContext: context, canvas, viewport, background: "rgba(0,0,0,0)" } as any).promise;
+        } catch {
+          await page.render({ canvasContext: context, canvas, viewport }).promise;
+        }
 
         return canvas.toDataURL("image/png");
       } finally {
