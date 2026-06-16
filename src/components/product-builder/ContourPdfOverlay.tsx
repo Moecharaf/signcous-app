@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 interface ContourPdfOverlayProps {
   previewUrl?: string | null;
@@ -17,26 +17,27 @@ export default function ContourPdfOverlay({
   className = "",
   title = "Contour overlay",
 }: ContourPdfOverlayProps) {
-  const overlayClassName =
-    displayMode === "stretch"
-      ? `pointer-events-none absolute inset-0 z-20 h-full w-full opacity-70 mix-blend-multiply ${className}`
-      : `pointer-events-none absolute inset-0 z-20 m-auto h-auto max-h-full w-auto max-w-full opacity-70 mix-blend-multiply ${className}`;
-
-  if (previewUrl) {
-    return (
-      <img
-        src={previewUrl}
-        alt={title}
-        className={displayMode === "stretch" ? overlayClassName : `${overlayClassName} object-contain`}
-      />
-    );
-  }
-
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [generatedPreviewUrl, setGeneratedPreviewUrl] = useState<string | null>(null);
   const [renderFailed, setRenderFailed] = useState(false);
 
+  const wrapperClassName = `pointer-events-none absolute inset-0 z-20 flex items-center justify-center opacity-70 mix-blend-multiply ${className}`;
+  const assetClassName =
+    displayMode === "stretch"
+      ? "h-full w-full object-fill"
+      : "h-auto w-auto max-h-full max-w-full object-contain";
+
   useEffect(() => {
+    if (previewUrl) {
+      setRenderFailed(false);
+      setGeneratedPreviewUrl((previous) => {
+        if (previous) URL.revokeObjectURL(previous);
+        return null;
+      });
+      return;
+    }
+
     let cancelled = false;
+    let objectUrlToRevoke: string | null = null;
 
     async function renderPdfFirstPage() {
       setRenderFailed(false);
@@ -46,25 +47,38 @@ export default function ContourPdfOverlay({
 
         const loadingTask = pdfjsLib.getDocument(fileUrl);
         const pdf = await loadingTask.promise;
-        const page = await pdf.getPage(1);
-        const viewport = page.getViewport({ scale: 1.5 });
+        try {
+          const page = await pdf.getPage(1);
+          const viewport = page.getViewport({ scale: 1.5 });
+          const canvas = document.createElement("canvas");
+          const context = canvas.getContext("2d");
+          if (!context) {
+            throw new Error("Canvas context unavailable");
+          }
 
-        if (cancelled || !canvasRef.current) {
+          canvas.width = Math.max(1, Math.floor(viewport.width));
+          canvas.height = Math.max(1, Math.floor(viewport.height));
+          await page.render({ canvasContext: context, canvas, viewport }).promise;
+
+          const nextPreviewUrl = await new Promise<string | null>((resolve) => {
+            canvas.toBlob((blob) => {
+              resolve(blob ? URL.createObjectURL(blob) : null);
+            }, "image/png");
+          });
+
+          if (cancelled) {
+            if (nextPreviewUrl) URL.revokeObjectURL(nextPreviewUrl);
+            return;
+          }
+
+          objectUrlToRevoke = nextPreviewUrl;
+          setGeneratedPreviewUrl((previous) => {
+            if (previous) URL.revokeObjectURL(previous);
+            return nextPreviewUrl;
+          });
+        } finally {
           await pdf.destroy();
-          return;
         }
-
-        const canvas = canvasRef.current;
-        const context = canvas.getContext("2d");
-        if (!context) {
-          await pdf.destroy();
-          throw new Error("Canvas context unavailable");
-        }
-
-        canvas.width = Math.max(1, Math.floor(viewport.width));
-        canvas.height = Math.max(1, Math.floor(viewport.height));
-        await page.render({ canvasContext: context, canvas, viewport }).promise;
-        await pdf.destroy();
       } catch {
         if (!cancelled) setRenderFailed(true);
       }
@@ -73,25 +87,32 @@ export default function ContourPdfOverlay({
     void renderPdfFirstPage();
     return () => {
       cancelled = true;
+      if (objectUrlToRevoke) URL.revokeObjectURL(objectUrlToRevoke);
     };
-  }, [fileUrl]);
+  }, [fileUrl, previewUrl]);
 
-  if (renderFailed) {
+  const activePreviewUrl = previewUrl ?? generatedPreviewUrl;
+
+  if (activePreviewUrl) {
     return (
-      <iframe
-        src={`${fileUrl}#toolbar=0&navpanes=0&scrollbar=0&page=1&view=FitH`}
-        title={title}
-        className={overlayClassName}
-        scrolling="no"
-      />
+      <div className={wrapperClassName}>
+        <img src={activePreviewUrl} alt={title} className={assetClassName} />
+      </div>
     );
   }
 
-  return (
-    <canvas
-      ref={canvasRef}
-      aria-label={title}
-      className={overlayClassName}
-    />
-  );
+  if (renderFailed) {
+    return (
+      <div className={wrapperClassName}>
+        <iframe
+          src={`${fileUrl}#toolbar=0&navpanes=0&scrollbar=0&page=1&view=FitH`}
+          title={title}
+          className={assetClassName}
+          scrolling="no"
+        />
+      </div>
+    );
+  }
+
+  return null;
 }
