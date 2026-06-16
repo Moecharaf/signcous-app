@@ -106,6 +106,7 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
   const [contourFileUrl, setContourFileUrl] = useState<string | null>(null);
   const [contourFileName, setContourFileName] = useState<string | null>(null);
   const [contourImage, setContourImage] = useState<string | null>(null);
+  const [contourPreviewUrl, setContourPreviewUrl] = useState<string | null>(null);
   const [uploadingContour, setUploadingContour] = useState(false);
   const [contourAlignmentConfirmed, setContourAlignmentConfirmed] = useState(false);
   const [imageDisplayMode, setImageDisplayMode] = useState<"fit" | "stretch">("fit");
@@ -142,8 +143,40 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
     return () => {
       if (uploadedImage) URL.revokeObjectURL(uploadedImage);
       if (contourImage) URL.revokeObjectURL(contourImage);
+      if (contourPreviewUrl) URL.revokeObjectURL(contourPreviewUrl);
     };
-  }, [uploadedImage, contourImage]);
+  }, [uploadedImage, contourImage, contourPreviewUrl]);
+
+  async function createContourPreviewUrl(file: File): Promise<string | null> {
+    try {
+      const pdfjsLib = await import("pdfjs-dist");
+      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+
+      const loadingTask = pdfjsLib.getDocument({ data: await file.arrayBuffer() });
+      const pdf = await loadingTask.promise;
+      try {
+        const page = await pdf.getPage(1);
+        const viewport = page.getViewport({ scale: 1.5 });
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
+        if (!context) return null;
+
+        canvas.width = Math.max(1, Math.floor(viewport.width));
+        canvas.height = Math.max(1, Math.floor(viewport.height));
+        await page.render({ canvasContext: context, canvas, viewport }).promise;
+
+        return await new Promise<string | null>((resolve) => {
+          canvas.toBlob((blob) => {
+            resolve(blob ? URL.createObjectURL(blob) : null);
+          }, "image/png");
+        });
+      } finally {
+        await pdf.destroy();
+      }
+    } catch {
+      return null;
+    }
+  }
 
   async function onUploadArtwork(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -299,6 +332,11 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
         if (previous) URL.revokeObjectURL(previous);
         return blobUrl;
       });
+      const previewUrl = await createContourPreviewUrl(file);
+      setContourPreviewUrl((previous) => {
+        if (previous) URL.revokeObjectURL(previous);
+        return previewUrl;
+      });
     } catch {
       setUploadError("Contour upload failed. Please try again.");
     } finally {
@@ -312,6 +350,10 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
     setContourFileName(null);
     setContourAlignmentConfirmed(false);
     setContourImage((previous) => {
+      if (previous) URL.revokeObjectURL(previous);
+      return null;
+    });
+    setContourPreviewUrl((previous) => {
       if (previous) URL.revokeObjectURL(previous);
       return null;
     });
@@ -767,7 +809,7 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
                           </div>
                         )}
 
-                      {contourCut && contourFileUrl && <ContourPdfOverlay fileUrl={contourFileUrl} />}
+                      {contourCut && contourFileUrl && <ContourPdfOverlay fileUrl={contourFileUrl} previewUrl={contourPreviewUrl} />}
 
                         <SplitLinePreview
                           resolvedDirection={pricing.resolvedSplitDirection}
