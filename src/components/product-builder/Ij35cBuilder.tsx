@@ -145,6 +145,7 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
   const [contourFileName, setContourFileName] = useState<string | null>(null);
   const [contourImage, setContourImage] = useState<string | null>(null);
   const [contourPreviewUrl, setContourPreviewUrl] = useState<string | null>(null);
+  const [contourValidationError, setContourValidationError] = useState<string | null>(null);
   const [uploadingContour, setUploadingContour] = useState(false);
   const [contourAlignmentConfirmed, setContourAlignmentConfirmed] = useState(false);
   const [imageDisplayMode, setImageDisplayMode] = useState<"fit" | "stretch">("fit");
@@ -275,6 +276,7 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
         revokeBlobUrl(previous);
         return null;
       });
+      setContourValidationError(null);
 
       if (file.type.startsWith("image/")) {
         const blobUrl = URL.createObjectURL(file);
@@ -315,6 +317,7 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
       revokeBlobUrl(previous);
       return null;
     });
+    setContourValidationError(null);
     setUploadError(null);
   }
 
@@ -342,18 +345,15 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
       return;
     }
 
-    if (!contourSizesMatch(artworkImageSize, contourSize)) {
-      setUploadError(
-        `Contour cut size must match artwork within ${CONTOUR_SIZE_TOLERANCE_INCHES.toFixed(2)} in. Artwork: ${formatSizeForMessage(
+    const mismatchMessage = contourSizesMatch(artworkImageSize, contourSize)
+      ? null
+      : `Contour cut size must match artwork within ${CONTOUR_SIZE_TOLERANCE_INCHES.toFixed(2)} in. Artwork: ${formatSizeForMessage(
           artworkImageSize
-        )}, Contour: ${formatSizeForMessage(contourSize)}.`
-      );
-      event.target.value = "";
-      return;
-    }
+        )}, Contour: ${formatSizeForMessage(contourSize)}.`;
 
     setUploadingContour(true);
     setUploadError(null);
+    setContourValidationError(null);
 
     try {
       const formData = new FormData();
@@ -384,6 +384,16 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
         revokeBlobUrl(previous);
         return blobUrl;
       });
+      if (mismatchMessage) {
+        setContourPreviewUrl((previous) => {
+          revokeBlobUrl(previous);
+          return null;
+        });
+        setContourValidationError(mismatchMessage);
+        setUploadError(mismatchMessage);
+        return;
+      }
+
       const previewUrl = await createContourPreviewUrl(file);
       setContourPreviewUrl((previous) => {
         revokeBlobUrl(previous);
@@ -412,6 +422,7 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
       revokeBlobUrl(previous);
       return null;
     });
+    setContourValidationError(null);
     setUploadError(null);
   }
 
@@ -438,6 +449,10 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
       }
       if (!contourFileUrl || !contourFileName || !contourImage) {
         setUploadError("Upload a contour cut file to continue.");
+        return;
+      }
+      if (contourValidationError) {
+        setUploadError(contourValidationError);
         return;
       }
       if (!contourAlignmentConfirmed) {
@@ -864,7 +879,7 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
                           </div>
                         )}
 
-                      {contourCut && (contourPreviewUrl || contourImage || contourFileUrl) && (
+                      {contourCut && contourPreviewUrl && (
                         <ContourPdfOverlay
                           fileUrl={contourImage ?? contourFileUrl ?? ""}
                           previewUrl={contourPreviewUrl}
