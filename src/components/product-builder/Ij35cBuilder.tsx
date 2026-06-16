@@ -205,9 +205,14 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
   async function createContourPreviewUrl(file: File): Promise<string | null> {
     try {
       const pdfjsLib = await import("pdfjs-dist");
-      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
       const arrayBuffer = await file.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      let pdf: any;
+      try {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+        pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      } catch {
+        pdf = await pdfjsLib.getDocument({ data: arrayBuffer, disableWorker: true } as any).promise;
+      }
       try {
         const page = await pdf.getPage(1);
         const viewport = page.getViewport({ scale: 1.5 });

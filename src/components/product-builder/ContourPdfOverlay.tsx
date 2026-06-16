@@ -74,8 +74,14 @@ export default function ContourPdfOverlay({
     async function renderPdfFirstPage() {
       try {
         const pdfjsLib = await import("pdfjs-dist");
-        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
-        const pdf = await pdfjsLib.getDocument(fileUrl).promise;
+        const sourceData = await fetch(fileUrl).then((response) => response.arrayBuffer());
+        let pdf: any;
+        try {
+          pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+          pdf = await pdfjsLib.getDocument({ data: sourceData }).promise;
+        } catch {
+          pdf = await pdfjsLib.getDocument({ data: sourceData, disableWorker: true } as any).promise;
+        }
         try {
           const page = await pdf.getPage(1);
           const viewport = page.getViewport({ scale: 1.5 });
