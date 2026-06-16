@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
+import ContourPdfOverlay from "@/components/product-builder/ContourPdfOverlay";
 import {
   CONTOUR_SIZE_TOLERANCE_INCHES,
   contourSizesMatch,
@@ -251,7 +252,7 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
 
     const contourSize = await getUploadedImageSizeInches(file);
     if (!contourSize) {
-      setUploadError("Contour cut file must be an image so size can be validated.");
+      setUploadError("Contour cut file must be a PDF so size can be validated.");
       event.target.value = "";
       return;
     }
@@ -497,7 +498,7 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
           {contourCut ? (
             <>
               <label className="inline-flex h-10 w-full cursor-pointer items-center justify-center rounded border border-dashed border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-700 hover:border-zinc-400">
-                <input type="file" accept="image/*" className="hidden" onChange={onUploadContourFile} />
+                <input type="file" accept=".pdf,application/pdf" className="hidden" onChange={onUploadContourFile} />
                 {uploadingContour ? "Uploading Contour..." : contourFileName ? "Replace Contour File" : "Upload Contour File"}
               </label>
               {contourFileName && (
@@ -508,24 +509,16 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
                   </button>
                 </div>
               )}
-              {uploadedImage && contourImage && (
-                <div className="rounded border border-zinc-200 bg-zinc-50 p-2">
-                  <div className="mb-2 text-[11px] text-zinc-600">Confirm contour line aligns with artwork.</div>
-                  <div className="relative h-28 overflow-hidden rounded border border-zinc-300 bg-white">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={uploadedImage} alt="Artwork preview" className="absolute inset-0 h-full w-full object-contain" />
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={contourImage} alt="Contour overlay" className="absolute inset-0 h-full w-full object-contain opacity-70 mix-blend-multiply" />
-                  </div>
-                  <label className="mt-2 flex items-center gap-2 text-xs text-zinc-700">
-                    <input
-                      type="checkbox"
-                      checked={contourAlignmentConfirmed}
-                      onChange={(event) => setContourAlignmentConfirmed(event.target.checked)}
-                    />
-                    I confirm contour cut alignment is correct.
-                  </label>
-                </div>
+              <div className="text-[11px] leading-4 text-zinc-500">Contour preview appears over the product display above.</div>
+              {contourFileUrl && (
+                <label className="flex items-center gap-2 text-xs text-zinc-700">
+                  <input
+                    type="checkbox"
+                    checked={contourAlignmentConfirmed}
+                    onChange={(event) => setContourAlignmentConfirmed(event.target.checked)}
+                  />
+                  I confirm contour cut alignment is correct.
+                </label>
               )}
             </>
           ) : (
@@ -773,6 +766,8 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
                             </div>
                           </div>
                         )}
+
+                      {contourCut && contourFileUrl && <ContourPdfOverlay fileUrl={contourFileUrl} />}
 
                         <SplitLinePreview
                           resolvedDirection={pricing.resolvedSplitDirection}
