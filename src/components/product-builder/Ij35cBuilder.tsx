@@ -3,7 +3,13 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
+import {
+  CONTOUR_SIZE_TOLERANCE_INCHES,
+  contourSizesMatch,
+  formatSizeForMessage,
+} from "@/components/product-builder/contour-cut";
 import SizeInputPanel, { composeDimensionInches, toFeetAndInches } from "@/components/product-builder/SizeInputPanel";
+import { type UploadedImageSize } from "@/components/product-builder/uploaded-image-size";
 import { getUploadedImageSizeInches } from "@/components/product-builder/uploaded-image-size";
 import Button from "@/components/ui/Button";
 import AdhesivePricingModal from "@/components/product-builder/AdhesivePricingModal";
@@ -95,6 +101,12 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null);
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  const [artworkImageSize, setArtworkImageSize] = useState<UploadedImageSize | null>(null);
+  const [contourFileUrl, setContourFileUrl] = useState<string | null>(null);
+  const [contourFileName, setContourFileName] = useState<string | null>(null);
+  const [contourImage, setContourImage] = useState<string | null>(null);
+  const [uploadingContour, setUploadingContour] = useState(false);
+  const [contourAlignmentConfirmed, setContourAlignmentConfirmed] = useState(false);
   const [imageDisplayMode, setImageDisplayMode] = useState<"fit" | "stretch">("fit");
   const [uploadingArtwork, setUploadingArtwork] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -128,8 +140,9 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
   useEffect(() => {
     return () => {
       if (uploadedImage) URL.revokeObjectURL(uploadedImage);
+      if (contourImage) URL.revokeObjectURL(contourImage);
     };
-  }, [uploadedImage]);
+  }, [uploadedImage, contourImage]);
 
   async function onUploadArtwork(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -170,6 +183,7 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
       setUploadedFileName(data.originalName ?? file.name);
 
       const imageSize = await getUploadedImageSizeInches(file);
+      setArtworkImageSize(imageSize);
       if (imageSize) {
         const widthParts = toFeetAndInches(imageSize.widthInches);
         const heightParts = toFeetAndInches(imageSize.heightInches);
@@ -178,6 +192,14 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
         setHeightFeet(heightParts.feet);
         setHeightInches(heightParts.inches);
       }
+
+      setContourFileUrl(null);
+      setContourFileName(null);
+      setContourAlignmentConfirmed(false);
+      setContourImage((previous) => {
+        if (previous) URL.revokeObjectURL(previous);
+        return null;
+      });
 
       if (file.type.startsWith("image/")) {
         const blobUrl = URL.createObjectURL(file);
@@ -206,14 +228,124 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
     });
     setUploadedFileUrl(null);
     setUploadedFileName(null);
+    setArtworkImageSize(null);
+    setContourFileUrl(null);
+    setContourFileName(null);
+    setContourAlignmentConfirmed(false);
+    setContourImage((previous) => {
+      if (previous) URL.revokeObjectURL(previous);
+      return null;
+    });
     setUploadError(null);
+  }
+
+  async function onUploadContourFile(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!uploadedFileUrl || !artworkImageSize) {
+      setUploadError("Upload image artwork first so contour size can be validated.");
+      event.target.value = "";
+      return;
+    }
+
+    const contourSize = await getUploadedImageSizeInches(file);
+    if (!contourSize) {
+      setUploadError("Contour cut file must be an image so size can be validated.");
+      event.target.value = "";
+      return;
+    }
+
+    if (!contourSizesMatch(artworkImageSize, contourSize)) {
+      setUploadError(
+        `Contour cut size must match artwork within ${CONTOUR_SIZE_TOLERANCE_INCHES.toFixed(2)} in. Artwork: ${formatSizeForMessage(
+          artworkImageSize
+        )}, Contour: ${formatSizeForMessage(contourSize)}.`
+      );
+      event.target.value = "";
+      return;
+    }
+
+    setUploadingContour(true);
+    setUploadError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await fetch("/api/upload-artwork", { method: "POST", body: formData });
+      const contentType = response.headers.get("content-type") ?? "";
+      let data: { fileUrl?: string; originalName?: string; error?: string } = {};
+      if (contentType.includes("application/json")) {
+        data = await response.json();
+      } else {
+        const raw = await response.text();
+        data = {
+          error:
+            response.status === 413
+              ? "Upload rejected by server size limit. Ask support to increase Nginx client_max_body_size."
+              : `Contour upload failed with status ${response.status}. ${raw.slice(0, 180)}`,
+        };
+      }
+      if (!response.ok || !data.fileUrl) {
+        setUploadError(data.error ?? `Contour upload failed (status ${response.status}).`);
+        return;
+      }
+      setContourFileUrl(data.fileUrl);
+      setContourFileName(data.originalName ?? file.name);
+      setContourAlignmentConfirmed(false);
+      const blobUrl = URL.createObjectURL(file);
+      setContourImage((previous) => {
+        if (previous) URL.revokeObjectURL(previous);
+        return blobUrl;
+      });
+    } catch {
+      setUploadError("Contour upload failed. Please try again.");
+    } finally {
+      setUploadingContour(false);
+      event.target.value = "";
+    }
+  }
+
+  function clearContourFile() {
+    setContourFileUrl(null);
+    setContourFileName(null);
+    setContourAlignmentConfirmed(false);
+    setContourImage((previous) => {
+      if (previous) URL.revokeObjectURL(previous);
+      return null;
+    });
+    setUploadError(null);
+  }
+
+  function handleContourToggle() {
+    setContourCut((value) => {
+      const next = !value;
+      if (!next) {
+        clearContourFile();
+      }
+      return next;
+    });
   }
 
   function addToCart() {
     if (!isValid || !pricing) return;
-    if (uploadingArtwork) {
-      setUploadError("Please wait for your artwork to finish uploading.");
+    if (uploadingArtwork || uploadingContour) {
+      setUploadError("Please wait for uploads to finish.");
       return;
+    }
+    if (contourCut) {
+      if (!uploadedFileUrl || !artworkImageSize) {
+        setUploadError("Upload image artwork first before contour cut.");
+        return;
+      }
+      if (!contourFileUrl || !contourFileName || !contourImage) {
+        setUploadError("Upload a contour cut file to continue.");
+        return;
+      }
+      if (!contourAlignmentConfirmed) {
+        setUploadError("Confirm contour alignment before adding to cart.");
+        return;
+      }
     }
 
     cart.addItem({
@@ -240,6 +372,7 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
         custom_height: `${height} inches`,
         custom_laminate: selectedLaminate.label,
         custom_contour_cut: contourCut ? "Yes" : "No",
+        custom_contour_cut_file: contourFileName ?? "None",
         custom_rush: rush ? "Yes" : "No",
         custom_split_direction_input: splitDirection,
         custom_split_direction_applied: pricing.resolvedSplitDirection,
@@ -355,6 +488,53 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
       ),
     },
     {
+      id: "contourFile",
+      title: "Contour File",
+      value: contourCut ? (contourFileName ? "Uploaded" : "Required") : "Off",
+      width: 420,
+      content: (
+        <>
+          {contourCut ? (
+            <>
+              <label className="inline-flex h-10 w-full cursor-pointer items-center justify-center rounded border border-dashed border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-700 hover:border-zinc-400">
+                <input type="file" accept="image/*" className="hidden" onChange={onUploadContourFile} />
+                {uploadingContour ? "Uploading Contour..." : contourFileName ? "Replace Contour File" : "Upload Contour File"}
+              </label>
+              {contourFileName && (
+                <div className="flex items-center justify-between gap-2 rounded border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-600">
+                  <span className="truncate">{contourFileName}</span>
+                  <button type="button" onClick={clearContourFile} className="font-semibold text-zinc-500 hover:text-zinc-900">
+                    Remove
+                  </button>
+                </div>
+              )}
+              {uploadedImage && contourImage && (
+                <div className="rounded border border-zinc-200 bg-zinc-50 p-2">
+                  <div className="mb-2 text-[11px] text-zinc-600">Confirm contour line aligns with artwork.</div>
+                  <div className="relative h-28 overflow-hidden rounded border border-zinc-300 bg-white">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={uploadedImage} alt="Artwork preview" className="absolute inset-0 h-full w-full object-contain" />
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={contourImage} alt="Contour overlay" className="absolute inset-0 h-full w-full object-contain opacity-70 mix-blend-multiply" />
+                  </div>
+                  <label className="mt-2 flex items-center gap-2 text-xs text-zinc-700">
+                    <input
+                      type="checkbox"
+                      checked={contourAlignmentConfirmed}
+                      onChange={(event) => setContourAlignmentConfirmed(event.target.checked)}
+                    />
+                    I confirm contour cut alignment is correct.
+                  </label>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="text-[11px] text-zinc-500">Enable contour cut to upload a separate contour file.</div>
+          )}
+        </>
+      ),
+    },
+    {
       id: "laminate",
       title: "Laminate",
       value: selectedLaminate.label,
@@ -406,7 +586,7 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
           <div className="grid grid-cols-2 gap-1">
             <button
               type="button"
-              onClick={() => setContourCut((value) => !value)}
+              onClick={handleContourToggle}
               className={`h-9 rounded border px-3 text-xs font-semibold transition ${
                 contourCut
                   ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]"

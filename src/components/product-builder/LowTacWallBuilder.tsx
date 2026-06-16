@@ -5,6 +5,12 @@ import { useEffect, useMemo, useState, type ChangeEvent, type ReactNode } from "
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
 import AdhesivePricingModal from "@/components/product-builder/AdhesivePricingModal";
 import { ADHESIVE_PRICING_CONFIGS } from "@/components/product-builder/adhesive-pricing-data";
+import {
+  CONTOUR_SIZE_TOLERANCE_INCHES,
+  contourSizesMatch,
+  formatSizeForMessage,
+} from "@/components/product-builder/contour-cut";
+import { type UploadedImageSize } from "@/components/product-builder/uploaded-image-size";
 import { getUploadedImageSizeInches } from "@/components/product-builder/uploaded-image-size";
 import Button from "@/components/ui/Button";
 import { useCart } from "@/context/CartContext";
@@ -130,6 +136,12 @@ export default function LowTacWallBuilder({ productId = 0 }: LowTacWallBuilderPr
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null);
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  const [artworkImageSize, setArtworkImageSize] = useState<UploadedImageSize | null>(null);
+  const [contourFileUrl, setContourFileUrl] = useState<string | null>(null);
+  const [contourFileName, setContourFileName] = useState<string | null>(null);
+  const [contourImage, setContourImage] = useState<string | null>(null);
+  const [uploadingContour, setUploadingContour] = useState(false);
+  const [contourAlignmentConfirmed, setContourAlignmentConfirmed] = useState(false);
   const [imageDisplayMode, setImageDisplayMode] = useState<"fit" | "stretch">("fit");
   const [uploadingArtwork, setUploadingArtwork] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -158,8 +170,9 @@ export default function LowTacWallBuilder({ productId = 0 }: LowTacWallBuilderPr
   useEffect(() => {
     return () => {
       if (uploadedImage) URL.revokeObjectURL(uploadedImage);
+      if (contourImage) URL.revokeObjectURL(contourImage);
     };
-  }, [uploadedImage]);
+  }, [uploadedImage, contourImage]);
 
   async function onUploadArtwork(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -200,12 +213,21 @@ export default function LowTacWallBuilder({ productId = 0 }: LowTacWallBuilderPr
       setUploadedFileName(data.originalName ?? file.name);
 
       const imageSize = await getUploadedImageSizeInches(file);
+      setArtworkImageSize(imageSize);
       if (imageSize) {
         setWidthUnit("inches");
         setHeightUnit("inches");
         setWidthStr(imageSize.widthInches.toString());
         setHeightStr(imageSize.heightInches.toString());
       }
+
+      setContourFileUrl(null);
+      setContourFileName(null);
+      setContourAlignmentConfirmed(false);
+      setContourImage((previous) => {
+        if (previous) URL.revokeObjectURL(previous);
+        return null;
+      });
 
       if (file.type.startsWith("image/")) {
         const blobUrl = URL.createObjectURL(file);
@@ -234,7 +256,111 @@ export default function LowTacWallBuilder({ productId = 0 }: LowTacWallBuilderPr
     });
     setUploadedFileUrl(null);
     setUploadedFileName(null);
+    setArtworkImageSize(null);
+    setContourFileUrl(null);
+    setContourFileName(null);
+    setContourAlignmentConfirmed(false);
+    setContourImage((previous) => {
+      if (previous) URL.revokeObjectURL(previous);
+      return null;
+    });
     setUploadError(null);
+  }
+
+  async function onUploadContourFile(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!uploadedFileUrl || !artworkImageSize) {
+      setUploadError("Upload image artwork first so contour size can be validated.");
+      event.target.value = "";
+      return;
+    }
+
+    const contourSize = await getUploadedImageSizeInches(file);
+    if (!contourSize) {
+      setUploadError("Contour cut file must be an image so size can be validated.");
+      event.target.value = "";
+      return;
+    }
+
+    if (!contourSizesMatch(artworkImageSize, contourSize)) {
+      setUploadError(
+        `Contour cut size must match artwork within ${CONTOUR_SIZE_TOLERANCE_INCHES.toFixed(2)} in. Artwork: ${formatSizeForMessage(
+          artworkImageSize
+        )}, Contour: ${formatSizeForMessage(contourSize)}.`
+      );
+      event.target.value = "";
+      return;
+    }
+
+    setUploadingContour(true);
+    setUploadError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/upload-artwork", {
+        method: "POST",
+        body: formData,
+      });
+      const contentType = response.headers.get("content-type") ?? "";
+      let data: { fileUrl?: string; originalName?: string; error?: string } = {};
+
+      if (contentType.includes("application/json")) {
+        data = await response.json();
+      } else {
+        const raw = await response.text();
+        data = {
+          error:
+            response.status === 413
+              ? "Upload rejected by server size limit. Ask support to increase Nginx client_max_body_size."
+              : `Contour upload failed with status ${response.status}. ${raw.slice(0, 180)}`,
+        };
+      }
+
+      if (!response.ok || !data.fileUrl) {
+        setUploadError(data.error ?? `Contour upload failed (status ${response.status}).`);
+        return;
+      }
+
+      setContourFileUrl(data.fileUrl);
+      setContourFileName(data.originalName ?? file.name);
+      setContourAlignmentConfirmed(false);
+
+      const blobUrl = URL.createObjectURL(file);
+      setContourImage((previous) => {
+        if (previous) URL.revokeObjectURL(previous);
+        return blobUrl;
+      });
+    } catch {
+      setUploadError("Contour upload failed. Please try again.");
+    } finally {
+      setUploadingContour(false);
+      event.target.value = "";
+    }
+  }
+
+  function clearContourFile() {
+    setContourFileUrl(null);
+    setContourFileName(null);
+    setContourAlignmentConfirmed(false);
+    setContourImage((previous) => {
+      if (previous) URL.revokeObjectURL(previous);
+      return null;
+    });
+    setUploadError(null);
+  }
+
+  function handleContourToggle() {
+    setContourCut((value) => {
+      const next = !value;
+      if (!next) {
+        clearContourFile();
+      }
+      return next;
+    });
   }
 
   // Split helpers
@@ -272,6 +398,24 @@ export default function LowTacWallBuilder({ productId = 0 }: LowTacWallBuilderPr
 
   function addToCart() {
     if (!isValid || !pricing) return;
+    if (uploadingArtwork || uploadingContour) {
+      setUploadError("Please wait for uploads to finish.");
+      return;
+    }
+    if (contourCut) {
+      if (!uploadedFileUrl || !artworkImageSize) {
+        setUploadError("Upload image artwork first before contour cut.");
+        return;
+      }
+      if (!contourFileUrl || !contourFileName || !contourImage) {
+        setUploadError("Upload a contour cut file to continue.");
+        return;
+      }
+      if (!contourAlignmentConfirmed) {
+        setUploadError("Confirm contour alignment before adding to cart.");
+        return;
+      }
+    }
 
     cart.addItem({
       productId,
@@ -299,6 +443,7 @@ export default function LowTacWallBuilder({ productId = 0 }: LowTacWallBuilderPr
         custom_billable_height_ft: `${pricing.heightFt} ft`,
         custom_sq_ft: `${pricing.sqFt} sq ft`,
         custom_contour_cut: contourCut ? "Yes" : "No",
+        custom_contour_cut_file: contourFileName ?? "None",
         custom_rush: rush ? "Yes" : "No",
         custom_split_direction: splitDirection,
         custom_split_count: String(splitCount),
@@ -616,10 +761,35 @@ export default function LowTacWallBuilder({ productId = 0 }: LowTacWallBuilderPr
             >
               Stretch
             </button>
-          </div>{uploadedFileName && <div className="flex items-center justify-between gap-2 rounded border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-600"><span className="truncate">{uploadedFileName}</span><button type="button" onClick={clearArtwork} className="font-semibold text-zinc-500 hover:text-zinc-900">Remove</button></div>}{uploadError && <div className="text-xs font-medium text-red-600">{uploadError}</div>}</> },
+          </div>{uploadedFileName && <div className="flex items-center justify-between gap-2 rounded border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-600"><span className="truncate">{uploadedFileName}</span><button type="button" onClick={clearArtwork} className="font-semibold text-zinc-500 hover:text-zinc-900">Remove</button></div>}
+          {contourCut && (
+            <>
+              <label className="inline-flex h-10 w-full cursor-pointer items-center justify-center rounded border border-dashed border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-700 hover:border-zinc-400">
+                <input type="file" accept="image/*" className="hidden" onChange={onUploadContourFile} />
+                {uploadingContour ? "Uploading Contour..." : contourFileName ? "Replace Contour File" : "Upload Contour File"}
+              </label>
+              {contourFileName && <div className="flex items-center justify-between gap-2 rounded border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-600"><span className="truncate">{contourFileName}</span><button type="button" onClick={clearContourFile} className="font-semibold text-zinc-500 hover:text-zinc-900">Remove</button></div>}
+              {uploadedImage && contourImage && (
+                <div className="rounded border border-zinc-200 bg-zinc-50 p-2">
+                  <div className="mb-2 text-[11px] text-zinc-600">Confirm contour line aligns with artwork.</div>
+                  <div className="relative h-28 overflow-hidden rounded border border-zinc-300 bg-white">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={uploadedImage} alt="Artwork preview" className="absolute inset-0 h-full w-full object-contain" />
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={contourImage} alt="Contour overlay" className="absolute inset-0 h-full w-full object-contain opacity-70 mix-blend-multiply" />
+                  </div>
+                  <label className="mt-2 flex items-center gap-2 text-xs text-zinc-700">
+                    <input type="checkbox" checked={contourAlignmentConfirmed} onChange={(event) => setContourAlignmentConfirmed(event.target.checked)} />
+                    I confirm contour cut alignment is correct.
+                  </label>
+                </div>
+              )}
+            </>
+          )}
+          {uploadError && <div className="text-xs font-medium text-red-600">{uploadError}</div>}</> },
                 { id: "width", title: "Width", value: `${widthIn || 0}${widthUnit === "feet" ? " ft" : " in"}`, status: widthError ? "alert" : "ok", width: 280, content: <div className="grid grid-cols-[1fr_auto] gap-1"><input type="number" min={0.1} step={0.25} value={widthStr} onChange={(e) => setWidthStr(e.target.value)} className="h-9 rounded border border-zinc-300 px-2 text-sm" /><select value={widthUnit} onChange={(e) => setWidthUnit(e.target.value as DimensionUnit)} className="h-9 rounded border border-zinc-300 bg-white px-1 text-xs"><option value="inches">in</option><option value="feet">ft</option></select></div> },
                 { id: "height", title: "Height", value: `${heightIn || 0}${heightUnit === "feet" ? " ft" : " in"}`, status: heightError ? "alert" : "ok", width: 280, content: <div className="grid grid-cols-[1fr_auto] gap-1"><input type="number" min={0.1} step={0.25} value={heightStr} onChange={(e) => setHeightStr(e.target.value)} className="h-9 rounded border border-zinc-300 px-2 text-sm" /><select value={heightUnit} onChange={(e) => setHeightUnit(e.target.value as DimensionUnit)} className="h-9 rounded border border-zinc-300 bg-white px-1 text-xs"><option value="inches">in</option><option value="feet">ft</option></select></div> },
-                { id: "contour", title: "Contour Cut", value: contourCut ? "Enabled" : "Disabled", width: 260, content: <button type="button" onClick={() => setContourCut((v) => !v)} className={`h-9 w-full rounded border px-3 text-xs font-semibold transition ${contourCut ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>{contourCut ? "Enabled" : "Disabled"}</button> },
+                { id: "contour", title: "Contour Cut", value: contourCut ? "Enabled" : "Disabled", width: 260, content: <button type="button" onClick={handleContourToggle} className={`h-9 w-full rounded border px-3 text-xs font-semibold transition ${contourCut ? "border-[var(--brand-primary)] bg-[var(--brand-primary-soft)] text-[var(--brand-primary)]" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>{contourCut ? "Enabled" : "Disabled"}</button> },
                 { id: "rush", title: "Rush", value: rush ? "Rush" : "Standard", width: 260, content: <button type="button" onClick={() => setRush((v) => !v)} className={`h-9 w-full rounded border px-3 text-xs font-semibold transition ${rush ? "border-red-300 bg-red-50 text-red-700" : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"}`}>{rush ? "Rush" : "Standard"}</button> },
                 { id: "split-direction", title: "Split Direction", value: splitDirection, width: 280, content: <select value={splitDirection} onChange={(e) => { setSplitDirection(e.target.value as SplitDirection); setSelectedSplit("all"); setSplitOffsets({}); }} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"><option value="vertical">Vertical</option><option value="horizontal">Horizontal</option></select> },
                 { id: "split-selected", title: "Split Selected", value: selectedSplit === "all" ? "All Splits" : `Split ${selectedSplit}`, width: 280, content: <select value={selectedSplit === "all" ? "all" : String(selectedSplit)} onChange={(e) => setSelectedSplit(e.target.value === "all" ? "all" : Number(e.target.value))} className="h-9 w-full rounded border border-zinc-300 bg-white px-2 text-sm"><option value="all">All Splits</option>{Array.from({ length: splitCount }, (_, i) => i + 1).map((n) => <option key={n} value={n}>Split {n}</option>)}</select> },
