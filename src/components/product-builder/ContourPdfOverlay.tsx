@@ -18,8 +18,9 @@ export default function ContourPdfOverlay({
   title = "Contour overlay",
 }: ContourPdfOverlayProps) {
   const [generatedPreviewUrl, setGeneratedPreviewUrl] = useState<string | null>(null);
+  const [renderFailed, setRenderFailed] = useState(false);
 
-  const wrapperClassName = `pointer-events-none absolute inset-0 z-20 opacity-70 mix-blend-multiply ${className}`;
+  const wrapperClassName = `pointer-events-none absolute inset-0 z-20 opacity-90 ${className}`;
   const assetClassName =
     displayMode === "stretch"
       ? "h-full w-full object-fill"
@@ -27,6 +28,7 @@ export default function ContourPdfOverlay({
 
   useEffect(() => {
     if (previewUrl) {
+      setRenderFailed(false);
       setGeneratedPreviewUrl(null);
       return;
     }
@@ -34,6 +36,7 @@ export default function ContourPdfOverlay({
     let cancelled = false;
 
     async function renderPdfFirstPage() {
+      setRenderFailed(false);
       try {
         const pdfjsLib = await import("pdfjs-dist");
         const sourceData = await fetch(fileUrl).then((response) => response.arrayBuffer());
@@ -63,7 +66,10 @@ export default function ContourPdfOverlay({
           await pdf.destroy();
         }
       } catch {
-        if (!cancelled) setGeneratedPreviewUrl(null);
+        if (!cancelled) {
+          setGeneratedPreviewUrl(null);
+          setRenderFailed(true);
+        }
       }
     }
 
@@ -79,6 +85,19 @@ export default function ContourPdfOverlay({
     return (
       <div className={wrapperClassName}>
         <img src={activePreviewUrl} alt={title} className={assetClassName} />
+      </div>
+    );
+  }
+
+  if (renderFailed && fileUrl) {
+    return (
+      <div className={wrapperClassName}>
+        <iframe
+          src={`${fileUrl}#toolbar=0&navpanes=0&scrollbar=0&page=1&view=FitH`}
+          title={title}
+          className="absolute inset-0 h-full w-full border-0"
+          scrolling="no"
+        />
       </div>
     );
   }
