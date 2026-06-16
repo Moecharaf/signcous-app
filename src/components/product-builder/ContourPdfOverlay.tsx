@@ -2,6 +2,27 @@
 
 import { useEffect, useState } from "react";
 
+function removeWhiteBackground(canvas: HTMLCanvasElement) {
+  const context = canvas.getContext("2d");
+  if (!context) return;
+
+  const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+  const pixels = imageData.data;
+
+  for (let index = 0; index < pixels.length; index += 4) {
+    const red = pixels[index];
+    const green = pixels[index + 1];
+    const blue = pixels[index + 2];
+    const alpha = pixels[index + 3];
+
+    if (alpha > 0 && red >= 245 && green >= 245 && blue >= 245) {
+      pixels[index + 3] = 0;
+    }
+  }
+
+  context.putImageData(imageData, 0, 0);
+}
+
 interface ContourPdfOverlayProps {
   previewUrl?: string | null;
   fileUrl: string;
@@ -54,6 +75,7 @@ export default function ContourPdfOverlay({
           canvas.width = Math.max(1, Math.floor(viewport.width));
           canvas.height = Math.max(1, Math.floor(viewport.height));
           await page.render({ canvasContext: context, canvas, viewport }).promise;
+          removeWhiteBackground(canvas);
 
           const nextPreviewUrl = canvas.toDataURL("image/png");
 
