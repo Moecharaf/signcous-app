@@ -50,7 +50,6 @@ function revokeBlobUrl(url: string | null) {
   }
 }
 
-function colorizeContourPreview(canvas: HTMLCanvasElement) {
 function SplitLinePreview({
   resolvedDirection,
   panelCount,
