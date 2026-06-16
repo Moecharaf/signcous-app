@@ -2,39 +2,6 @@
 
 import { useEffect, useState } from "react";
 
-function extractContourStrokes(canvas: HTMLCanvasElement) {
-  const context = canvas.getContext("2d");
-  if (!context) return;
-
-  const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-  const pixels = imageData.data;
-
-  for (let index = 0; index < pixels.length; index += 4) {
-    const red = pixels[index];
-    const green = pixels[index + 1];
-    const blue = pixels[index + 2];
-    const alpha = pixels[index + 3];
-
-    const luminance = 0.2126 * red + 0.7152 * green + 0.0722 * blue;
-    const maxChannel = Math.max(red, green, blue);
-    const minChannel = Math.min(red, green, blue);
-    const saturation = maxChannel - minChannel;
-    const isNearWhiteBackground = luminance >= 242 && saturation <= 18;
-
-    if (alpha === 0 || isNearWhiteBackground) {
-      pixels[index + 3] = 0;
-      continue;
-    }
-
-    pixels[index] = 18;
-    pixels[index + 1] = 18;
-    pixels[index + 2] = 18;
-    pixels[index + 3] = Math.max(alpha, 200);
-  }
-
-  context.putImageData(imageData, 0, 0);
-}
-
 interface ContourPdfOverlayProps {
   previewUrl?: string | null;
   fileUrl: string;
@@ -51,7 +18,6 @@ export default function ContourPdfOverlay({
   title = "Contour overlay",
 }: ContourPdfOverlayProps) {
   const [generatedPreviewUrl, setGeneratedPreviewUrl] = useState<string | null>(null);
-  const [renderFailed, setRenderFailed] = useState(false);
 
   const wrapperClassName = `pointer-events-none absolute inset-0 z-20 opacity-90 ${className}`;
   const assetClassName =
@@ -61,7 +27,6 @@ export default function ContourPdfOverlay({
 
   useEffect(() => {
     if (previewUrl) {
-      setRenderFailed(false);
       setGeneratedPreviewUrl(null);
       return;
     }
@@ -69,7 +34,6 @@ export default function ContourPdfOverlay({
     let cancelled = false;
 
     async function renderPdfFirstPage() {
-      setRenderFailed(false);
       try {
         const pdfjsLib = await import("pdfjs-dist");
         const sourceData = await fetch(fileUrl).then((response) => response.arrayBuffer());
@@ -86,8 +50,7 @@ export default function ContourPdfOverlay({
 
           canvas.width = Math.max(1, Math.floor(viewport.width));
           canvas.height = Math.max(1, Math.floor(viewport.height));
-          await page.render({ canvasContext: context, canvas, viewport }).promise;
-          extractContourStrokes(canvas);
+          await page.render({ canvasContext: context, canvas, viewport, background: "rgba(0,0,0,0)" }).promise;
 
           const nextPreviewUrl = canvas.toDataURL("image/png");
 
@@ -100,10 +63,7 @@ export default function ContourPdfOverlay({
           await pdf.destroy();
         }
       } catch {
-        if (!cancelled) {
-          setGeneratedPreviewUrl(null);
-          setRenderFailed(true);
-        }
+        if (!cancelled) setGeneratedPreviewUrl(null);
       }
     }
 
@@ -119,19 +79,6 @@ export default function ContourPdfOverlay({
     return (
       <div className={wrapperClassName}>
         <img src={activePreviewUrl} alt={title} className={assetClassName} />
-      </div>
-    );
-  }
-
-  if (renderFailed && fileUrl) {
-    return (
-      <div className={wrapperClassName}>
-        <iframe
-          src={`${fileUrl}#toolbar=0&navpanes=0&scrollbar=0&page=1&view=FitH`}
-          title={title}
-          className="absolute inset-0 h-full w-full border-0"
-          scrolling="no"
-        />
       </div>
     );
   }
