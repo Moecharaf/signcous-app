@@ -5,17 +5,29 @@ import { useEffect, useRef, useState } from "react";
 interface ContourPdfOverlayProps {
   previewUrl?: string | null;
   fileUrl: string;
+  displayMode?: "fit" | "stretch";
   className?: string;
   title?: string;
 }
 
-export default function ContourPdfOverlay({ previewUrl, fileUrl, className = "", title = "Contour overlay" }: ContourPdfOverlayProps) {
+export default function ContourPdfOverlay({
+  previewUrl,
+  fileUrl,
+  displayMode = "fit",
+  className = "",
+  title = "Contour overlay",
+}: ContourPdfOverlayProps) {
+  const overlayClassName =
+    displayMode === "stretch"
+      ? `pointer-events-none absolute inset-0 z-20 h-full w-full opacity-70 mix-blend-multiply ${className}`
+      : `pointer-events-none absolute inset-0 z-20 m-auto h-auto max-h-full w-auto max-w-full opacity-70 mix-blend-multiply ${className}`;
+
   if (previewUrl) {
     return (
       <img
         src={previewUrl}
         alt={title}
-        className={`pointer-events-none absolute inset-0 z-20 h-full w-full object-contain opacity-70 mix-blend-multiply ${className}`}
+        className={displayMode === "stretch" ? overlayClassName : `${overlayClassName} object-contain`}
       />
     );
   }
@@ -69,7 +81,7 @@ export default function ContourPdfOverlay({ previewUrl, fileUrl, className = "",
       <iframe
         src={`${fileUrl}#toolbar=0&navpanes=0&scrollbar=0&page=1&view=FitH`}
         title={title}
-        className={`pointer-events-none absolute inset-0 z-20 h-full w-full opacity-70 mix-blend-multiply ${className}`}
+        className={overlayClassName}
         scrolling="no"
       />
     );
@@ -79,7 +91,7 @@ export default function ContourPdfOverlay({ previewUrl, fileUrl, className = "",
     <canvas
       ref={canvasRef}
       aria-label={title}
-      className={`pointer-events-none absolute inset-0 z-20 h-full w-full opacity-70 mix-blend-multiply ${className}`}
+      className={overlayClassName}
     />
   );
 }

@@ -277,6 +277,13 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+    if (!isPdf) {
+      setUploadError("Contour cut file must be a PDF.");
+      event.target.value = "";
+      return;
+    }
+
     if (!uploadedFileUrl || !artworkImageSize) {
       setUploadError("Upload image artwork first so contour size can be validated.");
       event.target.value = "";
@@ -809,7 +816,7 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
                           </div>
                         )}
 
-                      {contourCut && contourFileUrl && <ContourPdfOverlay fileUrl={contourFileUrl} previewUrl={contourPreviewUrl} />}
+                      {contourCut && contourFileUrl && <ContourPdfOverlay fileUrl={contourFileUrl} previewUrl={contourPreviewUrl} displayMode={imageDisplayMode} />}
 
                         <SplitLinePreview
                           resolvedDirection={pricing.resolvedSplitDirection}

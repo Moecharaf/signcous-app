@@ -711,7 +711,7 @@ export default function BootprintsBuilder({ productId = 0 }: BootprintsBuilderPr
                           </div>
                         </div>
                       )}
-                      {contourCut && contourFileUrl && <ContourPdfOverlay fileUrl={contourFileUrl} />}
+                      {contourCut && contourFileUrl && <ContourPdfOverlay fileUrl={contourFileUrl} displayMode={imageDisplayMode} />}
                       </div>
                     </div>
 
