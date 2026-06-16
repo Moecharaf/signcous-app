@@ -2,63 +2,34 @@
 
 import { useEffect, useState } from "react";
 
-function keyOutPageBackground(canvas: HTMLCanvasElement) {
+function colorizeContourPreview(canvas: HTMLCanvasElement) {
   const context = canvas.getContext("2d");
   if (!context || canvas.width < 2 || canvas.height < 2) return;
 
   const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
   const pixels = imageData.data;
 
-  const samplePoints = [
-    [1, 1],
-    [canvas.width - 2, 1],
-    [1, canvas.height - 2],
-    [canvas.width - 2, canvas.height - 2],
-    [Math.floor(canvas.width / 2), 1],
-    [Math.floor(canvas.width / 2), canvas.height - 2],
-    [1, Math.floor(canvas.height / 2)],
-    [canvas.width - 2, Math.floor(canvas.height / 2)],
-  ];
-
-  let bgR = 0;
-  let bgG = 0;
-  let bgB = 0;
-  let count = 0;
-
-  for (const [x, y] of samplePoints) {
-    const idx = (y * canvas.width + x) * 4;
-    const alpha = pixels[idx + 3];
-    if (alpha === 0) continue;
-    bgR += pixels[idx];
-    bgG += pixels[idx + 1];
-    bgB += pixels[idx + 2];
-    count += 1;
-  }
-
-  if (count === 0) return;
-
-  bgR /= count;
-  bgG /= count;
-  bgB /= count;
-
-  const hardCutoff = 24;
-  const softCutoff = 52;
-
   for (let i = 0; i < pixels.length; i += 4) {
     const alpha = pixels[i + 3];
     if (alpha === 0) continue;
 
-    const distance =
-      Math.abs(pixels[i] - bgR) +
-      Math.abs(pixels[i + 1] - bgG) +
-      Math.abs(pixels[i + 2] - bgB);
+    const red = pixels[i];
+    const green = pixels[i + 1];
+    const blue = pixels[i + 2];
+    const maxChannel = Math.max(red, green, blue);
+    const minChannel = Math.min(red, green, blue);
+    const luminance = 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+    const isNearWhite = luminance >= 242 && maxChannel - minChannel <= 18;
 
-    if (distance <= hardCutoff) {
+    if (isNearWhite) {
       pixels[i + 3] = 0;
-    } else if (distance < softCutoff) {
-      const blend = (distance - hardCutoff) / (softCutoff - hardCutoff);
-      pixels[i + 3] = Math.max(0, Math.min(255, Math.round(alpha * blend)));
+      continue;
     }
+
+    pixels[i] = 255;
+    pixels[i + 1] = 0;
+    pixels[i + 2] = 140;
+    pixels[i + 3] = Math.max(alpha, 220);
   }
 
   context.putImageData(imageData, 0, 0);
@@ -80,7 +51,6 @@ export default function ContourPdfOverlay({
   title = "Contour overlay",
 }: ContourPdfOverlayProps) {
   const [generatedPreviewUrl, setGeneratedPreviewUrl] = useState<string | null>(null);
-  const [renderFailed, setRenderFailed] = useState(false);
 
   const wrapperClassName = `pointer-events-none absolute inset-0 z-20 opacity-90 ${className}`;
   const assetClassName =
@@ -90,7 +60,6 @@ export default function ContourPdfOverlay({
 
   useEffect(() => {
     if (previewUrl) {
-      setRenderFailed(false);
       setGeneratedPreviewUrl(null);
       return;
     }
@@ -98,7 +67,6 @@ export default function ContourPdfOverlay({
     let cancelled = false;
 
     async function renderPdfFirstPage() {
-      setRenderFailed(false);
       try {
         const pdfjsLib = await import("pdfjs-dist");
         const sourceData = await fetch(fileUrl).then((response) => response.arrayBuffer());
@@ -120,7 +88,7 @@ export default function ContourPdfOverlay({
           } catch {
             await page.render({ canvasContext: context, canvas, viewport }).promise;
           }
-          keyOutPageBackground(canvas);
+          colorizeContourPreview(canvas);
 
           const nextPreviewUrl = canvas.toDataURL("image/png");
 
@@ -133,10 +101,7 @@ export default function ContourPdfOverlay({
           await pdf.destroy();
         }
       } catch {
-        if (!cancelled) {
-          setGeneratedPreviewUrl(null);
-          setRenderFailed(true);
-        }
+        if (!cancelled) setGeneratedPreviewUrl(null);
       }
     }
 
@@ -152,19 +117,6 @@ export default function ContourPdfOverlay({
     return (
       <div className={wrapperClassName}>
         <img src={activePreviewUrl} alt={title} className={assetClassName} />
-      </div>
-    );
-  }
-
-  if (renderFailed && fileUrl) {
-    return (
-      <div className={wrapperClassName}>
-        <iframe
-          src={`${fileUrl}#toolbar=0&navpanes=0&scrollbar=0&page=1&view=FitH`}
-          title={title}
-          className="absolute inset-0 h-full w-full border-0"
-          scrolling="no"
-        />
       </div>
     );
   }

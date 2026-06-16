@@ -44,84 +44,44 @@ function formatInches(value: number): string {
   return `${text.replace(/\.0+$/, "")}"`;
 }
 
-function aspectRatioMatches(first: UploadedImageSize, second: UploadedImageSize, tolerance = 0.01): boolean {
-  if (first.widthInches <= 0 || first.heightInches <= 0 || second.widthInches <= 0 || second.heightInches <= 0) {
-    return false;
-  }
-
-  const firstRatio = first.widthInches / first.heightInches;
-  const secondRatio = second.widthInches / second.heightInches;
-  return Math.abs(firstRatio - secondRatio) <= tolerance;
-}
-
 function revokeBlobUrl(url: string | null) {
   if (url?.startsWith("blob:")) {
     URL.revokeObjectURL(url);
   }
 }
 
-function keyOutPageBackground(canvas: HTMLCanvasElement) {
+function colorizeContourPreview(canvas: HTMLCanvasElement) {
   const context = canvas.getContext("2d");
   if (!context || canvas.width < 2 || canvas.height < 2) return;
 
   const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
   const pixels = imageData.data;
 
-  const samplePoints = [
-    [1, 1],
-    [canvas.width - 2, 1],
-    [1, canvas.height - 2],
-    [canvas.width - 2, canvas.height - 2],
-    [Math.floor(canvas.width / 2), 1],
-    [Math.floor(canvas.width / 2), canvas.height - 2],
-    [1, Math.floor(canvas.height / 2)],
-    [canvas.width - 2, Math.floor(canvas.height / 2)],
-  ];
-
-  let bgR = 0;
-  let bgG = 0;
-  let bgB = 0;
-  let count = 0;
-
-  for (const [x, y] of samplePoints) {
-    const idx = (y * canvas.width + x) * 4;
-    const alpha = pixels[idx + 3];
-    if (alpha === 0) continue;
-    bgR += pixels[idx];
-    bgG += pixels[idx + 1];
-    bgB += pixels[idx + 2];
-    count += 1;
-  }
-
-  if (count === 0) return;
-
-  bgR /= count;
-  bgG /= count;
-  bgB /= count;
-
-  const hardCutoff = 24;
-  const softCutoff = 52;
-
-  for (let i = 0; i < pixels.length; i += 4) {
-    const alpha = pixels[i + 3];
+  for (let index = 0; index < pixels.length; index += 4) {
+    const alpha = pixels[index + 3];
     if (alpha === 0) continue;
 
-    const distance =
-      Math.abs(pixels[i] - bgR) +
-      Math.abs(pixels[i + 1] - bgG) +
-      Math.abs(pixels[i + 2] - bgB);
+    const red = pixels[index];
+    const green = pixels[index + 1];
+    const blue = pixels[index + 2];
+    const maxChannel = Math.max(red, green, blue);
+    const minChannel = Math.min(red, green, blue);
+    const luminance = 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+    const isNearWhite = luminance >= 242 && maxChannel - minChannel <= 18;
 
-    if (distance <= hardCutoff) {
-      pixels[i + 3] = 0;
-    } else if (distance < softCutoff) {
-      const blend = (distance - hardCutoff) / (softCutoff - hardCutoff);
-      pixels[i + 3] = Math.max(0, Math.min(255, Math.round(alpha * blend)));
+    if (isNearWhite) {
+      pixels[index + 3] = 0;
+      continue;
     }
+
+    pixels[index] = 255;
+    pixels[index + 1] = 0;
+    pixels[index + 2] = 140;
+    pixels[index + 3] = Math.max(alpha, 220);
   }
 
   context.putImageData(imageData, 0, 0);
 }
-
 function SplitLinePreview({
   resolvedDirection,
   panelCount,
@@ -244,7 +204,7 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
         } catch {
           await page.render({ canvasContext: context, canvas, viewport }).promise;
         }
-        keyOutPageBackground(canvas);
+        colorizeContourPreview(canvas);
 
         return canvas.toDataURL("image/png");
       } finally {
@@ -369,6 +329,29 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
       return;
     }
 
+    if (!uploadedFileUrl || !artworkImageSize) {
+      setUploadError("Upload image artwork first so contour size can be validated.");
+      event.target.value = "";
+      return;
+    }
+
+    const contourSize = await getUploadedImageSizeInches(file);
+    if (!contourSize) {
+      setUploadError("Contour cut file must be a PDF so size can be validated.");
+      event.target.value = "";
+      return;
+    }
+
+    if (!contourSizesMatch(artworkImageSize, contourSize)) {
+      setUploadError(
+        `Contour cut size must match artwork within ${CONTOUR_SIZE_TOLERANCE_INCHES.toFixed(2)} in. Artwork: ${formatSizeForMessage(
+          artworkImageSize
+        )}, Contour: ${formatSizeForMessage(contourSize)}.`
+      );
+      event.target.value = "";
+      return;
+    }
+
     setUploadingContour(true);
     setUploadError(null);
 
@@ -408,19 +391,6 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
       });
       if (!previewUrl) {
         setUploadError("Contour file uploaded, but preview could not be rendered. Please upload a contour PDF with clear vector stroke paths.");
-      }
-
-      if (!uploadedFileUrl || !artworkImageSize) {
-        setUploadError("Contour file uploaded. Upload artwork to compare alignment before adding to cart.");
-      } else {
-        const contourSize = await getUploadedImageSizeInches(file);
-        if (contourSize && !contourSizesMatch(artworkImageSize, contourSize) && !aspectRatioMatches(artworkImageSize, contourSize)) {
-          setUploadError(
-            `Contour file uploaded. Double-check alignment before adding to cart. Artwork: ${formatSizeForMessage(
-              artworkImageSize
-            )}, Contour: ${formatSizeForMessage(contourSize)}.`
-          );
-        }
       }
     } catch {
       setUploadError("Contour upload failed. Please try again.");
