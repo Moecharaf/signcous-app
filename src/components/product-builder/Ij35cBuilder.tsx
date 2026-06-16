@@ -166,9 +166,7 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
   async function createContourPreviewUrl(file: File): Promise<string | null> {
     try {
       const pdfjsLib = await import("pdfjs-dist");
-      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
-
-      const loadingTask = pdfjsLib.getDocument({ data: await file.arrayBuffer() });
+      const loadingTask = pdfjsLib.getDocument({ data: await file.arrayBuffer(), disableWorker: true });
       const pdf = await loadingTask.promise;
       try {
         const page = await pdf.getPage(1);
@@ -826,7 +824,13 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
                           </div>
                         )}
 
-                      {contourCut && contourFileUrl && <ContourPdfOverlay fileUrl={contourFileUrl} previewUrl={contourPreviewUrl} displayMode={imageDisplayMode} />}
+                      {contourCut && (contourImage || contourFileUrl) && (
+                        <ContourPdfOverlay
+                          fileUrl={contourImage ?? contourFileUrl ?? ""}
+                          previewUrl={contourPreviewUrl}
+                          displayMode={imageDisplayMode}
+                        />
+                      )}
 
                         <SplitLinePreview
                           resolvedDirection={pricing.resolvedSplitDirection}
