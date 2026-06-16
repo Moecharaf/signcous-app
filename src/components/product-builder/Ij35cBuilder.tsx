@@ -213,7 +213,10 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
         const viewport = page.getViewport({ scale: 1.5 });
         const canvas = document.createElement("canvas");
         const context = canvas.getContext("2d");
-        if (!context) return null;
+        if (!context) {
+          setUploadError("Canvas context unavailable – contour preview could not be generated.");
+          return null;
+        }
         canvas.width = Math.max(1, Math.floor(viewport.width));
         canvas.height = Math.max(1, Math.floor(viewport.height));
         await page.render({ canvasContext: context, canvas, viewport }).promise;
@@ -222,7 +225,8 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
       } finally {
         await pdf.destroy();
       }
-    } catch {
+    } catch (err) {
+      setUploadError(`Contour preview error: ${err instanceof Error ? err.message : String(err)}`);
       return null;
     }
   }
@@ -624,6 +628,7 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
                 </div>
               )}
               <div className="text-[11px] leading-4 text-zinc-500">Contour preview appears over the product display above.</div>
+              <div className="text-[10px] font-mono text-zinc-400">dbg: fileUrl={contourFileUrl ? "ok" : "null"} img={contourImage ? "ok" : "null"} preview={contourPreviewUrl ? "ok" : "null"}</div>
               {contourFileUrl && (
                 <label className="flex items-center gap-2 text-xs text-zinc-700">
                   <input
