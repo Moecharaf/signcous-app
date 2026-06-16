@@ -51,37 +51,6 @@ function revokeBlobUrl(url: string | null) {
 }
 
 function colorizeContourPreview(canvas: HTMLCanvasElement) {
-  const context = canvas.getContext("2d");
-  if (!context || canvas.width < 2 || canvas.height < 2) return;
-
-  const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-  const pixels = imageData.data;
-
-  for (let index = 0; index < pixels.length; index += 4) {
-    const alpha = pixels[index + 3];
-    if (alpha === 0) continue;
-
-    const red = pixels[index];
-    const green = pixels[index + 1];
-    const blue = pixels[index + 2];
-    const maxChannel = Math.max(red, green, blue);
-    const minChannel = Math.min(red, green, blue);
-    const luminance = 0.2126 * red + 0.7152 * green + 0.0722 * blue;
-    const isNearWhite = luminance >= 242 && maxChannel - minChannel <= 18;
-
-    if (isNearWhite) {
-      pixels[index + 3] = 0;
-      continue;
-    }
-
-    pixels[index] = 255;
-    pixels[index + 1] = 0;
-    pixels[index + 2] = 140;
-    pixels[index + 3] = Math.max(alpha, 220);
-  }
-
-  context.putImageData(imageData, 0, 0);
-}
 function SplitLinePreview({
   resolvedDirection,
   panelCount,
@@ -200,36 +169,6 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
       revokeBlobUrl(contourPreviewUrlRef.current);
     };
   }, []);
-
-  async function createContourPreviewUrl(file: File): Promise<string | null> {
-    try {
-      const pdfjsLib = await import("pdfjs-dist");
-      const loadingTask = pdfjsLib.getDocument({ data: await file.arrayBuffer(), disableWorker: true } as any);
-      const pdf = await loadingTask.promise;
-      try {
-        const page = await pdf.getPage(1);
-        const viewport = page.getViewport({ scale: 1.5 });
-        const canvas = document.createElement("canvas");
-        const context = canvas.getContext("2d");
-        if (!context) return null;
-
-        canvas.width = Math.max(1, Math.floor(viewport.width));
-        canvas.height = Math.max(1, Math.floor(viewport.height));
-        try {
-          await page.render({ canvasContext: context, canvas, viewport, background: "rgba(0,0,0,0)" } as any).promise;
-        } catch {
-          await page.render({ canvasContext: context, canvas, viewport }).promise;
-        }
-        colorizeContourPreview(canvas);
-
-        return canvas.toDataURL("image/png");
-      } finally {
-        await pdf.destroy();
-      }
-    } catch {
-      return null;
-    }
-  }
 
   async function onUploadArtwork(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -400,14 +339,10 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
         setUploadError(mismatchMessage);
       }
 
-      const previewUrl = await createContourPreviewUrl(file);
       setContourPreviewUrl((previous) => {
         revokeBlobUrl(previous);
-        return previewUrl;
+        return null;
       });
-      if (!previewUrl) {
-        setUploadError("Contour file uploaded, but preview could not be rendered. Please upload a contour PDF with clear vector stroke paths.");
-      }
     } catch {
       setUploadError("Contour upload failed. Please try again.");
     } finally {

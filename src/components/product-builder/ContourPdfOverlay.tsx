@@ -64,14 +64,25 @@ export default function ContourPdfOverlay({
       return;
     }
 
+    if (!fileUrl) {
+      setGeneratedPreviewUrl(null);
+      return;
+    }
+
     let cancelled = false;
 
     async function renderPdfFirstPage() {
       try {
         const pdfjsLib = await import("pdfjs-dist");
-        const sourceData = await fetch(fileUrl).then((response) => response.arrayBuffer());
-        const loadingTask = pdfjsLib.getDocument({ data: sourceData, disableWorker: true } as any);
-        const pdf = await loadingTask.promise;
+        let pdf: any;
+        try {
+          const sourceData = await fetch(fileUrl).then((response) => response.arrayBuffer());
+          const loadingTask = pdfjsLib.getDocument({ data: sourceData, disableWorker: true } as any);
+          pdf = await loadingTask.promise;
+        } catch {
+          const loadingTask = pdfjsLib.getDocument(fileUrl as any);
+          pdf = await loadingTask.promise;
+        }
         try {
           const page = await pdf.getPage(1);
           const viewport = page.getViewport({ scale: 1.5 });
