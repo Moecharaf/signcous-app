@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-function removeWhiteBackground(canvas: HTMLCanvasElement) {
+function extractContourStrokes(canvas: HTMLCanvasElement) {
   const context = canvas.getContext("2d");
   if (!context) return;
 
@@ -15,9 +15,16 @@ function removeWhiteBackground(canvas: HTMLCanvasElement) {
     const blue = pixels[index + 2];
     const alpha = pixels[index + 3];
 
-    if (alpha > 0 && red >= 245 && green >= 245 && blue >= 245) {
+    const luminance = 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+    if (alpha === 0 || luminance > 165) {
       pixels[index + 3] = 0;
+      continue;
     }
+
+    pixels[index] = 18;
+    pixels[index + 1] = 18;
+    pixels[index + 2] = 18;
+    pixels[index + 3] = Math.max(alpha, 200);
   }
 
   context.putImageData(imageData, 0, 0);
@@ -75,7 +82,7 @@ export default function ContourPdfOverlay({
           canvas.width = Math.max(1, Math.floor(viewport.width));
           canvas.height = Math.max(1, Math.floor(viewport.height));
           await page.render({ canvasContext: context, canvas, viewport }).promise;
-          removeWhiteBackground(canvas);
+          extractContourStrokes(canvas);
 
           const nextPreviewUrl = canvas.toDataURL("image/png");
 
