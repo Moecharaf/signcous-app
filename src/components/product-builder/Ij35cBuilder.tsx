@@ -59,39 +59,6 @@ function revokeBlobUrl(url: string | null) {
   }
 }
 
-function extractContourStrokes(canvas: HTMLCanvasElement) {
-  const context = canvas.getContext("2d");
-  if (!context) return;
-
-  const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-  const pixels = imageData.data;
-
-  for (let index = 0; index < pixels.length; index += 4) {
-    const red = pixels[index];
-    const green = pixels[index + 1];
-    const blue = pixels[index + 2];
-    const alpha = pixels[index + 3];
-
-    const luminance = 0.2126 * red + 0.7152 * green + 0.0722 * blue;
-    const maxChannel = Math.max(red, green, blue);
-    const minChannel = Math.min(red, green, blue);
-    const saturation = maxChannel - minChannel;
-    const isNearWhiteBackground = luminance >= 242 && saturation <= 18;
-
-    if (alpha === 0 || isNearWhiteBackground) {
-      pixels[index + 3] = 0;
-      continue;
-    }
-
-    pixels[index] = 18;
-    pixels[index + 1] = 18;
-    pixels[index + 2] = 18;
-    pixels[index + 3] = Math.max(alpha, 200);
-  }
-
-  context.putImageData(imageData, 0, 0);
-}
-
 function SplitLinePreview({
   resolvedDirection,
   panelCount,
@@ -210,7 +177,6 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
         canvas.width = Math.max(1, Math.floor(viewport.width));
         canvas.height = Math.max(1, Math.floor(viewport.height));
         await page.render({ canvasContext: context, canvas, viewport }).promise;
-        extractContourStrokes(canvas);
 
         return canvas.toDataURL("image/png");
       } finally {
@@ -861,7 +827,7 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
                         )}
 
                       {contourCut && contourPreviewUrl && (
-                        <div className="pointer-events-none absolute inset-0 z-20 opacity-100">
+                        <div className="pointer-events-none absolute inset-0 z-20 opacity-95 mix-blend-multiply">
                           <img
                             src={contourPreviewUrl}
                             alt="Contour cut overlay"
