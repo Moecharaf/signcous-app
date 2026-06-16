@@ -74,40 +74,20 @@ export default function ContourPdfOverlay({
     async function renderPdfFirstPage() {
       try {
         const pdfjsLib = await import("pdfjs-dist");
-        let pdf: any;
-        try {
-          const sourceData = await fetch(fileUrl).then((response) => response.arrayBuffer());
-          const loadingTask = pdfjsLib.getDocument({ data: sourceData, disableWorker: true } as any);
-          pdf = await loadingTask.promise;
-        } catch {
-          const loadingTask = pdfjsLib.getDocument(fileUrl as any);
-          pdf = await loadingTask.promise;
-        }
+        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+        const pdf = await pdfjsLib.getDocument(fileUrl).promise;
         try {
           const page = await pdf.getPage(1);
           const viewport = page.getViewport({ scale: 1.5 });
           const canvas = document.createElement("canvas");
           const context = canvas.getContext("2d");
-          if (!context) {
-            throw new Error("Canvas context unavailable");
-          }
-
+          if (!context) throw new Error("Canvas context unavailable");
           canvas.width = Math.max(1, Math.floor(viewport.width));
           canvas.height = Math.max(1, Math.floor(viewport.height));
-          try {
-            await page.render({ canvasContext: context, canvas, viewport, background: "rgba(0,0,0,0)" } as any).promise;
-          } catch {
-            await page.render({ canvasContext: context, canvas, viewport }).promise;
-          }
+          await page.render({ canvasContext: context, canvas, viewport }).promise;
           colorizeContourPreview(canvas);
-
           const nextPreviewUrl = canvas.toDataURL("image/png");
-
-          if (cancelled) {
-            return;
-          }
-
-          setGeneratedPreviewUrl(nextPreviewUrl);
+          if (!cancelled) setGeneratedPreviewUrl(nextPreviewUrl);
         } finally {
           await pdf.destroy();
         }
