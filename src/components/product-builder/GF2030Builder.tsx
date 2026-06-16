@@ -3,7 +3,8 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState, type ChangeEvent, type ReactNode } from "react";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
-import SizeInputPanel, { composeDimensionInches } from "@/components/product-builder/SizeInputPanel";
+import SizeInputPanel, { composeDimensionInches, toFeetAndInches } from "@/components/product-builder/SizeInputPanel";
+import { getUploadedImageSizeInches } from "@/components/product-builder/uploaded-image-size";
 import Button from "@/components/ui/Button";
 import AdhesivePricingModal from "@/components/product-builder/AdhesivePricingModal";
 import { ADHESIVE_PRICING_CONFIGS } from "@/components/product-builder/adhesive-pricing-data";
@@ -244,6 +245,16 @@ export default function GF2030Builder({ productId = 138 }: GF2030BuilderProps) {
 
       setUploadedFileUrl(data.fileUrl);
       setUploadedFileName(data.originalName ?? file.name);
+
+      const imageSize = await getUploadedImageSizeInches(file);
+      if (imageSize) {
+        const widthParts = toFeetAndInches(imageSize.widthInches);
+        const heightParts = toFeetAndInches(imageSize.heightInches);
+        setWidthFeet(widthParts.feet);
+        setWidthInches(widthParts.inches);
+        setHeightFeet(heightParts.feet);
+        setHeightInches(heightParts.inches);
+      }
 
       if (file.type.startsWith("image/")) {
         const blobUrl = URL.createObjectURL(file);

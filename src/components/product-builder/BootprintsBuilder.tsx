@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState, type ChangeEvent, type ReactNode } from "
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
 import AdhesivePricingModal from "@/components/product-builder/AdhesivePricingModal";
 import { ADHESIVE_PRICING_CONFIGS } from "@/components/product-builder/adhesive-pricing-data";
+import { getUploadedImageSizeInches } from "@/components/product-builder/uploaded-image-size";
 import Button from "@/components/ui/Button";
 import { useCart } from "@/context/CartContext";
 import {
@@ -200,6 +201,14 @@ export default function BootprintsBuilder({ productId = 0 }: BootprintsBuilderPr
 
       setUploadedFileUrl(data.fileUrl);
       setUploadedFileName(data.originalName ?? file.name);
+
+      const imageSize = await getUploadedImageSizeInches(file);
+      if (imageSize) {
+        setWidthUnit("inches");
+        setHeightUnit("inches");
+        setWidthStr(imageSize.widthInches.toString());
+        setHeightStr(imageSize.heightInches.toString());
+      }
 
       if (file.type.startsWith("image/")) {
         const blobUrl = URL.createObjectURL(file);

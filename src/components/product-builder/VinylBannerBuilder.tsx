@@ -2,6 +2,7 @@
 
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import BannerPricingModal from "@/components/product-builder/BannerPricingModal";
+import { getUploadedImageSizeInches } from "@/components/product-builder/uploaded-image-size";
 import Button from "@/components/ui/Button";
 import {
   BANNER_MARKUP,
@@ -1059,6 +1060,24 @@ export default function VinylBannerBuilder({
 
       setUploadedFileUrl(data.fileUrl);
       setUploadedFileName(data.originalName ?? file.name);
+
+      const imageSize = await getUploadedImageSizeInches(file);
+      if (imageSize && !isEconomicalStandProduct) {
+        const widthParts = toFeetAndInches(imageSize.widthInches);
+        const heightParts = toFeetAndInches(imageSize.heightInches);
+        setForm((prev) => ({
+          ...prev,
+          unit: "inches",
+          width: imageSize.widthInches.toString(),
+          height: imageSize.heightInches.toString(),
+        }));
+        setDimensionInputs({
+          widthFeet: widthParts.feet,
+          widthInches: widthParts.inches,
+          heightFeet: heightParts.feet,
+          heightInches: heightParts.inches,
+        });
+      }
 
       if (file.type.startsWith("image/")) {
         const blobUrl = URL.createObjectURL(file);
