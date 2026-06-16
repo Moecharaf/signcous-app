@@ -893,7 +893,7 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
 
                       {contourCut && (contourPreviewUrl || contourImage || contourFileUrl) && (
                         <ContourPdfOverlay
-                          fileUrl={contourImage ?? contourFileUrl ?? ""}
+                          fileUrl={contourFileUrl ?? contourImage ?? ""}
                           previewUrl={contourPreviewUrl}
                           displayMode={imageDisplayMode}
                         />
