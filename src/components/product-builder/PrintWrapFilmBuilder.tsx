@@ -333,7 +333,7 @@ export default function PrintWrapFilmBuilder({ productId = 136 }: PrintWrapFilmB
 
     const contourSize = await getUploadedImageSizeInches(file);
     if (!contourSize) {
-      setUploadError("Contour cut file must be an image so size can be validated.");
+      setUploadError("Contour cut file must be a PDF so size can be validated.");
       event.target.value = "";
       return;
     }
@@ -702,7 +702,7 @@ export default function PrintWrapFilmBuilder({ productId = 136 }: PrintWrapFilmB
                       {contourCut ? (
                         <>
                           <label className="inline-flex h-10 w-full cursor-pointer items-center justify-center rounded border border-dashed border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-700 hover:border-zinc-400">
-                            <input type="file" accept="image/*" className="hidden" onChange={onUploadContourFile} />
+                            <input type="file" accept=".pdf,application/pdf" className="hidden" onChange={onUploadContourFile} />
                             {uploadingContour ? "Uploading Contour..." : contourFileName ? "Replace Contour File" : "Upload Contour File"}
                           </label>
                           {contourFileName && (
@@ -718,7 +718,7 @@ export default function PrintWrapFilmBuilder({ productId = 136 }: PrintWrapFilmB
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img src={uploadedImage} alt="Artwork preview" className="absolute inset-0 h-full w-full object-contain" />
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={contourImage} alt="Contour overlay" className="absolute inset-0 h-full w-full object-contain opacity-70 mix-blend-multiply" />
+                                <object data={contourImage} type="application/pdf" aria-label="Contour overlay" className="absolute inset-0 h-full w-full object-contain opacity-70 mix-blend-multiply" />
                               </div>
                               <label className="mt-2 flex items-center gap-2 text-xs text-zinc-700">
                                 <input type="checkbox" checked={contourAlignmentConfirmed} onChange={(event) => setContourAlignmentConfirmed(event.target.checked)} />
