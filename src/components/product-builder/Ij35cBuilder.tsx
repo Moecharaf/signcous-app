@@ -400,12 +400,12 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
         setUploadError(mismatchMessage);
       }
 
-      const previewUrl = mismatchMessage ? null : await createContourPreviewUrl(file);
+      const previewUrl = await createContourPreviewUrl(file);
       setContourPreviewUrl((previous) => {
         revokeBlobUrl(previous);
         return previewUrl;
       });
-      if (!mismatchMessage && !previewUrl) {
+      if (!previewUrl) {
         setUploadError("Contour file uploaded, but preview could not be rendered. Please upload a contour PDF with visible cut paths.");
       }
     } catch {
