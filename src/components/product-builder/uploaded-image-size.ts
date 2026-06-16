@@ -15,16 +15,14 @@ export async function getUploadedImageSizeInches(file: File): Promise<UploadedIm
   const isImage = file.type.startsWith("image/");
   if (!isPdf && !isImage) return null;
 
-  const blobUrl = URL.createObjectURL(file);
+  const blobUrl = isImage ? URL.createObjectURL(file) : null;
   try {
     let widthInches: number;
     let heightInches: number;
 
     if (isPdf) {
       const pdfjsLib = await import("pdfjs-dist");
-      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
-
-      const loadingTask = pdfjsLib.getDocument({ data: await file.arrayBuffer() });
+      const loadingTask = pdfjsLib.getDocument({ data: await file.arrayBuffer(), disableWorker: true } as any);
       const pdf = await loadingTask.promise;
       try {
         const page = await pdf.getPage(1);
@@ -44,7 +42,7 @@ export async function getUploadedImageSizeInches(file: File): Promise<UploadedIm
           });
         };
         image.onerror = () => reject(new Error("Could not read image dimensions."));
-        image.src = blobUrl;
+        image.src = blobUrl!;
       });
 
       widthInches = Math.max(0.1, roundToTwo(dimensions.width / DEFAULT_IMAGE_DPI));
@@ -55,6 +53,8 @@ export async function getUploadedImageSizeInches(file: File): Promise<UploadedIm
   } catch {
     return null;
   } finally {
-    URL.revokeObjectURL(blobUrl);
+    if (blobUrl) {
+      URL.revokeObjectURL(blobUrl);
+    }
   }
 }

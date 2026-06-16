@@ -340,7 +340,7 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
 
     const contourSize = await getUploadedImageSizeInches(file);
     if (!contourSize) {
-      setUploadError("Contour cut file must be a PDF so size can be validated.");
+      setUploadError("Contour cut PDF size could not be read. Please upload a standard PDF with a readable page size.");
       event.target.value = "";
       return;
     }
