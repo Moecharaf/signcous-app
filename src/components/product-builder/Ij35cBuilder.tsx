@@ -339,17 +339,13 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
     }
 
     const contourSize = await getUploadedImageSizeInches(file);
-    if (!contourSize) {
-      setUploadError("Contour cut PDF size could not be read. Please upload a standard PDF with a readable page size.");
-      event.target.value = "";
-      return;
-    }
-
-    const mismatchMessage = contourSizesMatch(artworkImageSize, contourSize)
-      ? null
-      : `Contour cut size must match artwork within ${CONTOUR_SIZE_TOLERANCE_INCHES.toFixed(2)} in. Artwork: ${formatSizeForMessage(
-          artworkImageSize
-        )}, Contour: ${formatSizeForMessage(contourSize)}.`;
+    const mismatchMessage = !contourSize
+      ? "Contour cut PDF size could not be read. Upload succeeded, but size validation is required before checkout."
+      : contourSizesMatch(artworkImageSize, contourSize)
+        ? null
+        : `Contour cut size must match artwork within ${CONTOUR_SIZE_TOLERANCE_INCHES.toFixed(2)} in. Artwork: ${formatSizeForMessage(
+            artworkImageSize
+          )}, Contour: ${formatSizeForMessage(contourSize)}.`;
 
     setUploadingContour(true);
     setUploadError(null);
@@ -385,13 +381,8 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
         return blobUrl;
       });
       if (mismatchMessage) {
-        setContourPreviewUrl((previous) => {
-          revokeBlobUrl(previous);
-          return null;
-        });
         setContourValidationError(mismatchMessage);
         setUploadError(mismatchMessage);
-        return;
       }
 
       const previewUrl = await createContourPreviewUrl(file);
@@ -879,7 +870,7 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
                           </div>
                         )}
 
-                      {contourCut && contourPreviewUrl && (
+                      {contourCut && (contourPreviewUrl || contourImage || contourFileUrl) && (
                         <ContourPdfOverlay
                           fileUrl={contourImage ?? contourFileUrl ?? ""}
                           previewUrl={contourPreviewUrl}
