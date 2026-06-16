@@ -37,7 +37,7 @@ export default function ContourPdfOverlay({
       try {
         const pdfjsLib = await import("pdfjs-dist");
         const sourceData = await fetch(fileUrl).then((response) => response.arrayBuffer());
-        const loadingTask = pdfjsLib.getDocument({ data: sourceData, disableWorker: true });
+        const loadingTask = pdfjsLib.getDocument({ data: sourceData, disableWorker: true } as any);
         const pdf = await loadingTask.promise;
         try {
           const page = await pdf.getPage(1);

@@ -166,7 +166,7 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
   async function createContourPreviewUrl(file: File): Promise<string | null> {
     try {
       const pdfjsLib = await import("pdfjs-dist");
-      const loadingTask = pdfjsLib.getDocument({ data: await file.arrayBuffer(), disableWorker: true });
+      const loadingTask = pdfjsLib.getDocument({ data: await file.arrayBuffer(), disableWorker: true } as any);
       const pdf = await loadingTask.promise;
       try {
         const page = await pdf.getPage(1);
