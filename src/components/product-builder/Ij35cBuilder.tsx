@@ -301,26 +301,18 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
     }
 
     const contourSize = await getUploadedImageSizeInches(file);
-    if (!contourSize) {
-      setUploadError("Could not read contour PDF size. Export the cut file with the same artboard size as the artwork.");
-      event.target.value = "";
-      return;
-    }
-
-    const contourHasExactSize = contourSizesMatch(artworkImageSize, contourSize);
-    const contourHasMatchingProportions = aspectRatioMatches(artworkImageSize, contourSize);
-    if (!contourHasExactSize && !contourHasMatchingProportions) {
+    if (contourSize && !contourSizesMatch(artworkImageSize, contourSize) && !aspectRatioMatches(artworkImageSize, contourSize)) {
       setUploadError(
-        `Contour cut size or proportions must match the artwork. Artwork: ${formatSizeForMessage(artworkImageSize)}, Contour: ${formatSizeForMessage(
+        `Contour file uploaded. Double-check alignment before adding to cart. Artwork: ${formatSizeForMessage(artworkImageSize)}, Contour: ${formatSizeForMessage(
           contourSize
         )}.`
       );
-      event.target.value = "";
-      return;
     }
 
     setUploadingContour(true);
-    setUploadError(null);
+    if (!contourSize || contourSizesMatch(artworkImageSize, contourSize) || aspectRatioMatches(artworkImageSize, contourSize)) {
+      setUploadError(null);
+    }
 
     try {
       const formData = new FormData();
