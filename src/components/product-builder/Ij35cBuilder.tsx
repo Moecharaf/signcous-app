@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState, type ChangeEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
 import ContourPdfOverlay from "@/components/product-builder/ContourPdfOverlay";
 import {
@@ -151,6 +151,9 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
   const [imageDisplayMode, setImageDisplayMode] = useState<"fit" | "stretch">("fit");
   const [uploadingArtwork, setUploadingArtwork] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const uploadedImageRef = useRef<string | null>(null);
+  const contourImageRef = useRef<string | null>(null);
+  const contourPreviewUrlRef = useRef<string | null>(null);
 
   const width = composeDimensionInches(widthFeet, widthInches);
   const height = composeDimensionInches(heightFeet, heightInches);
@@ -179,12 +182,24 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
   const selectedLaminate = IJ35C_LAMINATE_OPTIONS.find((option) => option.value === laminate)!;
 
   useEffect(() => {
+    uploadedImageRef.current = uploadedImage;
+  }, [uploadedImage]);
+
+  useEffect(() => {
+    contourImageRef.current = contourImage;
+  }, [contourImage]);
+
+  useEffect(() => {
+    contourPreviewUrlRef.current = contourPreviewUrl;
+  }, [contourPreviewUrl]);
+
+  useEffect(() => {
     return () => {
-      revokeBlobUrl(uploadedImage);
-      revokeBlobUrl(contourImage);
-      revokeBlobUrl(contourPreviewUrl);
+      revokeBlobUrl(uploadedImageRef.current);
+      revokeBlobUrl(contourImageRef.current);
+      revokeBlobUrl(contourPreviewUrlRef.current);
     };
-  }, [uploadedImage, contourImage, contourPreviewUrl]);
+  }, []);
 
   async function createContourPreviewUrl(file: File): Promise<string | null> {
     try {
