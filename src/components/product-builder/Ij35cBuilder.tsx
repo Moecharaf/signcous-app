@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
+import ContourPdfOverlay from "@/components/product-builder/ContourPdfOverlay";
 import {
   CONTOUR_SIZE_TOLERANCE_INCHES,
   contourSizesMatch,
@@ -826,14 +827,12 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
                           </div>
                         )}
 
-                      {contourCut && contourPreviewUrl && (
-                        <div className="pointer-events-none absolute inset-0 z-20 opacity-95 mix-blend-multiply">
-                          <img
-                            src={contourPreviewUrl}
-                            alt="Contour cut overlay"
-                            className={imageDisplayMode === "stretch" ? "h-full w-full object-fill" : "h-full w-full object-contain"}
-                          />
-                        </div>
+                      {contourCut && (contourPreviewUrl || contourImage || contourFileUrl) && (
+                        <ContourPdfOverlay
+                          fileUrl={contourImage ?? contourFileUrl ?? ""}
+                          previewUrl={contourPreviewUrl}
+                          displayMode={imageDisplayMode}
+                        />
                       )}
 
                         <SplitLinePreview
