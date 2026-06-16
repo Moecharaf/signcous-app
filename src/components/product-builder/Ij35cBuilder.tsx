@@ -44,6 +44,16 @@ function formatInches(value: number): string {
   return `${text.replace(/\.0+$/, "")}"`;
 }
 
+function aspectRatioMatches(first: UploadedImageSize, second: UploadedImageSize, tolerance = 0.01): boolean {
+  if (first.widthInches <= 0 || first.heightInches <= 0 || second.widthInches <= 0 || second.heightInches <= 0) {
+    return false;
+  }
+
+  const firstRatio = first.widthInches / first.heightInches;
+  const secondRatio = second.widthInches / second.heightInches;
+  return Math.abs(firstRatio - secondRatio) <= tolerance;
+}
+
 function SplitLinePreview({
   resolvedDirection,
   panelCount,
@@ -292,16 +302,18 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
 
     const contourSize = await getUploadedImageSizeInches(file);
     if (!contourSize) {
-      setUploadError("Contour cut file must be a PDF so size can be validated.");
+      setUploadError("Could not read contour PDF size. Export the cut file with the same artboard size as the artwork.");
       event.target.value = "";
       return;
     }
 
-    if (!contourSizesMatch(artworkImageSize, contourSize)) {
+    const contourHasExactSize = contourSizesMatch(artworkImageSize, contourSize);
+    const contourHasMatchingProportions = aspectRatioMatches(artworkImageSize, contourSize);
+    if (!contourHasExactSize && !contourHasMatchingProportions) {
       setUploadError(
-        `Contour cut size must match artwork within ${CONTOUR_SIZE_TOLERANCE_INCHES.toFixed(2)} in. Artwork: ${formatSizeForMessage(
-          artworkImageSize
-        )}, Contour: ${formatSizeForMessage(contourSize)}.`
+        `Contour cut size or proportions must match the artwork. Artwork: ${formatSizeForMessage(artworkImageSize)}, Contour: ${formatSizeForMessage(
+          contourSize
+        )}.`
       );
       event.target.value = "";
       return;
