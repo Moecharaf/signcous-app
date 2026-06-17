@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export type ManualBannerThemeKey =
   | "manual-economical-stand"
@@ -272,19 +272,6 @@ const CATEGORY_THEME: Record<HomeCatalogSection["key"], { hero: string; chip: st
 };
 
 const CATEGORY_KEYS: HomeCatalogSection["key"][] = ["banner", "rigid", "adhesive", "magnet"];
-
-function subscribeToHashChange(callback: () => void): () => void {
-  window.addEventListener("hashchange", callback);
-  return () => window.removeEventListener("hashchange", callback);
-}
-
-function getHashSnapshot(): string {
-  return window.location.hash.toLowerCase();
-}
-
-function getServerSnapshot(): string {
-  return "";
-}
 
 function getCategoryFromHash(hash: string): HomeCatalogSection["key"] | null {
   const clean = hash.replace("#", "").trim().toLowerCase();
@@ -559,12 +546,36 @@ export default function HomeCatalogClient({
   manualAdhesiveProducts,
   manualMagnetProducts,
 }: HomeCatalogClientProps) {
-  const currentHash = useSyncExternalStore(subscribeToHashChange, getHashSnapshot, getServerSnapshot);
-  const activeKeyFromHash = getCategoryFromHash(currentHash);
-  const activeKey = activeKeyFromHash ?? sections[0]?.key ?? "banner";
+  const defaultActiveKey = sections[0]?.key ?? "banner";
+  const [activeKey, setActiveKey] = useState<HomeCatalogSection["key"]>(defaultActiveKey);
   const [heroFrame, setHeroFrame] = useState(0);
   const [isCoarsePointer, setIsCoarsePointer] = useState(false);
   const [expandedMobileCardId, setExpandedMobileCardId] = useState<string | null>(null);
+
+  useEffect(() => {
+    function syncActiveKeyFromHash() {
+      setActiveKey(getCategoryFromHash(window.location.hash) ?? defaultActiveKey);
+    }
+
+    function syncAfterNavigationClick(event: MouseEvent) {
+      const target = event.target instanceof Element ? event.target.closest("a") : null;
+      const href = target?.getAttribute("href") ?? "";
+      if (href.startsWith("/portal#") || href.startsWith("#")) {
+        window.setTimeout(syncActiveKeyFromHash, 0);
+      }
+    }
+
+    syncActiveKeyFromHash();
+    window.addEventListener("hashchange", syncActiveKeyFromHash);
+    window.addEventListener("popstate", syncActiveKeyFromHash);
+    document.addEventListener("click", syncAfterNavigationClick, true);
+
+    return () => {
+      window.removeEventListener("hashchange", syncActiveKeyFromHash);
+      window.removeEventListener("popstate", syncActiveKeyFromHash);
+      document.removeEventListener("click", syncAfterNavigationClick, true);
+    };
+  }, [defaultActiveKey]);
 
   const activeSection = useMemo(() => {
     return sections.find((section) => section.key === activeKey) ?? sections[0] ?? null;

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
+import type { PDFDocumentProxy } from "pdfjs-dist";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
 import ContourPdfOverlay from "@/components/product-builder/ContourPdfOverlay";
 import {
@@ -205,14 +206,14 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
   async function createContourPreviewUrl(file: File): Promise<string | null> {
     try {
       const pdfjsLib = await import("pdfjs-dist");
-      const arrayBuffer = await file.arrayBuffer();
-      let pdf: any;
-      try {
-        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
-        pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-      } catch {
-        pdf = await pdfjsLib.getDocument({ data: arrayBuffer, disableWorker: true } as any).promise;
-      }
+      pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+        "pdfjs-dist/build/pdf.worker.min.mjs",
+        import.meta.url
+      ).toString();
+      const sourceBuffer: ArrayBuffer = await file.arrayBuffer();
+      const pdf: PDFDocumentProxy = await pdfjsLib.getDocument({
+        data: new Uint8Array(sourceBuffer),
+      }).promise;
       try {
         const page = await pdf.getPage(1);
         const viewport = page.getViewport({ scale: 1.5 });
@@ -633,7 +634,6 @@ export default function Ij35cBuilder({ productId = 135 }: Ij35cBuilderProps) {
                 </div>
               )}
               <div className="text-[11px] leading-4 text-zinc-500">Contour preview appears over the product display above.</div>
-              <div className="text-[10px] font-mono text-zinc-400">dbg: fileUrl={contourFileUrl ? "ok" : "null"} img={contourImage ? "ok" : "null"} preview={contourPreviewUrl ? "ok" : "null"}</div>
               {contourFileUrl && (
                 <label className="flex items-center gap-2 text-xs text-zinc-700">
                   <input

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { PDFDocumentProxy } from "pdfjs-dist";
 
 function colorizeContourPreview(canvas: HTMLCanvasElement) {
   const context = canvas.getContext("2d");
@@ -74,14 +75,16 @@ export default function ContourPdfOverlay({
     async function renderPdfFirstPage() {
       try {
         const pdfjsLib = await import("pdfjs-dist");
-        const sourceData = await fetch(fileUrl).then((response) => response.arrayBuffer());
-        let pdf: any;
-        try {
-          pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
-          pdf = await pdfjsLib.getDocument({ data: sourceData }).promise;
-        } catch {
-          pdf = await pdfjsLib.getDocument({ data: sourceData, disableWorker: true } as any).promise;
-        }
+        pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+          "pdfjs-dist/build/pdf.worker.min.mjs",
+          import.meta.url
+        ).toString();
+        const sourceBuffer: ArrayBuffer = await fetch(fileUrl).then((response) =>
+          response.arrayBuffer()
+        );
+        const pdf: PDFDocumentProxy = await pdfjsLib.getDocument({
+          data: new Uint8Array(sourceBuffer),
+        }).promise;
         try {
           const page = await pdf.getPage(1);
           const viewport = page.getViewport({ scale: 1.5 });

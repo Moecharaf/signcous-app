@@ -1,3 +1,5 @@
+import type { PDFDocumentProxy } from "pdfjs-dist";
+
 const DEFAULT_IMAGE_DPI = 150;
 const PDF_POINTS_PER_INCH = 72;
 
@@ -22,8 +24,14 @@ export async function getUploadedImageSizeInches(file: File): Promise<UploadedIm
 
     if (isPdf) {
       const pdfjsLib = await import("pdfjs-dist");
-      const loadingTask = pdfjsLib.getDocument({ data: await file.arrayBuffer(), disableWorker: true } as any);
-      const pdf = await loadingTask.promise;
+      pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+        "pdfjs-dist/build/pdf.worker.min.mjs",
+        import.meta.url
+      ).toString();
+      const sourceBuffer: ArrayBuffer = await file.arrayBuffer();
+      const pdf: PDFDocumentProxy = await pdfjsLib.getDocument({
+        data: new Uint8Array(sourceBuffer),
+      }).promise;
       try {
         const page = await pdf.getPage(1);
         const viewport = page.getViewport({ scale: 1 });

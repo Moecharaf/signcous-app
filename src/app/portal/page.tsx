@@ -602,17 +602,23 @@ async function loadSections(): Promise<HomeCatalogSection[]> {
 }
 
 export default async function HomePage() {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get(getSessionCookieName())?.value;
+  const bypassLogin =
+    process.env.NODE_ENV !== "production" &&
+    process.env.LOCAL_BYPASS_LOGIN === "true";
 
-  if (!sessionCookie) {
-    redirect("/login?next=/portal");
-  }
+  if (!bypassLogin) {
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get(getSessionCookieName())?.value;
 
-  const session = await verifySessionToken(sessionCookie);
+    if (!sessionCookie) {
+      redirect("/login?next=/portal");
+    }
 
-  if (!session) {
-    redirect("/login?next=/portal");
+    const session = await verifySessionToken(sessionCookie);
+
+    if (!session) {
+      redirect("/login?next=/portal");
+    }
   }
 
   const sections = await loadSections();

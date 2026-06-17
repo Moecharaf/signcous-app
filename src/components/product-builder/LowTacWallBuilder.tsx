@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState, type ChangeEvent, type ReactNode } from "react";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
+import ContourPdfOverlay from "@/components/product-builder/ContourPdfOverlay";
 import AdhesivePricingModal from "@/components/product-builder/AdhesivePricingModal";
 import { ADHESIVE_PRICING_CONFIGS } from "@/components/product-builder/adhesive-pricing-data";
 import {
@@ -140,6 +141,7 @@ export default function LowTacWallBuilder({ productId = 0 }: LowTacWallBuilderPr
   const [contourFileUrl, setContourFileUrl] = useState<string | null>(null);
   const [contourFileName, setContourFileName] = useState<string | null>(null);
   const [contourImage, setContourImage] = useState<string | null>(null);
+  const [contourValidationError, setContourValidationError] = useState<string | null>(null);
   const [uploadingContour, setUploadingContour] = useState(false);
   const [contourAlignmentConfirmed, setContourAlignmentConfirmed] = useState(false);
   const [imageDisplayMode, setImageDisplayMode] = useState<"fit" | "stretch">("fit");
@@ -228,6 +230,7 @@ export default function LowTacWallBuilder({ productId = 0 }: LowTacWallBuilderPr
         if (previous) URL.revokeObjectURL(previous);
         return null;
       });
+      setContourValidationError(null);
 
       if (file.type.startsWith("image/")) {
         const blobUrl = URL.createObjectURL(file);
@@ -264,12 +267,20 @@ export default function LowTacWallBuilder({ productId = 0 }: LowTacWallBuilderPr
       if (previous) URL.revokeObjectURL(previous);
       return null;
     });
+    setContourValidationError(null);
     setUploadError(null);
   }
 
   async function onUploadContourFile(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) return;
+
+    const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+    if (!isPdf) {
+      setUploadError("Contour cut file must be a PDF.");
+      event.target.value = "";
+      return;
+    }
 
     if (!uploadedFileUrl || !artworkImageSize) {
       setUploadError("Upload image artwork first so contour size can be validated.");
@@ -278,24 +289,17 @@ export default function LowTacWallBuilder({ productId = 0 }: LowTacWallBuilderPr
     }
 
     const contourSize = await getUploadedImageSizeInches(file);
-    if (!contourSize) {
-      setUploadError("Contour cut file must be a PDF so size can be validated.");
-      event.target.value = "";
-      return;
-    }
-
-    if (!contourSizesMatch(artworkImageSize, contourSize)) {
-      setUploadError(
-        `Contour cut size must match artwork within ${CONTOUR_SIZE_TOLERANCE_INCHES.toFixed(2)} in. Artwork: ${formatSizeForMessage(
-          artworkImageSize
-        )}, Contour: ${formatSizeForMessage(contourSize)}.`
-      );
-      event.target.value = "";
-      return;
-    }
+    const mismatchMessage = !contourSize
+      ? "Contour cut PDF size could not be read. Upload succeeded, but size validation is required before checkout."
+      : contourSizesMatch(artworkImageSize, contourSize)
+        ? null
+        : `Contour cut size must match artwork within ${CONTOUR_SIZE_TOLERANCE_INCHES.toFixed(2)} in. Artwork: ${formatSizeForMessage(
+            artworkImageSize
+          )}, Contour: ${formatSizeForMessage(contourSize)}.`;
 
     setUploadingContour(true);
     setUploadError(null);
+    setContourValidationError(null);
 
     try {
       const formData = new FormData();
@@ -334,6 +338,10 @@ export default function LowTacWallBuilder({ productId = 0 }: LowTacWallBuilderPr
         if (previous) URL.revokeObjectURL(previous);
         return blobUrl;
       });
+      if (mismatchMessage) {
+        setContourValidationError(mismatchMessage);
+        setUploadError(mismatchMessage);
+      }
     } catch {
       setUploadError("Contour upload failed. Please try again.");
     } finally {
@@ -350,6 +358,7 @@ export default function LowTacWallBuilder({ productId = 0 }: LowTacWallBuilderPr
       if (previous) URL.revokeObjectURL(previous);
       return null;
     });
+    setContourValidationError(null);
     setUploadError(null);
   }
 
@@ -409,6 +418,10 @@ export default function LowTacWallBuilder({ productId = 0 }: LowTacWallBuilderPr
       }
       if (!contourFileUrl || !contourFileName || !contourImage) {
         setUploadError("Upload a contour cut file to continue.");
+        return;
+      }
+      if (contourValidationError) {
+        setUploadError(contourValidationError);
         return;
       }
       if (!contourAlignmentConfirmed) {
@@ -704,7 +717,10 @@ export default function LowTacWallBuilder({ productId = 0 }: LowTacWallBuilderPr
                             </div>
                           </div>
                         </div>
-                      )}
+                        )}
+                        {contourCut && contourFileUrl && (
+                          <ContourPdfOverlay fileUrl={contourFileUrl} displayMode={imageDisplayMode} />
+                        )}
                       </div>
                     </div>
 
