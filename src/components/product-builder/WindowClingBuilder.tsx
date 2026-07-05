@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useState, type ChangeEvent, type ReactNode } from "react";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
 import ContourPdfOverlay from "@/components/product-builder/ContourPdfOverlay";
+import PdfPagePreview from "@/components/product-builder/PdfPagePreview";
 import {
   CONTOUR_SIZE_TOLERANCE_INCHES,
   contourSizesMatch,
@@ -146,6 +147,7 @@ export default function WindowClingBuilder({ productId = 137 }: WindowClingBuild
   const [imageDisplayMode, setImageDisplayMode] = useState<"fit" | "stretch">("fit");
   const [uploadingArtwork, setUploadingArtwork] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const uploadedArtworkIsPdf = Boolean(uploadedFileUrl && uploadedFileName?.toLowerCase().endsWith(".pdf"));
 
   const width = composeDimensionInches(widthFeet, widthInches);
   const height = composeDimensionInches(heightFeet, heightInches);
@@ -594,14 +596,7 @@ export default function WindowClingBuilder({ productId = 137 }: WindowClingBuild
                             className={imageDisplayMode === "stretch" ? "object-fill" : "object-contain"}
                           />
                         ) : uploadedFileUrl && uploadedFileName?.toLowerCase().endsWith(".pdf") ? (
-                          <div className="relative h-full w-full">
-                            <iframe
-                              src={`${uploadedFileUrl}#toolbar=0&navpanes=0&scrollbar=0&page=1&view=FitH`}
-                              title="Uploaded PDF artwork preview"
-                              className="absolute -left-3 top-0 h-full w-[calc(100%+32px)] pointer-events-none"
-                              scrolling="no" style={{ clipPath: "inset(0 20px 0 0)" }}
-                            />
-                          </div>
+                          <PdfPagePreview fileUrl={uploadedFileUrl} displayMode={imageDisplayMode} title="Uploaded PDF artwork preview" />
                         ) : (
                           <div className="absolute inset-0 flex items-center justify-center text-center text-zinc-400">
                             <div>
@@ -613,7 +608,7 @@ export default function WindowClingBuilder({ productId = 137 }: WindowClingBuild
                           </div>
                         )}
                         {contourCut && contourFileUrl && (
-                          <ContourPdfOverlay fileUrl={contourFileUrl} displayMode={imageDisplayMode} />
+                          <ContourPdfOverlay fileUrl={contourFileUrl} alignToImageUrl={uploadedImage} displayMode={imageDisplayMode} />
                         )}
                       </div>
                     </div>
@@ -723,14 +718,17 @@ export default function WindowClingBuilder({ productId = 137 }: WindowClingBuild
                             </div>
                           )}
 
-                          {uploadedImage && contourImage && (
+                          {(uploadedImage || uploadedArtworkIsPdf) && contourImage && (
                             <div className="rounded border border-zinc-200 bg-zinc-50 p-2">
                               <div className="mb-2 text-[11px] text-zinc-600">Confirm contour line aligns with artwork.</div>
                               <div className="relative h-28 overflow-hidden rounded border border-zinc-300 bg-white">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={uploadedImage} alt="Artwork preview" className="absolute inset-0 h-full w-full object-contain" />
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <object data={contourImage} type="application/pdf" aria-label="Contour overlay" className="absolute inset-0 h-full w-full object-contain opacity-70 mix-blend-multiply" />
+                                {uploadedImage ? (
+                                  // eslint-disable-next-line @next/next/no-img-element
+                                  <img src={uploadedImage} alt="Artwork preview" className="absolute inset-0 h-full w-full object-contain" />
+                                ) : uploadedFileUrl ? (
+                                  <PdfPagePreview fileUrl={uploadedFileUrl} className="absolute inset-0" title="Artwork preview" />
+                                ) : null}
+                                <ContourPdfOverlay fileUrl={contourFileUrl ?? contourImage} alignToImageUrl={uploadedImage} className="opacity-70 mix-blend-multiply" />
                               </div>
                               <label className="mt-2 flex items-center gap-2 text-xs text-zinc-700">
                                 <input
