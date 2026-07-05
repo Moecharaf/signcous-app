@@ -39,6 +39,30 @@ function colorizeContourPreview(canvas: HTMLCanvasElement) {
   context.putImageData(imageData, 0, 0);
 }
 
+async function getPdfDocument(pdfjsLib: typeof import("pdfjs-dist"), sourceBuffer: ArrayBuffer): Promise<PDFDocumentProxy> {
+  try {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+      "pdfjs-dist/build/pdf.worker.min.mjs",
+      import.meta.url
+    ).toString();
+    return await pdfjsLib.getDocument({
+      data: new Uint8Array(sourceBuffer.slice(0)),
+    }).promise;
+  } catch {
+    try {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+      return await pdfjsLib.getDocument({
+        data: new Uint8Array(sourceBuffer.slice(0)),
+      }).promise;
+    } catch {
+      return await pdfjsLib.getDocument({
+        data: new Uint8Array(sourceBuffer.slice(0)),
+        disableWorker: true,
+      } as Parameters<typeof pdfjsLib.getDocument>[0]).promise;
+    }
+  }
+}
+
 interface ContourPdfOverlayProps {
   previewUrl?: string | null;
   fileUrl: string;
@@ -78,16 +102,10 @@ export default function ContourPdfOverlay({
     async function renderPdfFirstPage() {
       try {
         const pdfjsLib = await import("pdfjs-dist");
-        pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-          "pdfjs-dist/build/pdf.worker.min.mjs",
-          import.meta.url
-        ).toString();
         const sourceBuffer: ArrayBuffer = await fetch(fileUrl).then((response) =>
           response.arrayBuffer()
         );
-        const pdf: PDFDocumentProxy = await pdfjsLib.getDocument({
-          data: new Uint8Array(sourceBuffer),
-        }).promise;
+        const pdf = await getPdfDocument(pdfjsLib, sourceBuffer);
         try {
           const page = await pdf.getPage(1);
           const viewport = page.getViewport({ scale: 1.5 });
