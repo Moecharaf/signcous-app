@@ -4,7 +4,6 @@ import Image from "next/image";
 import { useEffect, useMemo, useState, type ChangeEvent, type ReactNode } from "react";
 import BuilderBottomToolbar, { type BuilderBottomToolbarPanel } from "@/components/product-builder/BuilderBottomToolbar";
 import ContourPdfOverlay from "@/components/product-builder/ContourPdfOverlay";
-import PdfPagePreview from "@/components/product-builder/PdfPagePreview";
 import {
   CONTOUR_SIZE_TOLERANCE_INCHES,
   contourSizesMatch,
@@ -119,6 +118,25 @@ function SummaryItem({ label, value }: { label: string; value: string }) {
       <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-500">{label}</div>
       <div className="mt-1.5 text-sm font-semibold text-zinc-900">{value}</div>
     </div>
+  );
+}
+
+function NativePdfPreview({
+  fileUrl,
+  className = "",
+  title = "PDF preview",
+}: {
+  fileUrl: string;
+  className?: string;
+  title?: string;
+}) {
+  return (
+    <iframe
+      src={`${fileUrl}#toolbar=0&navpanes=0&scrollbar=0&page=1&view=Fit`}
+      title={title}
+      className={`pointer-events-none h-full w-full border-0 ${className}`}
+      scrolling="no"
+    />
   );
 }
 
@@ -596,7 +614,7 @@ export default function WindowClingBuilder({ productId = 137 }: WindowClingBuild
                             className={imageDisplayMode === "stretch" ? "object-fill" : "object-contain"}
                           />
                         ) : uploadedFileUrl && uploadedFileName?.toLowerCase().endsWith(".pdf") ? (
-                          <PdfPagePreview fileUrl={uploadedFileUrl} displayMode={imageDisplayMode} title="Uploaded PDF artwork preview" />
+                          <NativePdfPreview fileUrl={uploadedFileUrl} title="Uploaded PDF artwork preview" />
                         ) : (
                           <div className="absolute inset-0 flex items-center justify-center text-center text-zinc-400">
                             <div>
@@ -726,7 +744,7 @@ export default function WindowClingBuilder({ productId = 137 }: WindowClingBuild
                                   // eslint-disable-next-line @next/next/no-img-element
                                   <img src={uploadedImage} alt="Artwork preview" className="absolute inset-0 h-full w-full object-contain" />
                                 ) : uploadedFileUrl ? (
-                                  <PdfPagePreview fileUrl={uploadedFileUrl} className="absolute inset-0" title="Artwork preview" />
+                                  <NativePdfPreview fileUrl={uploadedFileUrl} className="absolute inset-0" title="Artwork preview" />
                                 ) : null}
                                 <ContourPdfOverlay fileUrl={contourFileUrl ?? contourImage} className="opacity-70 mix-blend-multiply" />
                               </div>
