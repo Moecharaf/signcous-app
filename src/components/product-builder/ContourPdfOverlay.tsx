@@ -8,7 +8,7 @@ function isNearWhite(red: number, green: number, blue: number): boolean {
   const minChannel = Math.min(red, green, blue);
   const luminance = 0.2126 * red + 0.7152 * green + 0.0722 * blue;
 
-  return luminance >= 242 && maxChannel - minChannel <= 18;
+  return luminance >= 218 && maxChannel - minChannel <= 42;
 }
 
 function colorizeContourPreview(canvas: HTMLCanvasElement) {

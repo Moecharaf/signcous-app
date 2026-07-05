@@ -8,7 +8,7 @@ function isNearWhite(red: number, green: number, blue: number): boolean {
   const minChannel = Math.min(red, green, blue);
   const luminance = 0.2126 * red + 0.7152 * green + 0.0722 * blue;
 
-  return luminance >= 242 && maxChannel - minChannel <= 18;
+  return luminance >= 218 && maxChannel - minChannel <= 42;
 }
 
 function hasVisibleContent(canvas: HTMLCanvasElement): boolean {
@@ -17,12 +17,30 @@ function hasVisibleContent(canvas: HTMLCanvasElement): boolean {
 
   const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
   const pixels = imageData.data;
+  const edgeInset = Math.max(2, Math.ceil(Math.min(canvas.width, canvas.height) * 0.01));
+  let visiblePixels = 0;
+  const minimumVisiblePixels = Math.max(24, Math.floor(canvas.width * canvas.height * 0.0002));
 
   for (let i = 0; i < pixels.length; i += 4) {
     const alpha = pixels[i + 3];
     if (alpha <= 8) continue;
 
-    if (!isNearWhite(pixels[i], pixels[i + 1], pixels[i + 2])) return true;
+    const pixelIndex = i / 4;
+    const x = pixelIndex % canvas.width;
+    const y = Math.floor(pixelIndex / canvas.width);
+    if (
+      x < edgeInset ||
+      y < edgeInset ||
+      x >= canvas.width - edgeInset ||
+      y >= canvas.height - edgeInset
+    ) {
+      continue;
+    }
+
+    if (!isNearWhite(pixels[i], pixels[i + 1], pixels[i + 2])) {
+      visiblePixels += 1;
+      if (visiblePixels >= minimumVisiblePixels) return true;
+    }
   }
 
   return false;
