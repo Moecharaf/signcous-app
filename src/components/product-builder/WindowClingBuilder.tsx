@@ -608,7 +608,7 @@ export default function WindowClingBuilder({ productId = 137 }: WindowClingBuild
                           </div>
                         )}
                         {contourCut && contourFileUrl && (
-                          <ContourPdfOverlay fileUrl={contourFileUrl} alignToImageUrl={uploadedImage} displayMode={imageDisplayMode} />
+                          <ContourPdfOverlay fileUrl={contourFileUrl} displayMode={imageDisplayMode} />
                         )}
                       </div>
                     </div>
@@ -728,7 +728,7 @@ export default function WindowClingBuilder({ productId = 137 }: WindowClingBuild
                                 ) : uploadedFileUrl ? (
                                   <PdfPagePreview fileUrl={uploadedFileUrl} className="absolute inset-0" title="Artwork preview" />
                                 ) : null}
-                                <ContourPdfOverlay fileUrl={contourFileUrl ?? contourImage} alignToImageUrl={uploadedImage} className="opacity-70 mix-blend-multiply" />
+                                <ContourPdfOverlay fileUrl={contourFileUrl ?? contourImage} className="opacity-70 mix-blend-multiply" />
                               </div>
                               <label className="mt-2 flex items-center gap-2 text-xs text-zinc-700">
                                 <input
