@@ -611,10 +611,10 @@ export default function WindowClingBuilder({ productId = 137 }: WindowClingBuild
                             alt="Uploaded window cling artwork preview"
                             fill
                             unoptimized
-                            className={imageDisplayMode === "stretch" ? "object-fill" : "object-contain"}
+                            className={`z-20 ${imageDisplayMode === "stretch" ? "object-fill" : "object-contain"}`}
                           />
                         ) : uploadedFileUrl && uploadedFileName?.toLowerCase().endsWith(".pdf") ? (
-                          <NativePdfPreview fileUrl={uploadedFileUrl} title="Uploaded PDF artwork preview" />
+                          <NativePdfPreview fileUrl={uploadedFileUrl} className="relative z-20" title="Uploaded PDF artwork preview" />
                         ) : (
                           <div className="absolute inset-0 flex items-center justify-center text-center text-zinc-400">
                             <div>
@@ -742,9 +742,9 @@ export default function WindowClingBuilder({ productId = 137 }: WindowClingBuild
                               <div className="relative h-28 overflow-hidden rounded border border-zinc-300 bg-white">
                                 {uploadedImage ? (
                                   // eslint-disable-next-line @next/next/no-img-element
-                                  <img src={uploadedImage} alt="Artwork preview" className="absolute inset-0 h-full w-full object-contain" />
+                                  <img src={uploadedImage} alt="Artwork preview" className="absolute inset-0 z-20 h-full w-full object-contain" />
                                 ) : uploadedFileUrl ? (
-                                  <NativePdfPreview fileUrl={uploadedFileUrl} className="absolute inset-0" title="Artwork preview" />
+                                  <NativePdfPreview fileUrl={uploadedFileUrl} className="absolute inset-0 z-20" title="Artwork preview" />
                                 ) : null}
                                 <ContourPdfOverlay fileUrl={contourFileUrl ?? contourImage} className="opacity-70 mix-blend-multiply" />
                               </div>
