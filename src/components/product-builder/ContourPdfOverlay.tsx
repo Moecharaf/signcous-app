@@ -80,7 +80,7 @@ export default function ContourPdfOverlay({
 }: ContourPdfOverlayProps) {
   const [generatedPreviewUrl, setGeneratedPreviewUrl] = useState<string | null>(null);
 
-  const wrapperClassName = `pointer-events-none absolute inset-0 z-10 opacity-90 ${className}`;
+  const wrapperClassName = `pointer-events-none absolute inset-0 z-30 opacity-90 ${className}`;
   const assetClassName =
     displayMode === "stretch"
       ? "h-full w-full object-fill"
